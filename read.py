@@ -1,6 +1,5 @@
 import numpy as np
 import awkward as ak
-import hist
 
 def unflatMatrix(arr, nrows, ncols):
     nrows = ak.flatten(nrows, axis=None)
@@ -80,8 +79,33 @@ def getres4(x, name):
     nrows = x[name+'BK'].nRes4
     return unflatVector(arr, nrows)
 
-def gettransferP(x, name):
+def gettransferP(x, name): 
+    '''
+    NB index in last two dimensions is backwards: [gen, reco]
+    '''
     arr = x[name+'PROJ'].value
-    nrows = x[name+'PROJBK'].nGen
-    ncols = x[name+'PROJBK'].nReco
+    nOrd = ak.flatten(x[name+'BK'].nOrder, axis=None)
+    nTrans = x[name+"BK"].nTransP
+    arr = unflatMatrix(arr, nOrd, nTrans)
+    nrows = ak.flatten(x[name+'BK'].nGenP, axis=None)
+    ncols = ak.flatten(x[name+'BK'].nRecoP, axis=None)
+    cts = np.repeat(nrows, ncols*nOrd)
+    return ak.unflatten(arr, cts, axis=-1)
+
+def getTransfer3(x, name):
+    '''
+    NB index in last two dimensions is backwards: [gen, reco]
+    '''
+    arr = x[name+'RES3'].value
+    nrows = x[name+'BK'].nGen3
+    ncols = x[name+'BK'].nReco3
+    return unflatMatrix(arr, nrows, ncols)
+
+def getTransfer4(x, name):
+    '''
+    NB index in last two dimensions is backwards: [gen, reco]
+    '''
+    arr = x[name+'RES4'].value
+    nrows = x[name+'BK'].nGen4
+    ncols = x[name+'BK'].nReco4
     return unflatMatrix(arr, nrows, ncols)
