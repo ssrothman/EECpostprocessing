@@ -5,13 +5,14 @@ import numpy as np
 
 import read
 import bin 
+import reader
 
 from importlib import reload
 
 x = NanoEventsFactory.from_root("NANO_NANO.root", schemaclass=NanoAODSchema).events()
 
-proj = read.getproj(x, "RecoEEC")
-projdR = read.getprojdR(x, "RecoEEC")
+reco = reader.reader(x, 'RecoEEC')
+gen = reader.reader(x, 'GenEEC')
+trans = reader.reader(x, 'EECTransfer')
 
-HP = bin.getHistP()
-bin.fillHistP(HP, projdR, proj, 1)
+HTP = bin.getHistPxP_bdiag()

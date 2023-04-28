@@ -69,6 +69,15 @@ def getprojdR(x, name):
     nrows = x[name+'BK'].nDR
     return unflatVector(arr, nrows)
 
+def getprojOrder(x, name):
+    arr = x[name+"WTSBK"].order
+    nrows = x[name+'BK'].nOrders
+    return unflatVector(arr, nrows)
+
+def getprojJetIdx(x, name):
+    arr = x[name+"BK"].iJet
+    return arr
+
 def getres3(x, name):
     arr = x[name+'RES3']
     nrows = x[name+'BK'].nRes3
@@ -91,6 +100,14 @@ def gettransferP(x, name):
     ncols = ak.flatten(x[name+'BK'].nRecoP, axis=None)
     cts = np.repeat(nrows, ncols*nOrd)
     return ak.unflatten(arr, cts, axis=-1)
+
+def gettransferRecoIdx(x, name):
+    arr = x[name+'BK'].iReco
+    return arr
+
+def gettransferGenIdx(x, name):
+    arr = x[name+'BK'].iGen
+    return arr
 
 def getTransfer3(x, name):
     '''
