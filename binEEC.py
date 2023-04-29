@@ -1,9 +1,10 @@
 import hist
 import awkward as ak
 import numpy as np
+import matplotlib.pyplot as plt
 
 def getdRAxis(name='dR', label='$\Delta R$'):
-    return hist.axis.Regular(20, 1e-5, 1.0,
+    return hist.axis.Regular(20, 1e-3, 1.0,
                              name=name, label=label, 
                              transform=hist.axis.transform.log)
 
@@ -442,3 +443,20 @@ def fillHistTransfer4(h, rReco, rGen, rTrans, evtwt):
            dRb5 = ak.flatten(dRb5, axis=None),
            dRb6 = ak.flatten(dRb6, axis=None),
            weight = ak.flatten(wts, axis=None))
+
+def getEECnorm(r, evtwt):
+    return ak.sum(ak.num(r.proj, axis=1) * evtwt, axis=None)
+
+def plotProjectedEEC(H, Hcov, order, norm):
+    orderIdx = H.axes['order'].index(order)
+    Hproj = H[{'order' : orderIdx}].project('dR')
+    Hcovproj = Hcov[{'ordera' : orderIdx, 'orderb' : orderIdx}].project('dRa', 'dRb')
+
+    vals = Hproj.values()/norm
+    errs = np.diag(Hcovproj.values())/norm
+    
+    x = H.axes['dR'].centers
+
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.errorbar(x, vals, yerr=errs, fmt='o', label=f'order {order}')

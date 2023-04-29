@@ -1,4 +1,4 @@
-from read import *
+from readEEC import *
 
 class reader:
     def __init__(self, x, name):

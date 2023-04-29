@@ -1,20 +1,7 @@
 import numpy as np
 import awkward as ak
 
-def unflatMatrix(arr, nrows, ncols):
-    nrows = ak.flatten(nrows, axis=None)
-    ncols = ak.flatten(ncols, axis=None)
-    ntot = nrows*ncols
-
-    ans = ak.unflatten(arr, ntot, axis=-1)
-    ans = ak.unflatten(ans, np.repeat(ncols, nrows), axis=-1)
-
-    return ans
-
-def unflatVector(arr, ncols):
-    ncols = ak.flatten(ncols, axis=None)
-    ans = ak.unflatten(arr, ncols, axis=-1)
-    return ans
+from util import unflatMatrix, unflatVector
 
 def getptrans(x, name):
     arr = x.GenMatch.matrix
