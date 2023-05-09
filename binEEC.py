@@ -2,6 +2,7 @@ import hist
 import awkward as ak
 import numpy as np
 import matplotlib.pyplot as plt
+from util import ensure_mask
 
 def getdRAxis(name='dR', label='$\Delta R$'):
     return hist.axis.Regular(20, 1e-3, 1.0,
@@ -120,32 +121,37 @@ def getHist4xP():
         getdRAxis("dR46", "$\Delta R_{46}$"),
         storage=hist.storage.Double())
 
-def fillHistP(h, r, evtwts):
-    dR = r.projdR_forhist
-    order = r.projOrder_forhist
-    wts = r.proj*evtwts
+def fillHistP(h, r, evtwts=1, mask=None):
+    mask = ensure_mask(mask, r.proj)
+
+    dR = r.projdR_forhist[mask]
+    order = r.projOrder_forhist[mask]
+    wts = (r.proj*evtwts)[mask]
     h.fill(dR = ak.flatten(dR, axis=None), 
            order = ak.flatten(order, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistRes3(h, r, evtwts):
-    dR1 = r.res3.dR1
-    dR2 = r.res3.dR2
-    dR3 = r.res3.dR3
-    wts = r.res3.wts*evtwts
+def fillHistRes3(h, r, evtwts=1, mask=None):
+    mask = ensure_mask(mask, r.res3.wts)
+
+    dR1 = r.res3.dR1[mask]
+    dR2 = r.res3.dR2[mask]
+    dR3 = r.res3.dR3[mask]
+    wts = (r.res3.wts*evtwts)[mask]
     h.fill(dR1 = ak.flatten(dR1, axis=None),
            dR2 = ak.flatten(dR2, axis=None),
            dR3 = ak.flatten(dR3, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistRes4(h, r, evtwts):
-    dR1 = r.res4.dR1
-    dR2 = r.res4.dR2
-    dR3 = r.res4.dR3
-    dR4 = r.res4.dR4
-    dR5 = r.res4.dR5
-    dR6 = r.res4.dR6
-    wts = r.res4.wts*evtwts
+def fillHistRes4(h, r, evtwts=1, mask=None):
+    mask = ensure_mask(mask, r.res4.wts)
+    dR1 = r.res4.dR1[mask]
+    dR2 = r.res4.dR2[mask]
+    dR3 = r.res4.dR3[mask]
+    dR4 = r.res4.dR4[mask]
+    dR5 = r.res4.dR5[mask]
+    dR6 = r.res4.dR6[mask]
+    wts = (r.res4.wts*evtwts)[mask]
     h.fill(dR1 = ak.flatten(dR1, axis=None),
            dR2 = ak.flatten(dR2, axis=None),
            dR3 = ak.flatten(dR3, axis=None),
@@ -154,39 +160,41 @@ def fillHistRes4(h, r, evtwts):
            dR6 = ak.flatten(dR6, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistCovPxP(h, r, evtwt):
-    dR = r.projdR_forcov
-    order = r.projOrder_forcov
-    covPxP = r.covPxP
+def fillHistCovPxP(h, r, evtwt=1, mask=None):
+    mask = ensure_mask(mask, r.covPxP)
+    dR = r.projdR_forcov[mask]
+    order = r.projOrder_forcov[mask]
+    wts = (r.covPxP * evtwt)[mask]
 
-    dRa, ordera, _ = ak.broadcast_arrays(dR, order, covPxP)
+    dRa, ordera, _ = ak.broadcast_arrays(dR, order, wts)
     dRb, orderb, _ = ak.broadcast_arrays(dR[:,:,None,:], 
                                          order[:,:,None,:],
-                                         covPxP)
-    wts = covPxP * evtwt
+                                         wts)
+
     h.fill(dRa = ak.flatten(dRa, axis=None),
            ordera = ak.flatten(ordera, axis=None),
            dRb = ak.flatten(dRb, axis=None),
            orderb = ak.flatten(orderb, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistCov3x3(h, r, evtwt):
-    dR1 = r.res3.dR1
-    dR2 = r.res3.dR2
-    dR3 = r.res3.dR3
-    cov3x3 = r.cov3x3
+def fillHistCov3x3(h, r, evtwt=1, mask=None):
+    mask = ensure_mask(mask, r.cov3x3)
+
+    dR1 = r.res3.dR1[mask]
+    dR2 = r.res3.dR2[mask]
+    dR3 = r.res3.dR3[mask]
+    wts = (r.cov3x3 * evtwt)[mask]
 
     dRa1, dRa2, dRa3, _ = ak.broadcast_arrays(dR1[:,:,:,None], 
                                               dR2[:,:,:,None], 
                                               dR3[:,:,:,None],
-                                              cov3x3)
+                                              wts)
 
     dRb1, dRb2, dRb3, _ = ak.broadcast_arrays(dR1[:,:,None, :], 
                                               dR2[:,:,None, :], 
                                               dR3[:,:,None, :],
-                                              cov3x3)
+                                              wts)
 
-    wts = cov3x3 * evtwt
     h.fill(dRa1 = ak.flatten(dRa1, axis=None),
            dRa2 = ak.flatten(dRa2, axis=None),
            dRa3 = ak.flatten(dRa3, axis=None),
@@ -195,24 +203,26 @@ def fillHistCov3x3(h, r, evtwt):
            dRb3 = ak.flatten(dRb3, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistCov3xP(h, r, evtwt):
-    dRP = r.projdR_forcov
-    orderP = r.projOrder_forcov
+def fillHistCov3xP(h, r, evtwt=1, mask=None):
+    mask = ensure_mask(mask, r.cov3xP)
 
-    dR1 = r.res3.dR1
-    dR2 = r.res3.dR2
-    dR3 = r.res3.dR3
+    dRP = r.projdR_forcov[mask]
+    orderP = r.projOrder_forcov[mask]
 
-    cov3xP = r.cov3xP
+    dR1 = r.res3.dR1[mask]
+    dR2 = r.res3.dR2[mask]
+    dR3 = r.res3.dR3[mask]
+
+    wts = (r.cov3xP*wts)[mask]
 
     dRP, orderP = ak.broadcast_arrays(dRP[:,:,None,:], 
                                       orderP[:,:,None,:], 
-                                      cov3xP)
+                                      wts)
     dR1, dR2, dR3 = ak.broadcast_arrays(dR1[:,:,:,None],
                                         dR2[:,:,:,None],
                                         dR3[:,:,:,None],
-                                        cov3xP)
-    wts = cov3xP * evtwt
+                                        wts)
+
     h.fill(dRP = ak.flatten(dRP, axis=None),
            orderP = ak.flatten(orderP, axis=None),
            dR31 = ak.flatten(dR1, axis=None),
@@ -220,14 +230,15 @@ def fillHistCov3xP(h, r, evtwt):
            dR33 = ak.flatten(dR3, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistCov4x4(h, r, evtwt):
-    dR1 = r.res4.dR1
-    dR2 = r.res4.dR2
-    dR3 = r.res4.dR3
-    dR4 = r.res4.dR4
-    dR5 = r.res4.dR5
-    dR6 = r.res4.dR6
-    cov4x4 = r.cov4x4
+def fillHistCov4x4(h, r, evtwt=1, mask=None):
+    mask = ensure_mask(mask, r.cov4x4)
+    dR1 = r.res4.dR1[mask]
+    dR2 = r.res4.dR2[mask]
+    dR3 = r.res4.dR3[mask]
+    dR4 = r.res4.dR4[mask]
+    dR5 = r.res4.dR5[mask]
+    dR6 = r.res4.dR6[mask]
+    wts = (r.cov4x4 * evtwt)[mask]
 
     dRa1, dRa2, dRa3, dRa4, dRa5, dRa6, _ = ak.broadcast_arrays(
             dR1[:,:,:,None],
@@ -236,7 +247,7 @@ def fillHistCov4x4(h, r, evtwt):
             dR4[:,:,:,None],
             dR5[:,:,:,None],
             dR6[:,:,:,None],
-            cov4x4)
+            wts)
     dRb1, dRb2, dRb3, dRb4, dRb5, dRb6, _ = ak.broadcast_arrays(
             dR1[:,:,None,:],
             dR2[:,:,None,:],
@@ -244,8 +255,8 @@ def fillHistCov4x4(h, r, evtwt):
             dR4[:,:,None,:],
             dR5[:,:,None,:],
             dR6[:,:,None,:],
-            cov4x4)
-    wts = cov4x4 * evtwt
+            wts)
+
     h.fill(dRa1 = ak.flatten(dRa1, axis=None),
            dRa2 = ak.flatten(dRa2, axis=None),
            dRa3 = ak.flatten(dRa3, axis=None),
@@ -260,19 +271,21 @@ def fillHistCov4x4(h, r, evtwt):
            dRb6 = ak.flatten(dRb6, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistCov4x3(h, r, evtwt):
-    dR41 = r.res4.dR1
-    dR42 = r.res4.dR2
-    dR43 = r.res4.dR3
-    dR44 = r.res4.dR4
-    dR45 = r.res4.dR5
-    dR46 = r.res4.dR6
+def fillHistCov4x3(h, r, evtwt=1, mask=None):
+    mask = ensure_mask(mask, r.cov4x3)
 
-    dR31 = r.res3.dR1
-    dR32 = r.res3.dR2
-    dR33 = r.res3.dR3
+    dR41 = r.res4.dR1[mask]
+    dR42 = r.res4.dR2[mask]
+    dR43 = r.res4.dR3[mask]
+    dR44 = r.res4.dR4[mask]
+    dR45 = r.res4.dR5[mask]
+    dR46 = r.res4.dR6[mask]
 
-    cov4x3 = r.cov4x3
+    dR31 = r.res3.dR1[mask]
+    dR32 = r.res3.dR2[mask]
+    dR33 = r.res3.dR3[mask]
+
+    wts = (r.cov4x3 * evtwt)[mask]
 
     dR41, dR42, dR43, dR44, dR45, dR46, _ = ak.broadcast_arrays(
             dR41[:,:,:,None],
@@ -281,15 +294,13 @@ def fillHistCov4x3(h, r, evtwt):
             dR44[:,:,:,None],
             dR45[:,:,:,None],
             dR46[:,:,:,None],
-            cov4x3)
+            wts)
 
     dR31, dR32, dR33 = ak.broadcast_arrays(
             dR31[:,:,None,:],
             dR32[:,:,None,:],
             dR33[:,:,None,:],
-            cov4x3)
-
-    wts = cov4x3 * evtwt
+            wts)
 
     h.fill(dR41 = ak.flatten(dR41, axis=None),
            dR42 = ak.flatten(dR42, axis=None),
@@ -302,22 +313,23 @@ def fillHistCov4x3(h, r, evtwt):
            dR33 = ak.flatten(dR33, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistCov4xP():
-    dRP = r.projdR_forcov
-    orderP = r.projOrder_forcov
+def fillHistCov4xP(h, r, evtwt=1, mask=None):
+    mask = ensure_mask(mask, r.cov4xP)
+    dRP = r.projdR_forcov[mask]
+    orderP = r.projOrder_forcov[mask]
 
-    dR1 = r.res4.dR1
-    dR2 = r.res4.dR2
-    dR3 = r.res4.dR3
-    dR4 = r.res4.dR4
-    dR5 = r.res4.dR5
-    dR6 = r.res4.dR6
+    dR1 = r.res4.dR1[mask]
+    dR2 = r.res4.dR2[mask]
+    dR3 = r.res4.dR3[mask]
+    dR4 = r.res4.dR4[mask]
+    dR5 = r.res4.dR5[mask]
+    dR6 = r.res4.dR6[mask]
 
-    cov4xP = r.cov4xP
+    wts = (r.cov4xP * evtwt)[mask]
 
     dRP, orderP = ak.broadcast_arrays(dRP[:,:,None,:],
                                       orderP[:,:,None,:],
-                                      cov4xP)
+                                      wts)
 
     dR1, dR2, dR3, dR4, dR5, dR6 = ak.broadcast_arrays(
             dR1[:,:,:,None],
@@ -326,9 +338,7 @@ def fillHistCov4xP():
             dR4[:,:,:,None],
             dR5[:,:,:,None],
             dR6[:,:,:,None],
-            cov4xP)
-
-    wts = cov4xP * evtwt
+            wts)
 
     h.fill(dRP = ak.flatten(dRP, axis=None),
            orderP = ak.flatten(orderP, axis=None),
@@ -340,17 +350,20 @@ def fillHistCov4xP():
            dR46 = ak.flatten(dR6, axis=None),
            weight=ak.flatten(wts, axis=None))
 
-def fillHistTransferP(h, rReco, rGen, rTrans, evtwt):
+def fillHistTransferP(h, rReco, rGen, rTrans, evtwt=1, mask=None):
+    mask = ensure_mask(mask, rTrans.transferP)
     iJTa = rTrans.transferRecoIdx
     iJTb = rTrans.transferGenIdx
+    mask = mask[iJTa]
 
-    dRa = rReco.projdR_forhist[iJTa]
-    order = rReco.projOrder_forhist[iJTa]
+    dRa = rReco.projdR_forhist[iJTa][mask]
+    order = rReco.projOrder_forhist[iJTa][mask]
 
-    dRb = rGen.projdR_forhist[iJTb]
+    dRb = rGen.projdR_forhist[mask] #gen only even gets computed for matched 
+                                    #so no need to mask with iJTb (?)
 
 
-    wts = rTrans.transferP * evtwt
+    wts = (rTrans.transferP * evtwt)[mask]
 
     dRa, order, _ = ak.broadcast_arrays(dRa[:,:,:,None,:],
                                          order[:,:,:,None,:],
@@ -362,19 +375,22 @@ def fillHistTransferP(h, rReco, rGen, rTrans, evtwt):
            dRb = ak.flatten(dRb, axis=None),
            weight = ak.flatten(wts, axis=None))
 
-def fillHistTransfer3(h, rReco, rGen, rTrans, evtwt):
+def fillHistTransfer3(h, rReco, rGen, rTrans, evtwt=1, mask=None):
+    mask = ensure_mask(mask, rTrans.transfer3)
+
     iJTa = rTrans.transferRecoIdx
     iJTb = rTrans.transferGenIdx
+    mask = mask[iJTa]
 
-    dRa1 = rReco.res3.dR1[iJTa]
-    dRa2 = rReco.res3.dR2[iJTa]
-    dRa3 = rReco.res3.dR3[iJTa]
+    dRa1 = rReco.res3.dR1[iJTa][mask]
+    dRa2 = rReco.res3.dR2[iJTa][mask]
+    dRa3 = rReco.res3.dR3[iJTa][mask]
 
-    dRb1 = rGen.res3.dR1[iJTb]
-    dRb2 = rGen.res3.dR2[iJTb]
-    dRb3 = rGen.res3.dR3[iJTb]
+    dRb1 = rGen.res3.dR1[mask]
+    dRb2 = rGen.res3.dR2[mask]
+    dRb3 = rGen.res3.dR3[mask]
 
-    wts = rTrans.transfer3 * evtwt
+    wts = (rTrans.transfer3 * evtwt)[mask]
 
     dRa1, dRa2, dRa3, _ = ak.broadcast_arrays(dRa1[:,:,None,:],
                                               dRa2[:,:,None,:],
@@ -392,25 +408,29 @@ def fillHistTransfer3(h, rReco, rGen, rTrans, evtwt):
            dRb3 = ak.flatten(dRb3, axis=None),
            weight = ak.flatten(wts, axis=None))
 
-def fillHistTransfer4(h, rReco, rGen, rTrans, evtwt):
+def fillHistTransfer4(h, rReco, rGen, rTrans, evtwt=1, mask=None):
+    mask = ensure_mask(mask, rTrans.transfer4)
+
     iJTa = rTrans.transferRecoIdx
     iJTb = rTrans.transferGenIdx
+        
+    mask = mask[iJTa]
 
-    dRa1 = rReco.res4.dR1[iJTa]
-    dRa2 = rReco.res4.dR2[iJTa]
-    dRa3 = rReco.res4.dR3[iJTa]
-    dRa4 = rReco.res4.dR4[iJTa]
-    dRa5 = rReco.res4.dR5[iJTa]
-    dRa6 = rReco.res4.dR6[iJTa]
+    dRa1 = rReco.res4.dR1[iJTa][mask]
+    dRa2 = rReco.res4.dR2[iJTa][mask]
+    dRa3 = rReco.res4.dR3[iJTa][mask]
+    dRa4 = rReco.res4.dR4[iJTa][mask]
+    dRa5 = rReco.res4.dR5[iJTa][mask]
+    dRa6 = rReco.res4.dR6[iJTa][mask]
+    
+    dRb1 = rGen.res4.dR1[mask]
+    dRb2 = rGen.res4.dR2[mask]
+    dRb3 = rGen.res4.dR3[mask]
+    dRb4 = rGen.res4.dR4[mask]
+    dRb5 = rGen.res4.dR5[mask]
+    dRb6 = rGen.res4.dR6[mask]
 
-    dRb1 = rGen.res4.dR1[iJTb]
-    dRb2 = rGen.res4.dR2[iJTb]
-    dRb3 = rGen.res4.dR3[iJTb]
-    dRb4 = rGen.res4.dR4[iJTb]
-    dRb5 = rGen.res4.dR5[iJTb]
-    dRb6 = rGen.res4.dR6[iJTb]
-
-    wts = rTrans.transfer4 * evtwt
+    wts = (rTrans.transfer4 * evtwt)[mask]
 
     dRa1, dRa2, dRa3, dRa4, dRa5, dRa6, _ = ak.broadcast_arrays(
             dRa1[:,:,None, :],
@@ -443,20 +463,3 @@ def fillHistTransfer4(h, rReco, rGen, rTrans, evtwt):
            dRb5 = ak.flatten(dRb5, axis=None),
            dRb6 = ak.flatten(dRb6, axis=None),
            weight = ak.flatten(wts, axis=None))
-
-def getEECnorm(r, evtwt):
-    return ak.sum(ak.num(r.proj, axis=1) * evtwt, axis=None)
-
-def plotProjectedEEC(H, Hcov, order, norm):
-    orderIdx = H.axes['order'].index(order)
-    Hproj = H[{'order' : orderIdx}].project('dR')
-    Hcovproj = Hcov[{'ordera' : orderIdx, 'orderb' : orderIdx}].project('dRa', 'dRb')
-
-    vals = Hproj.values()/norm
-    errs = np.diag(Hcovproj.values())/norm
-    
-    x = H.axes['dR'].centers
-
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.errorbar(x, vals, yerr=errs, fmt='o', label=f'order {order}')

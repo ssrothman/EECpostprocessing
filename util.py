@@ -16,3 +16,8 @@ def unflatVector(arr, ncols):
     ans = ak.unflatten(arr, ncols, axis=-1)
     return ans
 
+def ensure_mask(mask, arr):
+    if mask is None:
+        return np.ones(len(arr), dtype=bool)
+    else:
+        return mask

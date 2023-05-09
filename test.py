@@ -9,8 +9,9 @@ import reader
 
 from importlib import reload
 
-x = NanoEventsFactory.from_root("NANO_NANO.root", schemaclass=NanoAODSchema).events()
+fname = '10k.root'
+x = NanoEventsFactory.from_root(fname, schemaclass=NanoAODSchema).events()
 
 reco = reader.reader(x, 'RecoEEC')
 gen = reader.reader(x, 'GenEEC')
-trans = reader.reader(x, 'EECTransfer')
+trans = reader.reader(x, 'EECTransf`er')
