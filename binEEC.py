@@ -5,12 +5,13 @@ import matplotlib.pyplot as plt
 from util import ensure_mask
 
 def getdRAxis(name='dR', label='$\Delta R$'):
-    return hist.axis.Regular(20, 1e-3, 1.0,
-                             name=name, label=label, 
-                             transform=hist.axis.transform.log)
+    #return hist.axis.Regular(20, 1e-3, 1.0,
+    #                         name=name, label=label, 
+    #                         transform=hist.axis.transform.log)
+    return hist.axis.Variable([0, 0.0002, 0.001, 0.002, 0.005, 0.01, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.137, 0.157,0.179, 0.205, 0.234, 0.268, 0.306, 0.35, 0.4, 0.8, 10], name=name, label=label)
 
 def getOrderAxis(name='order', label='Order'):
-    return hist.axis.IntCategory([2, 3, 4, 5, 6, -21, -22, -23], 
+    return hist.axis.IntCategory([2, 3, 4, 5, 6, -12, -22, -13], 
                                  name=name, label=label)
 
 def getPtAxis(name='pt', label='$p_T$'):

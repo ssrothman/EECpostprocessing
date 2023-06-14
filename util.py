@@ -21,3 +21,9 @@ def ensure_mask(mask, arr):
         return np.ones(len(arr), dtype=bool)
     else:
         return mask
+
+def cleanDivide(num, denom):
+    with np.errstate(divide='ignore', invalid='ignore'):
+        c = np.true_divide(num, denom)
+        c = np.nan_to_num(c, copy=False, nan=0, posinf=0, neginf=0)
+        return c

@@ -52,13 +52,13 @@ class EECProcessor(processor.ProcessorABC):
         hist_genP = binEEC.getHistP()
         hist_genPcov = binEEC.getHistPxP()
 
-        hist_reco3 = binEEC.getHist3()
-        hist_reco3cov = binEEC.getHist3x3()
-        hist_gen3 = binEEC.getHist3()
-        hist_gen3cov = binEEC.getHist3x3()
+        #hist_reco3 = binEEC.getHist3()
+        #hist_reco3cov = binEEC.getHist3x3()
+        #hist_gen3 = binEEC.getHist3()
+        #hist_gen3cov = binEEC.getHist3x3()
 
         hist_transferP = binEEC.getHistPxP_bdiag()
-        hist_transfer3 = binEEC.getHist3x3()
+        #hist_transfer3 = binEEC.getHist3x3()
 
         #bin EEC
         binEEC.fillHistP(hist_recoP, recoEEC, weight, jetMask)
@@ -66,15 +66,15 @@ class EECProcessor(processor.ProcessorABC):
         binEEC.fillHistCovPxP(hist_recoPcov, recoEEC, weight, jetMask)
         binEEC.fillHistCovPxP(hist_genPcov, genEEC, weight, genJetMask)
 
-        binEEC.fillHistRes3(hist_reco3, recoEEC, weight, jetMask)
-        binEEC.fillHistRes3(hist_gen3, genEEC, weight, genJetMask)
-        binEEC.fillHistCov3x3(hist_reco3cov, recoEEC, weight, jetMask)
-        binEEC.fillHistCov3x3(hist_gen3cov, genEEC, weight, genJetMask)
+        #binEEC.fillHistRes3(hist_reco3, recoEEC, weight, jetMask)
+        #binEEC.fillHistRes3(hist_gen3, genEEC, weight, genJetMask)
+        #binEEC.fillHistCov3x3(hist_reco3cov, recoEEC, weight, jetMask)
+        #binEEC.fillHistCov3x3(hist_gen3cov, genEEC, weight, genJetMask)
 
         binEEC.fillHistTransferP(hist_transferP, recoEEC, genEEC, transfer, 
                                  weight, jetMask)
-        binEEC.fillHistTransfer3(hist_transfer3, recoEEC, genEEC, transfer,
-                                 weight, jetMask)
+        #binEEC.fillHistTransfer3(hist_transfer3, recoEEC, genEEC, transfer,
+        #                         weight, jetMask)
 
         #setup empty jet histogram
         hist_jet = binJet.getJetHist()
@@ -96,12 +96,12 @@ class EECProcessor(processor.ProcessorABC):
             "recoPcov": hist_recoPcov,
             "genP": hist_genP,
             "genPcov": hist_genPcov,
-            "reco3": hist_reco3,
-            "reco3cov": hist_reco3cov,
-            "gen3": hist_gen3,
-            "gen3cov": hist_gen3cov,
+         #   "reco3": hist_reco3,
+         #   "reco3cov": hist_reco3cov,
+         #   "gen3": hist_gen3,
+         #   "gen3cov": hist_gen3cov,
             "transferP": hist_transferP,
-            "transfer3": hist_transfer3,
+         #   "transfer3": hist_transfer3,
             "jet": hist_jet,
             "recomatch": hist_recomatch,
             "genmatch": hist_genmatch,
