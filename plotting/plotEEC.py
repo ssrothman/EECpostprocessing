@@ -3,9 +3,9 @@ import awkward as ak
 import numpy as np
 import matplotlib.pyplot as plt
 
-import EECutil
+import util.EECutil
 
-def plotvalues(vals, errs, axis, label=None, dlog=True, savefig=None, clear=False, show=True, ax=None, logy=True, xlab=True):
+def plotvalues(vals, errs, axis, label=None, dlog=True, savefig=None, clear=False, show=True, ax=None, logy=True, xlab=True, doylim=True):
     if ax is None:
         ax = plt.gca()
 
@@ -35,12 +35,14 @@ def plotvalues(vals, errs, axis, label=None, dlog=True, savefig=None, clear=Fals
     if savefig is not None:
         plt.tight_layout()
         low, high=ax.get_ylim()
-        ax.set_ylim(1e-4, high)
+        if doylim:
+            ax.set_ylim(1e-4, high)
         plt.savefig(savefig+'.png', bbox_inches='tight', format='png')
     if show:
         plt.tight_layout()
         low, high=ax.get_ylim()
-        ax.set_ylim(1e-4, high)
+        if doylim:
+            ax.set_ylim(1e-4, high)
         plt.show()
     if clear:
         plt.clf()
@@ -193,7 +195,7 @@ def plotProjectedDif(h1, h1cov, h2, h2cov, order, label=None, dlog=True,
     print("filled between??")
     print("low, high", low, high)
 
-    plotvalues(vals, errs, h11d.axes['dR'], label, dlog, savefig, clear, show, ax, False)
+    plotvalues(vals, errs, h11d.axes['dR'], label, dlog, savefig, clear, show, ax, False, doylim=False)
 
 def plotProjectedWithRatio(h1, h1cov, h2, h2cov, order, dlog=True,
                            savefig=None, clear=False, show=True):

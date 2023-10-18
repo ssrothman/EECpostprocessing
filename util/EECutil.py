@@ -1,7 +1,7 @@
 import awkward as ak
 import numpy as np
 import hist
-from util import cleanDivide
+from .util import cleanDivide
 
 def getOrderIdx(H, order, returnBdiag = False):
     if 'order' in H.axes.name:

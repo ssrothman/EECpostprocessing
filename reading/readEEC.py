@@ -1,7 +1,7 @@
 import numpy as np
 import awkward as ak
 
-from util import unflatMatrix, unflatVector
+from util.util import unflatMatrix, unflatVector
 
 def getptrans(x, name):
     arr = x.GenMatch.matrix

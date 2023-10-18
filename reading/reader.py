@@ -1,6 +1,23 @@
-from readEEC import *
-from readMu import * 
-from readJets import *
+from .readEEC import *
+from .readMu import * 
+from .readJets import *
+
+class resolutionreader:
+    def __init__(self, x, name):
+        self._x = x
+        self._name = name
+
+    @property
+    def res(self):
+        if not hasattr(self, '_res'):
+            self._res = getResolutionStudy(self._x, self._name)
+        return self._res
+
+    @property
+    def resIdx(self):
+        if not hasattr(self, '_resIdx'):
+            self._resIdx = getResolutionStudyIdx(self._x, self._name)
+        return self._resIdx
 
 class EECreader:
     def __init__(self, x, name):

@@ -2,7 +2,8 @@ import hist
 import awkward as ak
 import numpy as np
 import matplotlib.pyplot as plt
-from util import ensure_mask
+
+from util.util import ensure_mask
 
 def getdRAxis(name='dR', label='$\Delta R$'):
     #return hist.axis.Regular(20, 1e-3, 1.0,

@@ -1,5 +1,6 @@
 import numpy as np
 import awkward as ak
+import warnings
 
 from coffea.analysis_tools import PackedSelection
 
@@ -63,15 +64,25 @@ def getEventSelection(rmu, HLT):
     selection = addZSelections(selection, rmu)
     return selection
 
-def getJetSelection(rjet, rmu, evtSel = None):
+def getJetSelection(rjet, rmu=None, evtSel = None):
     jets = rjet.jets
-    muons = rmu.muons
     selection = PackedJetSelection(evtSel)
     selection.add("pt", jets.pt > 30)
-    selection.add("eta", np.abs(jets.eta) < 2.4)
+    selection.add("eta", np.abs(jets.eta) < 2.0)
     selection.add("jetId", (jets.jetId == 7) | (jets.pt > 50))
-    selection.add("muVeto", (muons[:,0].delta_r(jets) > 0.4)
-                          & (muons[:,1].delta_r(jets) > 0.4))
+    if rmu is not None:
+        muons = rmu.muons
+        deta0 = jets.eta - ak.fill_none(muons[:,0].eta, 999)
+        deta1 = jets.eta - ak.fill_none(muons[:,1].eta, 999)
+        dphi0 = jets.phi - ak.fill_none(muons[:,0].phi, 999)
+        dphi1 = jets.phi - ak.fill_none(muons[:,1].phi, 999)
+        dphi0 = np.where(dphi0 > np.pi, dphi0 - 2*np.pi, dphi0)
+        dphi0 = np.where(dphi0 < -np.pi, dphi0 + 2*np.pi, dphi0)
+        dphi1 = np.where(dphi1 > np.pi, dphi1 - 2*np.pi, dphi1)
+        dphi1 = np.where(dphi1 < -np.pi, dphi1 + 2*np.pi, dphi1)
+        dR0 = np.sqrt(deta0*deta0 + dphi0*dphi0)
+        dR1 = np.sqrt(deta1*deta1 + dphi1*dphi1)
+        selection.add("muVeto", (dR0 > 0.4) & (dR1 > 0.4))
     return selection
 
 def getGenJetSelection(rjet, rmu, evtSel = None):
@@ -80,6 +91,6 @@ def getGenJetSelection(rjet, rmu, evtSel = None):
     selection = PackedJetSelection(evtSel)
     selection.add("pt", jets.pt > 30)
     selection.add("eta", np.abs(jets.eta) < 2.4)
-    selection.add("muVeto", (muons[:,0].delta_r(jets) > 0.4)
-                            & (muons[:,1].delta_r(jets) > 0.4))
+    selection.add("muVeto", (jets.delta_r(muons[:,0]) > 0.4)
+                          & (jets.delta_r(muons[:,1]) > 0.4))
     return selection

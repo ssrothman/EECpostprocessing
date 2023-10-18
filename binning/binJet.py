@@ -1,7 +1,8 @@
 import numpy as np
 import awkward as ak
 import hist
-from util import ensure_mask
+
+from util.util import ensure_mask
 
 def getPtAxis(name="pt", label="$p_{T}$ [GeV]", minpt=30, maxpt=1000):
     return hist.axis.Regular(20, minpt, maxpt, name=name, label=label, 
