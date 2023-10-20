@@ -5,211 +5,251 @@ import matplotlib.pyplot as plt
 
 import util.EECutil
 
-def plotvalues(vals, errs, axis, label=None, dlog=True, savefig=None, clear=False, show=True, ax=None, logy=True, xlab=True, doylim=True):
+edges = np.linspace(0, 0.5, 51)
+edges[0] = 1e-10
+dRaxis = hist.axis.Variable(edges, name='dR', label='$\Delta R$')
+
+def plotValues(values, errs, xs, label=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    centers = axis.centers
-    edges = axis.edges
+    differences = xs[1:] - xs[:-1]
+    differences = np.concatenate(([differences[0]], differences))
+    ax.errorbar(xs, values, yerr=errs, xerr = differences/2, ms=3, fmt='o', label=label)
+    if label is not None:
+        ax.legend()
 
-    if dlog:
+def applyPtBin(Hval, Hcov, ptbin):
+    if ptbin is not None:
+        Hval = Hval[{'pt':ptbin}]
+        Hcov = Hcov[{'pt1':ptbin, 'pt2':ptbin}]
+
+    Hval = Hval.project('dRbin')
+    Hcov = Hcov.project('dRbin1', 'dRbin2')
+
+    return Hval, Hcov
+
+
+def plotEEC(Hval, Hcov, ptbin=None, label=None, logwidth=True, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    Hval, Hcov = applyPtBin(Hval, Hcov, ptbin)
+
+    values = Hval.values(flow=False)[1:-1]
+    variances = np.diag(Hcov.values(flow=False)[1:-1,1:-1])
+    errs = np.sqrt(variances)
+
+    xs = dRaxis.centers
+    edges = dRaxis.edges
+    if logwidth:
         widths = np.log(edges[1:]) - np.log(edges[:-1])
     else:
         widths = edges[1:] - edges[:-1]
 
-    vals=vals/widths
-    errs=errs/widths
+    values = values/widths
+    errs = errs/widths
 
-    ax.set_xscale('log')
-
-    ax.errorbar(centers, vals, yerr=errs, fmt='o--', label=label)
-    if xlab:
-        ax.set_xlabel("$\Delta R_{max}$", fontsize=20)
-
-    if label is not None:
-        ax.legend()
-
-    if logy:
-        ax.set_yscale('log')
-
-    if savefig is not None:
-        plt.tight_layout()
-        low, high=ax.get_ylim()
-        if doylim:
-            ax.set_ylim(1e-4, high)
-        plt.savefig(savefig+'.png', bbox_inches='tight', format='png')
-    if show:
-        plt.tight_layout()
-        low, high=ax.get_ylim()
-        if doylim:
-            ax.set_ylim(1e-4, high)
-        plt.show()
-    if clear:
-        plt.clf()
-
-def addYlabel(order, dlog=True, ax=None):
-    if ax is None:
-        ax = plt.gca()
-    if dlog:
-        ax.set_ylabel("$\\frac{d\\sigma^{[%d]}}{d\\log\\Delta R_{max}}$"%order, fontsize=20)
+    ax.set_xlabel("$\Delta R$")
+    if logwidth:
+        ax.set_ylabel("$\\frac{d\\sigma^{(2)}}{d\\log\\Delta R}$ [Unnormalized]")
     else:
-        ax.set_ylabel("$\\frac{d\\sigma^{[%d]}}{d\\Delta R_{max}}$"%order, fontsize=20)
+        ax.set_ylabel("$\\frac{d\\sigma^{(2)}}{d\\Delta R}$ [Unnormalized]")
 
-def plotForward(htrans, hreco, hgen, hcovgen, order,
-                label=None, dlog=True, savefig=None, clear=False, show=True,
-                ax=None):
-    genvals, gencov = EECutil.getProjectedValsCov(hgen, hcovgen, order=order, 
-                                                  flow=True, normalize=False)
+    plotValues(values, errs, xs, label=label, ax=ax)
 
-    transMat = EECutil.getTransferMatrix(htrans, hgen, hreco, order)
-
-    forward, covforward = EECutil.forwardTransfer(transMat, genvals, gencov)
-
-    vals = forward[1:-1]
-    errs = np.sqrt(np.diag(covforward))[1:-1]
-
-    addYlabel(order, dlog, ax)
-    plotvalues(vals, errs, hreco.axes['dR'], label, dlog, savefig, clear, show, ax)
-
-def plotForwardCross(h1trans, h1reco, h1covreco, h1gen, h1covgen, 
-                     h2reco, h2covreco, h2gen, h2covgen, order,
-                     dlog=True, savefig=None, clear=False, show=True,
-                     ax=None):
-
-    transMat = EECutil.getTransferMatrix(h1trans, h1gen, h1reco, order=order)
-
-    gen2vals, gen2cov = EECutil.getProjectedValsCov(h2gen, h2covgen, order=order,
-                                                    flow=True, normalize=False)
-    forward, covforward = EECutil.forwardTransfer(transMat, gen2vals, gen2cov)
-
-    forwardvals = forward[1:-1]
-    forwarderrs = np.sqrt(np.diag(covforward))[1:-1]
-    print("FORWARD[15] = ", forwardvals[15])
-
-    addYlabel(order, dlog, ax)
-    plotvalues(forwardvals, forwarderrs, h2reco.axes['dR'], "Forward", dlog, savefig=None, clear=False, show=False, ax=ax)
-    
-    template, templatecov = EECutil.getBackgroundTemplate(h1trans, 
-                                                          h1gen, h1covgen,
-                                                          h1reco, h1covreco,
-                                                          order = order,
-                                                          normByGen=True)
-    templnorm = gen2vals.sum()
-    templvals = template[1:-1]*templnorm
-    templerrs = np.sqrt(np.diag(templatecov))[1:-1]*templnorm
-    print("BACKGROUND[15] = ", templvals[15])
-    
-    plotvalues(templvals, templerrs, h2reco.axes['dR'], "Background", dlog, savefig=None, clear=False, show=False, ax=ax)
-
-    print("\tFORWARD[15] = ", forwardvals[15])
-    print("\tBACKGROUND[15] = ", templvals[15])
-
-    fullvals = templvals + forwardvals
-    fullerrs = np.sqrt(np.square(templerrs) + np.square(forwarderrs))
-
-    print("FULL[15] = ", fullvals[15])
-    plotvalues(fullvals, fullerrs, h2reco.axes['dR'], "Total", dlog, savefig=None, clear=False, show=False, ax=ax)
-
-    reco2vals, reco2cov = EECutil.getProjectedValsCov(h2reco, h2covreco, order=order,
-                                                      flow=True, normalize=False)
-    recovals = reco2vals[1:-1]
-    recoerrs = np.sqrt(np.diag(reco2cov))[1:-1]
-    print("RECO[15] = ", recovals[15])
-
-    plotvalues(recovals, recoerrs, h2reco.axes['dR'], "Actual", dlog, savefig=savefig, clear=clear, show=show, ax=ax)
-
-def plotBackground(htrans, hreco, hcovreco, hgen, hcovgen, order, 
-                   label=None, dlog=True, savefig=None, clear=False, show=True,
-                   ax=None):
-
-    template, templatecov = EECutil.getBackgroundTemplate(htrans, 
-                                                          hgen, hcovgen, 
-                                                          hreco, hcovreco,
-                                                          order = order,
-                                                          normByGen=True)
-
-    vals = template[1:-1]
-    errs = np.sqrt(np.diag(templatecov))[1:-1]
-
-    norm = EECutil.getForOrder1d(hgen, order).sum(flow=True)
-
-    vals = vals*norm
-    errs = errs*norm
-    
-    addYlabel(order, dlog, ax)
-    plotvalues(vals, errs, hreco.axes['dR'], label, dlog, savefig, clear, show, ax)
-
-def plotTransfered(htrans, hreco, order, label=None, dlog=True, savefig=None, clear=False, show=True, ax=None):
-    orderidx = htrans.axes['order'].index(order)
-    ht1d = htrans[{'order' : orderidx}].project('dRa')
-    hr1d = hreco[{'order' : orderidx}].project('dR')
-
-    norm = hr1d.sum(flow=True)
-    vals = ht1d.values()/norm
-    errs = 0
-
-    addYlabel(order, dlog, ax)
-    plotvalues(vals, errs, ht1d.axes['dRa'], label, dlog, savefig, clear, show, ax)
-
-def plotProjectedEEC(h, hcov, order, label = None, dlog=True,
-                     savefig=None, clear=False, show=True, ax=None, xlab=True):
-
-    vals, cov = EECutil.getProjectedValsCov(h, hcov, order, normalize=False)
-    errs = np.sqrt(np.diag(cov))
-    
-    addYlabel(order, dlog, ax)
-    plotvalues(vals, errs, h.axes['dR'], label, dlog, savefig, clear, show, ax, xlab=xlab)
-
-def plotProjectedDif(h1, h1cov, h2, h2cov, order, label=None, dlog=True,
-             savefig=None, clear=False, show=True, ax=None):
-    orderidx = h1.axes['order'].index(order)
-    h11d = h1[{'order' : orderidx}].project('dR')
-    h21d = h2[{'order' : orderidx}].project('dR')
-    h1cov2d = h1cov[{'ordera' : orderidx, 'orderb' : orderidx}].project('dRa', 'dRb')
-    h2cov2d = h2cov[{'ordera' : orderidx, 'orderb' : orderidx}].project('dRa', 'dRb')
-
-    norm1 = h11d.sum(flow=True)
-    norm2 = h21d.sum(flow=True)
-
-    vals1 = h11d.values()/norm1
-    errs1 = np.sqrt(np.diag(h1cov2d.values())/norm1)
-
-    vals2 = h21d.values()/norm2
-    errs2 = np.sqrt(np.diag(h2cov2d.values())/norm2)
-
-    diff = vals1 - vals2
-    differr = np.sqrt(np.square(errs1) + np.square(errs2))
-
-    vals = diff/differr
-    errs = 0
-
+def plotRatio(Hval1, Hcov1, Hval2, Hcov2, ptbin=None, logwidth=True, 
+              label=None, ax=None):
     if ax is None:
         ax = plt.gca()
-    ax.set_ylabel("$\\frac{1-2}{\sigma}$", fontsize=20)
+
+    Hval1, Hcov1 = applyPtBin(Hval1, Hcov1, ptbin)
+    Hval2, Hcov2 = applyPtBin(Hval2, Hcov2, ptbin)
+
+    values1 = Hval1.values(flow=False)[1:-1]
+    variances1 = np.diag(Hcov1.values(flow=False)[1:-1,1:-1])
+    errs1 = np.sqrt(variances1)
+
+    values2 = Hval2.values(flow=False)[1:-1]
+    variances2 = np.diag(Hcov2.values(flow=False)[1:-1,1:-1])
+    errs2 = np.sqrt(variances2)
+
+    xs = dRaxis.centers
+    edges = dRaxis.edges
+    if logwidth:
+        widths = np.log(edges[1:]) - np.log(edges[:-1])
+    else:
+        widths = edges[1:] - edges[:-1]
+
+    values1 = values1/widths
+    errs1 = errs1/widths
+
+    values2 = values2/widths
+    errs2 = errs2/widths
+
+    ratio = values1/values2
+    ratioerrs = ratio*np.sqrt(np.square(errs1/values1) 
+                              + np.square(errs2/values2))
+
+    ax.axhline(1, color='k', linestyle='--')
+    ax.set_ylabel("Ratio")
+    ax.set_xlabel("$\Delta R$")
+    plotValues(ratio, ratioerrs, xs, label=label, ax=ax)
+
+def makeTransfer(Hdict, ptbin, includeInefficiency=True):
+    Hgen = Hdict['Hgen']
+    HcovGen = Hdict['HcovGen']
+
+    if not includeInefficiency:
+        Hgen = Hgen - Hdict['HgenUNMATCH']
+        HcovGen = HcovGen - Hdict['HcovGenUNMATCH']
+
+    Hgen, HcovGen = applyPtBin(Hgen, HcovGen, ptbin)
+
+    Htrans = Hdict['Htrans']
+    Htrans = Htrans[{'ptReco' : ptbin, 'ptGen' : ptbin}].project('dRbinReco', 'dRbinGen')
+
+    transValue = Htrans.values(flow=False)
+    genValue = Hgen.values(flow=False)
+
+    target = np.sum(transValue, axis=1)
+
+    transValue = transValue / genValue[None, :]
+
+    return transValue
+
+def plotPurity(Hdict, ptbin, includeInefficiency, label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
+
+    xs = dRaxis.centers
+    edges = dRaxis.edges
+
+    ax.set_xlabel("$\Delta R_{Reco}$")
+    ax.set_ylabel("Purity")
+
+    purity = np.diag(trans) / np.sum(trans, axis=1)
+
+    purity = purity[1:-1]
     
-    low = np.min(h11d.axes['dR'].edges)
-    high = np.max(h11d.axes['dR'].edges)
-    x = np.linspace(low, high, 100)
-    ax.fill_between(x, -1, 1, color='gray', alpha=0.5)
-    ax.axhline(0, color='black', alpha=0.5, linestyle='--')
-    print("filled between??")
-    print("low, high", low, high)
+    plotValues(purity, 0, xs, label=label, ax=ax)
 
-    plotvalues(vals, errs, h11d.axes['dR'], label, dlog, savefig, clear, show, ax, False, doylim=False)
+def plotStability(Hdict, ptbin, includeInefficiency, label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
 
-def plotProjectedWithRatio(h1, h1cov, h2, h2cov, order, dlog=True,
-                           savefig=None, clear=False, show=True):
-    fig, (ax1, ax2) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [3, 1]}, 
-                                         sharex=True)
+    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
 
-    plotProjectedEEC(h1, h1cov, order, "1", dlog, None, False, False, ax1, xlab=False)
-    plotProjectedEEC(h2, h2cov, order, "2", dlog, None, False, False, ax1, xlab=False)
-    plotProjectedDif(h1, h1cov, h2, h2cov, order, None, dlog, savefig, clear, show, ax2)
+    xs = dRaxis.centers
+    edges = dRaxis.edges
 
-def plotProjectedWithTransfer(htrans, hreco, hcovreco, hgen, hcovgen, order, dlog=True,
-                              savefig=None, clear=False, show=True):
-    plotProjectedEEC(hreco, hcovreco, order, "reco", dlog, show=False)
-    plotBackground(htrans, hreco, hcovreco, hgen, hcovgen, order, 
-                   "background", show=False)
-    plotForward(htrans, hreco, hgen, hcovgen, order, 
-                "transfered", dlog, savefig, clear, show)
+    ax.set_xlabel("$\Delta R_{Gen}$")
+    ax.set_ylabel("Stability")
+
+    purity = np.diag(trans) / np.sum(trans, axis=0)
+
+    purity = purity[1:-1]
+    
+    plotValues(purity, 0, xs, label=label, ax=ax)
+
+def showTransfer(Hdict, ptbin, includeInefficiency, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
+    plt.imshow(trans)
+    plt.show()
+
+def transferHist(Hdict, ptbin, dRbin, includeInefficiency, axis='Gen', 
+                 label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+    
+    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
+    
+    if axis == 'Gen':
+        values = trans[dRbin, :]/np.sum(trans, axis=1)
+        print(np.sum(values))
+        ax.set_xlabel('Gen $\Delta R$ bin')
+    elif axis == 'Reco':
+        values = trans[:, dRbin]/np.sum(trans, axis=0)
+        print(np.sum(values))
+        ax.set_xlabel('Reco $\Delta R$ bin')
+
+    ax.hist(np.arange(52), bins=52, weights=values, label=label, histtype='step')
+    ax.axvline(dRbin, color='k', linestyle='--')
+    if label is not None:
+        plt.legend()
+
+def pttitle(title, ptbin, Hdict, fig=None):
+    if fig is None:
+        fig = plt.gcf()
+    if ptbin is None:
+        fig.suptitle(title)
+    else:
+        ptmin = Hdict['Hreco'].axes['pt'].edges[ptbin]
+        ptmax = Hdict['Hreco'].axes['pt'].edges[ptbin+1]
+        fig.suptitle("%s\n$%0.1f < p_T^{Jet} \\mathrm{[GeV]} < %0.1f$" % (title, ptmin, ptmax))
+
+def plotReco(Hdict, ptbin, folder=None):
+    pttitle("Reco EEC", ptbin, Hdict)
+    plotEEC(Hdict['Hreco'], Hdict['HcovReco'], label='Total Reco', ptbin=ptbin)
+    plotEEC(Hdict['HrecoPUjets'], Hdict['HcovRecoPUjets'], label='PU Jets', ptbin=ptbin)
+    plotEEC(Hdict['HrecoUNMATCH'], Hdict['HcovRecoUNMATCH'], label='PU Contamination', ptbin=ptbin)
+    if folder is not None:
+        plt.savefig("%s/RecoEEC_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+    plt.show()
+
+def plotGen(Hdict, ptbin, folder=None):
+    pttitle("Gen EEC", ptbin, Hdict)
+    plotEEC(Hdict['Hgen'], Hdict['HcovGen'], label='Total Gen', ptbin=ptbin)
+    plotEEC(Hdict['HgenUNMATCH'], Hdict['HcovGenUNMATCH'], label='Unmatched Gen', ptbin=ptbin)
+    if folder is not None:
+        plt.savefig("%s/GenEEC_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+    plt.show()
+
+def compareGenReco(Hdict, ptbin, folder=None):
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(5, 5), sharex=True, height_ratios=[3,1])
+    pttitle("Gen vs Reco EEC", ptbin, Hdict, fig)
+    Hreco = Hdict['Hreco'] - Hdict['HrecoPUjets'] - Hdict['HrecoUNMATCH']
+    HcovReco = Hdict['HcovReco'] - Hdict['HcovRecoPUjets'] - Hdict['HcovRecoUNMATCH']
+    Hgen = Hdict['Hgen'] - Hdict['HgenUNMATCH']
+    HcovGen = Hdict['HcovGen'] - Hdict['HcovGenUNMATCH']
+
+    plotEEC(Hreco, HcovReco, label = 'Reco - background', ptbin=ptbin, ax=ax0)
+    plotEEC(Hgen, HcovGen, label = 'Gen - unmatched', ptbin=ptbin, ax=ax0)
+
+    plotRatio(Hreco, HcovReco, Hgen, HcovGen, ptbin=ptbin, ax=ax1)
+    plt.tight_layout()
+    if folder is not None:
+        plt.savefig("%s/RecoVsGenEEC_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+    plt.show()
+
+def comparePurity(Hdicts, labels, ptbin, includeInefficiency=True, folder=None):
+    pttitle("Purity (diagonal pT bins)", ptbin, Hdicts[0])
+    for Hdict, label in zip(Hdicts, labels):
+        plotPurity(Hdict, ptbin, label=label,
+                   includeInefficiency=includeInefficiency)
+    if folder is not None:
+        plt.savefig("%s/ComparePurity_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+    plt.show()
+
+def compareStability(Hdicts, labels, ptbin, includeInefficiency=True, folder=None):
+    pttitle("Stability (diagonal pT bins)", ptbin, Hdicts[0])
+    for Hdict, label in zip(Hdicts, labels):
+        plotStability(Hdict, ptbin, label=label, 
+                      includeInefficiency=includeInefficiency)
+    if folder is not None:
+        plt.savefig("%s/CompareStability_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+    plt.show()
+
+def compareTransferHist(Hdicts, labels, ptbin, dRbin, includeInefficiency=True, axis='Reco', folder=None):
+    pttitle("Slice of transfer matrix", ptbin, Hdicts[0])
+    for Hdict, label in zip(Hdicts, labels):
+        transferHist(Hdict, ptbin, dRbin, includeInefficiency, axis=axis, label=label)
+    plt.yscale('log')
+    if folder is not None:
+        plt.savefig("%s/CompareTransferHist_%s_ptbin%d.png" % (folder, axis, ptbin), format='png', bbox_inches='tight')
+    plt.show()
