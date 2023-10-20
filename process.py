@@ -1,5 +1,6 @@
 from processing.MatchingProcessor import MatchingProcessor
 from processing.TransferProcessor import TransferProcessor
+from processing.EECProcessor import EECProcessor
 from processing.scaleout import setup_cluster_on_submit
 
 from reading.files import get_rootfiles
@@ -15,6 +16,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
 
 processor_parsers = parser.add_subparsers(help='coffea processor to use', dest='processor', required=True)
+eec_parser = processor_parsers.add_parser('EEC', help='EEC processor')
 matching_parser = processor_parsers.add_parser('matching', help='matching processor')
 matching_parser.add_argument('matchings', nargs='+', default=['DefaultMatchParticles', 'NaiveMatchParticles'])
 transfer_parser = processor_parsers.add_parser('transfer', help='transfer processor')
@@ -62,6 +64,10 @@ if args.processor == 'matching':
     processor_instance = MatchingProcessor(args.matchings)
 elif args.processor == 'transfer':
     processor_instance = TransferProcessor()
+elif args.processor == 'EEC':
+    processor_instance = EECProcessor(['EEC', 'NaiveEEC'], 
+                                      ['GenMatch', 'NaiveGenMatch'],
+                                      52)
 else:
     raise ValueError("Unknown processor %s"%args.processor)
 
@@ -92,7 +98,7 @@ if use_slurm:
 
     runner = Runner(
         executor=DaskExecutor(client=client, status=True),
-        #chunksize=1000,
+        chunksize=1000,
         schema=NanoAODSchema
     )
 else:

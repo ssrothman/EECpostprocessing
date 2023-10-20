@@ -18,7 +18,7 @@ def unflatVector(arr, ncols):
 
 def ensure_mask(mask, arr):
     if mask is None:
-        return np.ones(len(arr), dtype=bool)
+        return ak.ones_like(arr, dtype=bool)
     else:
         return mask
 

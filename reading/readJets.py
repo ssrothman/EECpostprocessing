@@ -24,9 +24,9 @@ def getSimonJets(x, name):
             "eta": x[name+"BK"].jetEta,
             'phi': x[name+"BK"].jetPhi,
             'nPart': x[name+"BK"].nPart,     
-            'genPt': x[name+"BK"].genPt,
-            'genEta': x[name+"BK"].genEta,
-            'genPhi': x[name+"BK"].genPhi,
+            #'genPt': x[name+"BK"].genPt,
+            #'genEta': x[name+"BK"].genEta,
+            #'genPhi': x[name+"BK"].genPhi,
         })
 
 

@@ -1,4 +1,3 @@
-from .readEEC import *
 from .readMu import * 
 from .readJets import *
 
@@ -19,6 +18,8 @@ class resolutionreader:
             self._resIdx = getResolutionStudyIdx(self._x, self._name)
         return self._resIdx
 
+import reading.readEEC
+
 class EECreader:
     def __init__(self, x, name):
         self._x = x
@@ -27,142 +28,54 @@ class EECreader:
     @property
     def proj(self):
         if not hasattr(self, '_proj'):
-            self._proj = getproj(self._x, self._name)
+            self._proj = reading.readEEC.getProj(self._x, self._name, 'value2')
         return self._proj
 
     @property
-    def projdR(self):
-        if not hasattr(self, '_projdR'):
-            self._projdR = getprojdR(self._x, self._name)
-        return self._projdR
+    def iJet(self):
+        if not hasattr(self, '_iJet'):
+            self._iJet = reading.readEEC.getJetIdx(self._x, self._name)
+        return self._iJet
 
     @property
-    def projOrder(self):
-        if not hasattr(self, '_projOrder'):
-            self._projOrder = getprojOrder(self._x, self._name)
-        return self._projOrder
+    def iReco(self):
+        if not hasattr(self, '_iReco'):
+            self._iReco = reading.readEEC.getRecoIdx(self._x, self._name)
+        return self._iReco
 
     @property
-    def projJetIdx(self):
-        if not hasattr(self, '_projJetIdx'):
-            self._projJetIdx = getprojJetIdx(self._x, self._name)
-        return self._projJetIdx
-
-    @property
-    def res3(self):
-        if not hasattr(self, '_res3'):
-            self._res3 = getres3(self._x, self._name)
-        return self._res3
-
-    @property
-    def res4(self):
-        if not hasattr(self, '_res4'):
-            self._res4 = getres4(self._x, self._name)
-        return self._res4
-
-    @property
-    def covPxP(self):
-        if not hasattr(self, '_covPxP'):
-            self._covPxP = getcovPxP(self._x, self._name)
-        return self._covPxP
-
-    @property
-    def cov3x3(self):
-        if not hasattr(self, '_cov3x3'):
-            self._cov3x3 = getcov3x3(self._x, self._name)
-        return self._cov3x3
-
-    @property
-    def cov3xP(self):
-        if not hasattr(self, '_cov3xP'):
-            self._cov3xP = getcov3xP(self._x, self._name)
-        return self._cov3xP  
-
-    @property
-    def cov4x4(self):
-        if not hasattr(self, '_cov4x4'):
-            self._cov4x4 = getcov4x4(self._x, self._name)
-        return self._cov4x4
-
-    @property
-    def cov4x3(self):
-        if not hasattr(self, '_cov4x3'):
-            self._cov4x3 = getcov4x3(self._x, self._name)
-        return self._cov4x3
-
-    @property
-    def cov4xP(self):
-        if not hasattr(self, '_cov4xP'):
-            self._cov4xP = getcov4xP(self._x, self._name)
-        return self._cov4xP
-
-    @property
-    def projdR_forhist(self):
-        if not hasattr(self, '_projdR_forhist'):
-            
-            self._projdR_forhist, _ = ak.broadcast_arrays(
-                    self.projdR[:, :, None, :], self.proj)
-        return self._projdR_forhist
-
-    @property
-    def projdR_forcov(self):
-        if not hasattr(self, '_projdR_forcov'):
-            self._projdR_forcov = ak.flatten(
-                    self.projdR_forhist, axis=-1)
-        return self._projdR_forcov
-
-    @property
-    def projOrder_forhist(self):
-        if not hasattr(self, '_projOrder_forhist'):
-            self._projOrder_forhist, _ = ak.broadcast_arrays(
-                    self.projOrder, self.proj)
-        return self._projOrder_forhist
-
-    @property
-    def projOrder_forcov(self):
-        if not hasattr(self, '_projOrder_forcov'):
-            self._projOrder_forcov = ak.flatten(
-                    self.projOrder_forhist, axis=-1)
-        return self._projOrder_forcov
-
-
-
+    def nproj(self):
+        if not hasattr(self, '_nproj'):
+            self._nproj = reading.readEEC.getNProj(self._x, self._name)
+        return self._nproj
+    
 class transferreader:
     def __init__(self, x, name):
         self._x = x
         self._name = name
 
+    '''
+    ak.sum(transferP[evt, jet], axis=0) = reco - PU
+    '''
     @property
-    def transferP(self):
+    def proj(self):
         if not hasattr(self, '_transferP'):
-            self._transferP = gettransferP(self._x, self._name)
+            self._transferP = reading.readEEC.getTransferP(self._x, 
+                                                           self._name, 
+                                                           'value2')
         return self._transferP
 
     @property
-    def transferRecoIdx(self):
-        if not hasattr(self, '_transferPrecoIdx'):
-            self._transferPrecoIdx = gettransferRecoIdx(
-                    self._x, self._name)
-        return self._transferPrecoIdx
+    def iReco(self):
+        if not hasattr(self, '_iReco'):
+            self._iReco = reading.readEEC.getRecoIdx(self._x, self._name)
+        return self._iReco
 
     @property
-    def transferGenIdx(self):
-        if not hasattr(self, '_transferPgenIdx'):
-            self._transferPgenIdx = gettransferGenIdx(
-                    self._x, self._name)
-        return self._transferPgenIdx
-
-    @property
-    def transfer3(self):
-        if not hasattr(self, '_transfer3'):
-            self._transfer3 = getTransfer3(self._x, self._name)
-        return self._transfer3
-
-    @property
-    def transfer4(self):
-        if not hasattr(self, '_transfer4'):
-            self._transfer4 = getTransfer4(self._x, self._name)
-        return self._transfer4
+    def iGen(self):
+        if not hasattr(self, '_iGen'):
+            self._iGen = reading.readEEC.getGenIdx(self._x, self._name)
+        return self._iGen
 
 class jetreader:
     def __init__(self, x, jetsname, simonjetsname):
