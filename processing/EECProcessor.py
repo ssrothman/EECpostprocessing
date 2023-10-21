@@ -7,15 +7,15 @@ import reading.reader as reader
 import selections.masks as masks
 import selections.weights as weights
 
-import binning.binMatch as binMatch
 import binning.binEEC as binEEC
-import binning.binJet as binJet
+import binning.binEEC_binwt as binEEC_binwt
 
 class EECProcessor(processor.ProcessorABC):
-    def __init__(self, names, matchNames, nDR):
+    def __init__(self, names, matchNames, nDR, binwt):
         self.names = names
         self.matchNames = matchNames
         self.nDR = nDR
+        self.binner = binEEC_binwt if binwt else binEEC
 
     def postprocess(self, accumulator):
         pass
@@ -45,7 +45,7 @@ class EECProcessor(processor.ProcessorABC):
 
         for name, matchName in zip(self.names, self.matchNames):
             print("doing", name, matchName)
-            result[name] = binEEC.doAll(
+            result[name] = self.binner.doAll(
                     events, '%sTransfer'%name, 'Reco%s'%name, 'Gen%s'%name,
                     '%sParticles'%matchName, '%sGenParticles'%matchName,
                     self.nDR, weight, jetMask)
