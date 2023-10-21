@@ -34,12 +34,10 @@ def binProj(H, rEEC, rJet, nDR, wt, mask=None):
     dRbin = ak.local_index(vals, axis=2)
     pt, _ = ak.broadcast_arrays(pt, dRbin)
 
-    mask2 = vals > 0
-
     H.fill(
-        pt = ak.flatten(pt[mask2], axis=None),
-        dRbin = ak.flatten(dRbin[mask2], axis=None),
-        weight = ak.flatten(vals[mask2], axis=None),
+        pt = ak.flatten(pt, axis=None),
+        dRbin = ak.flatten(dRbin, axis=None),
+        weight = ak.flatten(vals, axis=None),
     )
 
 def getTransferHistP(nDR):
@@ -53,18 +51,8 @@ def getTransferHistP(nDR):
         storage=hist.storage.Double(),
     )
 
-def getTransferHistP2(nDR):
-    return hist.Hist(
-        hist.axis.Regular(10, 0, 500, name='ptGen', label='Jet $p_T$ [GeV]'),
-        hist.axis.Integer(0, nDR,  underflow=False, overflow=False,
-                          name='dRbinGen', label='$\Delta R$ bin'),
-        hist.axis.Regular(31, 0.0, 2.0, name='ratio', label='Reco wt/Gen wt'),
-    )
-
-def binTransferP(H, H2, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH,
-                 rRecoJet, rGenJet, nDR, wt, mask=None):
-    print(H2)
-    transferval = rTransfer.proj
+def binTransferP(H, rTransfer, rRecoJet, rGenJet, nDR, wt, mask=None):
+    proj = rTransfer.proj
     iReco = rTransfer.iReco
     iGen = rTransfer.iGen
 
@@ -78,36 +66,17 @@ def binTransferP(H, H2, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH
     recoPt = rRecoJet.simonjets.pt[iReco]
     genPt = rGenJet.simonjets.pt[iGen]
 
-    iDRGen = ak.local_index(transferval, axis=2)
-    iDRReco = ak.local_index(transferval, axis=3)
-    
-    genPt2, iDRGen2 = ak.broadcast_arrays(genPt, iDRGen)
+    iGen = ak.local_index(proj, axis=2)
+    iReco = ak.local_index(proj, axis=3)
 
-    recoPt, genPt, iDRGen, _ = ak.broadcast_arrays(recoPt, genPt, iDRGen, iDRReco)
-
-    totalRecoWt = ak.sum(transferval, axis=3)
-    totalGenWt = rGenEEC.proj - rGenEECUNMATCH.proj
-    
-    mask3 = totalGenWt > 0
-    totalRecoWt = totalRecoWt[mask3]
-    totalGenWt = totalGenWt[mask3]
-    iDRGen2 = iDRGen2[mask3]
-    genPt2 = genPt2[mask3]
-
-    wtratio = totalRecoWt/totalGenWt
+    recoPt, genPt, iGen, _ = ak.broadcast_arrays(recoPt, genPt, iGen, iReco)
 
     H.fill(
         ptReco = ak.flatten(recoPt[mask], axis=None),
-        dRbinReco = ak.flatten(iDRReco[mask], axis=None),
+        dRbinReco = ak.flatten(iReco[mask], axis=None),
         ptGen = ak.flatten(genPt[mask], axis=None),
-        dRbinGen = ak.flatten(iDRGen[mask], axis=None),
-        weight = ak.flatten((transferval*wts)[mask], axis=None),
-    )
-
-    H2.fill(
-        ptGen = ak.flatten(genPt2[mask], axis=None),
-        dRbinGen = ak.flatten(iDRGen2[mask], axis=None),
-        ratio = ak.flatten(wtratio[mask], axis=None),
+        dRbinGen = ak.flatten(iGen[mask], axis=None),
+        weight = ak.flatten((proj*wts)[mask], axis=None),
     )
 
 def getCovHistP(nDR):
@@ -195,30 +164,24 @@ def doProjected(x, nameEEC, nameJet, nDR, wt, mask=None):
 
     from time import time
     t0 = time()
-    #binProj(Hval, rEEC, rJet, nDR, wt, mask)
+    binProj(Hval, rEEC, rJet, nDR, wt, mask)
     print("\tbinProj took", time()-t0, "seconds")
     t0 = time()
-    #binCovP(Hcov, rEEC, rJet, nDR, wt, mask)
+    binCovP(Hcov, rEEC, rJet, nDR, wt, mask)
     print("\tbinCovP took", time()-t0, "seconds")
 
     return Hval, Hcov
 
 def doTransfer(x, nameTransfer, nameRecoJet, nameGenJet, nDR, wt, mask=None):
     Htrans = getTransferHistP(nDR)
-    H2 = getTransferHistP2(nDR)
 
     rTransfer = reading.reader.transferreader(x, nameTransfer)
-    rRecoEEC = reading.reader.EECreader(x, 'RecoEEC')
-    rRecoEECPU = reading.reader.EECreader(x, 'RecoEECPU')
-    rGenEEC = reading.reader.EECreader(x, 'GenEEC')
-    rGenEECUNMATCH = reading.reader.EECreader(x, 'GenEECUNMATCH')
     rRecoJet = reading.reader.jetreader(x, '', nameRecoJet)
     rGenJet = reading.reader.jetreader(x, '', nameGenJet)
 
-    binTransferP(Htrans, H2, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH,
-                 rRecoJet, rGenJet, nDR, wt, mask)
+    binTransferP(Htrans, rTransfer, rRecoJet, rGenJet, nDR, wt, mask)
 
-    return Htrans, H2
+    return Htrans
 
 def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC, 
           nameRecoJet, nameGenJet, nDR, wt, mask):
@@ -255,7 +218,7 @@ def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC,
     print("genUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
-    Htrans, H2 = doTransfer(x, nameTransfer, nameRecoJet, nameGenJet, nDR, wt, mask)
+    Htrans = doTransfer(x, nameTransfer, nameRecoJet, nameGenJet, nDR, wt, mask)
     print("Htrans took %0.4f seconds"%(time()-t0))
 
     print("DONE")
@@ -266,7 +229,6 @@ def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC,
         'Hgen' : Hgen,
         'HgenUNMATCH' : HgenUNMATCH,
         'Htrans' : Htrans,
-        'H2' : H2,
         'HcovReco' : HcovReco,
         'HcovRecoPUjets' : HcovRecoPUjets,
         'HcovRecoUNMATCH' : HcovRecoUNMATCH,
