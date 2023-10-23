@@ -7,14 +7,16 @@ from util.util import ensure_mask
 
 import reading.reader
 
-nBinWT = 50
+nBinWT = 40
+minwt = 1e-5
 
 def getProjHist(nDR):
     return hist.Hist(
         hist.axis.Regular(10, 0, 500, name='pt', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbin', label='$\Delta R$ bin'),
-        hist.axis.Regular(nBinWT, 1e-10, 1, name='EECwt', label='EEC weight'),
+        hist.axis.Regular(nBinWT, minwt, 1, name='EECwt', label='EEC weight',
+                          transform=hist.axis.transform.log),
         storage=hist.storage.Double(),
     )
 
@@ -58,11 +60,13 @@ def getTransferHistP(nDR):
         hist.axis.Regular(10, 0, 500, name='ptReco', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbinReco', label='$\Delta R$ bin'),
-        hist.axis.Regular(nBinWT, 1e-10, 1, name='EECwtReco', label='EEC weight'), 
+        hist.axis.Regular(nBinWT,minwt,1,name='EECwtReco', label='EEC weight',
+                          transform=hist.axis.transform.log),
         hist.axis.Regular(10, 0, 500, name='ptGen', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbinGen', label='$\Delta R$ bin'),
-        hist.axis.Regular(nBinWT, 1e-10, 1, name='EECwtGen', label='EEC weight'),
+        hist.axis.Regular(nBinWT,minwt,1,name='EECwtGen',label='EEC weight',
+                          transform=hist.axis.transform.log),
         storage=hist.storage.Double(),
     )
 

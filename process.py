@@ -1,7 +1,7 @@
 from processing.MatchingProcessor import MatchingProcessor
 from processing.TransferProcessor import TransferProcessor
 from processing.EECProcessor import EECProcessor
-from processing.scaleout import setup_cluster_on_submit
+from processing.scaleout import setup_cluster_on_submit, custom_scale
 
 from reading.files import get_rootfiles
 
@@ -33,6 +33,8 @@ parser.add_argument('--nfiles', dest='nfiles', type=int, help='number of files t
 
 scale_group = parser.add_mutually_exclusive_group(required=False)
 scale_group.add_argument('--force-local', dest='force_local', action='store_true', help='force local execution')
+scale_group.add_argument('--local-futures', dest='local_futures', action='store_true', help='force local execution with futures')
+scale_group.add_argument('--custom-scale', dest='custom_scale', action='store_true')
 scale_group.add_argument('--force-slurm', dest='force_slurm', action='store_true', help='force execution via slurm')
 
 args = parser.parse_args()
@@ -78,7 +80,8 @@ else:
 if args.input == 'local':
     destination = 'testlocal'
 else:
-    destination = "%s/%s"%(args.tag, args.processor)
+    destination = "/data/submit/srothman/EEC/%s/%s"%(args.tag, args.processor)
+    destination = "./%s/%s"%(args.tag, args.processor)
     if os.path.exists(destination):
         raise ValueError("Destination %s already exists"%destination)
 
@@ -88,45 +91,50 @@ os.makedirs(destination, exist_ok=True)
 ################### EXECUTION ###################
 
 use_slurm = len(files) > 10
-if args.force_local:
+if args.force_local or args.local_futures or args.custom_scale:
     use_slurm = False
 if args.force_slurm:
     use_slurm = True
 
 if use_slurm:
     print("using slurm")
-    cluster, client = setup_cluster_on_submit(1, 300, destination)
+    cluster, client = setup_cluster_on_submit(1, 5, destination)
 
     runner = Runner(
         executor=DaskExecutor(client=client, status=True),
         chunksize=1000,
         schema=NanoAODSchema
     )
-else:
+elif not args.custom_scale:
     print("running locally")
     runner = Runner(
-        executor=IterativeExecutor(),
+        executor=FuturesExecutor(workers=16) if args.local_futures else IterativeExecutor(),
         #executor=FuturesExecutor(workers=10, status=True),
-        #chunksize=1000,
+        chunksize=1000,
         schema=NanoAODSchema
     )
+else:
+    print("doing custom scale")
+    custom_scale(files, processor_instance, destination)
+    runner = None
 ##################################################
 
 
 ################### RUNNING ###################
 
-out = runner(
-    {"DYJetsToLL" : files},
-    treename='Events',
-    processor_instance=processor_instance
-)
+if runner is not None:
+    out = runner(
+        {"DYJetsToLL" : files},
+        treename='Events',
+        processor_instance=processor_instance
+    )
 
-with open(os.path.join(destination,"hists.pkl"), 'wb') as fout:
-    import pickle
-    pickle.dump(out, fout)
+    with open(os.path.join(destination,"hists.pkl"), 'wb') as fout:
+        import pickle
+        pickle.dump(out, fout)
 
-if use_slurm:
-    client.close()
-    cluster.close()
+    if use_slurm:
+        client.close()
+        cluster.close()
 
 ##################################################

@@ -1,4 +1,5 @@
 import os
+import pickle
 
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster
@@ -15,12 +16,76 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
     print("saving logs at",log_directory)
 
     cluster = SLURMCluster(queue = 'submit,submit-gpu,submit-gpu1080',
-                           cores=1,
+                           cores=64,
                            processes=1,
-                           memory='32GB',
+                           memory='70GB',
                            walltime='01:00:00',
                            log_directory=log_directory)
     cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)
     #cluster.scale(maxjobs)
     client = Client(cluster)
     return cluster, client
+
+def custom_scale(files, processor_instance, folder):
+    N = len(files)
+
+    command_string = 'python run.py $SLURM_ARRAY_TASK_ID'
+
+    with open("%s/submit_array.slurm"%folder, 'w') as f:
+        write_slurm_script(f, "scale_array", command_string,
+                           mem='50g', array='0-%d%%10'%N, cpus=64)
+
+    with open("%s/files.pkl"%folder, 'wb') as f:
+        pickle.dump(files, f)
+
+    with open("%s/processor.pkl"%folder, 'wb') as f:
+        pickle.dump(processor_instance, f)
+
+    with open("%s/run.py"%folder, 'w') as f:
+        write_run_script(f)
+
+    #for i in range(N):
+    #    os.makedirs("%s/%09d"%(folder,i), exist_ok=False)
+
+def write_run_script(f):
+    runstring = 'import pickle\n'
+    runstring += 'import sys\n'
+    runstring += '\n'
+    runstring += 'idx = int(sys.argv[1])'
+    runstring += '\n'
+    runstring += 'with open("files.pkl", "rb") as f:\n'
+    runstring += '\tfiles = pickle.load(f)\n'
+    runstring += '\n'
+    runstring += 'with open("processor.pkl", "rb") as f:\n'
+    runstring += '\tprocessor = pickle.load(f)\n'
+    runstring += '\n'
+    runstring += 'q = processor.locking_merge_on_disk(files[idx], "./hists.pkl")\n'
+    runstring += '\n'
+    #runstring += 'with open("%09d/hists.pkl"%idx, "wb") as f:\n'
+    #runstring += "\tpickle.dump(q, f)\n"
+    f.write(runstring)
+
+def write_slurm_script(f, jobname, commandstring,
+                       partition='submit,submit-gpu,submit-gpu1080', 
+                       time=None, cpus=None, gres=None,
+                       mem=None, array=None):
+    f.write("#!/bin/bash -l\n")
+    if time is not None:
+        f.write("#SBATCH --time=%s\n"%time)
+    f.write("#SBATCH --ntasks=1\n")
+    if cpus is not None:
+        f.write("#SBATCH --cpus-per-task=%d\n"%cpus)
+    if gres is not None:
+        f.write("#SBATCH --gres=%s\n"%gres)
+    if mem is not None:
+        f.write("#SBATCH --mem=%s\n"%mem)
+    f.write("#SBATCH --partition=%s\n"%partition)
+    f.write("#SBATCH --mail-type=ALL\n")
+    f.write("#SBATCH --mail-user=ssrothman.slurm.span@gmail.com\n")
+    f.write("#SBATCH --job-name=\"%s\"\n"%jobname)
+    f.write("#SBATCH --output=\"%A_%a.slurmout\"\n")
+    if array is not None:
+        f.write("#SBATCH --array=%s\n"%array)
+    f.write("\n\n")
+    f.write(commandstring)
+    f.write("\n\n")

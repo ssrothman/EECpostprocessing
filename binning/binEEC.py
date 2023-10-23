@@ -34,10 +34,12 @@ def binProj(H, rEEC, rJet, nDR, wt, mask=None):
     dRbin = ak.local_index(vals, axis=2)
     pt, _ = ak.broadcast_arrays(pt, dRbin)
 
+    mask2 = vals > 0
+
     H.fill(
-        pt = ak.flatten(pt, axis=None),
-        dRbin = ak.flatten(dRbin, axis=None),
-        weight = ak.flatten(vals, axis=None),
+        pt = ak.flatten(pt[mask2], axis=None),
+        dRbin = ak.flatten(dRbin[mask2], axis=None),
+        weight = ak.flatten(vals[mask2], axis=None),
     )
 
 def getTransferHistP(nDR):
@@ -66,17 +68,21 @@ def binTransferP(H, rTransfer, rRecoJet, rGenJet, nDR, wt, mask=None):
     recoPt = rRecoJet.simonjets.pt[iReco]
     genPt = rGenJet.simonjets.pt[iGen]
 
+    proj = proj[mask]
+
     iGen = ak.local_index(proj, axis=2)
     iReco = ak.local_index(proj, axis=3)
 
     recoPt, genPt, iGen, _ = ak.broadcast_arrays(recoPt, genPt, iGen, iReco)
 
+    mask2 = proj > 0
+
     H.fill(
-        ptReco = ak.flatten(recoPt[mask], axis=None),
-        dRbinReco = ak.flatten(iReco[mask], axis=None),
-        ptGen = ak.flatten(genPt[mask], axis=None),
-        dRbinGen = ak.flatten(iGen[mask], axis=None),
-        weight = ak.flatten((proj*wts)[mask], axis=None),
+        ptReco = ak.flatten(recoPt[mask2], axis=None),
+        dRbinReco = ak.flatten(iReco[mask2], axis=None),
+        ptGen = ak.flatten(genPt[mask2], axis=None),
+        dRbinGen = ak.flatten(iGen[mask2], axis=None),
+        weight = ak.flatten((proj*wts)[mask2], axis=None),
     )
 
 def getCovHistP(nDR):
@@ -133,6 +139,12 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
             indices = np.indices(cov.shape)
             dR1 = indices[1]
             dR2 = indices[2]
+
+            mask2 = cov > 0
+
+            dR1 = dR1[mask2]
+            dR2 = dR2[mask2]
+            cov = cov[mask2]
 
             H.fill(
                 pt1 = np.ones(len(np.ravel(dR2)))*H.axes['pt1'].value(pt1),
