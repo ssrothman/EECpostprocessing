@@ -8,30 +8,6 @@ import util.EECutil
 
 import binning.binEEC_binwt
 
-def load_proj(path):
-    values = np.memmap(path, dtype=np.float64,
-                       mode='c', shape=(12, 52, 52))
-    return values
-
-def load_transfer(path):
-    values = np.memmap(path, dtype=np.float64,
-                       mode='c', shape=(12,52,52,12,52,52))
-    return values
-
-def setup_Hdict(basepath):
-    Hdict = {}
-    for name in os.listdir(basepath):
-        Hdict[name ] = {}
-        for key in os.listdir(os.path.join(basepath, name)):
-            if 'trans' in key:
-                Hdict[name][key[:-4]]=load_transfer(
-                        os.path.join(basepath,name,key))
-            else:
-                Hdict[name][key[:-4]]=load_proj(
-                        os.path.join(basepath,name,key))
-    return Hdict
-
-
 edges = np.linspace(0, 0.5, 51)
 edges[0] = 1e-10
 dRaxis = hist.axis.Variable(edges, name='dR', label='$\Delta R$')
@@ -53,13 +29,23 @@ def plotValues(values, errs, xs, label=None, ax=None):
     if label is not None:
         ax.legend()
 
-def applyPtBin(Hval, ptbin):
+def plotWeight(val_mmap, dRbin, ptbin=None, 
+               label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
     if ptbin is not None:
-        Hval = Hval[{'pt':ptbin}]
+        vals = val_mmap[ptbin, :, :]
+    else:
+        vals = np.sum(val_mmap, axis=0)
 
-    Hval = Hval.project('dRbin', 'EECwt')
+    xs = wtaxis.centers
+    vals = vals[dRbin, :][1:-1]
 
-    return Hval
+    ax.set_xlabel("EEC weight")
+    ax.set_ylabel("Counts")
+    ax.set_xscale('log')
+    plotValues(vals, 0, xs, label=label, ax=ax)
 
 def plotEEC(val_mmap, ptbin=None, label=None, logwidth=True, ax=None):
     if ax is None:
@@ -123,46 +109,6 @@ def plotRatio(val1, val2, ptbin=None, logwidth=True,
     ax.set_xlabel("$\Delta R$")
     plotValues(ratio, 0, xs, label=label, ax=ax)
 
-def makeTransfer(Hdict, ptbin, includeInefficiency=True):
-    trans = Hdict['Htrans']
-
-    if includeInefficiency:
-        gen = Hdict['Hgen']
-    else:
-        gen = Hdict['HgenPure']
-
-    if ptbin is not None:
-        gen = gen[ptbin, :, :]
-        trans = trans[ptbin, :, :, ptbin, :, :]
-    else:
-        gen = np.sum(gen, axis=0)
-        trans = np.sum(trans, axis=(0, 3))
-
-    transValue = trans.copy()
-
-    for i in range(trans.shape[2]):
-        for j in range(trans.shape[3]):
-            if gen[i,j] > 0:
-                transValue[:,:,i,j]/=gen[i,j]
-            elif np.sum(trans[:,:,i,j] > 0):
-                transValue[:,:,i,j]=0
-                print("bad", i, j)
-
-    return trans
-
-def sliceTransfer(trans, otherbin, which):
-    if which == 'wt':
-        if otherbin is not None:
-            trans = trans[otherbin,:,otherbin,:]
-        else:
-            trans = np.sum(trans, axis=(0, 2))
-    else:
-        if otherbin is not None:
-            trans = trans[:, otherbin, :, otherbin]
-        else:
-            trans = np.nansum(trans, axis=(1, 3))
-    return trans
-
 def plotPurityStability(Hdict, ptbin, otherbin, whichbin, includeInefficiency, 
                        purity, label=None, ax=None):
     if ax is None:
@@ -217,14 +163,19 @@ def transferHist(Hdict, ptbin, thisbin, otherbin, whichbin,
     
     trans = makeTransfer(Hdict, ptbin, includeInefficiency)
     trans = sliceTransfer(trans, otherbin, whichbin)
-    
+    #plt.imshow(trans)
+    #plt.show()
+    print(thisbin)
+    print(trans[thisbin, :])
+    print(np.sum(trans, axis=1))
+
     if axis == 'Gen':
-        values = trans[thisbin, :]/np.sum(trans, axis=1)
+        values = trans[thisbin, :]/np.sum(trans[thisbin,:])
         np.nan_to_num(values, copy=False)
         print(np.sum(values))
         xlabel = 'Gen'
     elif axis == 'Reco':
-        values = trans[:, thisbin]/np.sum(trans, axis=0)
+        values = trans[:, thisbin]/np.sum(trans[:, thisbin])
         np.nan_to_num(values, copy=False)
         print(np.sum(values))
         xlabel = 'Reco'
@@ -305,10 +256,12 @@ def compareStability(Hdicts, labels, ptbin, otherbin, whichbin,
         plt.savefig("%s/CompareStability_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
     plt.show()
 
-def compareTransferHist(Hdicts, labels, ptbin, dRbin, includeInefficiency=True, axis='Reco', folder=None):
+def compareTransferHist(Hdicts, labels, ptbin, thisbin, otherbin, whichbin,
+                        includeInefficiency=True, axis='Reco', folder=None):
     pttitle("Slice of transfer matrix", ptbin, Hdicts[0])
     for Hdict, label in zip(Hdicts, labels):
-        transferHist(Hdict, ptbin, dRbin, includeInefficiency, axis=axis, label=label)
+        transferHist(Hdict, ptbin, thisbin, otherbin, whichbin,
+                     includeInefficiency, axis=axis, label=label)
     plt.yscale('log')
     if folder is not None:
         plt.savefig("%s/CompareTransferHist_%s_ptbin%d.png" % (folder, axis, ptbin), format='png', bbox_inches='tight')

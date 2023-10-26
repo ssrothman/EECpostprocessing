@@ -3,11 +3,13 @@ import awkward as ak
 import numpy as np
 import matplotlib.pyplot as plt
 
-import util.EECutil
+import plotting.EECutil
 
 edges = np.linspace(0, 0.5, 51)
 edges[0] = 1e-10
 dRaxis = hist.axis.Variable(edges, name='dR', label='$\Delta R$')
+ptaxis = hist.axis.Regular(10, 0, 500)
+wtaxis = hist.axis.Regular(50, 1e-6, 1, transform=hist.axis.transform.log)
 
 def plotValues(values, errs, xs, label=None, ax=None):
     if ax is None:
@@ -19,29 +21,10 @@ def plotValues(values, errs, xs, label=None, ax=None):
     if label is not None:
         ax.legend()
 
-def applyPtBin(Hval, Hcov, ptbin):
-    if ptbin is not None:
-        Hval = Hval[{'pt':ptbin}]
-        Hcov = Hcov[{'pt1':ptbin, 'pt2':ptbin}]
-
-    Hval = Hval.project('dRbin')
-    Hcov = Hcov.project('dRbin1', 'dRbin2')
-
-    return Hval, Hcov
-
-
-def plotEEC(Hval, Hcov, ptbin=None, label=None, logwidth=True, ax=None):
-    if ax is None:
-        ax = plt.gca()
-
-    Hval, Hcov = applyPtBin(Hval, Hcov, ptbin)
-
-    values = Hval.values(flow=False)[1:-1]
-    variances = np.diag(Hcov.values(flow=False)[1:-1,1:-1])
-    errs = np.sqrt(variances)
-
+def applyPlotOptions(values, errs, logwidth, density, dRweight):
     xs = dRaxis.centers
     edges = dRaxis.edges
+
     if logwidth:
         widths = np.log(edges[1:]) - np.log(edges[:-1])
     else:
@@ -50,206 +33,288 @@ def plotEEC(Hval, Hcov, ptbin=None, label=None, logwidth=True, ax=None):
     values = values/widths
     errs = errs/widths
 
+    if dRweight != 0:
+        wt = np.power(xs, dRweight)
+        values = values*wt
+        errs = errs*wt
+
+    if density:
+        N = np.sum(values)
+        values = values/N
+        errs = errs/N
+
+    return values, errs
+
+def plotEEC(EECobj, name, key, ptbin=None, 
+            logwidth=True, density=False, dRweight=0, 
+            label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    vals, errs = EECobj.getValsErrs(name, key, ptbin)
+    vals, errs = applyPlotOptions(vals, errs, logwidth, density, dRweight)
+
     ax.set_xlabel("$\Delta R$")
     if logwidth:
-        ax.set_ylabel("$\\frac{d\\sigma^{(2)}}{d\\log\\Delta R}$ [Unnormalized]")
+        ylabel="$\\frac{d\\sigma^{(2)}}{d\\log\\Delta R}$"
     else:
-        ax.set_ylabel("$\\frac{d\\sigma^{(2)}}{d\\Delta R}$ [Unnormalized]")
+        ylabel="$\\frac{d\\sigma^{(2)}}{d\\Delta R}$"
 
-    plotValues(values, errs, xs, label=label, ax=ax)
+    if density:
+        ylabel += ' [Density]'
+    else:
+        ylabel += ' [Unnormalized]'
 
-def plotRatio(Hval1, Hcov1, Hval2, Hcov2, ptbin=None, logwidth=True, 
+    ax.set_ylabel(ylabel)
+
+    xs = dRaxis.centers
+    plotValues(vals, errs, xs, label=label, ax=ax)
+
+def plotRatio(EECobj1, name1, key1, EECobj2, name2, key2, ptbin=None, 
+              logwidth=True, density=False, dRweight=0, 
               label=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    Hval1, Hcov1 = applyPtBin(Hval1, Hcov1, ptbin)
-    Hval2, Hcov2 = applyPtBin(Hval2, Hcov2, ptbin)
+    val1, err1 = EECobj1.getValsErrs(name1, key1, ptbin)
+    val1, err1 = applyPlotOptions(val1, err1, logwidth, density, dRweight)
 
-    values1 = Hval1.values(flow=False)[1:-1]
-    variances1 = np.diag(Hcov1.values(flow=False)[1:-1,1:-1])
-    errs1 = np.sqrt(variances1)
+    val2, err2 = EECobj2.getValsErrs(name2, key2, ptbin)
+    val2, err2 = applyPlotOptions(val2, err2, logwidth, density, dRweight)
 
-    values2 = Hval2.values(flow=False)[1:-1]
-    variances2 = np.diag(Hcov2.values(flow=False)[1:-1,1:-1])
-    errs2 = np.sqrt(variances2)
-
-    xs = dRaxis.centers
-    edges = dRaxis.edges
-    if logwidth:
-        widths = np.log(edges[1:]) - np.log(edges[:-1])
-    else:
-        widths = edges[1:] - edges[:-1]
-
-    values1 = values1/widths
-    errs1 = errs1/widths
-
-    values2 = values2/widths
-    errs2 = errs2/widths
-
-    ratio = values1/values2
-    ratioerrs = ratio*np.sqrt(np.square(errs1/values1) 
-                              + np.square(errs2/values2))
+    ratio = val1/val2
+    ratioerrs = ratio*np.sqrt(np.square(err1/val1) 
+                              + np.square(err2/val2))
 
     ax.axhline(1, color='k', linestyle='--')
     ax.set_ylabel("Ratio")
     ax.set_xlabel("$\Delta R$")
+    xs = dRaxis.centers
     plotValues(ratio, ratioerrs, xs, label=label, ax=ax)
 
-def makeTransfer(Hdict, ptbin, includeInefficiency=True):
-    Hgen = Hdict['Hgen']
-    HcovGen = Hdict['HcovGen']
-
-    if not includeInefficiency:
-        Hgen = Hgen - Hdict['HgenUNMATCH']
-        HcovGen = HcovGen - Hdict['HcovGenUNMATCH']
-
-    Hgen, HcovGen = applyPtBin(Hgen, HcovGen, ptbin)
-
-    Htrans = Hdict['Htrans']
-    Htrans = Htrans[{'ptReco' : ptbin, 'ptGen' : ptbin}].project('dRbinReco', 'dRbinGen')
-
-    transValue = Htrans.values(flow=False)
-    genValue = Hgen.values(flow=False)
-
-    target = np.sum(transValue, axis=1)
-
-    transValue = transValue / genValue[None, :]
-
-    return transValue
-
-def plotPurity(Hdict, ptbin, includeInefficiency, label=None, ax=None):
+def plotPurityStability(EECobj, name, ptbin, purity,
+                        otherbin=None, which=None, 
+                        label=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
+    if type(EECobj) is plotting.EECutil.EEC:
+        trans = EECobj.getTransfer(name, ptbin)
+        xtype='dR'
+    else:
+        trans = EECobj.getSlicedTransfer(name, ptbin, otherbin, which)
+        xtype = 'dR' if which == 'dR' else 'wt'
 
-    xs = dRaxis.centers
-    edges = dRaxis.edges
+    if xtype == 'dR':
+        xs = dRaxis.centers
+        xlabel = "$\Delta R"
+    else:
+        xs = wtaxis.centers
+        xlabel = "$wt"
+        ax.set_xscale('log')
+    
+    if purity:
+        xlabel += '_{Reco}$'
+        val = np.diag(trans) / np.sum(trans, axis=1)
+    else:
+        xlabel += '_{Gen}$'
+        val = np.diag(trans) / np.sum(trans, axis=0)
 
-    ax.set_xlabel("$\Delta R_{Reco}$")
     ax.set_ylabel("Purity")
+    ax.set_xlabel(xlabel)
 
-    purity = np.diag(trans) / np.sum(trans, axis=1)
-
-    purity = purity[1:-1]
+    ax.set_ylim(0, 1)
     
-    plotValues(purity, 0, xs, label=label, ax=ax)
+    plotValues(val[1:-1], 0, xs, label=label, ax=ax)
 
-def plotStability(Hdict, ptbin, includeInefficiency, label=None, ax=None):
+def showTransfer(EECobj, name, ptbin, otherbin=None, which=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
+    if type(EECobj) is plotting.EECutil.EEC:
+        trans = EECobj.getTransfer(name, ptbin)
+        xtype='dR'
+    else:
+        trans = EECobj.getSlicedTransfer(name, ptbin, otherbin, which)
+        xtype = 'dR' if which == 'dR' else 'wt'
 
-    xs = dRaxis.centers
-    edges = dRaxis.edges
-
-    ax.set_xlabel("$\Delta R_{Gen}$")
-    ax.set_ylabel("Stability")
-
-    purity = np.diag(trans) / np.sum(trans, axis=0)
-
-    purity = purity[1:-1]
-    
-    plotValues(purity, 0, xs, label=label, ax=ax)
-
-def showTransfer(Hdict, ptbin, includeInefficiency, ax=None):
-    if ax is None:
-        ax = plt.gca()
-
-    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
     plt.imshow(trans)
+    if xtype == 'dR':
+        plt.xlabel("Reco $\Delta R$ bin")
+        plt.ylabel("Gen $\Delta R$ bin")
+    else:
+        plt.xlabel("Reco $wt$ bin")
+        plt.ylabel("Gen $wt$ bin")
+    plt.colorbar()
     plt.show()
 
-def transferHist(Hdict, ptbin, dRbin, includeInefficiency, axis='Gen', 
+def transferHist(EECobj, name, ptbin, thisbin, axis='Gen',  
+                 otherbin=None, which=None, 
                  label=None, ax=None):
     if ax is None:
         ax = plt.gca()
     
-    trans = makeTransfer(Hdict, ptbin, includeInefficiency)
+    if type(EECobj) is plotting.EECutil.EEC:
+        trans = EECobj.getTransfer(name, ptbin)
+        xtype='dR'
+    else:
+        trans = EECobj.getSlicedTransfer(name, ptbin, otherbin, which)
+        xtype = 'dR' if which == 'dR' else 'wt'
     
     if axis == 'Gen':
-        values = trans[dRbin, :]/np.sum(trans, axis=1)
-        print(np.sum(values))
-        ax.set_xlabel('Gen $\Delta R$ bin')
+        values = trans[thisbin, :]
+        xlabel = 'Gen'
     elif axis == 'Reco':
-        values = trans[:, dRbin]/np.sum(trans, axis=0)
-        print(np.sum(values))
-        ax.set_xlabel('Reco $\Delta R$ bin')
+        values = trans[:, thisbin]
+        xlabel = 'Reco'
 
-    ax.hist(np.arange(52), bins=52, weights=values, label=label, histtype='step')
-    ax.axvline(dRbin, color='k', linestyle='--')
+    values = values/np.sum(values)
+    print(np.sum(values))
+
+    if xtype == 'dR':
+        xlabel += " $\Delta R$ bin"
+    else:
+        xlabel += " $wt$ bin"
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel("Fraction transfered from %s bin %d"%('reco' if axis=='Gen' else 'gen', thisbin))
+
+    ax.hist(np.arange(52), bins=np.arange(53)-0.5, weights=values, label=label, histtype='step')
+    ax.axvline(thisbin, color='k', linestyle='--')
     if label is not None:
         plt.legend()
 
-def pttitle(title, ptbin, Hdict, fig=None):
+def pttitle(title, ptbin, fig=None):
     if fig is None:
         fig = plt.gcf()
     if ptbin is None:
         fig.suptitle(title)
     else:
-        ptmin = Hdict['Hreco'].axes['pt'].edges[ptbin]
-        ptmax = Hdict['Hreco'].axes['pt'].edges[ptbin+1]
+        ptmin = ptaxis.edges[ptbin]
+        ptmax = ptaxis.edges[ptbin+1]
         fig.suptitle("%s\n$%0.1f < p_T^{Jet} \\mathrm{[GeV]} < %0.1f$" % (title, ptmin, ptmax))
 
-def plotReco(Hdict, ptbin, folder=None):
-    pttitle("Reco EEC", ptbin, Hdict)
-    plotEEC(Hdict['Hreco'], Hdict['HcovReco'], label='Total Reco', ptbin=ptbin)
-    plotEEC(Hdict['HrecoPUjets'], Hdict['HcovRecoPUjets'], label='PU Jets', ptbin=ptbin)
-    plotEEC(Hdict['HrecoUNMATCH'], Hdict['HcovRecoUNMATCH'], label='PU Contamination', ptbin=ptbin)
+def plotReco(EECobj, name, ptbin, folder=None, logwidth=True):
+    pttitle("Reco EEC", ptbin)
+    plotEEC(EECobj, name, 'Hreco', label='Total Reco', 
+            ptbin=ptbin, logwidth=logwidth, density=False)
+    plotEEC(EECobj, name, 'HrecoPUjets', label='PU Jets', 
+            ptbin=ptbin, logwidth=logwidth, density=False)
+    plotEEC(EECobj, name, 'HrecoUNMATCH', label='PU Contamination',
+            ptbin=ptbin, logwidth=logwidth, density=False)
     if folder is not None:
-        plt.savefig("%s/RecoEEC_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+        plt.savefig("%s/RecoEEC_ptbin%d.png" % (folder, ptbin), 
+                    format='png', bbox_inches='tight')
     plt.show()
 
-def plotGen(Hdict, ptbin, folder=None):
-    pttitle("Gen EEC", ptbin, Hdict)
-    plotEEC(Hdict['Hgen'], Hdict['HcovGen'], label='Total Gen', ptbin=ptbin)
-    plotEEC(Hdict['HgenUNMATCH'], Hdict['HcovGenUNMATCH'], label='Unmatched Gen', ptbin=ptbin)
+def plotPUShape(EECobj, name, ptbin, folder=None, logwidth=True):
+    pttitle("Reco EEC Shapes", ptbin)
+    plotEEC(EECobj, name, 'Hreco', label='Total Reco', 
+            ptbin=ptbin, logwidth=logwidth, density=True)
+    plotEEC(EECobj, name, 'HrecoPUjets', label='PU Jets', 
+            ptbin=ptbin, logwidth=logwidth, density=True)
+    plotEEC(EECobj, name, 'HrecoUNMATCH', label='PU Contamination',
+            ptbin=ptbin, logwidth=logwidth, density=True)
     if folder is not None:
-        plt.savefig("%s/GenEEC_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+        plt.savefig("%s/PUShapes_ptbin%d.png" % (folder, ptbin), 
+                    format='png', bbox_inches='tight')
     plt.show()
 
-def compareGenReco(Hdict, ptbin, folder=None):
-    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(5, 5), sharex=True, height_ratios=[3,1])
-    pttitle("Gen vs Reco EEC", ptbin, Hdict, fig)
-    Hreco = Hdict['Hreco'] - Hdict['HrecoPUjets'] - Hdict['HrecoUNMATCH']
-    HcovReco = Hdict['HcovReco'] - Hdict['HcovRecoPUjets'] - Hdict['HcovRecoUNMATCH']
-    Hgen = Hdict['Hgen'] - Hdict['HgenUNMATCH']
-    HcovGen = Hdict['HcovGen'] - Hdict['HcovGenUNMATCH']
+def plotGen(EECobj, name, ptbin, folder=None, logwidth=True):
+    pttitle("Gen EEC", ptbin)
+    plotEEC(EECobj, name, 'Hgen', label='Total Gen',
+            ptbin=ptbin, logwidth=logwidth)
+    plotEEC(EECobj, name, 'HgenUNMATCH', label='Unmatched Gen', 
+            ptbin=ptbin, logwidth=logwidth)
+    if folder is not None:
+        plt.savefig("%s/GenEEC_ptbin%d.png" % (folder, ptbin), 
+                    format='png', bbox_inches='tight')
+    plt.show()
 
-    plotEEC(Hreco, HcovReco, label = 'Reco - background', ptbin=ptbin, ax=ax0)
-    plotEEC(Hgen, HcovGen, label = 'Gen - unmatched', ptbin=ptbin, ax=ax0)
+def plotUnmatchedShape(EECobj, name, ptbin, folder=None, logwidth=True):
+    pttitle("Gen EEC Shapes", ptbin)
+    plotEEC(EECobj, name, 'Hgen', label='Total Gen',
+            ptbin=ptbin, logwidth=logwidth, density=True)
+    plotEEC(EECobj, name, 'HgenUNMATCH', label='Unmatched Gen',
+            ptbin=ptbin, logwidth=logwidth, density=True)
+    if folder is not None:
+        plt.savefig("%s/UnmatchedShapes_ptbin%d.png" % (folder, ptbin), 
+                    format='png', bbox_inches='tight')
+    plt.show()
 
-    plotRatio(Hreco, HcovReco, Hgen, HcovGen, ptbin=ptbin, ax=ax1)
+def compareGenReco(EECobj, name, ptbin, folder=None):
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(5, 5), sharex=True, 
+                                   height_ratios=[3,1])
+    pttitle("Gen vs Reco EEC", ptbin, fig)
+
+    plotEEC(EECobj, name, 'HrecoPure', label = 'Reco - background', ptbin=ptbin, ax=ax0)
+    plotEEC(EECobj, name, 'HgenPure', label = 'Gen - unmatched', ptbin=ptbin, ax=ax0)
+
+    plotRatio(EECobj, name, 'HrecoPure', EECobj, name, 'HgenPure',
+              ptbin=ptbin, ax=ax1)
+
     plt.tight_layout()
     if folder is not None:
-        plt.savefig("%s/RecoVsGenEEC_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+        plt.savefig("%s/RecoVsGenEEC_ptbin%d.png" % (folder, ptbin), format='png', 
+                    bbox_inches='tight')
     plt.show()
 
-def comparePurity(Hdicts, labels, ptbin, includeInefficiency=True, folder=None):
-    pttitle("Purity (diagonal pT bins)", ptbin, Hdicts[0])
-    for Hdict, label in zip(Hdicts, labels):
-        plotPurity(Hdict, ptbin, label=label,
-                   includeInefficiency=includeInefficiency)
+def compareReco(EECobj1, name1, label1, 
+                EECobj2, name2, label2,
+                ptbin, folder=None):
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(5, 5), sharex=True,
+                                   height_ratios=[3,1])
+    pttitle("Reco EEC", ptbin, fig)
+
+    plotEEC(EECobj1, name1, 'Hreco', label = label1, ptbin=ptbin, ax=ax0, density=True)
+    plotEEC(EECobj2, name2, 'Hreco', label = label2, ptbin=ptbin, ax=ax0, density=True)
+
+    plotRatio(EECobj1, name1, 'Hreco', EECobj2, name2, 'Hreco', 
+              ptbin=ptbin, ax=ax1)
     if folder is not None:
-        plt.savefig("%s/ComparePurity_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+        plt.savefig("%s/CompareReco_ptbin%d.png" %(folder, ptbin), format='png',
+                    bbox_inches='tight')
     plt.show()
 
-def compareStability(Hdicts, labels, ptbin, includeInefficiency=True, folder=None):
-    pttitle("Stability (diagonal pT bins)", ptbin, Hdicts[0])
-    for Hdict, label in zip(Hdicts, labels):
-        plotStability(Hdict, ptbin, label=label, 
-                      includeInefficiency=includeInefficiency)
+def comparePurityStability(EECobjs, names, labels, ptbin, purity,
+                          otherbin=None, which=None, folder=None):
+
+    if purity:
+        titlename = "Purity"
+    else:
+        titlename = "Stability"
+
+    if which is None:
+        titlestr = "%s (diagonal pT bins)"%titlename
+    elif which == 'dR':
+        titlestr = '%s (diagonal pT bins; integrated over wt bins)'%titlename
+    elif which == 'wt':
+        titlestr = '%s (diagonal pT bins; integrated over dR bins)'%titlename
+    pttitle(titlestr, ptbin)
+
+    for EECobj, name, label in zip(EECobjs, names, labels):
+        plotPurityStability(EECobj, name, ptbin, label=label, purity=purity,
+                            otherbin = otherbin, which=which)
     if folder is not None:
-        plt.savefig("%s/CompareStability_ptbin%d.png" % (folder, ptbin), format='png', bbox_inches='tight')
+        plt.savefig("%s/Compare%s_ptbin%d_%s.png" % (folder, titlename, ptbin, which), format='png', bbox_inches='tight')
     plt.show()
 
-def compareTransferHist(Hdicts, labels, ptbin, dRbin, includeInefficiency=True, axis='Reco', folder=None):
-    pttitle("Slice of transfer matrix", ptbin, Hdicts[0])
-    for Hdict, label in zip(Hdicts, labels):
-        transferHist(Hdict, ptbin, dRbin, includeInefficiency, axis=axis, label=label)
-    plt.yscale('log')
+def compareTransferHist(EECobjs, names, labels, ptbin, thisbin, axis='Reco',
+                        otherbin=None, which=None, logy=False, folder=None):
+    if which is None:
+        titlestr = "Slice of transfer matrix (diagonal pT bins)"
+    elif which == 'dR':
+        titlestr='Slice of transfer matrix (diagonal pT bins; integrated over wt bins)'
+    elif which == 'wt':
+        titlestr='Slice of transfer matrix (diagonal pT bins; integrated over dR bins)'
+    pttitle(titlestr, ptbin)
+
+    for EECobj, name, label in zip(EECobjs, names, labels):
+        transferHist(EECobj, name, ptbin, thisbin, axis=axis, 
+                     otherbin=otherbin, which=which, label=label)
+    if logy:
+        plt.yscale('log')
+
     if folder is not None:
-        plt.savefig("%s/CompareTransferHist_%s_ptbin%d.png" % (folder, axis, ptbin), format='png', bbox_inches='tight')
+        plt.savefig("%s/CompareTransferHist_%s_ptbin%d_%s%d.png" % (folder, axis, ptbin, which, thisbin), format='png', bbox_inches='tight')
     plt.show()

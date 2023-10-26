@@ -7,8 +7,8 @@ from util.util import ensure_mask
 
 import reading.reader
 
-nBinWT = 40
-minwt = 1e-5
+nBinWT = 50
+minwt = 1e-6
 
 def getProjHist(nDR):
     return hist.Hist(
@@ -70,55 +70,113 @@ def getTransferHistP(nDR):
         storage=hist.storage.Double(),
     )
 
-def binTransferP(H, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, 
-                 rRecoJet, rGenJet, nDR, wt, mask=None):
+def binTransferP(H, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH,
+                 rRecoJet, rGenJet, nDR, wt, mask=None, includeInefficiency=True):
 
-    proj = rTransfer.proj
+    print(rTransfer._name)
+    print(rRecoEEC._name)
+    print(rRecoEECPU._name)
+    print(rGenEEC._name)
+    print(rGenEECUNMATCH._name)
+    print(rRecoJet._simonjetsname)
+    print(rGenJet._simonjetsname)
+    print(includeInefficiency)
+
+    transferval = rTransfer.proj
     iReco = rTransfer.iReco
     iGen = rTransfer.iGen
 
-    gen = rGenEEC.proj
+    if not includeInefficiency:
+        gen = rGenEEC.proj - rGenEECUNMATCH.proj
+    else:
+        gen = rGenEEC.proj
     reco = rRecoEEC.proj - rRecoEECPU.proj
+    print("INITIAL RECO SUM", ak.sum(reco))
 
     mask = ensure_mask(mask, rRecoJet.simonjets.pt)
+
+
     mask = mask[iReco]
 
     if(ak.sum(mask)==0):
         return
 
+    reco = reco[iReco][mask]
+    gen = gen[mask] #we only compute EEC for matched gen jets
+                    #so this is already aligned with the transfers
+
+    print("--"*20)
+    print("max diff", ak.max(ak.sum(transferval, axis=2) - reco))
+    print("min diff", ak.min(ak.sum(transferval, axis=2) - reco))
+    print("--"*20)
+    recobackup = reco[:]
+
     wts, _ = ak.broadcast_arrays(wt, mask)
+    wts = wts[mask]
 
     recoPt = rRecoJet.simonjets.pt[iReco]
     genPt = rGenJet.simonjets.pt[iGen]
 
     recoPt = recoPt[mask]
     genPt = genPt[mask]
-    proj = proj[mask]
-    gen = gen[mask]
-    reco = reco[mask]
+    transferval = transferval[mask]
+    print("masked reco sum", ak.sum(reco))
 
-    iGen = ak.local_index(proj, axis=2)
-    iReco = ak.local_index(proj, axis=3)
-    genwt = gen[iGen]
-    recowt = reco[iReco[:,:,0,:]]
+    iDRGen = ak.local_index(transferval, axis=2)
+    iDRReco = ak.local_index(transferval, axis=3)
+    genwt = gen[iDRGen]
+    recowt = reco[iDRReco[:,:,0,:]]
 
-    recoPt, genPt, iGen, genwt, recowt, wts, _ = ak.broadcast_arrays(
-                                                        recoPt, genPt, iGen, 
+    #return recoPt, genPt, iDRGen, genwt, recowt, wts, iDRReco
+
+    recoPt, genPt, iDRGen, genwt, recowt, wts, _ = ak.broadcast_arrays(
+                                                        recoPt, genPt, 
+                                                        iDRGen[:,:,:,None], 
                                                         genwt[:,:,:,None], 
                                                         recowt[:,:,None,:], wts,
-                                                        iReco)
-    mask2 = (proj>0) & (recowt>0)
+                                                        iDRReco)
+    mask2 = (transferval>0) & (recowt>0) #&(genwt>0)
 
     H.fill(
         ptReco = ak.flatten(recoPt[mask2], axis=None),
-        dRbinReco = ak.flatten(iReco[mask2], axis=None),
+        dRbinReco = ak.flatten(iDRReco[mask2], axis=None),
         EECwtReco = ak.flatten(recowt[mask2], axis=None),
         ptGen = ak.flatten(genPt[mask2], axis=None),
-        dRbinGen = ak.flatten(iGen[mask2], axis=None),
+        dRbinGen = ak.flatten(iDRGen[mask2], axis=None),
         EECwtGen = ak.flatten(genwt[mask2], axis=None),
-        weight = ak.flatten(wts[mask2]*proj[mask2]/recowt[mask2], axis=None),
+        weight = ak.flatten(wts[mask2]*transferval[mask2]/recowt[mask2], axis=None),
     )
 
+    wt = wts*transferval/recowt
+    print("--"*20)
+    print("max diff", ak.max(ak.sum(transferval, axis=2) - recobackup))
+    print("min diff", ak.min(ak.sum(transferval, axis=2) - recobackup))
+    print("--"*20)
+    diff2 = ak.sum(recowt[mask2]*wt[mask2], axis=None) - ak.sum(recobackup, axis=None)
+    print("diff2", diff2)
+    print("--"*20)
+    dRbin = 0
+    wtbin = 29
+    minwt = H.axes['EECwtReco'].edges[wtbin]
+    maxwt = H.axes['EECwtReco'].edges[wtbin+1]
+    wtmask = (recowt>minwt) & (recowt<=maxwt)
+    dRmask = iDRReco == dRbin
+    print("SUM IN BIN", ak.sum(wt[wtmask & dRmask]))
+    print("pts", ak.flatten(recoPt[wtmask & dRmask & (wt!=0)], axis=None))
+    print("genPts", ak.flatten(genPt[wtmask & dRmask & (wt!=0)], axis=None))
+    print("genIDR", ak.flatten(iDRGen[wtmask & dRmask & (wt!=0)], axis=None))
+    print("genWTbin", H.axes['EECwtGen'].index(ak.to_numpy(ak.flatten(genwt[wtmask & dRmask & (wt!=0)], axis=None))))
+    print("genWT", ak.flatten(genwt[wtmask & dRmask & (wt!=0)], axis=None))
+    fullmask = wtmask & dRmask & (wt!=0) 
+    print("run", rTransfer._x.run[ak.where(ak.any(ak.any(ak.any(fullmask, axis=-1), axis=-1),axis=-1))])
+    print("lumi", rTransfer._x.luminosityBlock[ak.where(ak.any(ak.any(ak.any(fullmask, axis=-1), axis=-1),axis=-1))])
+    print("event", rTransfer._x.event[ak.where(ak.any(ak.any(ak.any(fullmask, axis=-1), axis=-1),axis=-1))])
+    print("event", ak.where(ak.any(ak.any(ak.any(fullmask, axis=-1), axis=-1),axis=-1)))
+    #print("jet", ak.where(ak.any(ak.any(fullmask, axis=-1), axis=-1)))
+    wtmask2 = (recobackup>minwt) & (recobackup<=maxwt)
+    print("TARGET VAL", ak.sum(wtmask2[:,:,dRbin]))
+    print("In the histogram...", np.sum(H.values(flow=True)[1,0,30,:,:,:]))
+    
 def getCovHistP(nDR):
     return hist.Hist(
         hist.axis.Regular(10, 0, 500, name='pt1', label='Jet $p_T$ [GeV]'),
@@ -160,7 +218,7 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
         size = ak.max(ak.num(s), axis=None)
         s = ak.fill_none(ak.pad_none(s, size, axis=-1, clip=True), 0)
         projsums.append(ak.to_numpy(s))
-    print("\t\tmaking projsums took", time()-t0, "seconds")
+    #print("\t\tmaking projsums took", time()-t0, "seconds")
 
     covtime = 0
     filltime = 0
@@ -192,8 +250,8 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
             #            threads=1,
             #        )
             filltime += time()-t0
-    print("\t\tcovtime = ", covtime)
-    print("\t\tfilltime = ", filltime)
+    #print("\t\tcovtime = ", covtime)
+    #print("\t\tfilltime = ", filltime)
 
 def doProjected(x, nameEEC, nameJet, nDR, wt, mask=None, minus=None):
     Hval = getProjHist(nDR)
@@ -210,36 +268,39 @@ def doProjected(x, nameEEC, nameJet, nDR, wt, mask=None, minus=None):
     from time import time
     t0 = time()
     binProj(Hval, rEEC, rJet, nDR, wt, mask, minus=rMinus)
-    print("\tbinProj took", time()-t0, "seconds")
+    #print("\tbinProj took", time()-t0, "seconds")
     t0 = time()
     #binCovP(Hcov, rEEC, rJet, nDR, wt, mask)
-    print("\tbinCovP took", time()-t0, "seconds")
+    #print("\tbinCovP took", time()-t0, "seconds")
 
     return Hval, Hcov
 
-def doTransfer(x, nameTransfer, nameGenEEC, nameRecoJet, nameGenJet, nDR, wt, mask=None):
+def doTransfer(x, nameTransfer, nameRecoEEC, nameGenEEC, nameRecoJet, nameGenJet, 
+               nDR, wt, mask=None, includeInefficiency=False):
     Htrans = getTransferHistP(nDR)
 
     rTransfer = reading.reader.transferreader(x, nameTransfer)
     rGenEEC = reading.reader.EECreader(x, nameGenEEC)
-    rRecoEEC = reading.reader.EECreader(x, 'RecoEEC')
-    rRecoEECPU = reading.reader.EECreader(x, 'RecoEEC'+"PU")
+    rGenEECUNMATCH = reading.reader.EECreader(x, nameGenEEC+"UNMATCH")
+    rRecoEEC = reading.reader.EECreader(x, nameRecoEEC)
+    rRecoEECPU = reading.reader.EECreader(x, nameRecoEEC+"PU")
     rRecoJet = reading.reader.jetreader(x, '', nameRecoJet)
     rGenJet = reading.reader.jetreader(x, '', nameGenJet)
 
-    binTransferP(Htrans, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, 
-                 rRecoJet, rGenJet, nDR, wt, mask)
+    binTransferP(Htrans, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH,
+                 rRecoJet, rGenJet, nDR, wt, mask, includeInefficiency)
 
     return Htrans
 
 def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC, 
-          nameRecoJet, nameGenJet, nDR, wt, mask):
+          nameRecoJet, nameGenJet, nDR, wt, mask,
+          includeInefficiency):
 
     print("top of doALL")
     from time import time
     t0 = time()
     Hreco, HcovReco = doProjected(x, nameRecoEEC, nameRecoJet, nDR, wt, mask)
-    print("reco took %0.4f seconds"%(time()-t0))
+    #print("reco took %0.4f seconds"%(time()-t0))
     HrecoPure, HcovRecoPure = doProjected(x, nameRecoEEC, nameRecoJet, nDR, wt, mask, 
                                           minus = nameRecoEEC+"PU")
 
@@ -248,32 +309,32 @@ def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC,
     recoEEC = reading.reader.EECreader(x, nameRecoEEC).proj
     recoPUEEC = reading.reader.EECreader(x, nameRecoEEC+"PU").proj
     PUjets = ak.all(recoJets.nmatch == 0, axis=-1)
-    print("finding PUjets took %0.4f seconds"%(time()-t0))
+    #print("finding PUjets took %0.4f seconds"%(time()-t0))
 
     t0 = time()
     HrecoPUjets, HcovRecoPUjets = doProjected(x, nameRecoEEC+"PU", 
                                               nameRecoJet, nDR, wt, 
                                               (mask & PUjets))
-    print("recoPUjets took %0.4f seconds"%(time()-t0))
+    #print("recoPUjets took %0.4f seconds"%(time()-t0))
     t0 = time()
     HrecoUNMATCH, HcovRecoUNMATCH = doProjected(x, nameRecoEEC+"PU", 
                                                 nameRecoJet, nDR, wt, 
                                                 (mask & (~PUjets)))
-    print("recoUNMATCH took %0.4f seconds"%(time()-t0))
+    #print("recoUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
     Hgen, HcovGen = doProjected(x, nameGenEEC, nameGenJet, nDR, wt, mask)
-    print("gen took %0.4f seconds"%(time()-t0))
+    #print("gen took %0.4f seconds"%(time()-t0))
     HgenPure, HcovGenPure = doProjected(x, nameGenEEC, nameGenJet, nDR, wt, mask,
                                         minus = nameGenEEC+"UNMATCH")
     t0 = time()
     HgenUNMATCH, HcovGenUNMATCH = doProjected(x, nameGenEEC+"UNMATCH", 
                                               nameGenJet, nDR, wt, mask)
-    print("genUNMATCH took %0.4f seconds"%(time()-t0))
+    #print("genUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
-    Htrans = doTransfer(x, nameTransfer, nameGenEEC, nameRecoJet, nameGenJet, nDR, wt, mask)
-    print("Htrans took %0.4f seconds"%(time()-t0))
+    Htrans = doTransfer(x, nameTransfer, nameRecoEEC, nameGenEEC, nameRecoJet, nameGenJet, nDR, wt, mask, includeInefficiency)
+    #print("Htrans took %0.4f seconds"%(time()-t0))
 
     print("DONE")
     return {

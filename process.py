@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD 
 processor_parsers = parser.add_subparsers(help='coffea processor to use', dest='processor', required=True)
 eec_parser = processor_parsers.add_parser('EEC', help='EEC processor')
 eec_parser.add_argument('--binwt', action='store_true')
+eec_parser.add_argument('--noeff', action='store_false', dest='ineff')
 matching_parser = processor_parsers.add_parser('matching', help='matching processor')
 matching_parser.add_argument('matchings', nargs='+', default=['DefaultMatchParticles', 'NaiveMatchParticles'])
 transfer_parser = processor_parsers.add_parser('transfer', help='transfer processor')
@@ -70,7 +71,7 @@ elif args.processor == 'transfer':
 elif args.processor == 'EEC':
     processor_instance = EECProcessor(['EEC', 'NaiveEEC'], 
                                       ['GenMatch', 'NaiveGenMatch'],
-                                      52, args.binwt)
+                                      52, args.binwt, args.ineff)
 else:
     raise ValueError("Unknown processor %s"%args.processor)
 

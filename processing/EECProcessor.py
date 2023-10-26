@@ -51,11 +51,12 @@ def recursive_hist_to_numpy(hist):
     return hist
 
 class EECProcessor(processor.ProcessorABC):
-    def __init__(self, names, matchNames, nDR, binwt):
+    def __init__(self, names, matchNames, nDR, binwt, ineff):
         self.names = names
         self.matchNames = matchNames
         self.nDR = nDR
         self.binwt = binwt
+        self.ineff = ineff
 
     def postprocess(self, accumulator):
         pass
@@ -69,6 +70,14 @@ class EECProcessor(processor.ProcessorABC):
         # a bit of a hack because I can't get things to work reasonably
 
         new = self.process_from_fname(fname)
+        print("--"*20)
+        print("CHECK DIFFERENCE")
+        print()
+        transreco = new['EEC']['Htrans'].project('ptReco', 'dRbinReco', 'EECwtReco')
+        reco = new['EEC']['HrecoPure']
+        print(np.max(transreco.values(flow=True) - reco.values(flow=True)))
+        print()
+        print('--'*20)
         new = recursive_hist_to_numpy(new)
 
         print("REQUESTING LOCK")
@@ -107,6 +116,6 @@ class EECProcessor(processor.ProcessorABC):
             result[name] = binner.doAll(
                     events, '%sTransfer'%name, 'Reco%s'%name, 'Gen%s'%name,
                     '%sParticles'%matchName, '%sGenParticles'%matchName,
-                    self.nDR, weight, jetMask)
+                    self.nDR, weight, jetMask, includeInefficiency=self.ineff)
 
         return result
