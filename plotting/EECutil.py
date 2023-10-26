@@ -4,7 +4,7 @@ import awkward as ak
 import numpy as np
 import pickle
 
-wtaxis = hist.axis.Regular(50, 1e-6, 1, transform=hist.axis.transform.log)
+wtaxis = hist.axis.Regular(25, 1e-6, 1, transform=hist.axis.transform.log)
 
 class EEC(object):
     def __init__(self, path, includeInefficiencies=False):
@@ -48,7 +48,7 @@ class EEC(object):
         vals = vals.values(flow=False)
         errs = np.sqrt(np.diag(cov.values(flow=False)))
 
-        return vals[1:-1], errs[1:-1]
+        return vals, errs
 
     def makeTransfer(self, name, ptbin):
         if self.includeInefficiencies:
@@ -79,8 +79,26 @@ class EEC_binwt(object):
         self.Hdict = self.setup_Hdict(path)
         self.includeInefficiencies = includeInefficiencies
 
-    def getValsErrs(self, name, key, ptbin):
+    def getWeights(self, name, key, ptbin, dRbin):
         vals = self.Hdict[name][key]
+
+        if ptbin is not None:
+            vals = vals[ptbin+1, :, :]
+        else:
+            vals =  np.sum(vals, axis=0)
+
+        if dRbin is not None:
+            vals = vals[dRbin, :]
+        else:
+            vals = np.sum(vals, axis=0)
+
+        return vals
+
+    def getValsErrs(self, name, key, ptbin):
+        if key == 'forward':
+            vals = self.forwardTransfer(name)
+        else:
+            vals = self.Hdict[name][key]
         
         if ptbin is not None:
             vals = vals[ptbin+1, :, :]
@@ -90,7 +108,30 @@ class EEC_binwt(object):
         wts = wtaxis.centers
         vals = np.sum(vals[:,1:-1] * wts[None,:], axis=1)
 
-        return vals[1:-1], 0
+        return vals, np.zeros_like(vals)
+
+    def forwardTransfer(self, name, genmat=None):
+        trans = self.getRawTransfer(name)
+        if genmat is None:
+            if self.includeInefficiencies:
+                genmat = self.Hdict[name]['Hgen']
+            else:
+                genmat = self.Hdict[name]['HgenPure']
+        return np.einsum('ijklmn,lmn->ijk', trans, genmat)
+
+    def getRawTransfer(self, name):
+        trans = self.Hdict[name]['Htrans']
+        if self.includeInefficiencies:
+            gen = self.Hdict[name]['Hgen']
+        else:
+            gen = self.Hdict[name]['HgenPure']
+
+        transValue = trans.copy()
+        invgen = 1/gen
+        invgen[gen==0] = 0
+        transValue = np.einsum('ijklmn,lmn->ijklmn',transValue, invgen)
+
+        return transValue
 
     def getTransfer(self, name, ptbin):
         trans = self.Hdict[name]['Htrans']
@@ -140,13 +181,13 @@ class EEC_binwt(object):
     @staticmethod
     def load_proj(path):
         values = np.memmap(path, dtype=np.float64,
-                           mode='c', shape=(12, 52, 52))
+                           mode='c', shape=(12, 52, 27))
         return values
 
     @staticmethod
     def load_transfer(path):
         values = np.memmap(path, dtype=np.float64,
-                           mode='c', shape=(12,52,52,12,52,52))
+                           mode='c', shape=(12,52,27,12,52,27))
         return values
 
     @staticmethod

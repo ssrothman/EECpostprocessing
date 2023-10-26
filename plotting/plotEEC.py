@@ -9,7 +9,7 @@ edges = np.linspace(0, 0.5, 51)
 edges[0] = 1e-10
 dRaxis = hist.axis.Variable(edges, name='dR', label='$\Delta R$')
 ptaxis = hist.axis.Regular(10, 0, 500)
-wtaxis = hist.axis.Regular(50, 1e-6, 1, transform=hist.axis.transform.log)
+wtaxis = hist.axis.Regular(25, 1e-6, 1, transform=hist.axis.transform.log)
 
 def plotValues(values, errs, xs, label=None, ax=None):
     if ax is None:
@@ -52,6 +52,8 @@ def plotEEC(EECobj, name, key, ptbin=None,
         ax = plt.gca()
 
     vals, errs = EECobj.getValsErrs(name, key, ptbin)
+    vals = vals[1:-1]
+    errs = errs[1:-1]
     vals, errs = applyPlotOptions(vals, errs, logwidth, density, dRweight)
 
     ax.set_xlabel("$\Delta R$")
@@ -70,16 +72,56 @@ def plotEEC(EECobj, name, key, ptbin=None,
     xs = dRaxis.centers
     plotValues(vals, errs, xs, label=label, ax=ax)
 
+def plotWeights(EECobj, name, key, ptbin=None, dRbin=None, label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    wts = EECobj.getWeights(name, key, ptbin, dRbin)[1:-1]
+
+    ax.set_xlabel("$wt$")
+    ax.set_ylabel("Counts [A.U.]")
+    
+    titlestr = "EEC weights distribution"
+    if dRbin is not None:
+        titlestr += " for $\Delta R$ bin {}".format(dRbin)
+    pttitle(titlestr, ptbin)
+
+    xs = wtaxis.centers
+    ax.set_xscale('log')
+    print(np.sum(xs*wts))
+    plotValues(wts, np.zeros_like(wts), xs, label=label, ax=ax)
+
+def plotWeightRatio(EECobj1, name1, key1, EECobj2, name2, key2, 
+                    ptbin=None, dRbin=None, label=None, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    val1 = EECobj1.getWeights(name1, key1, ptbin, dRbin)[1:-1]
+    val2 = EECobj2.getWeights(name2, key2, ptbin, dRbin)[1:-1]
+    
+    ratio = val1/val2
+    
+    ax.axhline(1, color='k', linestyle='--')
+    ax.set_ylabel("Ratio")
+    ax.set_xlabel("$wt$")
+    xs = wtaxis.centers
+    ax.set_xscale('log')
+    plotValues(ratio, np.zeros_like(ratio), xs, label=label, ax=ax)
+
 def plotRatio(EECobj1, name1, key1, EECobj2, name2, key2, ptbin=None, 
-              logwidth=True, density=False, dRweight=0, 
+              logwidth=True, density=False, dRweight=0, kind='EEC',
               label=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
     val1, err1 = EECobj1.getValsErrs(name1, key1, ptbin)
+    val1 = val1[1:-1]
+    err1 = err1[1:-1]
     val1, err1 = applyPlotOptions(val1, err1, logwidth, density, dRweight)
 
     val2, err2 = EECobj2.getValsErrs(name2, key2, ptbin)
+    val2 = val2[1:-1]
+    err2 = err2[1:-1]
     val2, err2 = applyPlotOptions(val2, err2, logwidth, density, dRweight)
 
     ratio = val1/val2
@@ -126,6 +168,23 @@ def plotPurityStability(EECobj, name, ptbin, purity,
     ax.set_ylim(0, 1)
     
     plotValues(val[1:-1], 0, xs, label=label, ax=ax)
+
+def showPtTransfer(EECobj, name, ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    if type(EECobj) is plotting.EECutil.EEC:
+        trans = EECobj.getRawTransfer(name)
+        trans = np.sum(trans, axis=(1,3))
+    else:
+        trans = EECobj.getRawTransfer(name)
+        trans = np.sum(trans, axis=(1,2,4,5))
+
+    plt.imshow(trans)
+    plt.xlabel("Reco $p_T$ bin")
+    plt.ylabel("Gen $p_T$ bin")
+    plt.colorbar()
+    plt.show()
 
 def showTransfer(EECobj, name, ptbin, otherbin=None, which=None, ax=None):
     if ax is None:
@@ -179,7 +238,7 @@ def transferHist(EECobj, name, ptbin, thisbin, axis='Gen',
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Fraction transfered from %s bin %d"%('reco' if axis=='Gen' else 'gen', thisbin))
 
-    ax.hist(np.arange(52), bins=np.arange(53)-0.5, weights=values, label=label, histtype='step')
+    ax.hist(np.arange(len(values)), bins=np.arange(len(values)+1)-0.5, weights=values, label=label, histtype='step')
     ax.axvline(thisbin, color='k', linestyle='--')
     if label is not None:
         plt.legend()
@@ -259,6 +318,26 @@ def compareGenReco(EECobj, name, ptbin, folder=None):
                     bbox_inches='tight')
     plt.show()
 
+def testForward(EECobj, name, ptbin, folder=None):
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(5, 5), sharex=True,
+                                   height_ratios=[3,1])
+    pttitle("Forward transfer EEC", ptbin, fig)
+
+    plotEEC(EECobj, name, 'forward', label='Foward transfered', ptbin=ptbin, ax=ax0)
+    plotEEC(EECobj, name, 'HrecoPure', label='Reco - background', ptbin=ptbin, ax=ax0)
+
+    plotRatio(EECobj, name, 'forward', EECobj, name, 'HrecoPure',
+              ptbin=ptbin, ax=ax1)
+    
+    ax1.set_ylim(0.9, 1.1)
+
+    plt.tight_layout()
+    if folder is not None:
+        plt.savefig('%s/TestTransfer_ptbin%d.png'%(folder, ptbin), format='png',
+                    bbox_inches='tight')
+
+    plt.show()
+
 def compareReco(EECobj1, name1, label1, 
                 EECobj2, name2, label2,
                 ptbin, folder=None):
@@ -317,4 +396,18 @@ def compareTransferHist(EECobjs, names, labels, ptbin, thisbin, axis='Reco',
 
     if folder is not None:
         plt.savefig("%s/CompareTransferHist_%s_ptbin%d_%s%d.png" % (folder, axis, ptbin, which, thisbin), format='png', bbox_inches='tight')
+    plt.show()
+
+def compareGenRecoWeights(EECobj, name, ptbin, dRbin, folder=None):
+    fix, (ax0, ax1) = plt.subplots(2, 1, figsize=(5, 5), sharex=True,
+                                   height_ratios=[3,1])
+    plotWeights(EECobj, name, 'HrecoPure', ptbin=ptbin, dRbin=dRbin, 
+                ax=ax0, label='Reco - background')
+    plotWeights(EECobj, name, 'HgenPure', ptbin=ptbin, dRbin=dRbin,
+                ax=ax0, label='Gen - unmatched')
+
+    plotWeightRatio(EECobj, name, 'HrecoPure', EECobj, name, 'HgenPure',
+                    ptbin=ptbin, dRbin=dRbin, ax=ax1)
+    ax1.set_ylim(0.5,1.5)
+
     plt.show()

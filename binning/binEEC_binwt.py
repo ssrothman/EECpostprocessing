@@ -7,7 +7,7 @@ from util.util import ensure_mask
 
 import reading.reader
 
-nBinWT = 50
+nBinWT = 25
 minwt = 1e-6
 
 def getProjHist(nDR):
@@ -147,6 +147,7 @@ def binTransferP(H, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH,
         weight = ak.flatten(wts[mask2]*transferval[mask2]/recowt[mask2], axis=None),
     )
 
+    '''
     wt = wts*transferval/recowt
     print("--"*20)
     print("max diff", ak.max(ak.sum(transferval, axis=2) - recobackup))
@@ -176,6 +177,7 @@ def binTransferP(H, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH,
     wtmask2 = (recobackup>minwt) & (recobackup<=maxwt)
     print("TARGET VAL", ak.sum(wtmask2[:,:,dRbin]))
     print("In the histogram...", np.sum(H.values(flow=True)[1,0,30,:,:,:]))
+    '''
     
 def getCovHistP(nDR):
     return hist.Hist(
