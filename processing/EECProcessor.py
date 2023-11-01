@@ -100,6 +100,7 @@ class EECProcessor(processor.ProcessorABC):
         import numpy as np
         #jetMask = np.ones(len(HLT), dtype=bool)
         jetMask = np.abs(jets.simonjets.eta) < 2.0
+        jetMask = jetMask & (jets.simonjets.pt > 100)
 
         #evtWeight = weights.getEventWeight(events)
         #weight = evtWeight.weight()

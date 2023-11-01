@@ -60,13 +60,9 @@ def getTransferHistP(nDR):
         hist.axis.Regular(10, 0, 500, name='ptReco', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbinReco', label='$\Delta R$ bin'),
-        hist.axis.Regular(nBinWT,minwt,1,name='EECwtReco', label='EEC weight',
-                          transform=hist.axis.transform.log),
         hist.axis.Regular(10, 0, 500, name='ptGen', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbinGen', label='$\Delta R$ bin'),
-        hist.axis.Regular(nBinWT,minwt,1,name='EECwtGen',label='EEC weight',
-                          transform=hist.axis.transform.log),
         storage=hist.storage.Double(),
     )
 
@@ -137,14 +133,16 @@ def binTransferP(H, rTransfer, rRecoEEC, rRecoEECPU, rGenEEC, rGenEECUNMATCH,
                                                         iDRReco)
     mask2 = (transferval>0) & (recowt>0) #&(genwt>0)
 
+    denom = ak.sum(transferval, axis=-1)
+
     H.fill(
         ptReco = ak.flatten(recoPt[mask2], axis=None),
         dRbinReco = ak.flatten(iDRReco[mask2], axis=None),
-        EECwtReco = ak.flatten(recowt[mask2], axis=None),
+        #EECwtReco = ak.flatten(recowt[mask2], axis=None),
         ptGen = ak.flatten(genPt[mask2], axis=None),
         dRbinGen = ak.flatten(iDRGen[mask2], axis=None),
-        EECwtGen = ak.flatten(genwt[mask2], axis=None),
-        weight = ak.flatten(wts[mask2]*transferval[mask2]/recowt[mask2], axis=None),
+        #EECwtGen = ak.flatten(genwt[mask2], axis=None),
+        weight = ak.flatten(wts[mask2]*(transferval/denom)[mask2], axis=None),
     )
 
     '''

@@ -25,7 +25,6 @@ def binProj(H, rEEC, rJet, nDR, wt, mask=None):
     if(ak.sum(mask)==0):
         return
 
-
     wts, _ = ak.broadcast_arrays(wt, mask)
 
     pt = rJet.simonjets.pt[iJet][mask]
@@ -43,7 +42,7 @@ def binProj(H, rEEC, rJet, nDR, wt, mask=None):
     )
 
 def getTransferHistP(nDR):
-    return hist.Hist(
+    HS = hist.Hist(
         hist.axis.Regular(10, 0, 500, name='ptReco', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbinReco', label='$\Delta R$ bin'),
@@ -52,8 +51,24 @@ def getTransferHistP(nDR):
                           name='dRbinGen', label='$\Delta R$ bin'),
         storage=hist.storage.Double(),
     )
+    HF = hist.Hist(
+        hist.axis.Regular(10, 0, 500, name='ptGen', label='Jet $p_T$ [GeV]'),
+        hist.axis.Integer(0, nDR,  underflow=False, overflow=False,
+                          name='dRbinGen', label='$\Delta R$ bin'),
+        hist.axis.Regular(20, 1e-6, 1, name='EECwtGen', label='EEC weight',
+                          transform=hist.axis.transform.log),
+        #hist.axis.Regular(20, 1e-6, 1, name='EECwtReco', label='EEC weight',
+        #                  transform=hist.axis.transform.log),
+        #hist.axis.Regular(50, 1e-6, 1, name='totalEECwtReco', 
+        #                  label='Total reco EEC weight'),
+                          #transform=hist.axis.transform.log),
+        #hist.axis.Regular(21, 0, 2, name='factor', label='factor'),
+        storage=hist.storage.WeightedMean(),
+    )
+    return HS, HF
 
-def binTransferP(H, rTransfer, rRecoJet, rGenJet, nDR, wt, mask=None):
+def binTransferP(HS, HF, rTransfer, rGenEEC, rGenEECUNMATCH, 
+                 rRecoJet, rGenJet, nDR, wt, mask):
     proj = rTransfer.proj
     iReco = rTransfer.iReco
     iGen = rTransfer.iGen
@@ -65,24 +80,45 @@ def binTransferP(H, rTransfer, rRecoJet, rGenJet, nDR, wt, mask=None):
 
     wts, _ = ak.broadcast_arrays(wt, mask)
 
-    recoPt = rRecoJet.simonjets.pt[iReco]
-    genPt = rGenJet.simonjets.pt[iGen]
+    recoPt = rRecoJet.simonjets.pt[iReco][mask]
+    genPt = rGenJet.simonjets.pt[iGen][mask]
+
+    genwt = (rGenEEC.proj - rGenEECUNMATCH.proj)[mask]
 
     proj = proj[mask]
 
-    iGen = ak.local_index(proj, axis=2)
-    iReco = ak.local_index(proj, axis=3)
+    iDRGen = ak.local_index(proj, axis=2)
+    iDRReco = ak.local_index(proj, axis=3)
 
-    recoPt, genPt, iGen, _ = ak.broadcast_arrays(recoPt, genPt, iGen, iReco)
+    wts = wts[mask]
+    recoPt, genPt, iDRGen, genwt, wts, _ = ak.broadcast_arrays(recoPt, genPt, iDRGen, genwt, wts, iDRReco)
 
     mask2 = proj > 0
 
-    H.fill(
+    denom = ak.sum(proj, axis=-1)
+
+    HS.fill(
         ptReco = ak.flatten(recoPt[mask2], axis=None),
-        dRbinReco = ak.flatten(iReco[mask2], axis=None),
+        dRbinReco = ak.flatten(iDRReco[mask2], axis=None),
         ptGen = ak.flatten(genPt[mask2], axis=None),
-        dRbinGen = ak.flatten(iGen[mask2], axis=None),
+        dRbinGen = ak.flatten(iDRGen[mask2], axis=None),
         weight = ak.flatten((proj*wts)[mask2], axis=None),
+    )
+
+    factor = denom/genwt
+    denom, _ = ak.broadcast_arrays(denom, factor)
+
+    #firsts to remove the reco dimension
+    #everything is constant along that dimension anyway
+    HF.fill(
+        ptGen = ak.flatten(ak.firsts(genPt[mask2], axis=-1), axis=None),
+        dRbinGen = ak.flatten(ak.firsts(iDRGen[mask2], axis=-1), axis=None),
+        EECwtGen = ak.flatten(ak.firsts(genwt[mask2], axis=-1), axis=None),
+        sample = ak.flatten(ak.firsts(factor[mask2], axis=-1), axis=None),
+        #EECwtReco = ak.flatten(ak.firsts(denom[mask2], axis=-1), axis=None),
+        #totalEECwtReco = ak.flatten(ak.firsts(denom[mask2], axis=-1), axis=None),
+        #weight = ak.flatten(ak.firsts(wts[mask2], axis=-1), axis=None)
+        weight = ak.flatten(ak.firsts(wts[mask2]*genwt[mask2], axis=-1), axis=None)
     )
 
 def getCovHistP(nDR):
@@ -179,24 +215,29 @@ def doProjected(x, nameEEC, nameJet, nDR, wt, mask=None):
     binProj(Hval, rEEC, rJet, nDR, wt, mask)
     print("\tbinProj took", time()-t0, "seconds")
     t0 = time()
-    binCovP(Hcov, rEEC, rJet, nDR, wt, mask)
+    #binCovP(Hcov, rEEC, rJet, nDR, wt, mask)
     print("\tbinCovP took", time()-t0, "seconds")
 
     return Hval, Hcov
 
-def doTransfer(x, nameTransfer, nameRecoJet, nameGenJet, nDR, wt, mask=None):
-    Htrans = getTransferHistP(nDR)
+def doTransfer(x, nameTransfer, nameGenEEC, nameRecoJet, nameGenJet, nDR, wt, mask):
+    HtransS, HtransF = getTransferHistP(nDR)
 
     rTransfer = reading.reader.transferreader(x, nameTransfer)
     rRecoJet = reading.reader.jetreader(x, '', nameRecoJet)
     rGenJet = reading.reader.jetreader(x, '', nameGenJet)
 
-    binTransferP(Htrans, rTransfer, rRecoJet, rGenJet, nDR, wt, mask)
+    rGenEEC = reading.reader.EECreader(x, nameGenEEC)
+    rGenEECUNMATCH = reading.reader.EECreader(x, nameGenEEC+"UNMATCH")
 
-    return Htrans
+    binTransferP(HtransS, HtransF, rTransfer, rGenEEC, rGenEECUNMATCH, 
+                 rRecoJet, rGenJet, nDR, wt, mask)
+
+    return HtransS, HtransF
 
 def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC, 
-          nameRecoJet, nameGenJet, nDR, wt, mask):
+          nameRecoJet, nameGenJet, nDR, wt, mask,
+          includeInefficiency=None): #includeInefficiency ignored
 
     print("top of doALL")
     from time import time
@@ -230,7 +271,8 @@ def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC,
     print("genUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
-    Htrans = doTransfer(x, nameTransfer, nameRecoJet, nameGenJet, nDR, wt, mask)
+    HtransS, HtransF = doTransfer(x, nameTransfer, nameGenEEC, 
+                                  nameRecoJet, nameGenJet, nDR, wt, mask)
     print("Htrans took %0.4f seconds"%(time()-t0))
 
     print("DONE")
@@ -240,7 +282,8 @@ def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC,
         'HrecoUNMATCH' : HrecoUNMATCH,
         'Hgen' : Hgen,
         'HgenUNMATCH' : HgenUNMATCH,
-        'Htrans' : Htrans,
+        'HtransS' : HtransS,
+        'HtransF' : HtransF,
         'HcovReco' : HcovReco,
         'HcovRecoPUjets' : HcovRecoPUjets,
         'HcovRecoUNMATCH' : HcovRecoUNMATCH,

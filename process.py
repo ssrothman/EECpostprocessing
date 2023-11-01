@@ -69,8 +69,10 @@ if args.processor == 'matching':
 elif args.processor == 'transfer':
     processor_instance = TransferProcessor()
 elif args.processor == 'EEC':
-    processor_instance = EECProcessor(['EEC', 'NaiveEEC'], 
-                                      ['GenMatch', 'NaiveGenMatch'],
+    processor_instance = EECProcessor(['FancyEEC', 'NaiveEEC', 
+                                       'FancyCorrEEC', 'NaiveCorrEEC'], 
+                                      ['GenMatch', 'NaiveGenMatch',
+                                       'GenMatch', 'NaiveGenMatch'],
                                       52, args.binwt, args.ineff)
 else:
     raise ValueError("Unknown processor %s"%args.processor)
@@ -103,7 +105,7 @@ if use_slurm:
 
     runner = Runner(
         executor=DaskExecutor(client=client, status=True),
-        chunksize=1000,
+        #chunksize=1000,
         schema=NanoAODSchema
     )
 elif not args.custom_scale:
@@ -111,7 +113,7 @@ elif not args.custom_scale:
     runner = Runner(
         executor=FuturesExecutor(workers=16) if args.local_futures else IterativeExecutor(),
         #executor=FuturesExecutor(workers=10, status=True),
-        chunksize=1000,
+        #chunksize=1000,
         schema=NanoAODSchema
     )
 else:
