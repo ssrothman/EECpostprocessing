@@ -38,39 +38,90 @@ class PackedJetSelection:
     def names(self):
         return self.selection.names
 
-def addMuonSelections(selection, rmu):
+def addMuonSelections(selection, rmu, config):
+    mu0 = rmu.muons[:,0]
+    mu1 = rmu.muons[:,1]
+    leadmu = ak.where(mu0.pt > mu1.pt, mu0, mu1)
+    submu = ak.where(mu0.pt > mu1.pt, mu1, mu0)
+
     selection.add("twomu", ak.count(rmu.muons.pt, axis=-1) >= 2)
-    selection.add("mu1pt", rmu.muons[:,0].pt > 30)
-    selection.add("mu2pt", rmu.muons[:,1].pt > 10)
-    selection.add("mu1eta", np.abs(rmu.muons[:,0].eta) < 2.5)
-    selection.add("mu2eta", np.abs(rmu.muons[:,1].eta) < 2.5)
-    selection.add("oppsign", rmu.muons[:,0].charge * rmu.muons[:,1].charge < 0)
+    selection.add("leadpt", leadmu.pt > config.leadpt)
+    selection.add("subpt", submu.pt > config.subpt)
+    selection.add("leadeta", np.abs(leadmu) < config.leadeta)
+    selection.add("subeta", np.abs(submu) < config.subeta)
+    if config.ID == "loose":
+        selection.add("leadID", leadmu.looseId)
+        selection.add("subID", submu.looseId)
+    elif config.ID == "medium":
+        selection.add("leadID", leadmu.mediumId)
+        selection.add("subID", submu.mediumId)
+    elif config.ID == "tight":
+        selection.add("leadID", leadmu.tightId)
+        selection.add("subID", submu.tightId)
+    elif config.ID == 'none':
+        pass
+    else:
+        raise ValueError("Invalid muon ID: {}".format(config.ID))
+    if config.iso == 'loose':
+        selection.add("leadiso", leadmu.pfIsoId >= 2)
+        selection.add("subiso", submu.pfIsoId >= 2)
+    elif config.iso == 'tight':
+        selection.add("leadiso", leadmu.pfIsoId >= 4)
+        selection.add("subiso", submu.pfIsoId >= 4)
+    elif config.iso == 'none':
+        pass
+    else:
+        raise ValueError("Invalid muon iso: {}".format(config.iso))
+
+    if config.oppsign:
+        selection.add("oppsign", (leadmu.charge * submu.charge) < 0)
+
     return selection
 
-def addTriggerSelections(selection, HLT):
-    selection.add("IsoMu27", HLT.IsoMu27)
-    #selection.add("DiMu", HLT.Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8)
+def addEventSelections(selection, HLT, config):
+    selection.add("trigger", HLT[config.trigger])
     return selection
 
-def addZSelections(selection, rmu):
+def addZSelections(selection, rmu, config):
     Z = rmu.Zs
-    selection.add("Zmass", (Z.mass > 70) & (Z.mass < 110))
+    selection.add("Zmass", (Z.mass > config.mass[0]) & (Z.mass < config.mass[1]))
     return selection
 
-def getEventSelection(rmu, HLT):
+def getEventSelection(rmu, HLT, config):
     selection = PackedSelection()
-    selection = addMuonSelections(selection, rmu)
-    selection = addTriggerSelections(selection, HLT)
-    selection = addZSelections(selection, rmu)
+    selection = addMuonSelections(selection, rmu, config.muonSelection)
+    selection = addZSelections(selection, rmu, config.Zselection)
+    selection = addEventSelections(selection, HLT, config.eventSelection)
     return selection
 
-def getJetSelection(rjet, rmu=None, evtSel = None):
+def getJetSelection(rjet, rmu, evtSel, config):
     jets = rjet.jets
     selection = PackedJetSelection(evtSel)
-    selection.add("pt", jets.pt > 30)
-    selection.add("eta", np.abs(jets.eta) < 2.0)
-    selection.add("jetId", (jets.jetId == 7) | (jets.pt > 50))
-    if rmu is not None:
+    selection.add("pt", jets.pt > config.pt)
+    selection.add("eta", np.abs(jets.eta) < config.eta)
+    if config.jetID == 'loose':
+        selection.add("jetId", jets.jetId >= 2)
+    elif config.jetID == 'tight':
+        selection.add("jetId", jets.jetId >= 6)
+    elif config.jetID == 'tightLepVeto':
+        selection.add("jetId", jets.jetId >= 7)
+    elif config.jetID == 'none':
+        pass
+    else:
+        raise ValueError("Invalid jet ID: {}".format(config.jetID))
+
+    if config.puJetID == 'loose':
+        selection.add("puId", jets.puId >= 4)
+    elif config.puJetID == 'medium':
+        selection.add("puId", jets.puId >= 6)
+    elif config.puJetID == 'tight':
+        selection.add("puId", jets.puId >= 7)
+    elif config.puJetID == 'none':
+        pass
+    else:
+        raise ValueError("Invalid jet puID: {}".format(config.puJetID))
+
+    if config.muonOverlapDR > 0:
         muons = rmu.muons
         deta0 = jets.eta - ak.fill_none(muons[:,0].eta, 999)
         deta1 = jets.eta - ak.fill_none(muons[:,1].eta, 999)
@@ -82,15 +133,13 @@ def getJetSelection(rjet, rmu=None, evtSel = None):
         dphi1 = np.where(dphi1 < -np.pi, dphi1 + 2*np.pi, dphi1)
         dR0 = np.sqrt(deta0*deta0 + dphi0*dphi0)
         dR1 = np.sqrt(deta1*deta1 + dphi1*dphi1)
-        selection.add("muVeto", (dR0 > 0.4) & (dR1 > 0.4))
+        selection.add("muVeto", (dR0>config.muonOverlapDR)&(dR1>config.muonOverlapDR))
     return selection
 
-def getGenJetSelection(rjet, rmu, evtSel = None):
+def getGenJetSelection(rjet, rmu, evtSel, config):
     jets = rjet.jets
     muons = rmu.muons
     selection = PackedJetSelection(evtSel)
-    selection.add("pt", jets.pt > 30)
-    selection.add("eta", np.abs(jets.eta) < 2.4)
-    selection.add("muVeto", (jets.delta_r(muons[:,0]) > 0.4)
-                          & (jets.delta_r(muons[:,1]) > 0.4))
+    selection.add("pt", jets.pt > config.pt)
+    selection.add("eta", np.abs(jets.eta) < config.eta)
     return selection

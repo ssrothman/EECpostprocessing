@@ -374,7 +374,7 @@ def getMatchingHists(events, jetMaskReco, jetMaskGen, weight, name):
     fillMatchHist(H_matchGen, jetreaderGen, 
                   wt=weight, mask=jetMaskGen)
 
-    fillJetHists(H_jets, jetreaderReco, wt=weight, mask=jetMaskReco)
+    #fillJetHists(H_jets, jetreaderReco, wt=weight, mask=jetMaskReco)
 
     return {
         'EM0': H_EM0,

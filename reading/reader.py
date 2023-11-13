@@ -1,23 +1,6 @@
 from .readMu import * 
 from .readJets import *
 
-class resolutionreader:
-    def __init__(self, x, name):
-        self._x = x
-        self._name = name
-
-    @property
-    def res(self):
-        if not hasattr(self, '_res'):
-            self._res = getResolutionStudy(self._x, self._name)
-        return self._res
-
-    @property
-    def resIdx(self):
-        if not hasattr(self, '_resIdx'):
-            self._resIdx = getResolutionStudyIdx(self._x, self._name)
-        return self._resIdx
-
 import reading.readEEC
 
 class EECreader:
@@ -78,10 +61,11 @@ class transferreader:
         return self._iGen
 
 class jetreader:
-    def __init__(self, x, jetsname, simonjetsname):
+    def __init__(self, x, jetsname, simonjetsname, CHSjetsname):
         self._x = x
         self._jetsname = jetsname
         self._simonjetsname = simonjetsname
+        self._CHSjetsname = CHSjetsname
 
     @property
     def parts(self):
@@ -101,6 +85,13 @@ class jetreader:
             self._jets = getJets(self._x, self._jetsname, 
                                           self._simonjetsname)
         return self._jets
+
+    @property
+    def CHSjets(self):
+        if not hasattr(self, '_CHSjets'):
+            self._CHSjets = getCHSjets(self._x, self._CHSjetsname, 
+                                              self._simonjetsname)
+        return self._CHSjets
 
     @property
     def alljets(self):

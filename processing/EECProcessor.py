@@ -15,6 +15,9 @@ import pickle
 
 import os
 
+import json
+from types import SimpleNamespace
+
 def write_mmaps(Hdict, basepath):
     for name in Hdict.keys():
         os.makedirs(os.path.join(basepath, name), exist_ok=True)
@@ -51,12 +54,9 @@ def recursive_hist_to_numpy(hist):
     return hist
 
 class EECProcessor(processor.ProcessorABC):
-    def __init__(self, names, matchNames, nDR, binwt, ineff):
-        self.names = names
-        self.matchNames = matchNames
-        self.nDR = nDR
-        self.binwt = binwt
-        self.ineff = ineff
+    def __init__(self, config, statsplit=False):
+        self.config = config
+        self.statsplit = statsplit
 
     def postprocess(self, accumulator):
         pass
@@ -89,34 +89,37 @@ class EECProcessor(processor.ProcessorABC):
     def process(self, events):
         print("top of process")
         #setup inputs
-        jets = reader.jetreader(events, 'selectedPatJetsAK4PFPuppi', "SimonJets")
-        muons = reader.muonreader(events, "Muon")
+        jets = reader.jetreader(events, self.config.names.puppijets, 
+                                        self.config.names.simonjets,
+                                        self.config.names.CHSjets)
+        muons = reader.muonreader(events, self.config.names.muons)
         HLT = events.HLT
 
-        #evtSel = masks.getEventSelection(muons, HLT)
-        #jetSel = masks.getJetSelection(jets, muons, evtSel)
+        evtSel = masks.getEventSelection(muons, HLT, self.config)
+        jetSel = masks.getJetSelection(jets, muons, evtSel, self.config.jetSelection)
 
-        #jetMask = jetSel.all(*jetSel.names)
+        jetMask = jetSel.all(*jetSel.names)
         import numpy as np
-        #jetMask = np.ones(len(HLT), dtype=bool)
-        jetMask = np.abs(jets.simonjets.eta) < 2.0
-        jetMask = jetMask & (jets.simonjets.pt > 100)
 
-        #evtWeight = weights.getEventWeight(events)
-        #weight = evtWeight.weight()
-        weight = np.ones(len(HLT))
+        evtWeight = weights.getEventWeight(events)
+        weight = evtWeight.weight()
 
         #return outputs
         result = {}
         print("just before loop")
-        
-        binner = binEEC_binwt if self.binwt else binEEC
-    
-        for name, matchName in zip(self.names, self.matchNames):
-            print("doing", name, matchName)
-            result[name] = binner.doAll(
-                    events, '%sTransfer'%name, 'Reco%s'%name, 'Gen%s'%name,
-                    '%sParticles'%matchName, '%sGenParticles'%matchName,
-                    self.nDR, weight, jetMask, includeInefficiency=self.ineff)
+        if self.statsplit:
+            for EECname, MatchName in zip(self.config.EECnames, self.config.MatchNames):
+                print("doing", EECname, MatchName)
+                result[EECname+"1"] = binEEC.doAll(
+                        events, EECname, MatchName, self.config, 
+                        weight, jetMask & (events.event%2==0))
+                result[EECname+"2"] = binEEC.doAll(
+                        events, EECname, MatchName, self.config,
+                        weight, jetMask & (events.event%2==1))
+        else:
+            for EECname, MatchName in zip(self.config.EECnames, self.config.MatchNames):
+                result[EECname] = binEEC.doAll(
+                        events, EECname, MatchName, self.config,
+                        weight, jetMask)
 
         return result

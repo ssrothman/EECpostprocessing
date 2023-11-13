@@ -34,44 +34,96 @@ class EEC(object):
             self.Hdict[name]['HcovGenPure'] = self.Hdict[name]['HcovGen'] - \
                                                 self.Hdict[name]['HcovGenUNMATCH']
 
-    def getValsErrs(self, name, key, ptbin):
-        vals = self.Hdict[name][key]
-        cov = self.Hdict[name][self.covnames[key]]
+    def getDRtransfer(self, name):
+        S = self.Hdict[name]['HtransSG'].values(flow=True)
+        S = np.nan_to_num(S/np.sum(S, axis=(0,1)))
+        return S
 
-        if ptbin is not None:
-            vals = vals[{'pt':ptbin}]
-            cov = cov[{'pt1':ptbin, 'pt2':ptbin}]
+    def getFullTransfer(self, name):
+        S = self.getDRtransfer(name)
+        factors = self.Hdict[name]['HtransFR'].project('ptReco', 'dRbinReco')
+        factors = factors.values(flow=True)
+        return np.einsum('ij,ijkl->ijkl', factors, S)
 
-        vals = vals.project('dRbin')
-        cov = cov.project('dRbin1', 'dRbin2')
+    def forward(self, name, other=None, othername=None):
+        if other is None:
+            other = self
+        if othername is None:
+            othername = name
+
+        S = self.getFullTransfer(name)
+
+        oG = other.Hdict[othername]['HgenPure'].values(flow=True)
+        oGerr = other.Hdict[othername]['HcovGenPure'].values(flow=True)
         
-        vals = vals.values(flow=False)
-        errs = np.sqrt(np.diag(cov.values(flow=False)))
+        print("vals")
+        vals = np.einsum('ijkl,kl->ij', S, oG)
+        print(vals.shape)
+        print('vars1')
+        vars1 = np.einsum('ijkl,klmn->ijmn', S, oGerr)
+        print(vars1.shape)
+        print('S2')
+        S2 = np.einsum('ijkl->klij', S)
+        print(S2.shape)
+        print("vars2")
+        vars2 = np.einsum('ijkl,klmn->ijmn', vars1, S2)
+        print(vars2.shape)
+
+        return vals, vars2
+
+    def getFactors(self, name, ptbin, etabin, pubin, wrt):
+        Hfact = self.Hdict[name]['HtransFR']
+        if ptbin is not None:
+            Hfact = Hfact[{'ptReco' : ptbin}]
+
+        if etabin is not None:
+            Hfact = Hfact[{'eta' : etabin}]
+
+        if wrt == 'dR':
+            Hfact = Hfact.project('dRbinReco')
+        elif wrt == 'EECwt':
+            Hfact = Hfact.project('EECwtReco')
+        else:
+            raise ValueError('wrt must be dR or EECwt')
+
+        vals = Hfact.values(flow=True)
+        errs = np.sqrt(Hfact.variances(flow=True))
 
         return vals, errs
 
-    def makeTransfer(self, name, ptbin):
-        if self.includeInefficiencies:
-            Hgen = self.Hdict[name]['Hgen']
-            HcovGen = self.Hdict[name]['HcovGen']
+    def getValsErrs(self, name, key, ptbin, etabin, pubin):
+        vals = self.Hdict[name][key].values(flow=True)
+        cov = self.Hdict[name][self.covnames[key]].values(flow=True)
+
+        return self.project(vals, cov, ptbin, etabin, pubin)
+
+    def getForwardValsErrs(self, name, other=None, othername=None, 
+                           ptbin=None, etabin=None, pubin=None):
+        vals, cov = self.forward(name, other, othername)
+
+        return self.project(vals, cov, ptbin, etabin, pubin)
+
+    def project(self, vals, cov, ptbin, etabin, pubin):
+        if etabin is not None:
+            vals = vals[etabin+1, :, :, :]
+            print("Warning: forgot to bin cov in eta, so it's bogus")
         else:
-            Hgen = Hdict['HgenPure']
-            HcovGen = Hdict['HcovGenPure']
+            vals = np.sum(vals, axis=0)
 
-        Hgen = Hgen[{'pt':ptbin}].project('dRbin')
-        HcovGen = HcovGen[{'pt1':ptbin, 'pt2':ptbin}].project('dRbin1', 'dRbin2')
+        if pubin is not None:
+            vals = = vals[:, :, pubin+1]
+            print("Warning: forgot to bin cov in pu, so it's bogus")
+        else:
+            vals = np.sum(vals, axis=2)
 
-        Htrans = Hdict['Htrans']
-        Htrans = Htrans[{'ptReco':ptbin, 'ptGen':ptbin}].project('dRbinReco','dRbinGen')
-        
-        transValue = Htrans.values(flow=False)
-        genValue = Hgen.values(flow=False)
+        if ptbin is not None:
+            vals = vals[ptbin+1, :]
+            cov = cov[ptbin+1, :, ptbin+1, :]
+        else:
+            vals = np.sum(vals, axis=0)
+            cov = np.sum(cov, axis=(0,2))
 
-        target = np.sum(transValue, axis=1)
-
-        transValue = transValue / genValue[None, :]
-
-        return transValue
+        return vals, np.sqrt(np.diag(cov))
 
 class EEC_binwt(object):
     def __init__(self, path, includeInefficiencies=True):
@@ -137,10 +189,8 @@ class EEC_binwt(object):
         trans = self.Hdict[name]['Htrans']
         if self.includeInefficiencies:
             gen = self.Hdict[name]['Hgen']
-            print("branch1")
         else:
             gen = self.Hdict[name]['HgenPure']
-            print('branch2')
 
         if ptbin is not None:
             gen = gen[ptbin+1, :, :]

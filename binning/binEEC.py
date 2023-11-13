@@ -7,11 +7,16 @@ from util.util import ensure_mask
 
 import reading.reader
 
+etabins = [0, 0.4, 0.9, 1.4, 2.0]
+
 def getProjHist(nDR):
     return hist.Hist(
+        hist.axis.Variable(etabins, name='eta', label = 'Jet $|\eta|$'),
         hist.axis.Regular(10, 0, 500, name='pt', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbin', label='$\Delta R$ bin'),
+        hist.axis.Variable([0, 20, 30, 40, 50, 80], 
+                           name='nPU', label='Number of PU vertices'),
         storage=hist.storage.Double(),
     )
 
@@ -27,7 +32,7 @@ def binProj(H, rEEC, rJet, nDR, wt, mask=None):
 
     wts, _ = ak.broadcast_arrays(wt, mask)
 
-    pt = rJet.simonjets.pt[iJet][mask]
+    pt = rJet.simonjets.jetPt[iJet][mask]
     vals = (proj * wts)[mask]
     
     dRbin = ak.local_index(vals, axis=2)
@@ -35,14 +40,24 @@ def binProj(H, rEEC, rJet, nDR, wt, mask=None):
 
     mask2 = vals > 0
 
+    nPU, _ = ak.broadcast_arrays(rEEC._x.Pileup.nPU, dRbin)
+
+    eta = np.abs(rJet.simonjets.jetEta[iJet][mask])
+    eta, _ = ak.broadcast_arrays(eta, dRbin)
+
     H.fill(
         pt = ak.flatten(pt[mask2], axis=None),
+        eta = ak.flatten(eta[mask2], axis=None),
         dRbin = ak.flatten(dRbin[mask2], axis=None),
+        nPU = ak.flatten(nPU[mask2], axis=None),
         weight = ak.flatten(vals[mask2], axis=None),
     )
 
 def getTransferHistP(nDR):
-    HS = hist.Hist(
+    HSR = hist.Hist(
+        #hist.axis.Regular(20, 1e-6, 1, name='EECwtReco', label='EEC weight',
+        #                  transform=hist.axis.transform.log),
+        hist.axis.Variable(etabins, name='eta', label = 'Jet $|\eta|$'),
         hist.axis.Regular(10, 0, 500, name='ptReco', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
                           name='dRbinReco', label='$\Delta R$ bin'),
@@ -51,39 +66,58 @@ def getTransferHistP(nDR):
                           name='dRbinGen', label='$\Delta R$ bin'),
         storage=hist.storage.Double(),
     )
-    HF = hist.Hist(
+    HSG = hist.Hist(
+        #hist.axis.Regular(20, 1e-6, 1, name='EECwtReco', label='EEC weight',
+        #                  transform=hist.axis.transform.log),
+        hist.axis.Variable(etabins, name='eta', label = 'Jet $|\eta|$'),
+        hist.axis.Regular(10, 0, 500, name='ptReco', label='Jet $p_T$ [GeV]'),
+        hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
+                          name='dRbinReco', label='$\Delta R$ bin'),
+        hist.axis.Regular(10, 0, 500, name='ptGen', label='Jet $p_T$ [GeV]'),
+        hist.axis.Integer(0, nDR,  underflow=False, overflow=False, 
+                          name='dRbinGen', label='$\Delta R$ bin'),
+        storage=hist.storage.Double(),
+    )
+    HFR = hist.Hist(
+        hist.axis.Variable(etabins, name='eta', label = 'Jet $|\eta|$'),
+        hist.axis.Regular(10, 0, 500, name='ptReco', label='Jet $p_T$ [GeV]'),
+        hist.axis.Integer(0, nDR,  underflow=False, overflow=False,
+                          name='dRbinReco', label='$\Delta R$ bin'),
+        #hist.axis.Regular(20, 1e-6, 1, name='EECwtReco', label='EEC weight',
+        #                  transform=hist.axis.transform.log),
+        storage=hist.storage.WeightedMean(),
+    )
+    HFG = hist.Hist(
+        hist.axis.Variable(etabins, name='eta', label = 'Jet $|\eta|$'),
         hist.axis.Regular(10, 0, 500, name='ptGen', label='Jet $p_T$ [GeV]'),
         hist.axis.Integer(0, nDR,  underflow=False, overflow=False,
                           name='dRbinGen', label='$\Delta R$ bin'),
-        hist.axis.Regular(20, 1e-6, 1, name='EECwtGen', label='EEC weight',
-                          transform=hist.axis.transform.log),
-        #hist.axis.Regular(20, 1e-6, 1, name='EECwtReco', label='EEC weight',
+        #hist.axis.Regular(20, 1e-6, 1, name='EECwtGen', label='EEC weight',
         #                  transform=hist.axis.transform.log),
-        #hist.axis.Regular(50, 1e-6, 1, name='totalEECwtReco', 
-        #                  label='Total reco EEC weight'),
-                          #transform=hist.axis.transform.log),
-        #hist.axis.Regular(21, 0, 2, name='factor', label='factor'),
         storage=hist.storage.WeightedMean(),
     )
-    return HS, HF
+    return HSR, HSG, HFR, HFG
 
-def binTransferP(HS, HF, rTransfer, rGenEEC, rGenEECUNMATCH, 
+def binTransferP(HSR, HSG, HFR, HFG, rTransfer, rGenEEC, rGenEECUNMATCH, 
                  rRecoJet, rGenJet, nDR, wt, mask):
     proj = rTransfer.proj
     iReco = rTransfer.iReco
     iGen = rTransfer.iGen
 
-    mask = ensure_mask(mask, rRecoJet.simonjets.pt)
+    mask = ensure_mask(mask, rRecoJet.simonjets.jetPt)
     mask = mask[iReco]
     if(ak.sum(mask)==0):
         return
 
     wts, _ = ak.broadcast_arrays(wt, mask)
 
-    recoPt = rRecoJet.simonjets.pt[iReco][mask]
-    genPt = rGenJet.simonjets.pt[iGen][mask]
+    recoPt = rRecoJet.simonjets.jetPt[iReco][mask]
+    genPt = rGenJet.simonjets.jetPt[iGen][mask]
+
+    recoEta = np.abs(rRecoJet.simonjets.jetEta[iReco][mask])
 
     genwt = (rGenEEC.proj - rGenEECUNMATCH.proj)[mask]
+    genwt_backup = genwt
 
     proj = proj[mask]
 
@@ -91,13 +125,66 @@ def binTransferP(HS, HF, rTransfer, rGenEEC, rGenEECUNMATCH,
     iDRReco = ak.local_index(proj, axis=3)
 
     wts = wts[mask]
-    recoPt, genPt, iDRGen, genwt, wts, _ = ak.broadcast_arrays(recoPt, genPt, iDRGen, genwt, wts, iDRReco)
+    recoPt, genPt, recoEta, iDRGen, genwt, wts, _ = ak.broadcast_arrays(recoPt, 
+                                                               genPt, 
+                                                               recoEta,
+                                                               iDRGen, 
+                                                               genwt, 
+                                                               wts, 
+                                                               iDRReco)
 
     mask2 = proj > 0
 
-    denom = ak.sum(proj, axis=-1)
 
-    HS.fill(
+    reco_bygen = ak.sum(proj, axis=3) #indexed by gen
+    gen_bygen = ak.firsts(genwt, axis=3) #indexed by gen
+    factor_bygen = reco_bygen/gen_bygen #indexed by gen
+    short_dRbinGen = ak.firsts(iDRGen, axis=3)
+    
+    reco_byreco = ak.sum(proj, axis=2) #indexed by reco
+    invfactor = ak.nan_to_num(1/factor_bygen)
+    gen_byreco = ak.sum(proj*invfactor, axis=2) #indexed by reco
+    factor_byreco = reco_byreco/gen_byreco #indexed by reco
+    short_dRbinReco = ak.firsts(iDRReco, axis=2)
+
+    #doesn't matter whether we reduce by reco or gen, 
+    #these are at jet level anyway
+    short_ptReco = ak.firsts(recoPt, axis=-1)
+    short_ptGen = ak.firsts(genPt, axis=-1) 
+    short_etaReco = ak.firsts(recoEta, axis=-1)
+
+    mask3 = np.isfinite(factor_byreco)
+    HFR.fill(
+        eta = ak.flatten(short_etaReco[mask3], axis=None),
+        ptReco = ak.flatten(short_ptReco[mask3], axis=None),
+        dRbinReco = ak.flatten(short_dRbinReco[mask3], axis=None),
+        #EECwtReco = ak.flatten(reco_byreco[mask3], axis=None),
+        sample = ak.flatten(factor_byreco[mask3], axis=None),
+        weight = ak.flatten(gen_byreco[mask3], axis=None)
+    )
+
+    mask4 = np.isfinite(factor_bygen)
+    HFG.fill(
+        eta = ak.flatten(short_etaReco[mask4], axis=None),
+        ptGen = ak.flatten(short_ptGen[mask4], axis=None),
+        dRbinGen = ak.flatten(short_dRbinGen[mask4], axis=None),
+        #EECwtGen = ak.flatten(gen_bygen[mask4], axis=None),
+        sample = ak.flatten(factor_bygen[mask4], axis=None),
+        weight = ak.flatten(gen_bygen[mask4], axis=None)
+    )
+    print()
+    print("sum(genbygen):", ak.sum(gen_bygen, axis=None))
+    print("sum(genbyreco):", ak.sum(gen_byreco, axis=None))
+    print("sum(gen):", ak.sum(genwt_backup, axis=None))
+    print()
+    print("sum(recobyreco):", ak.sum(reco_byreco, axis=None))
+    print("sum(recobygen):", ak.sum(reco_bygen, axis=None))
+    print("sum(reco):", ak.sum(proj, axis=None))
+    print()
+
+    HSR.fill(
+        #EECwtReco = ak.flatten(proj[mask2], axis=None),
+        eta = ak.flatten(recoEta[mask2], axis=None),
         ptReco = ak.flatten(recoPt[mask2], axis=None),
         dRbinReco = ak.flatten(iDRReco[mask2], axis=None),
         ptGen = ak.flatten(genPt[mask2], axis=None),
@@ -105,21 +192,30 @@ def binTransferP(HS, HF, rTransfer, rGenEEC, rGenEECUNMATCH,
         weight = ak.flatten((proj*wts)[mask2], axis=None),
     )
 
-    factor = denom/genwt
-    denom, _ = ak.broadcast_arrays(denom, factor)
-
-    #firsts to remove the reco dimension
-    #everything is constant along that dimension anyway
-    HF.fill(
-        ptGen = ak.flatten(ak.firsts(genPt[mask2], axis=-1), axis=None),
-        dRbinGen = ak.flatten(ak.firsts(iDRGen[mask2], axis=-1), axis=None),
-        EECwtGen = ak.flatten(ak.firsts(genwt[mask2], axis=-1), axis=None),
-        sample = ak.flatten(ak.firsts(factor[mask2], axis=-1), axis=None),
-        #EECwtReco = ak.flatten(ak.firsts(denom[mask2], axis=-1), axis=None),
-        #totalEECwtReco = ak.flatten(ak.firsts(denom[mask2], axis=-1), axis=None),
-        #weight = ak.flatten(ak.firsts(wts[mask2], axis=-1), axis=None)
-        weight = ak.flatten(ak.firsts(wts[mask2]*genwt[mask2], axis=-1), axis=None)
+    HSG.fill(
+        #EECwtReco = ak.flatten(proj[mask2], axis=None),
+        eta = ak.flatten(recoEta[mask2], axis=None),
+        ptReco = ak.flatten(recoPt[mask2], axis=None),
+        dRbinReco = ak.flatten(iDRReco[mask2], axis=None),
+        ptGen = ak.flatten(genPt[mask2], axis=None),
+        dRbinGen = ak.flatten(iDRGen[mask2], axis=None),
+        weight = ak.flatten((proj*invfactor*wts)[mask2], axis=None),
     )
+
+    #denom = ak.sum(proj, axis=-1)
+    #factor = denom/genwt
+    #denom, _ = ak.broadcast_arrays(denom, factor)
+
+    #HFG.fill(
+    #    ptGen = ak.flatten(ak.firsts(genPt[mask2], axis=-1), axis=None),
+    #    dRbinGen = ak.flatten(ak.firsts(iDRGen[mask2], axis=-1), axis=None),
+    #    EECwtGen = ak.flatten(ak.firsts(genwt[mask2], axis=-1), axis=None),
+    #    sample = ak.flatten(ak.firsts(factor[mask2], axis=-1), axis=None),
+    #    weight = ak.flatten(ak.firsts(wts[mask2]*genwt[mask2], axis=-1), axis=None)
+    #)
+
+    #plt.hist([ak.flatten(factor_byreco, axis=None), ak.flatten(factor_bygen, axis=None)], bins=100, range=[0,3], histtype='step')
+    #plt.show()
 
 def getCovHistP(nDR):
     return hist.Hist(
@@ -138,14 +234,14 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
     iJet = rEEC.iJet
     iReco = rEEC.iReco
 
-    mask = ensure_mask(mask, rJet.simonjets.pt)
+    mask = ensure_mask(mask, rJet.simonjets.jetPt)
     mask = mask[iReco]
     if(ak.sum(mask)==0):
         return
 
     wts, _ = ak.broadcast_arrays(wt, mask)
 
-    pt = rJet.simonjets.pt[iJet][mask]
+    pt = rJet.simonjets.jetPt[iJet][mask]
     numPt = ak.num(pt)
     ptIdx = H.axes['pt1'].index(ak.flatten(pt, axis=None))
     idxvals = np.unique(ptIdx)
@@ -183,9 +279,9 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
             cov = cov[mask2]
 
             H.fill(
-                pt1 = np.ones(len(np.ravel(dR2)))*H.axes['pt1'].value(pt1),
+                pt1 = np.ones(len(np.ravel(dR2)))*H.axes['pt1'].value(idxvals[pt1]),
                 dRbin1 = np.ravel(dR1),
-                pt2 = np.ones(len(np.ravel(dR2)))*H.axes['pt2'].value(pt2),
+                pt2 = np.ones(len(np.ravel(dR2)))*H.axes['pt2'].value(idxvals[pt2]),
                 dRbin2 = np.ravel(dR2),
                 weight = np.ravel(cov),
             )
@@ -203,76 +299,78 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
     print("\t\tcovtime = ", covtime)
     print("\t\tfilltime = ", filltime)
 
-def doProjected(x, nameEEC, nameJet, nDR, wt, mask=None):
-    Hval = getProjHist(nDR)
-    Hcov = getCovHistP(nDR)
+def doProjected(x, nameEEC, config, gen, wt, mask):
+    Hval = getProjHist(config.nDR)
+    Hcov = getCovHistP(config.nDR)
     
     rEEC = reading.reader.EECreader(x, nameEEC)
-    rJet = reading.reader.jetreader(x, '', nameJet)
+    if gen:
+        rJet = reading.reader.jetreader(x, None, config.names.gensimonjets, None)
+    else:
+        rJet = reading.reader.jetreader(x, None, config.names.simonjets, None)
 
     from time import time
     t0 = time()
-    binProj(Hval, rEEC, rJet, nDR, wt, mask)
+    binProj(Hval, rEEC, rJet, config.nDR, wt, mask)
     print("\tbinProj took", time()-t0, "seconds")
     t0 = time()
-    #binCovP(Hcov, rEEC, rJet, nDR, wt, mask)
+    binCovP(Hcov, rEEC, rJet, config.nDR, wt, mask)
     print("\tbinCovP took", time()-t0, "seconds")
 
     return Hval, Hcov
 
-def doTransfer(x, nameTransfer, nameGenEEC, nameRecoJet, nameGenJet, nDR, wt, mask):
-    HtransS, HtransF = getTransferHistP(nDR)
+def doTransfer(x, EECname, config, wt, mask):
+    HtransSR, HtransSG, HtransFR, HtransFG = getTransferHistP(config.nDR)
 
-    rTransfer = reading.reader.transferreader(x, nameTransfer)
-    rRecoJet = reading.reader.jetreader(x, '', nameRecoJet)
-    rGenJet = reading.reader.jetreader(x, '', nameGenJet)
+    rTransfer = reading.reader.transferreader(x, "%sTransfer"%EECname)
+    rRecoJet = reading.reader.jetreader(x, None, config.names.simonjets, None)
+    rGenJet = reading.reader.jetreader(x, None, config.names.gensimonjets, None)
 
-    rGenEEC = reading.reader.EECreader(x, nameGenEEC)
-    rGenEECUNMATCH = reading.reader.EECreader(x, nameGenEEC+"UNMATCH")
+    rGenEEC = reading.reader.EECreader(x, 'Gen%s'%EECname)
+    rGenEECUNMATCH = reading.reader.EECreader(x, "Gen%sUNMATCH"%EECname)
 
-    binTransferP(HtransS, HtransF, rTransfer, rGenEEC, rGenEECUNMATCH, 
-                 rRecoJet, rGenJet, nDR, wt, mask)
+    binTransferP(HtransSR, HtransSG, HtransFR, HtransFG, 
+                 rTransfer, rGenEEC, rGenEECUNMATCH, 
+                 rRecoJet, rGenJet, config.nDR, wt, mask)
 
-    return HtransS, HtransF
+    return HtransSR, HtransSG, HtransFR, HtransFG
 
-def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC, 
-          nameRecoJet, nameGenJet, nDR, wt, mask,
-          includeInefficiency=None): #includeInefficiency ignored
-
+def doAll(x, EECname, MatchName, config, wt, mask):
     print("top of doALL")
     from time import time
     t0 = time()
-    Hreco, HcovReco = doProjected(x, nameRecoEEC, nameRecoJet, nDR, wt, mask)
+    Hreco, HcovReco = doProjected(x, "Reco%s"%EECname, config, False, wt, mask)
     print("reco took %0.4f seconds"%(time()-t0))
 
     t0 = time()
-    recoJets = reading.reader.jetreader(x, '', nameRecoJet).parts
-    recoEEC = reading.reader.EECreader(x, nameRecoEEC).proj
-    recoPUEEC = reading.reader.EECreader(x, nameRecoEEC+"PU").proj
-    PUjets = ak.all(recoJets.nmatch == 0, axis=-1)
+    #recoJets = reading.reader.jetreader(x, '', x.names.).parts
+    #recoEEC = reading.reader.EECreader(x, nameRecoEEC).proj
+    #recoPUEEC = reading.reader.EECreader(x, nameRecoEEC+"PU").proj
+    #PUjets = ak.all(recoJets.nmatch == 0, axis=-1)
+    matchedjets = reading.reader.jetreader(x, None, '%sParticles'%MatchName, None)
+    PUjets = matchedjets.simonjets.genPt < 0
     print("finding PUjets took %0.4f seconds"%(time()-t0))
 
     t0 = time()
-    HrecoPUjets, HcovRecoPUjets = doProjected(x, nameRecoEEC+"PU", 
-                                              nameRecoJet, nDR, wt, 
-                                              (mask & PUjets))
+    HrecoPUjets, HcovRecoPUjets = doProjected(x, "Reco%sPU"%EECname, config, 
+                                              False, wt, (mask & PUjets))
     print("recoPUjets took %0.4f seconds"%(time()-t0))
     t0 = time()
-    HrecoUNMATCH, HcovRecoUNMATCH = doProjected(x, nameRecoEEC+"PU", 
-                                                nameRecoJet, nDR, wt, 
-                                                (mask & (~PUjets)))
+    HrecoUNMATCH, HcovRecoUNMATCH = doProjected(x, "Reco%sPU"%EECname, config,
+                                                False, wt, (mask & (~PUjets)))
     print("recoUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
-    Hgen, HcovGen = doProjected(x, nameGenEEC, nameGenJet, nDR, wt, mask)
+    Hgen, HcovGen = doProjected(x, "Gen%s"%EECname, config, True, wt, mask)
     print("gen took %0.4f seconds"%(time()-t0))
-    HgenUNMATCH, HcovGenUNMATCH = doProjected(x, nameGenEEC+"UNMATCH", 
-                                              nameGenJet, nDR, wt, mask)
+    HgenUNMATCH, HcovGenUNMATCH = doProjected(x, "Gen%sUNMATCH"%EECname, config, 
+                                              True, wt, mask)
     print("genUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
-    HtransS, HtransF = doTransfer(x, nameTransfer, nameGenEEC, 
-                                  nameRecoJet, nameGenJet, nDR, wt, mask)
+    HtransSR, HtransSG, HtransFR, HtransFG = doTransfer(
+            x, EECname, config, 
+            wt, mask)
     print("Htrans took %0.4f seconds"%(time()-t0))
 
     print("DONE")
@@ -282,8 +380,10 @@ def doAll(x, nameTransfer, nameRecoEEC, nameGenEEC,
         'HrecoUNMATCH' : HrecoUNMATCH,
         'Hgen' : Hgen,
         'HgenUNMATCH' : HgenUNMATCH,
-        'HtransS' : HtransS,
-        'HtransF' : HtransF,
+        'HtransSR' : HtransSR,
+        'HtransSG' : HtransSG,
+        'HtransFR' : HtransFR,
+        'HtransFG' : HtransFG,
         'HcovReco' : HcovReco,
         'HcovRecoPUjets' : HcovRecoPUjets,
         'HcovRecoUNMATCH' : HcovRecoUNMATCH,

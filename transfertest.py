@@ -10,7 +10,6 @@ def set_hists(m):
 def plotpure(name, label):
     S = x[name]['HtransS'][{'ptGen' : slice(3,None,sum)}].values(flow=True)
     S = np.nan_to_num(S/np.sum(S,axis=(0,1)))
-    print(S.shape)
     xval = np.arange(52)
     a = np.sum(S, axis=(0))
     plt.title("pure")
@@ -25,24 +24,58 @@ def plotstab(name, label):
     plt.scatter(xval, np.diag(a)/np.sum(a, axis=1), label=label)
 
 def plotfactor(name, label, axis='dRbinGen'):
-    F = x[name]['HtransF'][{'ptGen' : slice(3,None,sum)}]
+    F = x[name]['HtransFG'][{'ptGen' : slice(3,None,sum)}]
     F.project(axis).plot(label=label)
     plt.title("factor")
 
-def plotforward(name):
-    F = x[name]['HtransF'].project('ptGen', 'dRbinGen').values(flow=True)
-    S = x[name]['HtransS'].values(flow=True)
-    S = np.nan_to_num(S/np.sum(S,axis=(0,1)))
-    G = (x[name]['Hgen'] - x[name]['HgenUNMATCH']).values(flow=True)
-    R = (x[name]['Hreco'] - x[name]['HrecoPUjets'] 
-         - x[name]['HrecoUNMATCH']).values(flow=True)
-    
-    forward = np.einsum('ijkl,kl->ij', S, F*G)
+def forward(name, factorside, EEC_from=None):
+    if EEC_from is None:
+        EEC_from = name
 
-    plt.scatter(np.arange(52), np.sum(forward, axis=0)/np.sum(R, axis=0))
-    plt.ylim(0.999,1.001)
-    plt.ylabel("Forward-transfered / Reco")
-    plt.xlabel("Reco delta-R bin")
+    if factorside not in ['Gen', 'Reco']:
+        raise ValueError("factorside must be Gen or Reco")
+
+    if factorside=='Gen':
+        F = x[name]['HtransFG'].project('ptGen', 'dRbinGen').values(flow=True)
+        S = x[name]['HtransSR'].values(flow=True)
+        S = np.nan_to_num(S/np.sum(S, axis=(0,1)))
+        T = np.einsum('ijkl,kl->ijkl', S, F)
+    else:
+        F = x[name]['HtransFR'].project('ptReco', 'dRbinReco').values(flow=True)
+        S = x[name]['HtransSG'].values(flow=True)
+        S = np.nan_to_num(S/np.sum(S, axis=(0,1)))
+        T = np.einsum('ij,ijkl->ijkl', F, S)
+
+    G = (x[EEC_from]['Hgen'] - x[EEC_from]['HgenUNMATCH']).values(flow=True)
+
+    transfered = np.einsum('ijkl,kl->ij', T, G)
+
+    R = (x[EEC_from]['Hreco'] - x[EEC_from]['HrecoPUjets'] 
+         - x[EEC_from]['HrecoUNMATCH']).values(flow=True)
+
+    return transfered, R
+
+def plotforward(name, factorside, EEC_from=None, title=None):
+    fig, (ax0, ax1) = plt.subplots(2, 1, sharex=True, height_ratios=[3, 1])
+
+    if title is not None:
+        fig.suptitle(title)
+
+    transfered, R = forward(name, factorside, EEC_from)
+
+    t = np.sum(transfered, axis=0)
+    r = np.sum(R, axis=0)
+    ratio = t/r
+    ax0.scatter(np.arange(52), t, label='Forward transfered')
+    ax0.scatter(np.arange(52), r, label='Background-subtracted reco')
+    ax0.set_ylabel("EEC value")
+    ax0.legend()
+
+    ax1.scatter(np.arange(52), ratio)
+    ax1.set_ylabel("Ratio")
+    ax1.set_xlabel("Reco delta-R bin")
+    ax1.axhline(1, color='k', linestyle='--')
+
     plt.tight_layout()
     plt.show()
 

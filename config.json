@@ -1,0 +1,39 @@
+{
+    "EECnames" : ["CaloShareEEC", "NaiveEEC"],
+    "MatchNames" : ["CaloShare", "NaiveMatch"],
+    "nDR" : 52,
+    "names" : {
+        "puppijets" : "updatedJetsPuppi",
+        "CHSjets" : "Jet",
+        "simonjets" : "SimonJets",
+        "genjets" : "GenJet",
+        "gensimonjets" : "GenSimonJets",
+        "muons" : "Muon"
+    },
+    "jetSelection" : {
+        "pt" : 30.0,
+        "eta" : 2.0,
+        "jetID" : "none",
+        "puJetID" : "none",
+        "muonOverlapDR" : 0.4 
+    },
+    "genJetSelection" : {
+        "pt" : 20.0,
+        "eta" : 2.4
+    },
+    "muonSelection" : {
+        "leadpt" : 20,
+        "subpt" : 10,
+        "leadeta" : 2.5,
+        "subeta" : 2.5,
+        "oppsign" : true,
+        "ID" : "loose",
+        "iso" : "loose"
+    },
+    "eventSelection" : {
+        "trigger" : "Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8"
+    },
+    "Zselection" : {
+        "mass" : [60,120]
+    }
+}

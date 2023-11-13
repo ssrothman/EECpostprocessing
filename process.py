@@ -1,15 +1,18 @@
 from processing.MatchingProcessor import MatchingProcessor
 from processing.TransferProcessor import TransferProcessor
 from processing.EECProcessor import EECProcessor
-from processing.scaleout import setup_cluster_on_submit, custom_scale
+from processing.scaleout import setup_cluster_on_submit, custom_scale, setup_htcondor
 
 from reading.files import get_rootfiles
+
+from RecursiveNamespace import RecursiveNamespace
 
 from coffea.nanoevents import NanoAODSchema
 from coffea.processor import Runner, IterativeExecutor, FuturesExecutor, DaskExecutor
 
 import os
 import argparse
+import json
 
 ################### ARGUMENT PARSING ###################
 
@@ -19,6 +22,7 @@ processor_parsers = parser.add_subparsers(help='coffea processor to use', dest='
 eec_parser = processor_parsers.add_parser('EEC', help='EEC processor')
 eec_parser.add_argument('--binwt', action='store_true')
 eec_parser.add_argument('--noeff', action='store_false', dest='ineff')
+eec_parser.add_argument('--statsplit', action='store_true')
 matching_parser = processor_parsers.add_parser('matching', help='matching processor')
 matching_parser.add_argument('matchings', nargs='+', default=['DefaultMatchParticles', 'NaiveMatchParticles'])
 transfer_parser = processor_parsers.add_parser('transfer', help='transfer processor')
@@ -69,11 +73,9 @@ if args.processor == 'matching':
 elif args.processor == 'transfer':
     processor_instance = TransferProcessor()
 elif args.processor == 'EEC':
-    processor_instance = EECProcessor(['FancyEEC', 'NaiveEEC', 
-                                       'FancyCorrEEC', 'NaiveCorrEEC'], 
-                                      ['GenMatch', 'NaiveGenMatch',
-                                       'GenMatch', 'NaiveGenMatch'],
-                                      52, args.binwt, args.ineff)
+    with open("config.json", 'r') as f:
+        config = RecursiveNamespace(**json.load(f))
+    processor_instance = EECProcessor(config, args.statsplit)
 else:
     raise ValueError("Unknown processor %s"%args.processor)
 
@@ -101,7 +103,8 @@ if args.force_slurm:
 
 if use_slurm:
     print("using slurm")
-    cluster, client = setup_cluster_on_submit(1, 5, destination)
+    cluster, client = setup_cluster_on_submit(1, 500, destination)
+    #cluster, client = setup_htcondor(1, 10, destination)
 
     runner = Runner(
         executor=DaskExecutor(client=client, status=True),

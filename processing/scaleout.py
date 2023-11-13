@@ -2,7 +2,28 @@ import os
 import pickle
 
 from dask.distributed import Client
-from dask_jobqueue import SLURMCluster
+from dask_jobqueue import SLURMCluster, HTCondorCluster
+
+def setup_htcondor(minjobs, maxjobs, path=None):
+    cluster = HTCondorCluster(
+            disk = '2GB',
+            cores = 1,
+            memory = '20GB',
+            processes = 1,
+            nanny=True,
+            job_extra_directives=
+                {'+JobFlavor':'espresso',
+                 '+AccountingGroup' : 'analysis.srothman',
+                 'use_x509userproxy' : 'True',
+                 'x509userproxy' : '/home/submit/srothman/myticket',
+                 'universe' : 'vanilla',
+                 'Requirements' : '( BOSCOCluster =!= "t3serv008.mit.edu" && BOSCOCluster =!= "ce03.cmsaf.mit.edu" && BOSCOCluster =!= "eofe8.mit.edu")',
+                 '+DESIRED_Sites' : 'mit_tier3'},
+            local_directory='test',
+            log_directory='test')
+    cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)
+    client = Client(cluster)
+    return cluster, client
 
 def setup_cluster_on_submit(minjobs, maxjobs, path=None):
     import random
@@ -15,10 +36,10 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit,submit-gpu,submit-gpu1080',
+    cluster = SLURMCluster(queue = 'submit-alma9',
                            cores=8,
                            processes=1,
-                           memory='30GB',
+                           memory='24GB',
                            walltime='01:00:00',
                            log_directory=log_directory)
     cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)
