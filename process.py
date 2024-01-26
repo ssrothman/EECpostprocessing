@@ -114,7 +114,7 @@ if use_slurm:
 elif not args.custom_scale:
     print("running locally")
     runner = Runner(
-        executor=FuturesExecutor(workers=16) if args.local_futures else IterativeExecutor(),
+        executor=FuturesExecutor(workers=4) if args.local_futures else IterativeExecutor(),
         #executor=FuturesExecutor(workers=10, status=True),
         #chunksize=1000,
         schema=NanoAODSchema

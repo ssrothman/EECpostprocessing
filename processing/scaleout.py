@@ -36,13 +36,14 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit-alma9',
+    cluster = SLURMCluster(queue = 'submit-alma9,submit,submit-gpu,submit-gpu1080,submit-gpu1080-alma9',
                            cores=8,
                            processes=1,
                            memory='24GB',
                            walltime='01:00:00',
                            log_directory=log_directory)
     cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)
+    print(cluster.job_script())
     #cluster.scale(maxjobs)
     client = Client(cluster)
     return cluster, client

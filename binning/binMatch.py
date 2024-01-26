@@ -130,14 +130,14 @@ def fillJetHists(H, jetreader, wt=1, mask=None):
     #jets = jetreader.jets
     simonjets = jetreader.simonjets
     
-    mask = ensure_mask(mask, simonjets.pt)
+    mask = ensure_mask(mask, simonjets.jetPt)
     
-    wt, _ = ak.broadcast_arrays(wt, simonjets.pt)
+    wt, _ = ak.broadcast_arrays(wt, simonjets.jetPt)
 
     PU = ak.all(parts.nmatch == 0, axis=-1)
 
     jec_actual = simonjets.genPt / simonjets.rawPt
-    jec_cmssw = simonjets.pt / simonjets.rawPt
+    jec_cmssw = simonjets.jetPt / simonjets.rawPt
 
     matchedPt_gen = ak.sum(parts.matchPt, axis=-1)
     matchedPt_reco = ak.sum(parts.pt[parts.nmatch>0], axis=-1)
@@ -148,47 +148,47 @@ def fillJetHists(H, jetreader, wt=1, mask=None):
 
     jec_simon = puTerm + responseTerm + unrecoTerm
 
-    jec_ratio = simonjets.pt / simonjets.genPt
+    jec_ratio = simonjets.jetPt / simonjets.genPt
 
     H['jec'].fill(
-        pt = ak.flatten(simonjets.pt[mask], axis=None),
-        eta = np.abs(ak.flatten(simonjets.eta[mask], axis=None)),
+        pt = ak.flatten(simonjets.jetPt[mask], axis=None),
+        eta = np.abs(ak.flatten(simonjets.jetEta[mask], axis=None)),
         jec = ak.flatten(jec_cmssw[mask], axis=None),
         trueJEC = ak.flatten(jec_actual[mask], axis=None),
         PU = ak.flatten(PU[mask], axis=None),
         weight = ak.flatten(wt[mask], axis=None),
     )
     H['puTerm'].fill(
-        pt = ak.flatten(simonjets.pt[mask], axis=None),
-        eta = np.abs(ak.flatten(simonjets.eta[mask], axis=None)),
+        pt = ak.flatten(simonjets.jetPt[mask], axis=None),
+        eta = np.abs(ak.flatten(simonjets.jetEta[mask], axis=None)),
         puTerm = ak.flatten(puTerm[mask], axis=None),
         PU = ak.flatten(PU[mask], axis=None),
         weight = ak.flatten(wt[mask], axis=None),
     )
     H['responseTerm'].fill(
-        pt = ak.flatten(simonjets.pt[mask], axis=None),
-        eta = np.abs(ak.flatten(simonjets.eta[mask], axis=None)),
+        pt = ak.flatten(simonjets.jetPt[mask], axis=None),
+        eta = np.abs(ak.flatten(simonjets.jetEta[mask], axis=None)),
         responseTerm = ak.flatten(responseTerm[mask], axis=None),
         PU = ak.flatten(PU[mask], axis=None),
         weight = ak.flatten(wt[mask], axis=None),
     )
     H['unrecoTerm'].fill(
-        pt = ak.flatten(simonjets.pt[mask], axis=None),
-        eta = np.abs(ak.flatten(simonjets.eta[mask], axis=None)),
+        pt = ak.flatten(simonjets.jetPt[mask], axis=None),
+        eta = np.abs(ak.flatten(simonjets.jetEta[mask], axis=None)),
         unrecoTerm = ak.flatten(unrecoTerm[mask], axis=None),
         PU = ak.flatten(PU[mask], axis=None),
         weight = ak.flatten(wt[mask], axis=None),
     )
     H['jecRatio'].fill(
-        pt = ak.flatten(simonjets.pt[mask], axis=None),
-        eta = np.abs(ak.flatten(simonjets.eta[mask], axis=None)),
+        pt = ak.flatten(simonjets.jetPt[mask], axis=None),
+        eta = np.abs(ak.flatten(simonjets.jetEta[mask], axis=None)),
         jecRatio = ak.flatten(jec_ratio[mask], axis=None),
         PU = ak.flatten(PU[mask], axis=None),
         weight = ak.flatten(wt[mask], axis=None),
     )
     H['jecPred'].fill(
-        pt = ak.flatten(simonjets.pt[mask], axis=None),
-        eta = np.abs(ak.flatten(simonjets.eta[mask], axis=None)),
+        pt = ak.flatten(simonjets.jetPt[mask], axis=None),
+        eta = np.abs(ak.flatten(simonjets.jetEta[mask], axis=None)),
         jecPred = ak.flatten(jec_simon[mask], axis=None),
         PU = ak.flatten(PU[mask], axis=None),
         weight = ak.flatten(wt[mask], axis=None),
@@ -241,13 +241,13 @@ def fillMatchHist(H, jetreader, wt=1, mask=None):
     mask = ensure_mask(mask, data.pt)
     mask = mask & (~ak.all(data.nmatch == 0, axis=-1)) #mask out PU jets
 
-    jetpt, _ = ak.broadcast_arrays(jets.pt, data.pt)
+    jetpt, _ = ak.broadcast_arrays(jets.jetPt, data.pt)
     ptfrac = data.pt/jetpt
 
     wt, _ = ak.broadcast_arrays(wt, data.pt)
 
-    detajet = data.eta - jets.eta
-    dphijet = data.phi - jets.phi
+    detajet = data.eta - jets.jetEta
+    dphijet = data.phi - jets.jetPhi
     dphijet = np.where(dphijet > np.pi, dphijet - 2*np.pi, dphijet)
     dphijet = np.where(dphijet < -np.pi, dphijet + 2*np.pi, dphijet)
     dRjet = np.sqrt(detajet**2 + dphijet**2)
@@ -275,10 +275,10 @@ def getMatchingHists(events, jetMaskReco, jetMaskGen, weight, name):
 
     jetreaderReco = reader.jetreader(events, 
                                      'selectedPatJetsAK4PFPuppi', 
-                                     nameReco)
+                                     nameReco, None)
     jetreaderGen = reader.jetreader(events, 
                                     'ak4GenJetsNoNu', 
-                                    nameGen)
+                                    nameGen, None)
     
     H_EM0 = getEM0Hists()
     H_HAD0 = getHAD0Hists()

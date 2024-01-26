@@ -34,22 +34,103 @@ class EEC(object):
             self.Hdict[name]['HcovGenPure'] = self.Hdict[name]['HcovGen'] - \
                                                 self.Hdict[name]['HcovGenUNMATCH']
 
-    def getDRtransfer(self, name):
+    def getDRtransfer(self, name, etabin, pubin):
         S = self.Hdict[name]['HtransSG'].values(flow=True)
-        S = np.nan_to_num(S/np.sum(S, axis=(0,1)))
+        if etabin is None:
+            S = np.sum(S, axis=0)
+        elif etabin>=0:
+            S = S[etabin+1, :, :, :, :]
+
+        if etabin is not None and etabin<0:
+            print(S.shape)
+            print(np.sum(S, axis=(1,2)).shape)
+            sumS = 1/np.sum(S, axis=(1,2))
+            S = np.einsum('eijkl,ekl->eijkl', S, sumS)
+            S = np.nan_to_num(S)
+            print(S.shape)
+            print('made')
+        else:
+            S = np.nan_to_num(S/np.sum(S, axis=(0,1)))
         return S
 
     def getFullTransfer(self, name):
-        S = self.getDRtransfer(name)
-        factors = self.Hdict[name]['HtransFR'].project('ptReco', 'dRbinReco')
+        S = self.getDRtransfer(name, -1, None)
+        factors = self.Hdict[name]['HtransFR']#.project('ptReco', 'dRbinReco')
         factors = factors.values(flow=True)
-        return np.einsum('ij,ijkl->ijkl', factors, S)
+        print(factors.shape)
+        print(S.shape)
+        return np.einsum('eij,eijkl->eijkl', factors, S)
 
-    def forward(self, name, other=None, othername=None):
-        if other is None:
-            other = self
-        if othername is None:
-            othername = name
+    def applyPUjetsTemplate(self, name, ontopof):
+        #if other is None:
+        #    other = self
+        #if othername is None:
+        #    othername = name
+
+        PUjets = self.Hdict[name]['HrecoPUjets'].project('pt', 'dRbin').values(flow=True)
+        total = self.Hdict[name]['HrecoPure'].project('pt', 'dRbin').values(flow=True)
+        template = np.nan_to_num(PUjets/total)
+
+        #othertotal = other.Hdict[name]['Hreco'].project("ptReco", 'dRbinReco').values(flow=True)
+        return template * ontopof
+
+    def applyContaminationTemplate(self, name, ontopof):
+        #if other is None:
+        #    other = self
+        #if othername is None:
+        #    othername = name
+
+        UNMATCH = self.Hdict[name]['HrecoUNMATCH'].project('pt', 'dRbin').values(flow=True)
+        total = self.Hdict[name]['HrecoPure'].project('pt', 'dRbin').values(flow=True)
+        template = np.nan_to_num(UNMATCH/total)
+
+        #othertotal = other.Hdict[name]['Hreco'].project("ptReco", 'dRbinReco').values(flow=True)
+        return template * ontopof
+        
+    def applyInefficiencyTemplate(self, name, ontopof):
+        #if other is None:
+        #    other = self
+        #if othername is None:
+        #    othername = name
+
+        ineff = self.Hdict[name]['HgenUNMATCH'].project('pt', 'dRbin').values(flow=True)
+        total = self.Hdict[name]['Hgen'].project('pt', 'dRbin').values(flow=True)
+        template = np.nan_to_num(ineff/total)
+
+        #othertotal = other.Hdict[name]['Hgen'].project("pt", 'dRbin').values(flow=True)
+        return template * ontopof
+
+    def forward(self, name, other=None, othername=None, doTemplates=True):
+        #if other is None:
+        #    other = self
+        #if othername is None:
+        #    othername = name
+
+        SdR = self.Hdict[name]['HtransSG'].project("ptReco", 'dRbinReco',
+                                                   'ptGen', 'dRbinGen')
+        SdR = SdR.values(flow=True)
+        SdR = np.nan_to_num(SdR/np.sum(SdR, axis=(0,1)))
+
+        F = self.Hdict[name]['HtransFR'].project('ptReco', 'dRbinReco')
+        F = F.values(flow=True)
+
+        T = np.einsum('ijkl,ij->ijkl', SdR, F)
+        
+        if doTemplates:
+            Gtot = other.Hdict[othername]['Hgen'].project('pt','dRbin').values(flow=True)
+            ineff = self.applyInefficiencyTemplate(name, Gtot)
+            G = Gtot-ineff
+        else:
+            G=other.Hdict[othername]['HgenPure'].project('pt','dRbin').values(flow=True)
+
+        vals = np.einsum('ijkl,kl->ij', T, G)
+        if doTemplates:
+            contamination = self.applyContaminationTemplate(name, vals)
+            #PUjets = self.applyPUjetsTemplate(name, vals)
+            #contamination = other.Hdict[othername]['HrecoUNMATCH'].project('pt', 'dRbin').values(flow=True)
+            PUjets = other.Hdict[othername]['HrecoPUjets'].project('pt', 'dRbin').values(flow=True)
+            vals = vals + contamination + PUjets
+        return vals[None,:,:,None], np.zeros((12,52,12,52))
 
         S = self.getFullTransfer(name)
 
@@ -57,16 +138,18 @@ class EEC(object):
         oGerr = other.Hdict[othername]['HcovGenPure'].values(flow=True)
         
         print("vals")
-        vals = np.einsum('ijkl,kl->ij', S, oG)
+        print(S.shape, oG.shape)
+        vals = np.einsum('qijkl,eklp->eijp', S, oG)/4
+        return vals, np.zeros((12,52,12,52))
         print(vals.shape)
         print('vars1')
-        vars1 = np.einsum('ijkl,klmn->ijmn', S, oGerr)
+        vars1 = np.einsum('eijkl,eklmn->eijmn', S, oGerr)
         print(vars1.shape)
         print('S2')
-        S2 = np.einsum('ijkl->klij', S)
+        S2 = np.einsum('eijkl->eklij', S)
         print(S2.shape)
         print("vars2")
-        vars2 = np.einsum('ijkl,klmn->ijmn', vars1, S2)
+        vars2 = np.einsum('eijkl,eklmn->eijmn', vars1, S2)
         print(vars2.shape)
 
         return vals, vars2
@@ -98,20 +181,23 @@ class EEC(object):
         return self.project(vals, cov, ptbin, etabin, pubin)
 
     def getForwardValsErrs(self, name, other=None, othername=None, 
-                           ptbin=None, etabin=None, pubin=None):
-        vals, cov = self.forward(name, other, othername)
+                           ptbin=None, etabin=None, pubin=None,
+                           doTemplates=True):
+        vals, cov = self.forward(name, other, othername, doTemplates=doTemplates)
 
         return self.project(vals, cov, ptbin, etabin, pubin)
 
     def project(self, vals, cov, ptbin, etabin, pubin):
         if etabin is not None:
             vals = vals[etabin+1, :, :, :]
+            cov = np.zeros_like(cov)
             print("Warning: forgot to bin cov in eta, so it's bogus")
         else:
             vals = np.sum(vals, axis=0)
 
         if pubin is not None:
-            vals = = vals[:, :, pubin+1]
+            vals = vals[:, :, pubin+1]
+            cov = np.zeros_like(cov)
             print("Warning: forgot to bin cov in pu, so it's bogus")
         else:
             vals = np.sum(vals, axis=2)
@@ -124,132 +210,3 @@ class EEC(object):
             cov = np.sum(cov, axis=(0,2))
 
         return vals, np.sqrt(np.diag(cov))
-
-class EEC_binwt(object):
-    def __init__(self, path, includeInefficiencies=True):
-        self.path = path
-        self.Hdict = self.setup_Hdict(path)
-        self.includeInefficiencies = includeInefficiencies
-
-    def getWeights(self, name, key, ptbin, dRbin):
-        vals = self.Hdict[name][key]
-
-        if ptbin is not None:
-            vals = vals[ptbin+1, :, :]
-        else:
-            vals =  np.sum(vals, axis=0)
-
-        if dRbin is not None:
-            vals = vals[dRbin, :]
-        else:
-            vals = np.sum(vals, axis=0)
-
-        return vals
-
-    def getValsErrs(self, name, key, ptbin):
-        if key == 'forward':
-            vals = self.forwardTransfer(name)
-        else:
-            vals = self.Hdict[name][key]
-        
-        if ptbin is not None:
-            vals = vals[ptbin+1, :, :]
-        else:
-            vals =  np.sum(vals, axis=0)
-
-        wts = wtaxis.centers
-        vals = np.sum(vals[:,1:-1] * wts[None,:], axis=1)
-
-        return vals, np.zeros_like(vals)
-
-    def forwardTransfer(self, name, genmat=None):
-        trans = self.getRawTransfer(name)
-        if genmat is None:
-            if self.includeInefficiencies:
-                genmat = self.Hdict[name]['Hgen']
-            else:
-                genmat = self.Hdict[name]['HgenPure']
-        return np.einsum('ijklmn,lmn->ijk', trans, genmat)
-
-    def getRawTransfer(self, name):
-        trans = self.Hdict[name]['Htrans']
-        if self.includeInefficiencies:
-            gen = self.Hdict[name]['Hgen']
-        else:
-            gen = self.Hdict[name]['HgenPure']
-
-        transValue = trans.copy()
-        invgen = 1/gen
-        invgen[gen==0] = 0
-        transValue = np.einsum('ijklmn,lmn->ijklmn',transValue, invgen)
-
-        return transValue
-
-    def getTransfer(self, name, ptbin):
-        trans = self.Hdict[name]['Htrans']
-        if self.includeInefficiencies:
-            gen = self.Hdict[name]['Hgen']
-        else:
-            gen = self.Hdict[name]['HgenPure']
-
-        if ptbin is not None:
-            gen = gen[ptbin+1, :, :]
-            trans = trans[ptbin+1, :, :, ptbin+1, :, :]
-        else:
-            gen =  np.sum(gen, axis=0)
-            trans = np.sum(trans, axis=(0,3))
-
-        transValue = trans.copy()
-
-        for i in range(trans.shape[2]):
-            for j in range(trans.shape[3]):
-                if gen[i,j] > 0:
-                    transValue[:,:,i,j]/=gen[i,j]
-                elif np.sum(trans[:,:,i,j] > 0):
-                    transValue[:,:,i,j]=0
-                    print("bad", i, j)
-
-        return transValue
-
-    @staticmethod
-    def sliceTransfer(trans, otherbin, which):
-        if which == 'wt':
-            if otherbin is not None:
-                trans = trans[otherbin,:,otherbin,:]
-            else:
-                trans = np.sum(trans, axis=(0, 2))
-        else:
-            if otherbin is not None:
-                trans = trans[:, otherbin, :, otherbin]
-            else:
-                trans = np.sum(trans, axis=(1, 3))
-        return trans
-
-    def getSlicedTransfer(self, name, ptbin, otherbin, which):
-        return self.sliceTransfer(self.getTransfer(name, ptbin), otherbin, which)
-
-    @staticmethod
-    def load_proj(path):
-        values = np.memmap(path, dtype=np.float64,
-                           mode='c', shape=(12, 52, 27))
-        return values
-
-    @staticmethod
-    def load_transfer(path):
-        values = np.memmap(path, dtype=np.float64,
-                           mode='c', shape=(12,52,27,12,52,27))
-        return values
-
-    @staticmethod
-    def setup_Hdict(basepath):
-        Hdict = {}
-        for name in os.listdir(basepath):
-            Hdict[name ] = {}
-            for key in os.listdir(os.path.join(basepath, name)):
-                if 'trans' in key:
-                    Hdict[name][key[:-4]]=EEC_binwt.load_transfer(
-                            os.path.join(basepath,name,key))
-                else:
-                    Hdict[name][key[:-4]]=EEC_binwt.load_proj(
-                            os.path.join(basepath,name,key))
-        return Hdict
