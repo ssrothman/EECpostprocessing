@@ -2,3 +2,8 @@
 __pycache__/*
 *.pyc
 *.png
+*.pkl
+*.err
+*.out
+*.slurmout
+*.lck
