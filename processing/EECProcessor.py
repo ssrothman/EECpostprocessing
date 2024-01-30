@@ -2,21 +2,17 @@ import awkward as ak
 import numpy as np
 from coffea import processor
 
-import reading.reader as reader
+from reading.allreader import AllReaders
 
 import selections.masks as masks
 import selections.weights as weights
-
-import binning.binEEC as binEEC
-import binning.binEEC_binwt as binEEC_binwt
 
 from Locker import Locker
 import pickle
 
 import os
 
-import json
-from types import SimpleNamespace
+from binning.binEEC import binAll
 
 def write_mmaps(Hdict, basepath):
     for name in Hdict.keys():
@@ -88,17 +84,17 @@ class EECProcessor(processor.ProcessorABC):
 
     def process(self, events):
         #setup inputs
-        jets = reader.jetreader(events, self.config.names.puppijets, 
-                                        self.config.names.simonjets,
-                                        self.config.names.CHSjets)
-        muons = reader.muonreader(events, self.config.names.muons)
-        HLT = events.HLT
+        readers = []
+        for i in range(len(self.config.EECnames)):
+            readers.append(AllReaders(events, self.config, i))
 
-        evtSel = masks.getEventSelection(muons, HLT, self.config)
-        jetSel = masks.getJetSelection(jets, muons, evtSel, self.config.jetSelection)
+        evtSel = masks.getEventSelection(
+                readers[0].rMu, readers[0].HLT, self.config)
+        jetSel = masks.getJetSelection(
+                readers[0].rRecoJet, readers[0].rMu, 
+                evtSel, self.config.jetSelection)
 
         jetMask = jetSel.all(*jetSel.names)
-        import numpy as np
 
         evtWeight = weights.getEventWeight(events)
         weight = evtWeight.weight()
@@ -106,18 +102,19 @@ class EECProcessor(processor.ProcessorABC):
         #return outputs
         result = {}
         if self.statsplit:
-            for EECname, MatchName in zip(self.config.EECnames, self.config.MatchNames):
-                print("doing", EECname, MatchName)
-                result[EECname+"1"] = binEEC.doAll(
-                        events, EECname, MatchName, self.config, 
-                        weight, jetMask & (events.event%2==0))
-                result[EECname+"2"] = binEEC.doAll(
-                        events, EECname, MatchName, self.config,
-                        weight, jetMask & (events.event%2==1))
+            for i in range(len(readers)):
+                EECname = self.config.EECnames[i]
+                result[EECname+"1"] = binAll(
+                        readers[i], self.config.nDR,
+                        jetMask & (events.event%2==0), weight)
+                result[EECname+"2"] = binAll(
+                        readers[i], self.config.nDR,
+                        jetMask & (events.event%2==1), weight)
         else:
-            for EECname, MatchName in zip(self.config.EECnames, self.config.MatchNames):
-                result[EECname] = binEEC.doAll(
-                        events, EECname, MatchName, self.config,
-                        weight, jetMask)
+            for i in range(len(readers)):
+                EECname = self.config.EECnames[i]
+                result[EECname] = binAll(
+                        readers[i], self.config.nDR,
+                        jetMask, weight)
 
         return result

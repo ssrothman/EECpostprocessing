@@ -97,37 +97,6 @@ class jetreader:
     def alljets(self):
         return self._x[self._jetsname]
 
-class genjetreader:
-    def __init__(self, x, jetsname, simonjetsname, transfername):
-        self._x = x
-        self._jetsname = jetsname
-        self._simonjetsname = simonjetsname
-        self._transfername = transfername
-        self.jetsreader_ = jetreader(x, jetsname, simonjetsname)
-
-    @property
-    def transferIdx(self):
-        if not hasattr(self, '_transferIdx'):
-            self._transferIdx = gettransferGenIdx(
-                    self._x, self._transfername)
-        return self._transferIdx
-
-    @property
-    def parts(self):
-        if not hasattr(self, '_parts'):
-            self._parts = self.jetsreader_.parts[self.transferIdx]
-        return self._parts
-
-    @property
-    def jets(self):
-        if not hasattr(self, '_jets'):
-            self._jets = self.jetsreader_.jets[self.transferIdx]
-        return self._jets
-
-    @property
-    def alljets(self):
-        return self.jetsreader_.alljets
-
 class muonreader:
     def __init__(self, x, name):
         self._x = x
