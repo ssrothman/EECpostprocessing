@@ -172,15 +172,15 @@ def binTransferP(HSR, HSG, HFR, HFG, rTransfer, rGenEEC, rGenEECUNMATCH,
         sample = ak.flatten(factor_bygen[mask4], axis=None),
         weight = ak.flatten(gen_bygen[mask4], axis=None)
     )
-    print()
-    print("sum(genbygen):", ak.sum(gen_bygen, axis=None))
-    print("sum(genbyreco):", ak.sum(gen_byreco, axis=None))
-    print("sum(gen):", ak.sum(genwt_backup, axis=None))
-    print()
-    print("sum(recobyreco):", ak.sum(reco_byreco, axis=None))
-    print("sum(recobygen):", ak.sum(reco_bygen, axis=None))
-    print("sum(reco):", ak.sum(proj, axis=None))
-    print()
+    #print()
+    #print("sum(genbygen):", ak.sum(gen_bygen, axis=None))
+    #print("sum(genbyreco):", ak.sum(gen_byreco, axis=None))
+    #print("sum(gen):", ak.sum(genwt_backup, axis=None))
+    #print()
+    #print("sum(recobyreco):", ak.sum(reco_byreco, axis=None))
+    #print("sum(recobygen):", ak.sum(reco_bygen, axis=None))
+    #print("sum(reco):", ak.sum(proj, axis=None))
+    #print()
 
     HSR.fill(
         #EECwtReco = ak.flatten(proj[mask2], axis=None),
@@ -258,7 +258,7 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
         size = ak.max(ak.num(s), axis=None)
         s = ak.fill_none(ak.pad_none(s, size, axis=-1, clip=True), 0)
         projsums.append(ak.to_numpy(s))
-    print("\t\tmaking projsums took", time()-t0, "seconds")
+    #print("\t\tmaking projsums took", time()-t0, "seconds")
 
     covtime = 0
     filltime = 0
@@ -296,8 +296,8 @@ def binCovP(H, rEEC, rJet, nDR, wt, mask=None):
             #            threads=1,
             #        )
             filltime += time()-t0
-    print("\t\tcovtime = ", covtime)
-    print("\t\tfilltime = ", filltime)
+    #print("\t\tcovtime = ", covtime)
+    #print("\t\tfilltime = ", filltime)
 
 def doProjected(x, nameEEC, config, gen, wt, mask):
     Hval = getProjHist(config.nDR)
@@ -312,10 +312,10 @@ def doProjected(x, nameEEC, config, gen, wt, mask):
     from time import time
     t0 = time()
     binProj(Hval, rEEC, rJet, config.nDR, wt, mask)
-    print("\tbinProj took", time()-t0, "seconds")
+    #print("\tbinProj took", time()-t0, "seconds")
     t0 = time()
     binCovP(Hcov, rEEC, rJet, config.nDR, wt, mask)
-    print("\tbinCovP took", time()-t0, "seconds")
+    #print("\tbinCovP took", time()-t0, "seconds")
 
     return Hval, Hcov
 
@@ -336,11 +336,11 @@ def doTransfer(x, EECname, config, wt, mask):
     return HtransSR, HtransSG, HtransFR, HtransFG
 
 def doAll(x, EECname, MatchName, config, wt, mask):
-    print("top of doALL")
+    #print("top of doALL")
     from time import time
     t0 = time()
     Hreco, HcovReco = doProjected(x, "Reco%s"%EECname, config, False, wt, mask)
-    print("reco took %0.4f seconds"%(time()-t0))
+    #print("reco took %0.4f seconds"%(time()-t0))
 
     t0 = time()
     #recoJets = reading.reader.jetreader(x, '', x.names.).parts
@@ -349,31 +349,31 @@ def doAll(x, EECname, MatchName, config, wt, mask):
     #PUjets = ak.all(recoJets.nmatch == 0, axis=-1)
     matchedjets = reading.reader.jetreader(x, None, '%sParticles'%MatchName, None)
     PUjets = matchedjets.simonjets.genPt < 0
-    print("finding PUjets took %0.4f seconds"%(time()-t0))
+    #print("finding PUjets took %0.4f seconds"%(time()-t0))
 
     t0 = time()
     HrecoPUjets, HcovRecoPUjets = doProjected(x, "Reco%sPU"%EECname, config, 
                                               False, wt, (mask & PUjets))
-    print("recoPUjets took %0.4f seconds"%(time()-t0))
+    #print("recoPUjets took %0.4f seconds"%(time()-t0))
     t0 = time()
     HrecoUNMATCH, HcovRecoUNMATCH = doProjected(x, "Reco%sPU"%EECname, config,
                                                 False, wt, (mask & (~PUjets)))
-    print("recoUNMATCH took %0.4f seconds"%(time()-t0))
+    #print("recoUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
     Hgen, HcovGen = doProjected(x, "Gen%s"%EECname, config, True, wt, mask)
-    print("gen took %0.4f seconds"%(time()-t0))
+    #print("gen took %0.4f seconds"%(time()-t0))
     HgenUNMATCH, HcovGenUNMATCH = doProjected(x, "Gen%sUNMATCH"%EECname, config, 
                                               True, wt, mask)
-    print("genUNMATCH took %0.4f seconds"%(time()-t0))
+    #print("genUNMATCH took %0.4f seconds"%(time()-t0))
 
     t0 = time()
     HtransSR, HtransSG, HtransFR, HtransFG = doTransfer(
             x, EECname, config, 
             wt, mask)
-    print("Htrans took %0.4f seconds"%(time()-t0))
+    #print("Htrans took %0.4f seconds"%(time()-t0))
 
-    print("DONE")
+    #print("DONE")
     return {
         'Hreco' : Hreco,
         'HrecoPUjets' : HrecoPUjets,
