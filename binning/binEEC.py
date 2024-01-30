@@ -127,13 +127,10 @@ def fillEEC(Hproj, Hcov, rEEC, rJet, nPU, wt, mask):
     evt = squash(evt[mask2])
 
     if Hproj.axes['nPU'].traits.underflow:
-        print("incrememting PUindex")
         PUindex += 1
     if Hproj.axes['pt'].traits.underflow:
-        print("incrememting pTindex")
         pTindex += 1
     if Hproj.axes['dRbin'].traits.underflow:
-        print("incrememting dRindex")
         dRindex += 1
 
     indextuple = (squash(evt), squash(pTindex), 
@@ -143,9 +140,6 @@ def fillEEC(Hproj, Hcov, rEEC, rJet, nPU, wt, mask):
     #probably because I am forcing the sum order
     #I think NBD though
     np.add.at(left, indextuple, squash(vals[mask2]))
-
-    print('sum left', np.sum(left))
-    print('should be', np.sum(vals[mask2]))
 
     cov = np.einsum('ijkl,iabc->jklabc', left, left)
     Hcov += cov #I love that this just works!
