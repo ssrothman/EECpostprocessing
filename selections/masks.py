@@ -97,14 +97,16 @@ def getEventSelection(rmu, HLT, config):
 def getJetSelection(rjet, rmu, evtSel, config):
     jets = rjet.jets
     selection = PackedJetSelection(evtSel)
+
     selection.add("pt", jets.pt > config.pt)
     selection.add("eta", np.abs(jets.eta) < config.eta)
+
     if config.jetID == 'loose':
-        selection.add("jetId", jets.jetId >= 2)
+        selection.add("jetId", jets.jetIdLoose > 0)
     elif config.jetID == 'tight':
-        selection.add("jetId", jets.jetId >= 6)
+        selection.add("jetId", jets.jetIdTight > 0)
     elif config.jetID == 'tightLepVeto':
-        selection.add("jetId", jets.jetId >= 7)
+        selection.add("jetId", jets.jetIdLepVeto > 0)
     elif config.jetID == 'none':
         pass
     else:

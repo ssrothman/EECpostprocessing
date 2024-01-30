@@ -7,9 +7,17 @@ import scipy.stats
 
 import plotting.EECutil
 
-edges = np.linspace(0, 0.5, 51)
-edges[0] = 1e-10
-dRaxis = hist.axis.Variable(edges, name='dR', label='$\Delta R$')
+#edges = np.linspace(0, 0.5, 51)
+#edges[0] = 1e-10
+
+edges = [1e-06, 1e-05, 0.0001, 0.001, 0.003, 
+        0.01, 0.015, 0.02, 0.025, 0.03, 
+        0.04, 0.05, 0.07, 0.1, 0.15, 
+        0.2, 0.3, 0.4, 0.5
+]
+print(len(edges))
+
+dRaxis = hist.axis.Variable(edges, name='dR', label='$\Delta R$', flow=True)
 ptaxis = hist.axis.Regular(10, 0, 500)
 wtaxis = hist.axis.Regular(20, 1e-6, 1, transform=hist.axis.transform.log)
 
@@ -42,6 +50,7 @@ def plotValues(values, errs, xs, label=None, ax=None):
         ax.legend()
 
     plt.tight_layout()
+    plt.grid(True)
 
 def applyPlotOptions(values, errs, logwidth, density, dRweight):
     xs = dRaxis.centers

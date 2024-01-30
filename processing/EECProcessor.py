@@ -87,7 +87,6 @@ class EECProcessor(processor.ProcessorABC):
             print("RELEASED LOCK")
 
     def process(self, events):
-        print("top of process")
         #setup inputs
         jets = reader.jetreader(events, self.config.names.puppijets, 
                                         self.config.names.simonjets,
@@ -106,7 +105,6 @@ class EECProcessor(processor.ProcessorABC):
 
         #return outputs
         result = {}
-        print("just before loop")
         if self.statsplit:
             for EECname, MatchName in zip(self.config.EECnames, self.config.MatchNames):
                 print("doing", EECname, MatchName)

@@ -1,7 +1,7 @@
 {
-    "EECnames" : ["CaloShareEEC", "NaiveEEC"],
-    "MatchNames" : ["CaloShare", "NaiveMatch"],
-    "nDR" : 52,
+    "EECnames" : ["TrackDR", "Naive"],
+    "MatchNames" : ["TrackDRMatch", "NaiveMatch"],
+    "nDR" : 20,
     "names" : {
         "puppijets" : "updatedJetsPuppi",
         "CHSjets" : "Jet",
@@ -13,8 +13,8 @@
     "jetSelection" : {
         "pt" : 30.0,
         "eta" : 2.0,
-        "jetID" : "none",
-        "puJetID" : "none",
+        "jetID" : "tightLepVeto",
+        "puJetID" : "tight",
         "muonOverlapDR" : 0.4 
     },
     "genJetSelection" : {
