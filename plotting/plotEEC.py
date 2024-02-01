@@ -139,12 +139,14 @@ def plotForward(EECobj, name, other, othername,
     xs = dRaxis.centers
     plotValues(vals, errs, xs, label=label, ax=ax)
 
-def plotFactors(EECobj, name, ptbin=None, etabin=None, pubin=None,
+def plotFactors(EECobj, name, ptbin=3, etabin=None, pubin=2,
                 wrt='dR', label=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    vals, errs = EECobj.getFactors(name, ptbin, etabin, pubin, wrt)
+    F, _ = EECobj.getFactorizedTransfer(name, ptbin, pubin)
+    vals = F
+    errs = np.zeros_like(F)
     vals = vals[1:-1]
     errs = errs[1:-1]
 
@@ -160,6 +162,8 @@ def plotFactors(EECobj, name, ptbin=None, etabin=None, pubin=None,
 
     ax.set_ylim(0, 2)
     ax.axhline(1, color='k', linestyle='--')
+
+    ax.set_ylabel("Unfolding 'scale factors'")
 
     plotValues(vals, errs, xs, label=label, ax=ax)
 
@@ -244,20 +248,22 @@ def plotFactorRatio(obj1, name1, obj2, name2,
                     ptbin1=None, ptbin2=None,
                     etabin1=None, etabin2=None,
                     pubin1=None, pubin2=None,
-                    wrt='dR', ax=None):
+                    wrt='dR', ax=None,
+                    ratio_mode='ratio'):
     if ax is None:
         ax = plt.gca()
 
-    val1,err1 = obj1.getFactors(name1, ptbin1, etabin1, pubin1, wrt)
-    val2,err2 = obj2.getFactors(name2, ptbin2, etabin2, pubin2, wrt)
+    val1, _ = obj1.getFactorizedTransfer(name1, ptbin1, pubin1)
+    val2, _ = obj2.getFactorizedTransfer(name2, ptbin2, pubin2)
+
+    err1, err2 = np.zeros_like(val1), np.zeros_like(val2);
 
     val1 = val1[1:-1]
     err1 = err1[1:-1]
     val2 = val2[1:-1]
     err2 = err2[1:-1]
 
-    if mode is not None:
-        _handleRatio(val1, err1, val2, err2, 'ratio', None, ax)
+    _handleRatio(val1, err1, val2, err2, ratio_mode, None, ax)
 
 def _handleRatio(val1, err1, val2, err2,
                  mode, label, ax, hline=True):
@@ -305,12 +311,7 @@ def plotPurityStability(EECobj, name,
     if ax is None:
         ax = plt.gca()
 
-    trans = EECobj.getDRtransfer(name, etabin, pubin)
-    if ptbin is not None:
-        trans = trans[ptbin+1,:,ptbin+1,:]
-    else:
-        trans = np.sum(trans, axis=(0,2))
-        
+    _, trans = EECobj.getFactorizedTransfer(name, ptbin, pubin)
 
     xs = dRaxis.centers
     xlabel = "$\Delta R"
@@ -318,11 +319,12 @@ def plotPurityStability(EECobj, name,
     if purity:
         xlabel += '_{Reco}$'
         val = np.diag(trans) / np.sum(trans, axis=1)
+        ax.set_ylabel("Purity")
     else:
         xlabel += '_{Gen}$'
         val = np.diag(trans) / np.sum(trans, axis=0)
+        ax.set_ylabel("Stability")
 
-    ax.set_ylabel("Purity")
     ax.set_xlabel(xlabel)
 
     ax.set_ylim(0, 1)
@@ -343,19 +345,15 @@ def showPtTransfer(EECobj, name, etabin, pubin, ax=None):
     plt.show()
 
 def showTransfer(EECobj, name, ptbin, etabin, pubin, 
-                 otherbin=None, which=None, ax=None):
-    raise NotImplementedError
+                 otherbin=None, which=None, ax=None,
+                 logcolor=False):
     if ax is None:
         ax = plt.gca()
 
-    trans = EECobj.getDRtransfer(name)
-    if ptbin is not None:
-        trans = trans[ptbin+1,:,ptbin+1,:]
-    else:
-        trans = np.sum(trans, axis=(0,2))
+    _, trans = EECobj.getFactorizedTransfer(name, ptbin, pubin)
     xtype='dR'
 
-    plt.imshow(trans, origin='lower', norm=matplotlib.colors.LogNorm(1e-5, 1))
+    plt.imshow(trans, origin='lower', norm=matplotlib.colors.LogNorm(1e-5, 1) if logcolor else matplotlib.colors.Normalize(0, 1))
     if xtype == 'dR':
         plt.xlabel("Reco $\Delta R$ bin")
         plt.ylabel("Gen $\Delta R$ bin")
@@ -470,6 +468,17 @@ def plotPUjets(EECobj, name, ptbin, etabin, pubin, folder=None):
               density=True, ax=ax1)
     plt.show()
 
+
+def compareEECratio_perName(EECobj, names, key, ratio_to,
+                            ptbin, etabin,
+                            pubin, labels,
+                            ratio_mode='ratio',
+                            density=False, folder=None):
+    N = len(names)
+    compareEECratio([EECobj]*N, names, [key]*N, labels,
+                    [ptbin]*N, [etabin]*N, [pubin]*N,
+                    ratio_to, ratio_mode,
+                    density, folder)
 
 def compareEECratio_perPU(EECobj, name, key, ratio_to,
                           ptbin, etabin,
@@ -682,22 +691,26 @@ def compareEEC(EECobjs, names, keys, labels, ptbins, etabins, pubins, folder=Non
 def compareForward(transferobj, transfername, dataobj, dataname,
                    ptbin=None, etabin=None, pubin=None, 
                    doTemplates = False,
-                   mode='ratio', folder=None):
+                   mode='ratio', folder=None,
+                   density=False):
     fig, (ax0, ax1) = setup_ratiopad(mode!='pulls')
     pttitle("Forward transfer test", ptbin, fig)
 
     plotForward(transferobj, transfername, dataobj, dataname, 
                 ptbin=ptbin, etabin=etabin, pubin=pubin,
                 doTemplates = doTemplates,
-                label = 'Forward', ax=ax0)
+                label = 'Forward', ax=ax0,
+                density=density)
 
     plotEEC(dataobj, dataname, 'Hreco' if doTemplates else 'HrecoPure', 
             ptbin=ptbin, etabin=etabin, pubin=pubin,
-            label='Reco' if doTemplates else 'Reco-background', ax=ax0)
+            label='Reco' if doTemplates else 'Reco-background', ax=ax0, 
+            density=density)
 
     plotForwardRatio(transferobj, transfername, dataobj, dataname, 
                      doTemplates = doTemplates,
-                     ptbin=ptbin, mode=mode, ax=ax1)
+                     ptbin=ptbin, mode=mode, ax=ax1,
+                     density=density)
 
     if folder is not None:
         plt.savefig("%s/test.png"%folder, format='png', bbox_inches='tight')
