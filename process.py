@@ -103,12 +103,12 @@ if args.force_slurm:
 
 if use_slurm:
     print("using slurm")
-    cluster, client = setup_cluster_on_submit(1, 500, destination)
+    cluster, client = setup_cluster_on_submit(1, 100, destination)
     #cluster, client = setup_htcondor(1, 10, destination)
 
     runner = Runner(
         executor=DaskExecutor(client=client, status=True),
-        #chunksize=1000,
+        #chunksize=100000,
         schema=NanoAODSchema
     )
 elif not args.custom_scale:

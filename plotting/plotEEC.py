@@ -10,11 +10,9 @@ import plotting.EECutil
 #edges = np.linspace(0, 0.5, 51)
 #edges[0] = 1e-10
 
-dRedges = [1e-06, 1e-05, 0.0001, 0.001, 0.003, 
-        0.01, 0.015, 0.02, 0.025, 0.03, 
-        0.04, 0.05, 0.07, 0.1, 0.15, 
-        0.2, 0.3, 0.4, 0.5
-]
+dRedges = [1e-3, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 
+           0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50]
+
 dRaxis = hist.axis.Variable(dRedges, name='dR', label='$\Delta R$', flow=True)
 
 ptbins = [30, 50, 100, 150, 250, 500]
@@ -53,6 +51,7 @@ def plotValues(values, errs, xs, label=None, ax=None):
 
     plt.tight_layout()
     ax.grid(True)
+    ax.set_xscale('log')
 
 def applyPlotOptions(values, errs, logwidth, density, dRweight):
     xs = dRaxis.centers
@@ -119,9 +118,9 @@ def plotForward(EECobj, name, other, othername,
     if ax is None:
         ax = plt.gca()
 
-    vals, errs = EECobj.getForwardValsErrs(name, other, othername, 
-                                           ptbin, etabin, pubin,
-                                           doTemplates=doTemplates)
+    vals, errs = EECobj.getForwardValsErrs(name, ptbin, pubin,
+                                           other, othername,
+                                           doTemplates)
     vals, errs = applyPlotOptions(vals, errs, logwidth, density, 0)
 
     ax.set_xlabel("$\Delta R$")
@@ -229,10 +228,9 @@ def plotForwardRatio(transferobj, transfername, dataobj, dataname,
     if ax is None:
         ax = plt.gca()
 
-    val1, err1 = transferobj.getForwardValsErrs(transfername, 
-                                                dataobj, dataname, 
-                                                ptbin, etabin, pubin,
-                                                doTemplates = doTemplates)
+    val1, err1 = transferobj.getForwardValsErrs(transfername, ptbin, pubin,
+                                                dataobj, dataname,
+                                                doTemplates)
     val1, err1 = applyPlotOptions(val1, err1, logwidth, density, dRweight)
 
     val2, err2 = dataobj.getProjValsErrs(dataname, 'Hreco' if doTemplates else 'HrecoPure', 
@@ -472,6 +470,29 @@ def plotPUjets(EECobj, name, ptbin, etabin, pubin, folder=None):
               density=True, ax=ax1)
     plt.show()
 
+
+def compareEECratio_perPU(EECobj, name, key, ratio_to,
+                          ptbin, etabin,
+                          pubins, labels, 
+                          ratio_mode='sigma',
+                          density=False, folder=None):
+    N = len(pubins)
+    compareEECratio([EECobj]*N, [name]*N, [key]*N, labels,
+                    [ptbin]*N, [etabin]*N, pubins,
+                    ratio_to, ratio_mode,
+                    density, folder)
+
+def compareEECratio_perObj(EECobjs, name, key, ratio_to,
+                           ptbin, etabin, 
+                           pubin, labels,
+                           ratio_mode='sigma',
+                           density=False, folder=None):
+    N = len(EECobjs)
+    compareEECratio(EECobjs, [name]*N, [key]*N, labels,
+                    [ptbin]*N, [etabin]*N, [pubin]*N,
+                    ratio_to, ratio_mode,
+                    density, folder)
+
 def compareEECratio(EECobjs, names, keys, labels, 
                     ptbins, etabins, pubins,
                     ratio_to, ratio_mode='difference',
@@ -493,9 +514,10 @@ def compareEECratio(EECobjs, names, keys, labels,
         errs.append(newerr)
 
     if ratio_mode is not None:
-        ax1.plot([], [])
+        if len(EECobjs) > 2:
+            ax1.plot([], [])
         for i in range(1, len(EECobjs)):
-            _handleRatio(vals[0], errs[0], vals[i], errs[i], ratio_mode, label=None, ax=ax1)
+            _handleRatio(vals[i], errs[i], vals[0], errs[0], ratio_mode, label=None, ax=ax1)
         ax1.set_ylabel("Ratio to %s"%labels[0])
 
     if folder is not None:
@@ -642,7 +664,8 @@ def compareEEC(EECobjs, names, keys, labels, ptbins, etabins, pubins, folder=Non
                 ptbin=ptbins[i], etabin=etabins[i], pubin=pubins[i],
                 density=True, label=labels[i], ax=ax0)
 
-    ax1.plot([], [])
+    if len(EECobjs)>2:
+        ax1.plot([], [])
     for i in range(1,len(EECobjs)):
         plotRatio(EECobjs[i], names[i], keys[i], EECobjs[0], names[0], keys[0],
                   density=True, mode=ratio_mode, 
@@ -670,7 +693,7 @@ def compareForward(transferobj, transfername, dataobj, dataname,
 
     plotEEC(dataobj, dataname, 'Hreco' if doTemplates else 'HrecoPure', 
             ptbin=ptbin, etabin=etabin, pubin=pubin,
-            label='Reco-background', ax=ax0)
+            label='Reco' if doTemplates else 'Reco-background', ax=ax0)
 
     plotForwardRatio(transferobj, transfername, dataobj, dataname, 
                      doTemplates = doTemplates,
