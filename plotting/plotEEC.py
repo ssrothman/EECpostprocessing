@@ -10,9 +10,15 @@ import plotting.EECutil
 #edges = np.linspace(0, 0.5, 51)
 #edges[0] = 1e-10
 
-dRedges = [1e-3, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 
-           0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50]
+#dRedges = [1e-3, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 
+#           0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50]
 
+dRedges = [0.0001 ,0.001, 0.005, 
+           0.01, 0.015, 0.02, 0.025,
+           0.03, 0.035, 0.04, 0.045, 
+           0.05, 0.06, 0.07, 0.08,
+           0.09, 0.10, 0.15, 0.20, 
+           0.30, 0.40, 0.50]
 dRaxis = hist.axis.Variable(dRedges, name='dR', label='$\Delta R$', flow=True)
 
 ptbins = [30, 50, 100, 150, 250, 500]
@@ -664,7 +670,15 @@ def compareGenRecoWeights(EECobj, name, ptbin, dRbin, folder=None):
 
     plt.show()
 
-def compareEEC(EECobjs, names, keys, labels, ptbins, etabins, pubins, folder=None, ratio_mode='diffrence'):
+def compareEEC_perPU(EECobj, name, key, labels,
+                     ptbin, etabin, pubins,
+                     folder=None, ratio_mode='difference'):
+    N = len(labels)
+    compareEEC([EECobj]*N, [name]*N, [key]*N, labels,
+               [ptbin]*N, [etabin]*N, pubins,
+               folder=folder, ratio_mode=ratio_mode)
+
+def compareEEC(EECobjs, names, keys, labels, ptbins, etabins, pubins, folder=None, ratio_mode='difference'):
     fig, (ax0, ax1) = setup_ratiopad()
     pttitle("EEC comparison", None, fig)
 

@@ -1,7 +1,6 @@
 {
-    "EECnames" : ["TrackDR", "Naive"],
-    "MatchNames" : ["TrackDRMatch", "NaiveMatch"],
-    "nDR" : 21,
+    "EECnames" : ["EECs", "ChargedEECs"],
+    "MatchNames" : ["GenMatch", "ChargedGenMatch"],
     "names" : {
         "puppijets" : "updatedJetsPuppi",
         "CHSjets" : "Jet",
@@ -35,5 +34,29 @@
     },
     "Zselection" : {
         "mass" : [60,120]
+    },
+    "binning" : {
+        "axes" : ["pt", "dRbin", "order"],
+        "bins" : {
+            "pt" : [30, 50, 100, 150, 250, 500],
+            "nPU" : [0, 20, 40, 60, 80],
+            "eta" : [0, 0.9, 1.4, 2.5],
+            "dRbin" : 23,
+            "order" : 3
+        },
+        "skipTransfer" : {
+            "pt" : false,
+            "nPU" : false,
+            "eta" : false,
+            "dRbin" : false,
+            "order" : false
+        },
+        "diagTransfer" : {
+            "pt" : false,
+            "nPU" : true,
+            "eta" : false,
+            "dRbin" : false,
+            "order" : true
+        }
     }
 }

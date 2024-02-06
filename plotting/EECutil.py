@@ -18,12 +18,13 @@ def project(H, Hcov, ptbin, pubin):
         H = project_out(H, ['pt'])
         Hcov = project_out(Hcov, ['pt_1', 'pt_2'])
 
-    if pubin is not None:
-        H = H[{'nPU':pubin}]
-        Hcov = Hcov[{'nPU_1':pubin, 'nPU_2':pubin}]
-    else:
-        H = project_out(H, ['nPU'])
-        Hcov = project_out(Hcov, ['nPU_1', 'nPU_2'])
+    if 'nPU' in H.axes.name:
+        if pubin is not None:
+            H = H[{'nPU':pubin}]
+            Hcov = Hcov[{'nPU_1':pubin, 'nPU_2':pubin}]
+        else:
+            H = project_out(H, ['nPU'])
+            Hcov = project_out(Hcov, ['nPU_1', 'nPU_2'])
 
     values = H.values(flow=True)
     covariance = Hcov.values(flow=True)
@@ -83,19 +84,28 @@ class EEChistReader:
 
         #CHECK
         reco = self.getProj(name, 'HrecoPure')[0].values(flow=True)
-        summat = np.sum(mat, axis=(3,4,5))
+        genaxes = []
+        Nax = len(mat.shape)//2
+        genaxes = [i+Nax for i in range(Nax)]
+        summat = np.sum(mat, axis=tuple(genaxes))
         assert (np.all(np.isclose(summat, reco)))
 
         #NORMALIZE
         gen = self.getProj(name, 'HgenPure')[0].values(flow=True)
         invgen = np.where(gen > 0, 1./gen, 0)
-        mat = np.nan_to_num(np.einsum('abcijk,ijk->abcijk', mat, invgen))
+        if Nax == 3:
+            mat = np.nan_to_num(np.einsum('abcijk,ijk->abcijk', mat, invgen))
+        elif Nax == 2:
+            mat = np.nan_to_num(np.einsum('abij,ij->abij', mat, invgen))
         return mat
 
     def getFactorizedTransfer(self, name, pubin, ptbin):
         mat = self.getTransferMat(name)
 
-        mat = mat[ptbin, :, pubin, ptbin, :, pubin]
+        if 'nPU' in self.Hdict[name]['Hreco'].axes.name:
+            mat = mat[ptbin, :, pubin, ptbin, :, pubin]
+        else:
+            mat = mat[ptbin, :, ptbin, :]
         print(mat.shape)
 
         F = np.sum(mat, axis=(0))
@@ -186,17 +196,28 @@ class EEChistReader:
 
         mat = self.getTransferMat(name)
         
-        forward = np.einsum('abcijk,ijk->abc', mat, gen)
+        Nax = len(mat.shape)//2
+        if Nax==3:
+            forward = np.einsum('abcijk,ijk->abc', mat, gen)
+        elif Nax==2:
+            forward = np.einsum('abij,ij->ab', mat, gen)
 
         #have to instantiate the transposed matrix
         #in contiguous memory
         #otherwise the einsum will do some crazy inefficient stuff
         #and take a million years
-        transmat = np.ascontiguousarray(np.einsum('abcijk->ijkabc', mat))
+        if Nax==3:
+            transmat = np.ascontiguousarray(np.einsum('abcijk->ijkabc', mat))
+        elif Nax==2:
+            transmat = np.ascontiguousarray(np.einsum('abij->ijab', mat))
 
         #even still, have to do it in two steps
-        step1 = np.einsum('abcdef, defghi -> abcghi', mat, covgen)
-        covforward = np.einsum('abcghi, ghijkl -> abcjkl', step1, transmat)
+        if Nax==3:
+            step1 = np.einsum('abcdef, defghi -> abcghi', mat, covgen)
+            covforward = np.einsum('abcghi, ghijkl -> abcjkl', step1, transmat)
+        elif Nax==2:
+            step1 = np.einsum('abde, degh -> abgh', mat, covgen)
+            covforward = np.einsum('abgh, ghjk -> abjk', step1, transmat)
 
         #CHECK
         if other is self and othername == name:

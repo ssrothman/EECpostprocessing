@@ -12,7 +12,7 @@ import pickle
 
 import os
 
-from binning.binEEC import binAll
+from binning.binEEC import EECbinner
 
 def write_mmaps(Hdict, basepath):
     for name in Hdict.keys():
@@ -53,6 +53,7 @@ class EECProcessor(processor.ProcessorABC):
     def __init__(self, config, statsplit=False):
         self.config = config
         self.statsplit = statsplit
+        self.binner = EECbinner(config.binning)
 
     def postprocess(self, accumulator):
         pass
@@ -104,17 +105,17 @@ class EECProcessor(processor.ProcessorABC):
         if self.statsplit:
             for i in range(len(readers)):
                 EECname = self.config.EECnames[i]
-                result[EECname+"1"] = binAll(
-                        readers[i], self.config.nDR,
+                result[EECname+"1"] = self.binner.binAll(
+                        readers[i], 
                         jetMask & (events.event%2==0), weight)
-                result[EECname+"2"] = binAll(
-                        readers[i], self.config.nDR,
+                result[EECname+"2"] = self.binner.binAll(
+                        readers[i], 
                         jetMask & (events.event%2==1), weight)
         else:
             for i in range(len(readers)):
                 EECname = self.config.EECnames[i]
-                result[EECname] = binAll(
-                        readers[i], self.config.nDR,
+                result[EECname] = self.binner.binAll(
+                        readers[i], 
                         jetMask, weight)
 
         return result

@@ -7,12 +7,13 @@ class EECreader:
     def __init__(self, x, name):
         self._x = x
         self._name = name
+        self._proj = {}
 
-    @property
-    def proj(self):
-        if not hasattr(self, '_proj'):
-            self._proj = reading.readEEC.getProj(self._x, self._name, 'value2')
-        return self._proj
+    def proj(self, order):
+        if order not in self._proj:
+            self._proj[order] = reading.readEEC.getProj(
+                    self._x, self._name, 'value%d'%order)
+        return self._proj[order]
 
     @property
     def iJet(self):
@@ -36,17 +37,16 @@ class transferreader:
     def __init__(self, x, name):
         self._x = x
         self._name = name
+        self._proj = {}
 
     '''
     ak.sum(transferP[evt, jet], axis=0) = reco - PU
     '''
-    @property
-    def proj(self):
-        if not hasattr(self, '_transferP'):
-            self._transferP = reading.readEEC.getTransferP(self._x, 
-                                                           self._name, 
-                                                           'value2')
-        return self._transferP
+    def proj(self, order):
+        if order not in self._proj:
+            self._proj[order] = reading.readEEC.getTransferP(
+                self._x, self._name, 'value%d'%order)
+        return self._proj[order]
 
     @property
     def iReco(self):
