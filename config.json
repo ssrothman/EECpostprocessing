@@ -21,22 +21,49 @@
         "eta" : 2.4
     },
     "muonSelection" : {
-        "leadpt" : 20,
-        "subpt" : 10,
+        "leadpt" : 26,
+        "subpt" : 15,
         "leadeta" : 2.5,
         "subeta" : 2.5,
         "oppsign" : true,
-        "ID" : "loose",
-        "iso" : "loose"
+        "ID" : "tight",
+        "iso" : "tight"
     },
     "eventSelection" : {
-        "trigger" : "Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8"
+        "trigger" : "IsoMu24",
+        "PreFireWeight" : true
     },
     "Zselection" : {
         "mass" : [60,120]
     },
+    "btag" : {
+        "algo" : "deepjet",
+        "wp" : "tight",
+        "sfpath" : "SFs/btagging.json.gz",
+        "WPcuts" : {
+            "loose" : 0.0490,
+            "medium" : 0.2783,
+            "tight" : 0.7100
+        }
+    },
+    "ctag" : {
+        "algo" : "deepjet",
+        "wp" : "tight",
+        "sfpath" : "SFs/ctagging.json.gz",
+        "CvLcuts" : {
+            "loose" : 0.038,
+            "medium" : 0.099,
+            "tight" : 0.282
+        },
+        "CvBcuts" : {
+            "loose" : 0.246,
+            "medium" : 0.325,
+            "tight" : 0.267
+        }
+    },
+    "sfpath" : "SFs/muon_Z_v2.json.gz",
     "binning" : {
-        "axes" : ["pt", "dRbin", "order"],
+        "axes" : ["pt", "dRbin", "order", "nPU", "btag"],
         "bins" : {
             "pt" : [30, 50, 100, 150, 250, 500],
             "nPU" : [0, 20, 40, 60, 80],
@@ -49,14 +76,16 @@
             "nPU" : false,
             "eta" : false,
             "dRbin" : false,
-            "order" : false
+            "order" : false,
+            "btag" : true
         },
         "diagTransfer" : {
             "pt" : false,
             "nPU" : true,
             "eta" : false,
             "dRbin" : false,
-            "order" : true
+            "order" : true,
+            "btag" : true
         }
     }
 }

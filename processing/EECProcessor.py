@@ -53,7 +53,7 @@ class EECProcessor(processor.ProcessorABC):
     def __init__(self, config, statsplit=False):
         self.config = config
         self.statsplit = statsplit
-        self.binner = EECbinner(config.binning)
+        self.binner = EECbinner(config.binning, config.btag, config.ctag)
 
     def postprocess(self, accumulator):
         pass
@@ -97,7 +97,8 @@ class EECProcessor(processor.ProcessorABC):
 
         jetMask = jetSel.all(*jetSel.names)
 
-        evtWeight = weights.getEventWeight(events)
+        evtWeight = weights.getEventWeight(events, readers[0].rMu.muons, 
+                                           self.config)
         weight = evtWeight.weight()
 
         #return outputs

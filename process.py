@@ -116,7 +116,7 @@ elif not args.custom_scale:
     runner = Runner(
         executor=FuturesExecutor(workers=4) if args.local_futures else IterativeExecutor(),
         #executor=FuturesExecutor(workers=10, status=True),
-        chunksize=1000,
+        #chunksize=1000,
         schema=NanoAODSchema
     )
 else:

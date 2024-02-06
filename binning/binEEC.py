@@ -20,12 +20,40 @@ def squash(arr):
     return ak.to_numpy(ak.flatten(arr, axis=None))
 
 class EECbinner:
-    def __init__(self, config):
+    def __init__(self, config, config_btag, config_ctag):
         self._config = {}
         self._config['axes'] = config.axes
         self._config['bins'] = config.bins
         self._config['skipTrans'] = config.skipTransfer
         self._config['diagTrans'] = config.diagTransfer
+
+        self._config['btag'] = config_btag
+        self._config['ctag'] = config_ctag
+
+    def _passBtag(self, rJet, iReco, mask):
+        if rJet._CHSjetsname is None:
+            return rJet.jets.hadronFlavour[iReco][mask] == 5
+        
+        CHS = rJet.CHSjets
+        if self._config['btag'].algo == 'deepjet':
+            btag = CHS.btagDeepFlavB[iReco][mask]
+        elif self._config['btag'].algo == 'deepcsv':
+            btag = CHS.btagDeepB[iReco][mask]
+        else:
+            raise NotImplementedError("deepjet and deepcsv are the only available btagging algos")
+
+        blabel = self._config['btag'].wp
+        if blabel == 'tight':
+            bwp = self._config['btag'].WPcuts.tight
+        elif blabel == 'medium':
+            bwp = self._config['btag'].WPcuts.medium
+        elif blabel == 'loose':
+            bwp = self._config['btag'].WPcuts.loose
+        else:
+            raise NotImplementedError("WP needs to be 'loose', 'medium', or 'tight'")
+
+        return btag > bwp
+        
 
     def _getAxis(self, name, suffix=''):
         if name == 'pt':
@@ -53,6 +81,11 @@ class EECbinner:
                             name='eta'+suffix,
                             label = 'Jet $\eta$',
                             overflow=False, underflow=True)
+        elif name == 'btag':
+            return Integer(0, 2, 
+                           name='btag' + suffix,
+                           label = 'btagging',
+                           underflow=False, overflow=False)
         else:
             raise ValueError('Unknown axis name: %s'%name)
 
@@ -112,6 +145,9 @@ class EECbinner:
         recoPt_o = rRecoJet.simonjets.jetPt[iReco][mask]
         genPt_o = rGenJet.simonjets.jetPt[iGen][mask]
 
+        pass_btag_o  = self._passBtag(rRecoJet, iReco, mask)
+        genflav_o = rRecoJet.CHSjets.hadronFlavour[iReco][mask]
+
         maxorder = self._config['bins'].order
         for order in range(2, maxorder+1):
             proj = rTransfer.proj(order)
@@ -122,9 +158,9 @@ class EECbinner:
             iDRGen = ak.local_index(proj, axis=2)
             iDRReco = ak.local_index(proj, axis=3)
 
-            recoPt, genPt, nPU, iDRGen, genwt, _ = ak.broadcast_arrays(
-                    recoPt_o, genPt_o, nPU_o, iDRGen, genwt, proj
-            )
+            recoPt, genPt, pass_btag, genflav, nPU, iDRGen, genwt, _ = \
+                ak.broadcast_arrays(recoPt_o, genPt_o, pass_btag_o, 
+                                    genflav_o, nPU_o, iDRGen, genwt, proj)
 
             mask2 = proj > 0
 
@@ -147,11 +183,17 @@ class EECbinner:
                 else:
                     fills['nPU_Reco'] = squash(nPU[mask2])
                     fills['nPU_Gen'] = squash(nPU[mask2])
-            if 'order' in self._config['axes'] and  not self._config['skipTrans'].order:
+            if 'order' in self._config['axes'] and not self._config['skipTrans'].order:
                 if self._config['diagTrans'].order:
                     fills['order'] = order
                 else:
                     raise RuntimeError("Cannot transfer along order axis")
+            if 'btag' in self._config['axes'] and not self._config['skipTrans'].order:
+                if self._config['diagTrans'].btag:
+                    fills['btag'] = squash(pass_btag[mask2])
+                else:
+                    fills['btag_Reco'] = squash(pass_btag[mask2])
+                    fills['btag_Gen'] = squash(genflav[mask2] == 5)
 
             Htrans.fill(
                 **fills,
@@ -183,22 +225,27 @@ class EECbinner:
         pt = rJet.simonjets.jetPt[iJet][mask]
         vals = (projs * wt)[mask]
 
+        pass_btag  = self._passBtag(rJet, iJet, mask)
+
         order = ak.local_index(vals, axis=2)+2
         dRbin = ak.local_index(vals, axis=3)
 
-        pt, nPU, order, _ = ak.broadcast_arrays(pt, nPU, order, dRbin)
+        pt, pass_btag, nPU, order, _ = ak.broadcast_arrays(
+                pt, pass_btag, nPU, order, dRbin)
 
         mask2 = vals > 0
 
         projfills = {}
-        if 'pt' in self._config['axes'] and not self._config['skipTrans'].pt:
+        if 'pt' in self._config['axes']:
             projfills['pt'] = squash(pt[mask2])
-        if 'dRbin' in self._config['axes'] and not self._config['skipTrans'].dRbin:
+        if 'dRbin' in self._config['axes']:
             projfills['dRbin'] = squash(dRbin[mask2])
-        if 'nPU' in self._config['axes'] and not self._config['skipTrans'].nPU:
+        if 'nPU' in self._config['axes']:
             projfills['nPU'] = squash(nPU[mask2])
-        if 'order' in self._config['axes'] and  not self._config['skipTrans'].order:
+        if 'order' in self._config['axes']:
             projfills['order'] = squash(order[mask2])
+        if 'btag' in self._config['axes']:
+            projfills['btag'] = squash(pass_btag[mask2])
 
         Hproj.fill(
             **projfills,

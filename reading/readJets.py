@@ -17,4 +17,14 @@ def getJets(x, jetsname, simonjetsname):
 
 def getCHSjets(x, jetsname, simonjetsname):
     iJet = x[simonjetsname+"BK"].iCHS
-    return x[jetsname][iJet]
+
+    #have to handle cases where there is no matched CHS jet
+    #in this case we set iJet=0, so that we can still index with 
+    #and then we go back through and zero everything out
+    #so that we don't get any false positives
+    iJet2 = ak.where(iJet == 9999, 0, iJet)
+    ans = x[jetsname][iJet2]
+    for field in ans.fields:
+        ans[field] = ak.where(iJet == 9999, 0, ans[field])
+
+    return ans
