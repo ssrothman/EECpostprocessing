@@ -40,7 +40,8 @@ class EECbinner:
                            underflow=False, overflow=False)
         elif name == 'nPU':
             return Variable(self._config['bins'].nPU, 
-                            name='nPU', label='Number of PU vertices',
+                            name='nPU'+suffix,
+                            label='Number of PU vertices',
                             overflow=True, underflow=False)
         elif name == 'order':
             return Integer(2, self._config['bins'].order+1, 
@@ -100,59 +101,62 @@ class EECbinner:
         return Htrans
 
     def _fillTransfer(self, Htrans, rTransfer, rGenEEC, rGenEECUNMATCH,
-                     rRecoJet, rGenJet, nPU, wt, mask):
-        proj = rTransfer.proj(2)
+                     rRecoJet, rGenJet, nPU_o, wt, mask):
         iReco = rTransfer.iReco
         iGen = rTransfer.iGen
 
         mask = mask[iReco]
         if(ak.sum(mask)==0):
             return;
-                   
-        recoPt = rRecoJet.simonjets.jetPt[iReco][mask]
-        genPt = rGenJet.simonjets.jetPt[iGen][mask]
 
-        genwt = (rGenEEC.proj(2) - rGenEECUNMATCH.proj(2))[mask]
-        proj = (wt*proj)[mask]
+        recoPt_o = rRecoJet.simonjets.jetPt[iReco][mask]
+        genPt_o = rGenJet.simonjets.jetPt[iGen][mask]
 
-        iDRGen = ak.local_index(proj, axis=2)
-        iDRReco = ak.local_index(proj, axis=3)
+        maxorder = self._config['bins'].order
+        for order in range(2, maxorder+1):
+            proj = rTransfer.proj(order)
+                       
+            genwt = (rGenEEC.proj(order) - rGenEECUNMATCH.proj(order))[mask]
+            proj = (wt*proj)[mask]
 
-        recoPt, genPt, nPU, iDRGen, genwt, _ = ak.broadcast_arrays(
-                recoPt, genPt, nPU, iDRGen, genwt, proj
-        )
+            iDRGen = ak.local_index(proj, axis=2)
+            iDRReco = ak.local_index(proj, axis=3)
 
-        mask2 = proj > 0
+            recoPt, genPt, nPU, iDRGen, genwt, _ = ak.broadcast_arrays(
+                    recoPt_o, genPt_o, nPU_o, iDRGen, genwt, proj
+            )
 
-        fills = {}
-        if 'pt' in self._config['axes'] and not self._config['skipTrans'].pt:
-            if self._config['diagTrans'].pt:
-                fills['pt'] = squash(recoPt[mask2])
-            else:
-                fills['pt_Reco'] = squash(recoPt[mask2])
-                fills['pt_Gen'] = squash(genPt[mask2])
-        if 'dRbin' in self._config['axes'] and not self._config['skipTrans'].dRbin:
-            if self._config['diagTrans'].dRbin:
-                fills['dRbin'] = squash(iDRReco[mask2])
-            else:
-                fills['dRbin_Reco'] = squash(iDRReco[mask2])
-                fills['dRbin_Gen'] = squash(iDRGen[mask2])
-        if 'nPU' in self._config['axes'] and not self._config['skipTrans'].nPU:
-            if self._config['diagTrans'].nPU:
-                fills['nPU'] = squash(nPU[mask2])
-            else:
-                fills['nPU_Reco'] = squash(nPU[mask2])
-                fills['nPU_Gen'] = squash(nPU[mask2])
-        if 'order' in self._config['axes'] and  not self._config['skipTrans'].order:
-            if self._config['diagTrans'].order:
-                fills['order'] = 2
-            else:
-                raise RuntimeError("Cannot transfer along order axis")
+            mask2 = proj > 0
 
-        Htrans.fill(
-            **fills,
-            weight = squash(proj[mask2])
-        )
+            fills = {}
+            if 'pt' in self._config['axes'] and not self._config['skipTrans'].pt:
+                if self._config['diagTrans'].pt:
+                    fills['pt'] = squash(recoPt[mask2])
+                else:
+                    fills['pt_Reco'] = squash(recoPt[mask2])
+                    fills['pt_Gen'] = squash(genPt[mask2])
+            if 'dRbin' in self._config['axes'] and not self._config['skipTrans'].dRbin:
+                if self._config['diagTrans'].dRbin:
+                    fills['dRbin'] = squash(iDRReco[mask2])
+                else:
+                    fills['dRbin_Reco'] = squash(iDRReco[mask2])
+                    fills['dRbin_Gen'] = squash(iDRGen[mask2])
+            if 'nPU' in self._config['axes'] and not self._config['skipTrans'].nPU:
+                if self._config['diagTrans'].nPU:
+                    fills['nPU'] = squash(nPU[mask2])
+                else:
+                    fills['nPU_Reco'] = squash(nPU[mask2])
+                    fills['nPU_Gen'] = squash(nPU[mask2])
+            if 'order' in self._config['axes'] and  not self._config['skipTrans'].order:
+                if self._config['diagTrans'].order:
+                    fills['order'] = order
+                else:
+                    raise RuntimeError("Cannot transfer along order axis")
+
+            Htrans.fill(
+                **fills,
+                weight = squash(proj[mask2])
+            )
 
     def _make_and_fill_EEC(self, rEEC, rJet, nPU, wt, mask):
         Hproj = self._getEECHist()
@@ -161,7 +165,14 @@ class EECbinner:
         return Hproj, Hcov
 
     def _fillEEC(self, Hproj, Hcov, rEEC, rJet, nPU, wt, mask):
-        proj = rEEC.proj(2)
+        maxorder = self._config['bins'].order
+        projs = [rEEC.proj(order) for order in range(2, maxorder+1)]
+        nums = [ak.num(proj, axis=-1) for proj in projs]
+        projs = ak.concatenate(projs, axis=-1)
+        nums = ak.concatenate(nums, axis=-1)
+        projs = ak.unflatten(projs, squash(nums), axis=-1)
+        #projs has shape [event, jet, order, DR]
+
         iReco = rEEC.iReco
         iJet = rEEC.iJet
 
@@ -170,11 +181,12 @@ class EECbinner:
             return;
 
         pt = rJet.simonjets.jetPt[iJet][mask]
-        vals = (proj * wt)[mask]
+        vals = (projs * wt)[mask]
 
-        dRbin = ak.local_index(vals, axis=2)
+        order = ak.local_index(vals, axis=2)+2
+        dRbin = ak.local_index(vals, axis=3)
 
-        pt, nPU, _ = ak.broadcast_arrays(pt, nPU, dRbin)
+        pt, nPU, order, _ = ak.broadcast_arrays(pt, nPU, order, dRbin)
 
         mask2 = vals > 0
 
@@ -186,7 +198,7 @@ class EECbinner:
         if 'nPU' in self._config['axes'] and not self._config['skipTrans'].nPU:
             projfills['nPU'] = squash(nPU[mask2])
         if 'order' in self._config['axes'] and  not self._config['skipTrans'].order:
-            projfills['order'] = 2
+            projfills['order'] = squash(order[mask2])
 
         Hproj.fill(
             **projfills,
@@ -217,12 +229,10 @@ class EECbinner:
         #I think NBD though
         np.add.at(left, indextuple, squash(vals[mask2]))
 
-        #cov = np.einsum('ijkl,iabc->jklabc', left, left)
-
         leftis = [0] + [i+1 for i in range(len(Hproj.axes))]
         rightis = [0] + [i+11 for i in range(len(Hproj.axes))]
         ansis = leftis[1:] + rightis[1:]
-        cov = np.einsum(left, leftis, left, rightis, ansis)
+        cov = np.einsum(left, leftis, left, rightis, ansis, optimize=True)
         Hcov += cov #I love that this just works!
 
     def binAll(self, readers, mask, wt):
