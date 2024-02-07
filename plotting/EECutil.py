@@ -10,29 +10,21 @@ def project_out(H, axes_to_remove):
         axes.remove(ax)
     return H.project(*axes)
 
-def project(H, Hcov, ptbin, pubin):
-    if ptbin is not None:
-        H = H[{'pt':ptbin}]
-        Hcov = Hcov[{'pt_1':ptbin, 'pt_2':ptbin}]
-    else:
-        H = project_out(H, ['pt'])
-        Hcov = project_out(Hcov, ['pt_1', 'pt_2'])
-
-    if 'nPU' in H.axes.name:
-        if pubin is not None:
-            H = H[{'nPU':pubin}]
-            Hcov = Hcov[{'nPU_1':pubin, 'nPU_2':pubin}]
-        else:
-            H = project_out(H, ['nPU'])
-            Hcov = project_out(Hcov, ['nPU_1', 'nPU_2'])
+def project(H, Hcov, bins):
+    names = H.axes.name
+    for axis in names:
+        if axis in bins:
+            H = H[{axis : bins[axis]}]
+            Hcov = Hcov[{axis+'_1':bins[axis], axis+'_2':bins[axis]}]
+        elif axis != 'dRbin':
+            H = project_out(H, [axis])
+            Hcov = project_out(Hcov, [axis+'_1', axis+'_2'])
 
     values = H.values(flow=True)
     covariance = Hcov.values(flow=True)
     errs = np.sqrt(np.einsum('ii->i', covariance))
 
     return values, errs
-
-
 
 class EEChistReader:
     def __init__(self, path):
@@ -71,46 +63,132 @@ class EEChistReader:
         return self.Hdict[name][key], \
                self.Hdict[name][self.projToCov[key]]
 
-    def getProjValsErrs(self, name, key,
-                        ptbin, pubin):
+    def getProjValsErrs(self, name, key, bins):
         Hproj, Hcov = self.getProj(name, key)
-        return project(Hproj, Hcov, ptbin, pubin)
+        return project(Hproj, Hcov, bins)
 
     def getTransfer(self, name):
         return self.Hdict[name]['Htrans']
 
+    def getTransferedGen(self, name):
+        gen = self.getProj(name, 'HgenPure')[0]
+        names = gen.axes.name
+        for axis in names:
+            if self.Hdict[name]['config']['skipTrans'][axis]:
+                gen = project_out(gen, [axis])
+        return gen
+
+    def getTransferedReco(self, name):
+        reco = self.getProj(name, 'HrecoPure')[0]
+        names = reco.axes.name
+        for axis in names:
+            if self.Hdict[name]['config']['skipTrans'][axis]:
+                reco = project_out(reco, [axis])
+        return reco
+    
+    def getAxisIds(self, name):
+        gen = {}
+        reco = {}
+        diag = {}
+        Htrans = self.getTransfer(name)
+        for i, axis in enumerate(Htrans.axes.name):
+            if 'Gen' in axis:
+                gen[axis[:-4]] = i
+            elif 'Reco' in axis:
+                reco[axis[:-5]] = i+10
+            else:
+                diag[axis] = i+20
+
+        return gen, reco, diag
+
+    def getRecoAxisIds(self, name):
+        genIds, recoIds, diagIds = self.getAxisIds(name)
+        Hreco = self.getTransferedReco(name)
+        ans = []
+        for axis in Hreco.axes.name:
+            if axis in recoIds:
+                ans.append(recoIds[axis])
+            else:
+                ans.append(diagIds[axis])
+        return ans
+
+    def getGenAxisIds(self, name):
+        genIds, recoIds, diagIds = self.getAxisIds(name)
+        Hgen = self.getTransferedGen(name)
+        ans = []
+        for axis in Hgen.axes.name:
+            if axis in genIds:
+                ans.append(genIds[axis])
+            else:
+                ans.append(diagIds[axis])
+        return ans
+    
+    def getTransferAxisIds(self, name):
+        genIds, recoIds, diagIds = self.getAxisIds(name)
+        Htrans = self.getTransfer(name)
+        ans = []
+        for axis in Htrans.axes.name:
+            if 'Gen' in axis:
+                ans.append(genIds[axis[:-4]])
+            elif 'Reco' in axis:
+                ans.append(recoIds[axis[:-5]])
+            else:
+                ans.append(diagIds[axis])
+        return ans
+
+    def getTransferIndex(self, name, key):
+        Htrans = self.getTransfer(name)
+        return Htrans.axes.name.index(key)
+
     def getTransferMat(self, name):
         mat = self.getTransfer(name).values(flow=True)
 
+        genIds = self.getGenAxisIds(name)
+        recoIds = self.getRecoAxisIds(name)
+        transferIds = self.getTransferAxisIds(name)
+
         #CHECK
-        reco = self.getProj(name, 'HrecoPure')[0].values(flow=True)
-        genaxes = []
-        Nax = len(mat.shape)//2
-        genaxes = [i+Nax for i in range(Nax)]
-        summat = np.sum(mat, axis=tuple(genaxes))
+        reco = self.getTransferedReco(name).values(flow=True)
+        summat = np.einsum(mat, transferIds, recoIds, optimize=True)
         assert (np.all(np.isclose(summat, reco)))
 
         #NORMALIZE
-        gen = self.getProj(name, 'HgenPure')[0].values(flow=True)
+        gen = self.getTransferedGen(name).values(flow=True)
         invgen = np.where(gen > 0, 1./gen, 0)
-        if Nax == 3:
-            mat = np.nan_to_num(np.einsum('abcijk,ijk->abcijk', mat, invgen))
-        elif Nax == 2:
-            mat = np.nan_to_num(np.einsum('abij,ij->abij', mat, invgen))
+        mat = np.einsum(mat, transferIds, invgen, genIds, transferIds, 
+                        optimize=True)
         return mat
 
-    def getFactorizedTransfer(self, name, pubin, ptbin):
+    def getFactorizedTransfer(self, name, bins={}, keepaxis='dRbin'):
         mat = self.getTransferMat(name)
 
-        if 'nPU' in self.Hdict[name]['Hreco'].axes.name:
-            mat = mat[ptbin, :, pubin, ptbin, :, pubin]
-        else:
-            mat = mat[ptbin, :, ptbin, :]
-        print(mat.shape)
+        config = self.Hdict[name]['config']
 
+        indexing = [slice(None)] * len(mat.shape)
+        for key, val in bins.items():
+            idx = val
+            if self.Hdict[name]['Hreco'].axes[key].traits.underflow:
+                idx += 1
+            idxslice = slice(idx, idx+1)
+            if config['skipTrans'][key]:
+                continue
+            elif config['diagTrans'][key]:
+                indexing[self.getTransferIndex(name, key)] = idxslice
+            else:
+                indexing[self.getTransferIndex(name, key+"_Reco")] = idxslice
+                indexing[self.getTransferIndex(name, key+"_Gen")] = idxslice
+
+        keep = []
+        for i, axis in enumerate(self.getTransfer(name).axes.name):
+            if keepaxis in axis:
+                keep.append(i)
+
+        mat = mat[tuple(indexing)]
+        mat = np.einsum(mat, list(range(len(mat.shape))), keep, optimize=True)
+ 
         F = np.sum(mat, axis=(0))
         invF = np.where(F > 0, 1./F, 0)
-        S = np.einsum('ai,i->ai', mat, invF)
+        S = np.einsum('ai,i->ai', mat, invF, optimize=True)
 
         return F, S
 
