@@ -15,3 +15,6 @@ class RecursiveNamespace:
                 setattr(self, key, [RecursiveNamespace.map_entry(entry) for entry in val])
             else:
                 setattr(self, key, val)
+
+    def __add__(self, other):
+        return self

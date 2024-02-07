@@ -286,7 +286,7 @@ class EECbinner:
             return;
 
         pt = rJet.simonjets.jetPt[iJet][mask]
-        eta = rjet.simonjets.jetEta[iJet][mask]
+        eta = rJet.simonjets.jetEta[iJet][mask]
         vals = (projs * wt)[mask]
 
         pass_btag  = self._passBtag(rJet, iJet, mask)
