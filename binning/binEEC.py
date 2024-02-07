@@ -263,15 +263,20 @@ class EECbinner:
                 weight = squash(proj[mask2])
             )
 
-    def _make_and_fill_EEC(self, rEEC, rJet, nPU, wt, mask):
+    def _make_and_fill_EEC(self, rEEC, rJet, nPU, wt, mask, subtract=None):
         Hproj = self._getEECHist()
         Hcov = self._getCovHist()
-        self._fillEEC(Hproj, Hcov, rEEC, rJet, nPU, wt, mask)
+        self._fillEEC(Hproj, Hcov, rEEC, rJet, nPU, wt, mask, subtract)
         return Hproj, Hcov
 
-    def _fillEEC(self, Hproj, Hcov, rEEC, rJet, nPU, wt, mask):
+    def _fillEEC(self, Hproj, Hcov, rEEC, rJet, nPU, wt, mask, subtract=None):
         maxorder = self._config['bins']['order']
         projs = [rEEC.proj(order) for order in range(2, maxorder+1)]
+
+        if subtract is not None:
+            for order in range(2, maxorder+1):
+                projs[order-2] = projs[order-2] - subtract.proj(order)
+
         nums = [ak.num(proj, axis=-1) for proj in projs]
         projs = ak.concatenate(projs, axis=-1)
         nums = ak.concatenate(nums, axis=-1)
@@ -365,12 +370,20 @@ class EECbinner:
         HrecoUNMATCH, HcovRecoUNMATCH = self._make_and_fill_EEC(
                 readers.rRecoEECUNMATCH, readers.rRecoJet,
                 readers.nPU, wt, mask)
+        HrecoPure, HcovRecoPure = self._make_and_fill_EEC(
+                readers.rRecoEEC, readers.rRecoJet,
+                readers.nPU, wt, mask,
+                subtract = readers.rRecoEECUNMATCH)
         Hgen, HcovGen = self._make_and_fill_EEC(
                 readers.rGenEEC, readers.rGenJet,
                 readers.nPU, wt, mask)
         HgenUNMATCH, HcovGenUNMATCH = self._make_and_fill_EEC(
                 readers.rGenEECUNMATCH, readers.rGenJet,
                 readers.nPU, wt, mask)
+        HgenPure, HcovGenPure = self._make_and_fill_EEC(
+                readers.rGenEEC, readers.rGenJet,
+                readers.nPU, wt, mask,
+                subtract = readers.rGenEECUNMATCH)
 
         return {
             'Htrans': Htrans,
@@ -378,9 +391,13 @@ class EECbinner:
             'HcovReco': HcovReco,
             'HrecoUNMATCH': HrecoUNMATCH,
             'HcovRecoUNMATCH': HcovRecoUNMATCH,
+            'HrecoPure' : HrecoPure,
+            'HcovRecoPure' : HcovRecoPure,
             'Hgen': Hgen,
             'HcovGen': HcovGen,
             'HgenUNMATCH': HgenUNMATCH,
             'HcovGenUNMATCH': HcovGenUNMATCH,
+            'HgenPure' : HgenPure,
+            'HcovGenPure' : HcovGenPure,
             'config' : self._config,
         }

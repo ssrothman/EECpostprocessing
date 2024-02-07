@@ -31,7 +31,6 @@ class EEChistReader:
         self.path = path
         self.Hdict = {}
         self.load()
-        self.fillPure()
 
     def load(self):
         if os.path.exists(self.path):
@@ -39,14 +38,6 @@ class EEChistReader:
                 self.Hdict = pickle.load(f)
         else:
             raise FileNotFoundError(f'File {self.path} not found')
-
-    def fillPure(self):
-        for name in self.Hdict:
-            self.Hdict[name]['HrecoPure'] = self.Hdict[name]['Hreco'] - self.Hdict[name]['HrecoUNMATCH']
-            self.Hdict[name]['HgenPure'] = self.Hdict[name]['Hgen'] - self.Hdict[name]['HgenUNMATCH']
-            #note the correction for the covariance due to the correlations
-            self.Hdict[name]['HcovRecoPure'] = self.Hdict[name]['HcovReco'] - self.Hdict[name]['HcovRecoUNMATCH']
-            self.Hdict[name]['HcovGenPure'] = self.Hdict[name]['HcovGen'] - self.Hdict[name]['HcovGenUNMATCH']
 
     @property
     def projToCov(self):
