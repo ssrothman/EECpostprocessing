@@ -21,9 +21,11 @@ def getEventWeight(x, muons, config):
     leadeta = np.abs(ak.firsts(leadmu.eta))
     leadeta = ak.fill_none(leadeta, 0)
     
-    badpt = leadpt == 0
+    badpt = leadpt <= 26
     leadpt = np.where(badpt, 26, leadpt)
 
+    badeta = leadeta >= 2.4
+    leadeta = np.where(badeta, 2.3999, leadeta)
 
     if config.muonSelection.ID == 'loose':
         id_sf = cset['NUM_LooseID_DEN_genTracks'].evaluate(
@@ -109,9 +111,9 @@ def getEventWeight(x, muons, config):
     else:
         raise NotImplementedError(f"SF for trigger {config.eventSelection.trigger} not implemented")
 
-    id_sf = np.where(badpt, 1, id_sf)
-    iso_sf = np.where(badpt, 1, iso_sf)
-    trigger_sf = np.where(badpt, 1, trigger_sf)
+    id_sf = np.where(badpt | badeta, 1, id_sf)
+    iso_sf = np.where(badpt | badeta, 1, iso_sf)
+    trigger_sf = np.where(badpt | badeta, 1, trigger_sf)
 
     ans.add("idsf", id_sf)
     ans.add("isosf", iso_sf)

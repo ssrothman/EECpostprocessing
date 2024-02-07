@@ -23,8 +23,8 @@
     "muonSelection" : {
         "leadpt" : 26,
         "subpt" : 15,
-        "leadeta" : 2.5,
-        "subeta" : 2.5,
+        "leadeta" : 2.4,
+        "subeta" : 2.4,
         "oppsign" : true,
         "ID" : "tight",
         "iso" : "tight"
@@ -63,7 +63,7 @@
     },
     "sfpath" : "SFs/muon_Z_v2.json.gz",
     "binning" : {
-        "axes" : ["pt", "dRbin", "order", "nPU", "btag"],
+        "axes" : ["pt", "dRbin", "order", "btag"],
         "bins" : {
             "pt" : [30, 50, 100, 150, 250, 500],
             "nPU" : [0, 20, 40, 60, 80],
@@ -77,7 +77,9 @@
             "eta" : false,
             "dRbin" : false,
             "order" : false,
-            "btag" : true
+            "btag" : true,
+            "ctag" : true,
+            "genflav" : true
         },
         "diagTransfer" : {
             "pt" : false,
@@ -85,7 +87,9 @@
             "eta" : false,
             "dRbin" : false,
             "order" : true,
-            "btag" : true
+            "btag" : true,
+            "ctag" : true,
+            "genflav" : true
         }
     }
 }
