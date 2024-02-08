@@ -3,6 +3,8 @@ import os
 import awkward as ak
 import numpy as np
 import pickle
+import numbers
+from .EECstats import *
 
 def project_out(H, axes_to_remove):
     axes = list(H.axes.name)
@@ -11,6 +13,7 @@ def project_out(H, axes_to_remove):
     return H.project(*axes)
 
 def project(H, Hcov, bins):
+    #Confirmed to handle covariances correctly :)
     names = H.axes.name
     for axis in names:
         if axis in bins:
@@ -22,9 +25,8 @@ def project(H, Hcov, bins):
 
     values = H.values(flow=True)
     covariance = Hcov.values(flow=True)
-    errs = np.sqrt(np.einsum('ii->i', covariance))
 
-    return values, errs
+    return values, covariance
 
 class EEChistReader:
     def __init__(self, path):
@@ -54,9 +56,41 @@ class EEChistReader:
         return self.Hdict[name][key], \
                self.Hdict[name][self.projToCov[key]]
 
-    def getProjValsErrs(self, name, key, bins):
+    def getProjValsErrs(self, name, key, bins,
+                        density=False):
+        #should have correct statistical treatment 
         Hproj, Hcov = self.getProj(name, key)
-        return project(Hproj, Hcov, bins)
+        vals, cov = project(Hproj, Hcov, bins)
+        vals, cov = maybe_density(vals, cov, density)
+
+        return vals, np.sqrt(np.einsum('ii->i', cov, optimize=True))
+
+    def getRelationValsErrs(self, name, key, bins, density,
+                            other, oname, okey, obins, odensity,
+                            mode='ratio'):
+        if key == 'factor':
+            vals, _ = self.getFactorizedTransfer(name, bins)
+            cov = np.zeros((*vals.shape, *vals.shape))
+
+            oval, _ = other.getFactorizedTransfer(oname, obins)
+            ocov = np.zeros((*oval.shape, *oval.shape))
+        else:
+            Hproj, Hcov = self.getProj(name, key)
+            vals, cov = project(Hproj, Hcov, bins)
+            vals, cov = maybe_density(vals, cov, density)
+
+            oHproj, oHcov = other.getProj(oname, okey)
+            oval, ocov = project(oHproj, oHcov, obins)
+            oval, ocov = maybe_density(oval, ocov, odensity)
+
+        if self is not other or key != okey or name != oname or key=='factor':
+            #treat them as independent
+            cov1x2 = None
+        else:
+            raise NotImplementedError("Need to implement proper covariances")
+
+        ans, covans = applyRelation(vals, cov, oval, ocov, cov1x2, mode)
+        return ans, np.sqrt(np.einsum('ii->i', covans, optimize=True))
 
     def getTransfer(self, name):
         return self.Hdict[name]['Htrans']
@@ -267,26 +301,26 @@ class EEChistReader:
         
         Nax = len(mat.shape)//2
         if Nax==3:
-            forward = np.einsum('abcijk,ijk->abc', mat, gen)
+            forward = np.einsum('abcijk,ijk->abc', mat, gen, optimize=True)
         elif Nax==2:
-            forward = np.einsum('abij,ij->ab', mat, gen)
+            forward = np.einsum('abij,ij->ab', mat, gen, optimize=True)
 
         #have to instantiate the transposed matrix
         #in contiguous memory
         #otherwise the einsum will do some crazy inefficient stuff
         #and take a million years
         if Nax==3:
-            transmat = np.ascontiguousarray(np.einsum('abcijk->ijkabc', mat))
+            transmat = np.ascontiguousarray(np.einsum('abcijk->ijkabc', mat), optimize=True)
         elif Nax==2:
-            transmat = np.ascontiguousarray(np.einsum('abij->ijab', mat))
+            transmat = np.ascontiguousarray(np.einsum('abij->ijab', mat), optimize=True)
 
         #even still, have to do it in two steps
         if Nax==3:
-            step1 = np.einsum('abcdef, defghi -> abcghi', mat, covgen)
-            covforward = np.einsum('abcghi, ghijkl -> abcjkl', step1, transmat)
+            step1 = np.einsum('abcdef, defghi -> abcghi', mat, covgen, optimize=True)
+            covforward = np.einsum('abcghi, ghijkl -> abcjkl', step1, transmat, optimize=True)
         elif Nax==2:
-            step1 = np.einsum('abde, degh -> abgh', mat, covgen)
-            covforward = np.einsum('abgh, ghjk -> abjk', step1, transmat)
+            step1 = np.einsum('abde, degh -> abgh', mat, covgen, optimize=True)
+            covforward = np.einsum('abgh, ghjk -> abjk', step1, transmat, optimize=True)
 
         #CHECK
         if other is self and othername == name:

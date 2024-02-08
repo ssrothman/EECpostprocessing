@@ -1,13 +1,15 @@
-from coffea.nanoevents import NanoEventsFactory
-import json
-from RecursiveNamespace import RecursiveNamespace
-from processing.EECProcessor import EECProcessor
+import plotting.EECutil as EECutil
+import plotting.plotEEC as plotEEC
+import matplotlib.pyplot as plt
 
-x = NanoEventsFactory.from_root('root://cmseos.fnal.gov//store/group/lpcpfnano/srothman/Jan31_2024_pythia_highstats_fixed_fixed/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/DYJetsToLL/240131_170925/0000/NANO_miniAOD_395.root', entry_start=0, entry_stop=100).events()
+x = EECutil.EEChistReader('Feb05_2024_highstats/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/Herwig/EEC/hists.pkl')
 
-with open("config.json", 'r') as f:
-    config = RecursiveNamespace(**json.load(f))
-
-p = EECProcessor(config)
-
-p.process(x)
+bins = {'order' : 0, 'pt' : 2}
+#plotEEC.plotEEC(x, 'EECs', 'Hreco', density = False, bins=bins)
+#plotEEC.plotEEC(x, 'EECs', 'HrecoUNMATCH', density = False, bins=bins)
+#plt.show()
+plotEEC.plotRatio(x, 'EECs', 'Hreco', False, 
+                  x, 'ChargedEECs', 'Hreco', False,
+                  bins1=bins, bins2=bins,
+                  mode='sigma')
+plt.show()
