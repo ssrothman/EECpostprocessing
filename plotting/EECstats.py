@@ -182,13 +182,7 @@ def change_basis(vals, cov, A):
     covindices = [i+10 for i in range(Ndim)] + [i+20 for i in range(Ndim)]
     Aindices2 = [i+20 for i in range(Ndim)] + [i+30 for i in range(Ndim)]
     ansindices = [i for i in range(Ndim)] + [i+30 for i in range(Ndim)]
-    print(A.shape)
-    print(Aindices)
-    print(cov.shape)
-    print(covindices)
-    print(A.shape)
-    print(Aindices2)
-    print(ansindices)
+
     covforward = np.einsum(A, Aindices, cov, covindices,  
                            A, Aindices2, ansindices, optimize=True)
 
@@ -203,8 +197,7 @@ def flatten(vals, cov):
     shape = vals.shape
     size = np.prod(shape)
     vals = vals.reshape(-1)
-    print(cov.shape)
-    print((size, size))
+
     cov = cov.reshape((size, size))
     return vals, cov, shape
 
