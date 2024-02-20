@@ -3,6 +3,7 @@ import awkward as ak
 from hist.axis import Variable, Integer, IntCategory
 from hist.storage import Double
 from hist import Hist
+from time import time
 
 #https://cds.cern.ch/record/2767703/files/SMP-19-009-pas.pdf
 #first jet pT from above record
@@ -34,7 +35,8 @@ class EECbinner:
         if rJet._CHSjetsname is None:
             return rJet.jets.hadronFlavour[iReco][mask]
         else:
-            return rJet.CHSjets.hadronFlavour[iReco][mask]
+            flavors = ak.max(rJet.CHSjets.hadronFlavour[iReco][mask], axis=-1)
+            return flavors
 
     def _passBtag(self, rJet, iReco, mask):
         if rJet._CHSjetsname is None:
@@ -58,7 +60,7 @@ class EECbinner:
         else:
             raise NotImplementedError("WP needs to be 'loose', 'medium', or 'tight'")
 
-        return btag > bwp
+        return ak.max(btag > bwp, axis=-1)
         
     def _passCtag(self, rJet, iReco, mask):
         if rJet._CHSjetsname is None:
@@ -85,7 +87,7 @@ class EECbinner:
             CvLwp = self._config['ctag']['CvLcuts'].loose
             CvBwp = self._config['ctag']['CvBcuts'].loose
 
-        return (CvL > CvLwp) & (CvB > CvBwp)
+        return ak.max((CvL > CvLwp) & (CvB > CvBwp), axis=-1)
 
     def _getAxis(self, name, suffix=''):
         if name == 'pt':
@@ -196,6 +198,7 @@ class EECbinner:
 
         maxorder = self._config['bins']['order']
         for order in range(2, maxorder+1):
+            t0 = time()
             proj = rTransfer.proj(order)
                        
             genwt = (rGenEEC.proj(order) - rGenEECUNMATCH.proj(order))[mask]
@@ -258,10 +261,13 @@ class EECbinner:
                     fills['eta_Reco'] = np.abs(squash(recoEta[mask2]))
                     fills['eta_Gen'] = np.abs(squash(genEta[mask2]))
 
+            #print("transfer %d setup took %0.3f seconds" % (order, time()-t0))
+            t0 = time()
             Htrans.fill(
                 **fills,
                 weight = squash(proj[mask2])
             )
+            #print("transfer %d fill took %0.3f seconds" % (order, time()-t0))
 
     def _make_and_fill_EEC(self, rEEC, rJet, nPU, wt, mask, subtract=None):
         Hproj = self._getEECHist()
@@ -270,12 +276,18 @@ class EECbinner:
         return Hproj, Hcov
 
     def _fillEEC(self, Hproj, Hcov, rEEC, rJet, nPU, wt, mask, subtract=None):
+        t0 = time()
         maxorder = self._config['bins']['order']
         projs = [rEEC.proj(order) for order in range(2, maxorder+1)]
 
         if subtract is not None:
             for order in range(2, maxorder+1):
                 projs[order-2] = projs[order-2] - subtract.proj(order)
+
+        #print("Total weights:")
+        #for q in range(len(projs)):
+        #    print("\t%d: %0.3f"%(q+2, ak.sum(projs[q])))
+        #print()
 
         nums = [ak.num(proj, axis=-1) for proj in projs]
         projs = ak.concatenate(projs, axis=-1)
@@ -325,10 +337,14 @@ class EECbinner:
         if 'eta' in self._config['axes']:
             projfills['eta'] = np.abs(squash(eta[mask2]))
 
+        #print("setup took %0.3f seconds" % (time()-t0))
+        t0 = time()
         Hproj.fill(
             **projfills,
             weight = squash(vals[mask2])
         )
+        #print("proj fill took %0.3f seconds" % (time()-t0))
+        t0 = time()
 
         Nevt = len(pt)
         extent = Hproj.axes.extent
@@ -357,8 +373,14 @@ class EECbinner:
         leftis = [0] + [i+1 for i in range(len(Hproj.axes))]
         rightis = [0] + [i+11 for i in range(len(Hproj.axes))]
         ansis = leftis[1:] + rightis[1:]
+        #print("covsetup %0.3f seconds" % (time()-t0))
+        t0 = time()
         cov = np.einsum(left, leftis, left, rightis, ansis, optimize=True)
+        #print("einsum took %0.3f seconds" % (time()-t0))
+        t0 = time()
         Hcov += cov #I love that this just works!
+        #print("addition took %0.3f seconds" % (time()-t0))
+        t0 = time()
 
     def binAll(self, readers, mask, wt):
         Htrans = self._make_and_fill_transfer(
