@@ -1,15 +1,13 @@
-import plotting.EECutil as EECutil
-import plotting.plotEEC as plotEEC
 import matplotlib.pyplot as plt
+import awkward as ak
+import numpy as np
+import json
+from importlib import reload
+import plotting.EECutil
+import plotting.plotEEC
 
-x = EECutil.EEChistReader('Feb05_2024_highstats/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/Herwig/EEC/hists.pkl')
+CORR = plotting.EECutil.EEChistReader('Feb19_2024_CORR/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Pythia_ak8/EEC')
+SUM = plotting.EECutil.EEChistReader('Feb19_2024_SUM/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Pythia_ak8/EEC')
+RAW = plotting.EECutil.EEChistReader('Feb19_2024_RAW/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Pythia_ak8/EEC')
 
 bins = {'order' : 0, 'pt' : 2}
-#plotEEC.plotEEC(x, 'EECs', 'Hreco', density = False, bins=bins)
-#plotEEC.plotEEC(x, 'EECs', 'HrecoUNMATCH', density = False, bins=bins)
-#plt.show()
-plotEEC.plotRatio(x, 'EECs', 'Hreco', False, 
-                  x, 'ChargedEECs', 'Hreco', False,
-                  bins1=bins, bins2=bins,
-                  mode='sigma')
-plt.show()

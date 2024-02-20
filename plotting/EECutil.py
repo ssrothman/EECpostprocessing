@@ -12,6 +12,24 @@ def project_out(H, axes_to_remove):
         axes.remove(ax)
     return H.project(*axes)
 
+def projectCovAsym(Hcov, bins1, bins2):
+    names = Hcov.axes.name
+    for axis in names:
+        if '_1' in axis:
+            thesebins = bins1
+        elif '_2' in axis:
+            thesebins = bins2
+        else:
+            raise ValueError(f'Axis {axis} does not have a _1 or _2')
+        axisname = axis[:-2]
+        if axisname in thesebins:
+            Hcov = Hcov[{axis : thesebins[axisname]}]
+        elif axisname != 'dRbin':
+            Hcov = project_out(Hcov, [axis])
+    #make sure axes are in correct order
+    Hcov = Hcov.project('dRbin_1', 'dRbin_2')
+    return Hcov
+
 def project(H, Hcov, bins):
     #Confirmed to handle covariances correctly :)
     names = H.axes.name
@@ -35,11 +53,12 @@ class EEChistReader:
         self.load()
 
     def load(self):
-        if os.path.exists(self.path):
-            with open(self.path, 'rb') as f:
+        pklpath = os.path.join(self.path, 'hists.pkl')
+        if os.path.exists(pklpath):
+            with open(pklpath, 'rb') as f:
                 self.Hdict = pickle.load(f)
         else:
-            raise FileNotFoundError(f'File {self.path} not found')
+            raise FileNotFoundError(f'File {pklpath} not found')
 
     @property
     def projToCov(self):
@@ -63,7 +82,7 @@ class EEChistReader:
         vals, cov = project(Hproj, Hcov, bins)
         vals, cov = maybe_density(vals, cov, density)
 
-        return vals, np.sqrt(np.einsum('ii->i', cov, optimize=True))
+        return vals, np.sqrt(diagonal(cov))
 
     def getRelationValsErrs(self, name, key, bins, density,
                             other, oname, okey, obins, odensity,
@@ -74,42 +93,58 @@ class EEChistReader:
 
             oval, _ = other.getFactorizedTransfer(oname, obins)
             ocov = np.zeros((*oval.shape, *oval.shape))
+
+            N = 1
+            oN = 1
         else:
             Hproj, Hcov = self.getProj(name, key)
             vals, cov = project(Hproj, Hcov, bins)
-            vals, cov = maybe_density(vals, cov, density)
+            vals, cov, N = maybe_density(vals, cov, density, return_N=True)
 
             oHproj, oHcov = other.getProj(oname, okey)
             oval, ocov = project(oHproj, oHcov, obins)
-            oval, ocov = maybe_density(oval, ocov, odensity)
+            oval, ocov, oN = maybe_density(oval, ocov, odensity, return_N=True)
 
         if self is not other or key != okey or name != oname or key=='factor':
             #treat them as independent
             cov1x2 = None
         else:
-            raise NotImplementedError("Need to implement proper covariances")
+            _, cov1x2 = self.getProj(name, key)
+            cov1x2 = projectCovAsym(cov1x2, bins, obins)
+            cov1x2 = cov1x2.values(flow=True)
+            #cov1x2 = None
 
+        cov1x2 = maybe_density_cross(vals, oval, density, odensity,
+                                     N, oN, cov1x2)
         ans, covans = applyRelation(vals, cov, oval, ocov, cov1x2, mode)
-        return ans, np.sqrt(np.einsum('ii->i', covans, optimize=True))
+        return ans, np.sqrt(diagonal(covans))
 
     def getTransfer(self, name):
         return self.Hdict[name]['Htrans']
 
-    def getTransferedGen(self, name):
-        gen = self.getProj(name, 'HgenPure')[0]
+    def getTransferedGen(self, name, pure=True):
+        if pure:
+            gen, covgen = self.getProj(name, 'HgenPure')
+        else:
+            gen, covgen = self.getProj(name, 'Hgen')
         names = gen.axes.name
         for axis in names:
             if self.Hdict[name]['config']['skipTrans'][axis]:
                 gen = project_out(gen, [axis])
-        return gen
+                covgen = project_out(covgen, [axis+'_1', axis+'_2'])
+        return gen, covgen
 
-    def getTransferedReco(self, name):
-        reco = self.getProj(name, 'HrecoPure')[0]
+    def getTransferedReco(self, name, pure=True):
+        if pure:
+            reco, covreco = self.getProj(name, 'HrecoPure')
+        else:
+            reco, covreco = self.getProj(name, 'Hreco')
         names = reco.axes.name
         for axis in names:
             if self.Hdict[name]['config']['skipTrans'][axis]:
                 reco = project_out(reco, [axis])
-        return reco
+                covreco = project_out(covreco, [axis+'_1', axis+'_2'])
+        return reco, covreco
     
     def getAxisIds(self, name):
         gen = {}
@@ -128,7 +163,7 @@ class EEChistReader:
 
     def getRecoAxisIds(self, name):
         genIds, recoIds, diagIds = self.getAxisIds(name)
-        Hreco = self.getTransferedReco(name)
+        Hreco = self.getTransferedReco(name)[0]
         ans = []
         for axis in Hreco.axes.name:
             if axis in recoIds:
@@ -139,7 +174,7 @@ class EEChistReader:
 
     def getGenAxisIds(self, name):
         genIds, recoIds, diagIds = self.getAxisIds(name)
-        Hgen = self.getTransferedGen(name)
+        Hgen = self.getTransferedGen(name)[0]
         ans = []
         for axis in Hgen.axes.name:
             if axis in genIds:
@@ -173,15 +208,18 @@ class EEChistReader:
         transferIds = self.getTransferAxisIds(name)
 
         #CHECK
-        reco = self.getTransferedReco(name).values(flow=True)
+        reco = self.getTransferedReco(name)[0].values(flow=True)
         summat = np.einsum(mat, transferIds, recoIds, optimize=True)
         assert (np.all(np.isclose(summat, reco)))
 
         #NORMALIZE
-        gen = self.getTransferedGen(name).values(flow=True)
+        gen = self.getTransferedGen(name)[0].values(flow=True)
         invgen = np.where(gen > 0, 1./gen, 0)
         mat = np.einsum(mat, transferIds, invgen, genIds, transferIds, 
                         optimize=True)
+
+        forwardtest = np.einsum(mat, transferIds, gen, genIds, recoIds,
+                                optimize=True)
         return mat
 
     def getFactorizedTransfer(self, name, bins={}, keepaxis='dRbin'):
@@ -218,60 +256,64 @@ class EEChistReader:
         return F, S
 
     def getGenTemplate(self, name):
-        gen, covgen = self.getProj(name, 'Hgen')
-        genUM, covgenUM = self.getProj(name, 'HgenUNMATCH')
+        gen, covgen = self.getTransferedGen(name, False)
+        genM, covgenM = self.getTransferedGen(name, True)
 
         genvals = gen.values(flow=True)
-        genUMvals = genUM.values(flow=True)
+        genMvals = genM.values(flow=True)
+        covgenvals = covgen.values(flow=True)
+        covgenMvals = covgenM.values(flow=True)
 
-        ratio = np.where(genvals > 0., genUMvals/genvals, 0)
+        #ratio, covratio = getratio(genMvals, genvals,
+        #                           covgenMvals, covgenvals,
+        #                           cov1x2 = None) #conservative choice
+        ratio = np.nan_to_num(genMvals/genvals)
+        covratio = np.zeros_like(covgenvals)
 
-        #covgenvals = covgen.values(flow=True)
-        #covgenUMvals = covgenUM.values(flow=True)
-        #note the correction for the covariance due to the correlation
-        #covratio = ratio*ratio * (covgenvals/(genvals*genvals)
-        #                          + covgenUMvals/(genUMvals*genUMvals)
-        #                          - 2*covgenvals/(genvals*genUMvals))
-        #covratio = np.where((genvals > 0.) & (genUMvals > 0), covratio, 0)
+        return ratio, covratio
         
-        return ratio, np.zeros((*ratio.shape, *ratio.shape))
-        
-    def applyGenTemplateToFull(self, name, gen, covgen):
-        ratio, covratio = self.getGenTemplate(name)
-        genvals, covgenvals = gen.values(flow=True), covgen.values(flow=True)
-
-        genUM = genvals * ratio
-
-        #covgenUM = covgen * ratio*ratio + gen*gen*covratio
-
-        return genUM, np.zeros((*genUM.shape, *genUM.shape))
-
     def getRecoTemplate(self, name):
-        reco, covreco = self.getProj(name, "Hreco")
-        recoUM, covrecoUM = self.getProj(name, "HrecoUNMATCH")
+        reco, covreco = self.getTransferedReco(name, False)
+        recoM, covrecoM = self.getTransferedReco(name, True)
 
         recovals = reco.values(flow=True)
-        recoUMvals = recoUM.values(flow=True)
+        recoMvals = recoM.values(flow=True)
+        covrecovals = covreco.values(flow=True)
+        covrecoMvals = covrecoM.values(flow=True)
 
-        ratio = np.where(recovals > 0., recoUMvals/recovals, 0)
+        #ratio, covratio = getratio(recovals, recoUMvals,
+        #                           covrecovals, covrecoUMvals,
+        #                           cov1x2 = None) #conservative choice
+        ratio = np.nan_to_num(recovals/recoMvals)
+        covratio = np.zeros_like(covrecovals)
 
-        return ratio, np.zeros((*ratio.shape, *ratio.shape))
+        return ratio, covratio
 
-    def applyRecoTemplateToPure(self, name, reco, covreco):
-        ratio, covratio = self.getRecoTemplate(name)
-        if type(reco) is hist.Hist:
-            recovals = reco.values(flow=True)
-        else:
-            recovals = reco
-        if type(covreco) is hist.Hist:
-            covrecovals = covreco.values(flow=True)
-        else:
-            covrecovals = covreco
+    def getCombinedTransferMatrix(self, name):
+        UG, _ = self.getGenTemplate(name)
+        mat = self.getTransferMat(name)
+        UR, _ = self.getRecoTemplate(name)
 
-        recoUM = recovals * ratio / (1-ratio)
-        recoUM = np.where(ratio < 1, recoUM, 0)
+        genIds = self.getGenAxisIds(name)
+        recoIds = self.getRecoAxisIds(name)
+        transferIds = self.getTransferAxisIds(name)
 
-        return recoUM, np.zeros((*recoUM.shape, *recoUM.shape))
+        matrix = np.einsum(UR, recoIds, mat, transferIds, UG, genIds,
+                           transferIds, optimize=True)
+
+        #check
+        recopure = self.getTransferedReco(name, True)[0].values(flow=True)
+        reco = self.getTransferedReco(name, False)[0].values(flow=True)
+        gen = self.getTransferedGen(name, False)[0].values(flow=True)
+
+        forwardtest = np.einsum(matrix, transferIds, gen, genIds, 
+                                recoIds, optimize=True)
+        assert (np.all((np.isclose(forwardtest, reco)) | (recopure==0)))
+        bad = ~np.isclose(forwardtest, reco)
+        if np.any(bad):
+            print("WARNING: some bins are zero in pure and nonzero in unmatched")
+
+        return matrix
 
     def forward(self, name, other=None, othername=None,
                 useTemplates=False):
@@ -281,77 +323,121 @@ class EEChistReader:
             othername = name
 
         if useTemplates:
-            fullgen, covfullgen = other.getProj(othername, 'Hgen')
-            genUM, covgenUM = self.applyGenTemplateToFull(
-                    name, fullgen, covfullgen)
-            gen = fullgen - genUM
-            covgen = covfullgen - covgenUM #this isn't quite right
-                                           #since it assumes perfect correl
-                                           #but actually the template is indep
-                                           #doesn't matter for now
-                                           #seeing as the template
-                                           #returns 0 covariance anyway
-        else:
-            gen, covgen = other.getProj(othername, 'HgenPure')
+            fullgen, covfullgen = other.getTransferedGen(name, False)
+            fullgen = fullgen.values(flow=True)
+            covfullgen = covfullgen.values(flow=True)
+            UG, covUG = self.getGenTemplate(name)
 
-        gen = gen.values(flow=True)
-        covgen = covgen.values(flow=True)
+            gen, covgen = getproduct(fullgen, UG,
+                                     covfullgen, 
+                                     covUG,
+                                     cov1x2=None) # treat as indep
+        else:
+            gen, covgen = other.getTransferedGen(name, True)
+            gen = gen.values(flow=True)
+            covgen = covgen.values(flow=True)
 
         mat = self.getTransferMat(name)
         
-        Nax = len(mat.shape)//2
-        if Nax==3:
-            forward = np.einsum('abcijk,ijk->abc', mat, gen, optimize=True)
-        elif Nax==2:
-            forward = np.einsum('abij,ij->ab', mat, gen, optimize=True)
-
-        #have to instantiate the transposed matrix
-        #in contiguous memory
-        #otherwise the einsum will do some crazy inefficient stuff
-        #and take a million years
-        if Nax==3:
-            transmat = np.ascontiguousarray(np.einsum('abcijk->ijkabc', mat), optimize=True)
-        elif Nax==2:
-            transmat = np.ascontiguousarray(np.einsum('abij->ijab', mat), optimize=True)
-
-        #even still, have to do it in two steps
-        if Nax==3:
-            step1 = np.einsum('abcdef, defghi -> abcghi', mat, covgen, optimize=True)
-            covforward = np.einsum('abcghi, ghijkl -> abcjkl', step1, transmat, optimize=True)
-        elif Nax==2:
-            step1 = np.einsum('abde, degh -> abgh', mat, covgen, optimize=True)
-            covforward = np.einsum('abgh, ghjk -> abjk', step1, transmat, optimize=True)
+        genIds = self.getGenAxisIds(name)
+        recoIds = self.getRecoAxisIds(name)
+        transferIds = self.getTransferAxisIds(name)
+        forward = np.einsum(mat, transferIds, gen, genIds, recoIds,
+                            optimize=True)
+        covforward = np.zeros_like(covgen)
 
         #CHECK
         if other is self and othername == name:
-            reco, _ = self.getProj(name, 'HrecoPure')
+            reco, _ = self.getTransferedReco(name, True)
             reco = reco.values(flow=True)
             assert (np.all(np.isclose(forward, reco)))
             print("passed assert 1")
 
         if useTemplates:
-            recoUM, covrecoUM = self.applyRecoTemplateToPure(
-                    name, forward, covforward)
-            forward = forward + recoUM
-            covforward = covforward + covrecoUM #this isn't right,
-                                                #but it doesn't matter
-                                                #because the template
-                                                #returns 0 covariance anyway
+            UR, covUR = self.getRecoTemplate(name)
+            forward, covforward = getproduct(forward, 
+                                             UR,
+                                             covforward, 
+                                             covUR,
+                                             cov1x2=None) #treat as indep
+
             #CHECK
             if other is self and othername == name:
-                reco, _ = self.getProj(name, 'Hreco')
+                reco, _ = self.getTransferedReco(name, False)
                 reco = reco.values(flow=True)
-                assert (np.all(np.isclose(forward, reco)))
+                assert (np.all((np.isclose(forward, reco)) | (forward==0)))
                 print("passed assert 2")
+                bad = ~np.isclose(forward, reco)
+                if np.sum(bad) !=0:
+                    print("WARNING: some bins are zero in pure and nonzero in unmatched")
 
         #turn these into histograms
-        Hforward = self.Hdict[name]['Hreco'].copy().reset() + forward
-        HcovForward = self.Hdict[name]['HcovReco'].copy().reset() + covforward
+        #this almost works..... but what if there are skipped indices?
+        Hforward, HcovForward = self.getTransferedReco(name)
+        Hforward = Hforward.copy().reset() + forward
+        HcovForward = HcovForward.copy().reset() + covforward
         return Hforward, HcovForward
 
-    def getForwardValsErrs(self, name, ptbin, pubin, 
+    def getForwardValsErrs(self, name, bins,
                            other=None, othername=None,
                            useTemplates=False):
         Hforward, HcovForward = self.forward(name, other, othername, 
                                              useTemplates=useTemplates)
-        return project(Hforward, HcovForward, ptbin, pubin)
+        vals, cov = project(Hforward, HcovForward, bins)
+        return vals, np.sqrt(diagonal(cov))
+
+    def dumpUnfoldingMatrices(self, name):
+        mat = self.getTransferMat(name)
+        gen, covgen = self.getTransferedGen(name, False)
+        reco, covreco = self.getTransferedReco(name, False)
+
+        basepath = os.path.join(self.path, 'unfolding', name)
+        os.makedirs(basepath, exist_ok=True)
+
+        matpath = os.path.join(basepath, 'M.npy') 
+        genpath = os.path.join(basepath, 'gen.npy')
+        recopath = os.path.join(basepath, 'reco.npy')
+        covgenpath = os.path.join(basepath, 'covgen.npy')
+        covrecopath = os.path.join(basepath, 'covreco.npy')
+
+        np.save(matpath, mat)
+        np.save(genpath, gen.values(flow=True))
+        np.save(recopath, reco.values(flow=True))
+        np.save(covgenpath, covgen.values(flow=True))
+        np.save(covrecopath, covreco.values(flow=True))
+
+        Htrans = self.getTransfer(name)
+        READMEpath = os.path.join(basepath, 'README.txt')
+        self.writeUnfoldingDocs(name, READMEpath,
+                           reco, covreco, Htrans)
+
+    def writeUnfoldingDocs(self, name, READMEpath, 
+                           Hreco, HcovReco, Htrans):
+        config = self.Hdict[name]['config']
+
+        with open(READMEpath, 'w') as f:
+            f.write("This directory contains the transfer matrix\n")
+            f.write("and gen and reco distributions in numpy format:\n")
+            f.write("M.npy: transfer matrix\n")
+            f.write("gen.npy: gen distribution\n")
+            f.write("reco.npy: reco distribution\n")
+            f.write("covgen.npy: covariance matrix of gen distribution\n")
+            f.write("covreco.npy: covariance matrix of reco distribution\n\n")
+            f.write("the shape of the gen and reco matrices are the same:\n")
+            f.write(str(Hreco.axes.name) + "\n\n")
+            f.write("the shape of the covgen and covreco matrices are the same:\n")
+            f.write(str(HcovReco.axes.name) + "\n\n")
+            f.write("the shape of the transfer matrix is:\n")
+            f.write(str(Htrans.axes.name) + "\n\n")
+            f.write("Note that the transfer matrix is diagonal in the following quantites:\n")
+            for axis in Hreco.axes.name:
+                if not config['skipTrans'][axis] and config['diagTrans'][axis]:
+                    f.write(axis + ", ")
+            f.write("\n\n")
+            f.write("NB these shapes are not compatible with naive matrix multiplication\n")
+            f.write("With numpy einsum, the foward-folding can be written\n")
+            genIds = self.getGenAxisIds(name)
+            recoIds = self.getRecoAxisIds(name)
+            transferIds = self.getTransferAxisIds(name)
+            f.write("np.einsum(M, %s, gen, %s, %s, optimize=True)"%(
+                transferIds, genIds, recoIds))

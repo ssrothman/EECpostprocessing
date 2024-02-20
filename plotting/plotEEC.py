@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors
 import scipy.stats
 
-from plotting.EECstats import applyRelation
+from plotting.EECstats import applyRelation, diagonal
 from plotting.EECutil import EEChistReader
 
 #edges = np.linspace(0, 0.5, 51)
@@ -19,7 +19,8 @@ dRedges = [0.0001 ,0.001, 0.005,
            0.03, 0.035, 0.04, 0.045, 
            0.05, 0.06, 0.07, 0.08,
            0.09, 0.10, 0.15, 0.20, 
-           0.30, 0.40, 0.50]
+           0.30, 0.40, 0.50, 0.60,
+           0.70, 0.80, 0.90, 1.00]
 dRaxis = hist.axis.Variable(dRedges, name='dR', label='$\Delta R$', flow=True)
 
 ptbins = [30, 50, 100, 150, 250, 500]
@@ -117,14 +118,13 @@ def plotForward(EECobj, name, other, othername, bins={'order' : 0},
                 logwidth=True, density=False, 
                 doTemplates = True,
                 label=None, ax=None):
-    raise NotImplementedError
     if ax is None:
         ax = plt.gca()
 
     vals, errs = EECobj.getForwardValsErrs(name, bins,
                                            other, othername,
                                            doTemplates)
-    vals, errs = applyPlotOptions(vals, errs, logwidth, density, 0)
+    vals, errs = applyPlotOptions(vals, errs, logwidth, 0)
 
     ax.set_xlabel("$\Delta R$")
     if logwidth:
@@ -139,8 +139,8 @@ def plotForward(EECobj, name, other, othername, bins={'order' : 0},
 
     ax.set_ylabel(ylabel)
 
-    xs = dRaxis.centers
-    plotValues(vals, errs, xs, label=label, ax=ax)
+    xs, xerrs = getDRcenters_errs()
+    plotValues(vals, errs, xs, xerrs, label=label, ax=ax)
 
 def plotFactors(EECobj, name, bins={'order' : 0},
                 label=None, ax=None):
@@ -162,7 +162,6 @@ def plotFactors(EECobj, name, bins={'order' : 0},
 
     ax.set_ylabel("Unfolding 'scale factors'")
 
-    print(vals)
     plotValues(vals, errs, xs, xerrs, label=label, ax=ax)
 
 def plotRatio(EECobj1, name1, key1, density1, 
@@ -171,7 +170,6 @@ def plotRatio(EECobj1, name1, key1, density1,
               logwidth=True, dRweight=0, 
               mode='ratio', hline=True, label=None, 
               ysuffix='', ax=None):
-    print(density1, density2)
     if ax is None:
         ax = plt.gca()
 
@@ -188,7 +186,7 @@ def plotRatio(EECobj1, name1, key1, density1,
         vals, covs = applyRelation(EECobj1, np.square(name1), 
                                    EECobj2, np.square(name2),
                                    None, mode)
-        errs = np.sqrt(np.einsum('ii->i', covs))
+        errs = np.sqrt(diagonal(covs))
     
     ax.set_xlabel("$\Delta R$")
     if mode == 'ratio':
@@ -478,6 +476,12 @@ def compareGenReco(EECobj, name, bins = {'order' : 0}, folder=None):
                     format='png', bbox_inches='tight')
     plt.show()
 
+def comparePurityStability_perObj(EECobjs, name, labels, bins,
+                                  purity, folder=None):
+    N = len(labels)
+    comparePurityStability(EECobjs, [name]*N, labels, [bins]*N,
+                           purity, folder)
+
 def comparePurityStability(EECobjs, names, labels, bins_l, 
                            purity, folder=None):
 
@@ -525,6 +529,14 @@ def compareEEC_perBins(EECobj, name, key, labels,
                bins_l, [density]*N,
                folder=folder, ratio_mode=ratio_mode)
 
+def compareEEC_perObj(EECobjs, name, key, labels,
+                      bins, density,
+                      folder=None, ratio_mode='ratio'):
+    N = len(labels)
+    compareEEC(EECobjs, [name]*N, [key]*N, labels,
+               [bins]*N, [density]*N,
+               folder=folder, ratio_mode=ratio_mode)
+
 def compareEEC(EECobjs, names, keys, labels, bins_l, densities,
                folder=None, ratio_mode='difference'):
     fig, (ax0, ax1) = setup_ratiopad()
@@ -533,7 +545,7 @@ def compareEEC(EECobjs, names, keys, labels, bins_l, densities,
     for i in range(len(EECobjs)):
         plotEEC(EECobjs[i], names[i], keys[i], 
                 bins=bins_l[i],
-                density=True, label=labels[i], ax=ax0)
+                density=densities[i], label=labels[i], ax=ax0)
 
     if len(EECobjs)>2:
         ax1.plot([], [])
@@ -541,9 +553,8 @@ def compareEEC(EECobjs, names, keys, labels, bins_l, densities,
         plotRatio(EECobjs[i], names[i], keys[i], densities[i],
                   EECobjs[0], names[0], keys[0], densities[0],
                   mode=ratio_mode, 
-                  bins1=bins_l[i], bins2=bins_l[0], ax=ax1)
-
-    ax1.set_ylabel("Ratio to %s"%labels[0])
+                  bins1=bins_l[i], bins2=bins_l[0], ax=ax1,
+                  ysuffix = " to %s"%labels[0])
     if folder is not None:
         raise NotImplementedError
 
@@ -591,6 +602,10 @@ def compareForwardPulls(transferobjs, transfernames, dataobjs, datanames,
                          label = labels[i])
 
     plt.show()
+
+def compareFactors_perObj(EECobjs, name, labels, bins, folder=None):
+    N = len(labels)
+    compareFactors(EECobjs, [name]*N, labels, [bins]*N, folder)
 
 def compareFactors(EECobjs, names, labels, bins_l,
                    folder=None):
