@@ -1,0 +1,95 @@
+{
+    "EECnames" : ["EECs"],
+    "MatchNames" : ["GenMatch"],
+    "names" : {
+        "puppijets" : "updatedJetsPuppi",
+        "CHSjets" : "Jet",
+        "simonjets" : "SimonJets",
+        "genjets" : "GenJet",
+        "gensimonjets" : "GenSimonJets",
+        "muons" : "Muon"
+    },
+    "jetSelection" : {
+        "pt" : 30.0,
+        "eta" : 2.0,
+        "jetID" : "tightLepVeto",
+        "puJetID" : "none",
+        "muonOverlapDR" : 0.4 
+    },
+    "genJetSelection" : {
+        "pt" : 20.0,
+        "eta" : 2.4
+    },
+    "muonSelection" : {
+        "leadpt" : 26,
+        "subpt" : 15,
+        "leadeta" : 2.4,
+        "subeta" : 2.4,
+        "oppsign" : true,
+        "ID" : "tight",
+        "iso" : "tight"
+    },
+    "eventSelection" : {
+        "trigger" : "IsoMu24",
+        "PreFireWeight" : true
+    },
+    "Zselection" : {
+        "mass" : [60,120]
+    },
+    "btag" : {
+        "algo" : "deepjet",
+        "wp" : "tight",
+        "sfpath" : "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2018_UL/btagging.json.gz",
+        "WPcuts" : {
+            "loose" : 0.0490,
+            "medium" : 0.2783,
+            "tight" : 0.7100
+        }
+    },
+    "ctag" : {
+        "algo" : "deepjet",
+        "wp" : "tight",
+        "sfpath" : "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2018_UL/ctagging.json.gz",
+        "CvLcuts" : {
+            "loose" : 0.038,
+            "medium" : 0.099,
+            "tight" : 0.282
+        },
+        "CvBcuts" : {
+            "loose" : 0.246,
+            "medium" : 0.325,
+            "tight" : 0.267
+        }
+    },
+    "sfpath" : "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/MUO/2018_UL/muon_Z_v2.json.gz",
+    "binning" : {
+        "axes" : ["pt", "dRbin", "order"],
+        "bins" : {
+            "pt" : [30, 50, 100, 150, 250, 500],
+            "nPU" : [0, 20, 40, 60, 80],
+            "eta" : [0, 0.9, 1.4, 2.5],
+            "dRbin" : 28,
+            "order" : 6
+        },
+        "skipTransfer" : {
+            "pt" : false,
+            "nPU" : false,
+            "eta" : false,
+            "dRbin" : false,
+            "order" : false,
+            "btag" : true,
+            "ctag" : true,
+            "genflav" : true
+        },
+        "diagTransfer" : {
+            "pt" : false,
+            "nPU" : true,
+            "eta" : false,
+            "dRbin" : false,
+            "order" : true,
+            "btag" : true,
+            "ctag" : true,
+            "genflav" : true
+        }
+    }
+}

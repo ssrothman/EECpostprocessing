@@ -1,11 +1,11 @@
 {
-    "EECnames" : ["EECs", "ChargedEECs"],
-    "MatchNames" : ["GenMatch", "ChargedGenMatch"],
+    "EECnames" : ["EECs"],
+    "MatchNames" : ["GenMatch"],
     "names" : {
-        "puppijets" : "updatedJetsPuppi",
+        "puppijets" : "selectedJetsAK8",
         "CHSjets" : "Jet",
         "simonjets" : "SimonJets",
-        "genjets" : "GenJet",
+        "genjets" : "selectedGenJetsAK8",
         "gensimonjets" : "GenSimonJets",
         "muons" : "Muon"
     },
@@ -13,8 +13,8 @@
         "pt" : 30.0,
         "eta" : 2.0,
         "jetID" : "tightLepVeto",
-        "puJetID" : "tight",
-        "muonOverlapDR" : 0.4 
+        "puJetID" : "none",
+        "muonOverlapDR" : 0.8 
     },
     "genJetSelection" : {
         "pt" : 20.0,
@@ -63,13 +63,13 @@
     },
     "sfpath" : "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/MUO/2018_UL/muon_Z_v2.json.gz",
     "binning" : {
-        "axes" : ["pt", "dRbin", "order", "btag"],
+        "axes" : ["pt", "dRbin", "order"],
         "bins" : {
             "pt" : [30, 50, 100, 150, 250, 500],
             "nPU" : [0, 20, 40, 60, 80],
             "eta" : [0, 0.9, 1.4, 2.5],
-            "dRbin" : 23,
-            "order" : 3
+            "dRbin" : 28,
+            "order" : 6
         },
         "skipTransfer" : {
             "pt" : false,

@@ -23,6 +23,8 @@ eec_parser = processor_parsers.add_parser('EEC', help='EEC processor')
 eec_parser.add_argument('--binwt', action='store_true')
 eec_parser.add_argument('--noeff', action='store_false', dest='ineff')
 eec_parser.add_argument('--statsplit', action='store_true')
+eec_parser.add_argument('config', type=str, default='ak8')
+
 matching_parser = processor_parsers.add_parser('matching', help='matching processor')
 matching_parser.add_argument('matchings', nargs='+', default=['DefaultMatchParticles', 'NaiveMatchParticles'])
 transfer_parser = processor_parsers.add_parser('transfer', help='transfer processor')
@@ -73,7 +75,7 @@ if args.processor == 'matching':
 elif args.processor == 'transfer':
     processor_instance = TransferProcessor()
 elif args.processor == 'EEC':
-    with open("config.json", 'r') as f:
+    with open("configs/%s.json"%args.config, 'r') as f:
         config = RecursiveNamespace(**json.load(f))
     processor_instance = EECProcessor(config, args.statsplit)
 else:
