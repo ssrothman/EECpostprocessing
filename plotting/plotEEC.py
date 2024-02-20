@@ -38,6 +38,9 @@ def setup_ratiopad(sharex=True):
     return plt.subplots(2, 1, figsize=(5, 6), sharex=sharex, 
                         height_ratios=[3,2])
 
+def savefig(fname):
+    plt.savefig(fname, format='png', bbox_inches='tight')
+
 def reflected_gaussian(binIndex, mu, sigma):
     left = np.where(binIndex!=0, binIndex-0.5, 0)
     right = binIndex+.5
@@ -61,7 +64,7 @@ def plotValues(values, errs, xs, xerrs, label=None, ax=None):
     ax.errorbar(xs, values, yerr=errs, xerr = xerrs, 
                 ms=3, fmt='o', label=label)
     if label is not None:
-        ax.legend()
+        ax.legend(loc='upper left')
 
     plt.tight_layout()
     ax.grid(True)
@@ -322,7 +325,7 @@ def transferHist(EECobj, name, bins, dRbin, axis='Gen',
     ax.hist(np.arange(len(values)), bins=np.arange(len(values)+1)-0.5, weights=values, label=label, histtype='step')
     ax.axvline(dRbin, color='k', linestyle='--')
     if label is not None:
-        plt.legend()
+        plt.legend(loc='top left')
 
 def pttitle(title, ptbin, fig=None):
     #TODO
@@ -335,7 +338,7 @@ def pttitle(title, ptbin, fig=None):
         ptmax = ptaxis.edges[ptbin+1]
         fig.suptitle("%s\n$%0.1f < p_T^{Jet} \\mathrm{[GeV]} < %0.1f$" % (title, ptmin, ptmax))
 
-def plotReco(EECobj, name, bins = {'order' : 0}, folder=None, logwidth=True):
+def plotReco(EECobj, name, bins = {'order' : 0}, show=True, logwidth=True):
     pttitle("Reco EEC", None)
     plotEEC(EECobj, name, 'Hreco', label='Total Reco', 
             bins = bins,
@@ -343,14 +346,12 @@ def plotReco(EECobj, name, bins = {'order' : 0}, folder=None, logwidth=True):
     plotEEC(EECobj, name, 'HrecoUNMATCH', label='Unmatched component',
             bins = bins,
             logwidth=logwidth, density=False)
-    if folder is not None:
-        plt.savefig("%s/RecoEEC_ptbin%d_etabin%d_pubin%d.png" % (folder, ptbin, 
-                                                                 etabin, pubin), 
-                    format='png', bbox_inches='tight')
-    plt.show()
+
+    if show:
+        plt.show()
 
 def plotPUShape(EECobj, name, bins = {'order' : 0}, 
-                folder=None, logwidth=True):
+                show=True, logwidth=True):
     pttitle("Reco EEC Shapes", None)
     plotEEC(EECobj, name, 'Hreco', label='Total Reco', 
             bins = bins,
@@ -358,13 +359,11 @@ def plotPUShape(EECobj, name, bins = {'order' : 0},
     plotEEC(EECobj, name, 'HrecoUNMATCH', label='Unmatched component',
             bins = bins,
             logwidth=logwidth, density=True)
-    if folder is not None:
-        plt.savefig("%s/PUShapes_ptbin%d_etabin%d_pubin%d.png" % (folder, ptbin, 
-                                                                  etabin, pubin), 
-                    format='png', bbox_inches='tight')
-    plt.show()
 
-def plotGen(EECobj, name, bins={'order' : 0}, folder=None, logwidth=True):
+    if show:
+        plt.show()
+
+def plotGen(EECobj, name, bins={'order' : 0}, show=True, logwidth=True):
     pttitle("Gen EEC", None)
     plotEEC(EECobj, name, 'Hgen', label='Total Gen',
             bins = bins,
@@ -372,46 +371,44 @@ def plotGen(EECobj, name, bins={'order' : 0}, folder=None, logwidth=True):
     plotEEC(EECobj, name, 'HgenUNMATCH', label='Unmatched Gen', 
             bins = bins,
             logwidth=logwidth)
-    if folder is not None:
-        plt.savefig("%s/GenEEC_ptbin%d_etabin%d_pubin%d.png" % (folder, ptbin, 
-                                                                etabin, pubin), 
-                    format='png', bbox_inches='tight')
-    plt.show()
+
+    if show:
+        plt.show()
 
 def compareEECratio_perName(EECobj, names, key, ratio_to,
                             bins, labels,
                             ratio_mode='ratio',
-                            density=False, folder=None):
+                            density=False, show=True):
     N = len(names)
     compareEECratio([EECobj]*N, names, [key]*N, labels,
                     [bins]*N, 
                     ratio_to, ratio_mode,
-                    density, folder)
+                    density, show)
 
 def compareEECratio_perBins(EECobj, name, key, ratio_to,
                           bins_l, labels, 
                           ratio_mode='sigma',
-                          density=False, folder=None):
+                          density=False, show=True):
     N = len(pubins)
     compareEECratio([EECobj]*N, [name]*N, [key]*N, labels,
                     bins_l,
                     ratio_to, ratio_mode,
-                    density, folder)
+                    density, show)
 
 def compareEECratio_perObj(EECobjs, name, key, ratio_to,
                            bins, labels,
                            ratio_mode='sigma',
-                           density=False, folder=None):
+                           density=False, show=True):
     N = len(EECobjs)
     compareEECratio(EECobjs, [name]*N, [key]*N, labels,
                     [bins]*N,
                     ratio_to, ratio_mode,
-                    density, folder)
+                    density, show)
 
 def compareEECratio(EECobjs, names, keys, labels, 
                     bins_l,
                     ratio_to, ratio_mode='difference',
-                    density=False, folder=None):
+                    density=False, show=True):
     fig, (ax0, ax1) = setup_ratiopad()
     pttitle("Ratios to %s"%ratio_to, None, fig)
     
@@ -434,13 +431,11 @@ def compareEECratio(EECobjs, names, keys, labels,
                       vals[0], errs[0], None, None,
                       mode=ratio_mode, ysuffix = " to %s"%labels[0])
 
-    if folder is not None:
-        plt.savefig("%s/test.png"%folder, format='png', bbox_inches='tight')
-    
-    plt.show()
+    if show:
+        plt.show()
 
 def plotUnmatchedShape(EECobj, name, bins={'order' : 0},
-                       folder=None, logwidth=True):
+                       show=True, logwidth=True):
     pttitle("Gen EEC Shapes", None)
     plotEEC(EECobj, name, 'Hgen', label='Total Gen',
             bins = bins,
@@ -448,13 +443,11 @@ def plotUnmatchedShape(EECobj, name, bins={'order' : 0},
     plotEEC(EECobj, name, 'HgenUNMATCH', label='Unmatched Gen',
             bins = bins,
             logwidth=logwidth, density=True)
-    if folder is not None:
-        plt.savefig("%s/UnmatchedShapes_ptbin%d_etabin%d_pubin%d.png" % (folder, ptbin,
-                                                                         etabin, pubin),
-                    format='png', bbox_inches='tight')
-    plt.show()
 
-def compareGenReco(EECobj, name, bins = {'order' : 0}, folder=None):
+    if show:
+        plt.show()
+
+def compareGenReco(EECobj, name, bins = {'order' : 0}, show=True):
     fig, (ax0, ax1) = setup_ratiopad()
 
     pttitle("Gen vs Reco EEC", None, fig)
@@ -470,20 +463,18 @@ def compareGenReco(EECobj, name, bins = {'order' : 0}, folder=None):
               ax=ax1)
 
     plt.tight_layout()
-    if folder is not None:
-        plt.savefig("%s/RecoVsGenEEC_ptbin%d.png" % (folder, ptbin, 
-                                                     etabin, pubin), 
-                    format='png', bbox_inches='tight')
-    plt.show()
+
+    if show:
+        plt.show()
 
 def comparePurityStability_perObj(EECobjs, name, labels, bins,
-                                  purity, folder=None):
+                                  purity, show=True):
     N = len(labels)
     comparePurityStability(EECobjs, [name]*N, labels, [bins]*N,
-                           purity, folder)
+                           purity, show)
 
 def comparePurityStability(EECobjs, names, labels, bins_l, 
-                           purity, folder=None):
+                           purity, show=True):
 
     if purity:
         titlename = "Purity"
@@ -495,18 +486,12 @@ def comparePurityStability(EECobjs, names, labels, bins_l,
     for EECobj, name, label, bins in zip(EECobjs, names, labels, bins_l):
         plotPurityStability(EECobj, name, bins=bins,
                             label=label, purity=purity)
-    if folder is not None:
-        plt.savefig("%s/Compare%s_ptbin%d_etabin%d_pubin%d_%s.png" % (folder,
-                                                                      titlename, ptbin,
-                                                                      etabin, 
-                                                                      pubin, 
-                                                                      which), 
-                    format='png', bbox_inches='tight')
-    plt.show()
+    if show:
+        plt.show()
 
 def compareTransferHist(EECobjs, names, labels, 
                         bins_l, dRbins, axis='Reco',
-                        logy=False, folder=None):
+                        logy=False, show=True):
     titlestr = "Slice of transfer matrix (diagonal pT bins)"
     pttitle(titlestr, None)
 
@@ -517,28 +502,27 @@ def compareTransferHist(EECobjs, names, labels,
     if logy:
         plt.yscale('log')
 
-    if folder is not None:
-        plt.savefig("%s/CompareTransferHist_%s_ptbin%d_%s%d.png" % (folder, axis, ptbin, which, thisbin), format='png', bbox_inches='tight')
-    plt.show()
+    if show:
+        plt.show()
 
 def compareEEC_perBins(EECobj, name, key, labels,
                      bins_l, density,
-                     folder=None, ratio_mode='difference'):
+                     show=True, ratio_mode='difference'):
     N = len(labels)
     compareEEC([EECobj]*N, [name]*N, [key]*N, labels,
                bins_l, [density]*N,
-               folder=folder, ratio_mode=ratio_mode)
+               show=show, ratio_mode=ratio_mode)
 
 def compareEEC_perObj(EECobjs, name, key, labels,
                       bins, density,
-                      folder=None, ratio_mode='ratio'):
+                      show=True, ratio_mode='ratio'):
     N = len(labels)
     compareEEC(EECobjs, [name]*N, [key]*N, labels,
                [bins]*N, [density]*N,
-               folder=folder, ratio_mode=ratio_mode)
+               show=show, ratio_mode=ratio_mode)
 
 def compareEEC(EECobjs, names, keys, labels, bins_l, densities,
-               folder=None, ratio_mode='difference'):
+               show=True, ratio_mode='difference'):
     fig, (ax0, ax1) = setup_ratiopad()
     pttitle("EEC comparison", None, fig)
 
@@ -555,15 +539,14 @@ def compareEEC(EECobjs, names, keys, labels, bins_l, densities,
                   mode=ratio_mode, 
                   bins1=bins_l[i], bins2=bins_l[0], ax=ax1,
                   ysuffix = " to %s"%labels[0])
-    if folder is not None:
-        raise NotImplementedError
 
-    plt.show()
+    if show:
+        plt.show()
 
 def compareForward(transferobj, transfername, dataobj, dataname,
                    bins={'order' : 0},
                    doTemplates = False,
-                   mode='ratio', folder=None,
+                   mode='ratio', show=True,
                    density=False):
     raise NotImplementedError
     fig, (ax0, ax1) = setup_ratiopad(mode!='pulls')
@@ -585,14 +568,12 @@ def compareForward(transferobj, transfername, dataobj, dataname,
                      bins=bins, mode=mode, ax=ax1,
                      density=density)
 
-    if folder is not None:
-        plt.savefig("%s/test.png"%folder, format='png', bbox_inches='tight')
-
-    plt.show()
+    if show:
+        plt.show()
 
 def compareForwardPulls(transferobjs, transfernames, dataobjs, datanames,
                         labels,bins={'order' : 0},
-                        difference=False, folder=None):
+                        difference=False, show=True):
     pttitle("Pulls from forward transfer", None)
 
     for i in range(len(transferobjs)):
@@ -603,12 +584,12 @@ def compareForwardPulls(transferobjs, transfernames, dataobjs, datanames,
 
     plt.show()
 
-def compareFactors_perObj(EECobjs, name, labels, bins, folder=None):
+def compareFactors_perObj(EECobjs, name, labels, bins, show=True):
     N = len(labels)
-    compareFactors(EECobjs, [name]*N, labels, [bins]*N, folder)
+    compareFactors(EECobjs, [name]*N, labels, [bins]*N, show)
 
 def compareFactors(EECobjs, names, labels, bins_l,
-                   folder=None):
+                   show=True):
     fig, (ax0, ax1) = setup_ratiopad()
     pttitle("EEC weight scale factors", None, fig)
 
@@ -624,8 +605,6 @@ def compareFactors(EECobjs, names, labels, bins_l,
 
     ax1.set_ylim(0.5,1.5)
 
-    if folder is not None:
-        raise NotImplementedError
-
-    plt.show()
+    if show:
+        plt.show()
     
