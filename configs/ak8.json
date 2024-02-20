@@ -14,7 +14,7 @@
         "eta" : 2.0,
         "jetID" : "tightLepVeto",
         "puJetID" : "none",
-        "muonOverlapDR" : 0.4 
+        "muonOverlapDR" : 0.8 
     },
     "genJetSelection" : {
         "pt" : 20.0,
