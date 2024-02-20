@@ -22,7 +22,7 @@
     },
     "muonSelection" : {
         "leadpt" : 26,
-        "subpt" : 15,
+        "subpt" : 26,
         "leadeta" : 2.4,
         "subeta" : 2.4,
         "oppsign" : true,
@@ -34,7 +34,7 @@
         "PreFireWeight" : true
     },
     "Zselection" : {
-        "mass" : [60,120]
+        "mass" : [71.19,111.19]
     },
     "btag" : {
         "algo" : "deepjet",
