@@ -130,6 +130,26 @@ class EECbinner:
                                name='genflav' + suffix,
                                label = 'Gen-level flavor',
                                growth=False)
+        elif name == 'xi3':
+            return Integer(0, self._config['bins']['xi3'],
+                            name='xi'+suffix,
+                            label = '$\\xi$',
+                            overflow=False, underflow=False)
+        elif name == 'phi3':
+            return Integer(0, self._config['bins']['phi3'],
+                            name ='phi'+suffix,
+                            label = '$\phi$',
+                            overflow=False, underflow=False)
+        elif name == 'RM4':
+            return Integer(0, self._config['bins']['RM4'],
+                            name = 'RM'+suffix,
+                            label = '$R_2/R_L$',
+                            overflow=False, underflow=False)
+        elif name == 'phi4':
+            return Integer(0, self._config['bins']['phi4'],
+                            name='phi'+suffix,
+                            label = '$\phi$',
+                            overflow=False, underflow=False)
         else:
             raise ValueError('Unknown axis name: %s'%name)
 
@@ -152,20 +172,91 @@ class EECbinner:
     def _getEECHist(self):
         return Hist(
             *self._getEECaxes(),
+            self._getAxis('dRbin'),
+            self._getAxis('order'),
+            storage=Double()
+        )
+
+    def _getRes3Hist(self):
+        return Hist(
+            *self._getEECaxes(),
+            self._getAxis('xi3'),
+            self._getAxis('phi3'),
+            storage=Double()
+        )
+
+    def getRes4Hist(self):
+        return Hist(
+            *self._getEECaxes(),
+            self._getAxis('RM4'),
+            self._getAxis('phi4'),
             storage=Double()
         )
 
     def _getCovHist(self):
         return Hist(
             *self._getEECaxes('_1'),
+            self._getAxis('dRbin','_1'),
+            self._getAxis('order','_1'),
             *self._getEECaxes('_2'),
+            self._getAxis('dRbin','_2'),
+            self._getAxis('order','_1'),
+            storage=Double()
+        )
+
+    def _getCovRes3Hist(self):
+        return Hist(
+            *self._getEECaxes('_1'),
+            self._getAxis('xi3','_1'),
+            self._getAxis('phi3','_1'),
+            *self._getEECaxes('_2'),
+            self._getAxis('xi3','_2'),
+            self._getAxis('phi3','_2'),
+            storage=Double()
+        )
+
+    def _getCovRes4Hist(self):
+        return Hist(
+            *self._getEECaxes('_1'),
+            self._getAxis('RM4','_1'),
+            self._getAxis('phi4','_1'),
+            *self._getEECaxes('_2'),
+            self._getAxis('RM4','_2'),
+            self._getAxis('phi4','_2'),
             storage=Double()
         )
 
     def _getTransferHist(self):
         return Hist(
             *self._getEECaxes('_Reco', transfer=True),
+            self._getAxis('dRbin', '_Reco'),
             *self._getEECaxes('_Gen', transfer=True),
+            self._getAxis('dRbin', '_Gen'),
+            *self._getTransferDiagAxes(),
+            self._getAxis('order'),
+            storage=Double()
+        )
+
+    def _getTransferRes3Hist(self):
+        return Hist(
+            *self._getEECaxes('_Reco', transfer=True),
+            self._getAxis("xi3", "_Reco"),
+            self._getAxis("phi3", "_Reco"),
+            *self._getEECaxes('_Gen', transfer=True),
+            self._getAxis("xi3", "_Gen"),
+            self._getAxis("phi3", "_Gen"),
+            *self._getTransferDiagAxes(),
+            storage=Double()
+        )
+
+    def _getTransferRes4Hist(self):
+        return Hist(
+            *self._getEECaxes('_Reco', transfer=True),
+            self._getAxis("RM4", "_Reco"),
+            self._getAxis("phi4", "_Reco"),
+            *self._getEECaxes('_Gen', transfer=True),
+            self._getAxis("RM4", "_Gen"),
+            self._getAxis("phi4", "_Gen"),
             *self._getTransferDiagAxes(),
             storage=Double()
         )
