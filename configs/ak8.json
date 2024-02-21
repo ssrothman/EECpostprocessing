@@ -1,6 +1,6 @@
 {
-    "EECnames" : ["EECs"],
-    "MatchNames" : ["GenMatch"],
+    "EECnames" : ["ChargedEECs"],
+    "MatchNames" : ["ChargedGenMatch"],
     "names" : {
         "puppijets" : "selectedJetsAK8",
         "CHSjets" : "Jet",
