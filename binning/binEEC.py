@@ -5,6 +5,8 @@ from hist.storage import Double
 from hist import Hist
 from time import time
 
+from .util import *
+
 #https://cds.cern.ch/record/2767703/files/SMP-19-009-pas.pdf
 #first jet pT from above record
 #ptbins = [30, 47, 69, 96, 128, 166, 210, 261, 319,
@@ -17,9 +19,6 @@ from time import time
 #Meng et al
 #ptbins = [30, 97, 220, 330, 468, 638, 846, 1101, 1410, 1784, 20000]
 
-def squash(arr):
-    return ak.to_numpy(ak.flatten(arr, axis=None))
-
 class EECbinner:
     def __init__(self, config, config_btag, config_ctag):
         self._config = {}
@@ -31,220 +30,98 @@ class EECbinner:
         self._config['btag'] = vars(config_btag)
         self._config['ctag'] = vars(config_ctag)
     
-    def _getGenFlav(self, rJet, iReco, mask):
-        if rJet._CHSjetsname is None:
-            return rJet.jets.hadronFlavour[iReco][mask]
-        else:
-            flavors = ak.max(rJet.CHSjets.hadronFlavour[iReco][mask], axis=-1)
-            return flavors
-
-    def _passBtag(self, rJet, iReco, mask):
-        if rJet._CHSjetsname is None:
-            return rJet.jets.hadronFlavour[iReco][mask] == 5
-        
-        CHS = rJet.CHSjets
-        if self._config['btag']['algo'] == 'deepjet':
-            btag = CHS.btagDeepFlavB[iReco][mask]
-        elif self._config['btag']['algo'] == 'deepcsv':
-            btag = CHS.btagDeepB[iReco][mask]
-        else:
-            raise NotImplementedError("deepjet and deepcsv are the only available btagging algos")
-
-        blabel = self._config['btag']['wp']
-        if blabel == 'tight':
-            bwp = self._config['btag']['WPcuts'].tight
-        elif blabel == 'medium':
-            bwp = self._config['btag']['WPcuts'].medium
-        elif blabel == 'loose':
-            bwp = self._config['btag']['WPcuts'].loose
-        else:
-            raise NotImplementedError("WP needs to be 'loose', 'medium', or 'tight'")
-
-        return ak.max(btag > bwp, axis=-1)
-        
-    def _passCtag(self, rJet, iReco, mask):
-        if rJet._CHSjetsname is None:
-            return rJet.jets.hadronFlavour[iReco][mask] == 4
-        
-        CHS = rJet.CHSjets
-        if self._config['ctag']['algo'] == 'deepjet':
-            CvL = CHS.btagDeepFlavCvL[iReco][mask]
-            CvB = CHS.btagDeepFlavCvB[iReco][mask]
-        elif self._config['ctag']['algo'] == 'deepcsv':
-            CvL = CHS.btagDeepCvL[iReco][mask]
-            CvB = CHS.btagDeepCvB[iReco][mask]
-        else:
-            raise NotImplementedError("deepjet and deepcsv are the only available btagging algos")
-
-        blabel = self._config['ctag']['wp']
-        if blabel == 'tight':
-            CvLwp = self._config['ctag']['CvLcuts'].tight
-            CvBwp = self._config['ctag']['CvBcuts'].tight
-        elif blabel == 'medium':
-            CvLwp = self._config['ctag']['CvLcuts'].medium
-            CvBwp = self._config['ctag']['CvBcuts'].medium
-        elif blabel == 'loose':
-            CvLwp = self._config['ctag']['CvLcuts'].loose
-            CvBwp = self._config['ctag']['CvBcuts'].loose
-
-        return ak.max((CvL > CvLwp) & (CvB > CvBwp), axis=-1)
-
-    def _getAxis(self, name, suffix=''):
-        if name == 'pt':
-            return Variable(self._config['bins']['pt'], 
-                            name='pt'+suffix,
-                            label = 'Jet $p_{T}$ [GeV]',
-                            overflow=True, underflow=True)
-        elif name == 'dRbin':
-            return Integer(0, self._config['bins']['dRbin'], 
-                           name='dRbin'+suffix,
-                           label = '$\Delta R$ bin',
-                           underflow=False, overflow=False)
-        elif name == 'nPU':
-            return Variable(self._config['bins']['nPU'], 
-                            name='nPU'+suffix,
-                            label='Number of PU vertices',
-                            overflow=True, underflow=False)
-        elif name == 'order':
-            return Integer(2, self._config['bins']['order']+1, 
-                           name='order'+suffix, 
-                           label = 'EEC Order',
-                           underflow=False, overflow=False)
-        elif name == 'eta':
-            return Variable(self._config['bins']['eta'],
-                            name='eta'+suffix,
-                            label = 'Jet $\eta$',
-                            overflow=False, underflow=True)
-        elif name == 'btag':
-            return Integer(0, 2, 
-                           name='btag' + suffix,
-                           label = 'btagging',
-                           underflow=False, overflow=False)
-        elif name == 'ctag':
-            return Integer(0, 2, 
-                           name='ctag' + suffix,
-                           label = 'ctagging',
-                           underflow=False, overflow=False)
-        elif name == 'genflav':
-            return IntCategory([0, 4, 5],
-                               name='genflav' + suffix,
-                               label = 'Gen-level flavor',
-                               growth=False)
-        elif name == 'xi3':
-            return Integer(0, self._config['bins']['xi3'],
-                            name='xi'+suffix,
-                            label = '$\\xi$',
-                            overflow=False, underflow=False)
-        elif name == 'phi3':
-            return Integer(0, self._config['bins']['phi3'],
-                            name ='phi'+suffix,
-                            label = '$\phi$',
-                            overflow=False, underflow=False)
-        elif name == 'RM4':
-            return Integer(0, self._config['bins']['RM4'],
-                            name = 'RM'+suffix,
-                            label = '$R_2/R_L$',
-                            overflow=False, underflow=False)
-        elif name == 'phi4':
-            return Integer(0, self._config['bins']['phi4'],
-                            name='phi'+suffix,
-                            label = '$\phi$',
-                            overflow=False, underflow=False)
-        else:
-            raise ValueError('Unknown axis name: %s'%name)
-
     def _getEECaxes(self, suffix='', transfer=False):
         axes = []
         for axis in self._config['axes']:
             if transfer and (self._config['skipTrans'][axis]
                              or self._config['diagTrans'][axis]):
                 continue
-            axes.append(self._getAxis(axis,suffix))
+            axes.append(getAxis(axis, self._config['bins'], suffix))
         return axes
 
     def _getTransferDiagAxes(self):
         axes = []
         for axis in self._config['axes']:
             if self._config['diagTrans'][axis] and not self._config['skipTrans'][axis]:
-                axes.append(self._getAxis(axis))
+                axes.append(getAxis(axis, self._config['bins']))
         return axes
     
     def _getEECHist(self):
         return Hist(
             *self._getEECaxes(),
-            self._getAxis('dRbin'),
-            self._getAxis('order'),
+            getAxis('dRbin', self._config['bins']),
+            getAxis('order', self._config['bins']),
             storage=Double()
         )
 
     def _getRes3Hist(self):
         return Hist(
             *self._getEECaxes(),
-            self._getAxis('xi3'),
-            self._getAxis('phi3'),
+            getAxis('xi3', self._config['bins']),
+            getAxis('phi3', self._config['bins']),
             storage=Double()
         )
 
     def getRes4Hist(self):
         return Hist(
             *self._getEECaxes(),
-            self._getAxis('RM4'),
-            self._getAxis('phi4'),
+            getAxis('RM4', self._config['bins']),
+            getAxis('phi4', self._config['bins']),
             storage=Double()
         )
 
     def _getCovHist(self):
         return Hist(
             *self._getEECaxes('_1'),
-            self._getAxis('dRbin','_1'),
-            self._getAxis('order','_1'),
+            getAxis('dRbin', self._config['bins'], '_1'),
+            getAxis('order', self._config['bins'], '_1'),
             *self._getEECaxes('_2'),
-            self._getAxis('dRbin','_2'),
-            self._getAxis('order','_1'),
+            getAxis('dRbin', self._config['bins'],'_2'),
+            getAxis('order', self._config['bins'],'_2'),
             storage=Double()
         )
 
     def _getCovRes3Hist(self):
         return Hist(
             *self._getEECaxes('_1'),
-            self._getAxis('xi3','_1'),
-            self._getAxis('phi3','_1'),
+            getAxis('xi3', self._config['bins'],'_1'),
+            getAxis('phi3', self._config['bins'],'_1'),
             *self._getEECaxes('_2'),
-            self._getAxis('xi3','_2'),
-            self._getAxis('phi3','_2'),
+            getAxis('xi3', self._config['bins'],'_2'),
+            getAxis('phi3', self._config['bins'],'_2'),
             storage=Double()
         )
 
     def _getCovRes4Hist(self):
         return Hist(
             *self._getEECaxes('_1'),
-            self._getAxis('RM4','_1'),
-            self._getAxis('phi4','_1'),
+            getAxis('RM4', self._config['bins'],'_1'),
+            getAxis('phi4','_1', self._config['bins'],'_1'),
             *self._getEECaxes('_2'),
-            self._getAxis('RM4','_2'),
-            self._getAxis('phi4','_2'),
+            getAxis('RM4', self._config['bins'],'_2'),
+            getAxis('phi4', self._config['bins'],'_2'),
             storage=Double()
         )
 
     def _getTransferHist(self):
         return Hist(
             *self._getEECaxes('_Reco', transfer=True),
-            self._getAxis('dRbin', '_Reco'),
+            getAxis('dRbin', self._config['bins'], '_Reco'),
             *self._getEECaxes('_Gen', transfer=True),
-            self._getAxis('dRbin', '_Gen'),
+            getAxis('dRbin', self._config['bins'], '_Gen'),
             *self._getTransferDiagAxes(),
-            self._getAxis('order'),
+            getAxis('order', self._config['bins']),
             storage=Double()
         )
 
     def _getTransferRes3Hist(self):
         return Hist(
             *self._getEECaxes('_Reco', transfer=True),
-            self._getAxis("xi3", "_Reco"),
-            self._getAxis("phi3", "_Reco"),
+            getAxis("xi3", self._config['bins'], "_Reco"),
+            getAxis("phi3", self._config['bins'], "_Reco"),
             *self._getEECaxes('_Gen', transfer=True),
-            self._getAxis("xi3", "_Gen"),
-            self._getAxis("phi3", "_Gen"),
+            getAxis("xi3", self._config['bins'], "_Gen"),
+            getAxis("phi3", self._config['bins'], "_Gen"),
             *self._getTransferDiagAxes(),
             storage=Double()
         )
@@ -252,24 +129,34 @@ class EECbinner:
     def _getTransferRes4Hist(self):
         return Hist(
             *self._getEECaxes('_Reco', transfer=True),
-            self._getAxis("RM4", "_Reco"),
-            self._getAxis("phi4", "_Reco"),
+            getAxis("RM4", self._config['bins'], "_Reco"),
+            getAxis("phi4", self._config['bins'], "_Reco"),
             *self._getEECaxes('_Gen', transfer=True),
-            self._getAxis("RM4", "_Gen"),
-            self._getAxis("phi4", "_Gen"),
+            getAxis("RM4", self._config['bins'], "_Gen"),
+            getAxis("phi4", self._config['bins'], "_Gen"),
             *self._getTransferDiagAxes(),
             storage=Double()
         )
 
     def _make_and_fill_transfer(self, rTransfer, rGenEEC, rGenEECUNMATCH,
-                               rRecoJet, rGenJet, nPU, wt, mask):
-        Htrans = self._getTransferHist()
+                               rRecoJet, rGenJet, nPU, wt, mask,
+                                mode='proj'):
+        if mode=='proj':
+            Htrans = self._getTransferHist()
+        elif mode=='res3':
+            Htrans = self._getTransferHistRes3()
+        elif mode=='res4':
+            Htrans = self._getTransferHistRes4()
+        else:
+            raise ValueError("Invalid mode %s"%mode)
+
         self._fillTransfer(Htrans, rTransfer, rGenEEC, rGenEECUNMATCH,
-                     rRecoJet, rGenJet, nPU, wt, mask)
+                     rRecoJet, rGenJet, nPU, wt, mask, mode)
         return Htrans
 
     def _fillTransfer(self, Htrans, rTransfer, rGenEEC, rGenEECUNMATCH,
-                     rRecoJet, rGenJet, nPU_o, wt, mask):
+                     rRecoJet, rGenJet, nPU_o, wt, mask,
+                      mode='proj'):
         iReco = rTransfer.iReco
         iGen = rTransfer.iGen
 
@@ -283,54 +170,49 @@ class EECbinner:
         recoEta_o = rRecoJet.simonjets.jetEta[iReco][mask]
         genEta_o = rGenJet.simonjets.jetEta[iGen][mask]
 
-        pass_ctag_o = self._passCtag(rRecoJet, iReco, mask)
-        pass_btag_o  = self._passBtag(rRecoJet, iReco, mask)
-        genflav_o = self._getGenFlav(rRecoJet, iReco, mask)
+        pass_ctag_o = passCtag(rRecoJet, iReco, mask, self._config['ctag'])
+        pass_btag_o  = passBtag(rRecoJet, iReco, mask, self._config['btag'])
+        genflav_o = getGenFlav(rRecoJet, iReco, mask)
 
         maxorder = self._config['bins']['order']
         for order in range(2, maxorder+1):
             t0 = time()
-            proj = rTransfer.proj(order)
+            vals = rTransfer.proj(order)
                        
             genwt = (rGenEEC.proj(order) - rGenEECUNMATCH.proj(order))[mask]
-            proj = (wt*proj)[mask]
+            vals = (wt*vals)[mask]
 
-            iDRGen = ak.local_index(proj, axis=2)
-            iDRReco = ak.local_index(proj, axis=3)
+            #THIS MIGHT BE WRONG NOW
+            iDRGen = ak.local_index(vals, axis=2)
+            iDRReco = ak.local_index(vals, axis=3)
 
             recoPt, genPt, recoEta, genEta, \
                     pass_btag, pass_ctag, genflav, \
                     nPU, iDRGen, genwt, _ = \
                 ak.broadcast_arrays(recoPt_o, genPt_o, recoEta_o, genEta_o,
                                     pass_btag_o, pass_ctag_o, genflav_o, 
-                                    nPU_o, iDRGen, genwt, proj)
+                                    nPU_o, iDRGen, genwt, vals)
 
-            mask2 = proj > 0
+            mask2 = vals > 0
 
             fills = {}
+            if mode=='proj':
+                fills['order'] = order
+                fills['dRbin_Reco'] = squash(iDRReco[mask2])
+                fills['dRbin_Gen'] = squash(iDRGen[mask2])
+
             if 'pt' in self._config['axes'] and not self._config['skipTrans']['pt']:
                 if self._config['diagTrans']['pt']:
                     fills['pt'] = squash(recoPt[mask2])
                 else:
                     fills['pt_Reco'] = squash(recoPt[mask2])
                     fills['pt_Gen'] = squash(genPt[mask2])
-            if 'dRbin' in self._config['axes'] and not self._config['skipTrans']['dRbin']:
-                if self._config['diagTrans']['dRbin']:
-                    fills['dRbin'] = squash(iDRReco[mask2])
-                else:
-                    fills['dRbin_Reco'] = squash(iDRReco[mask2])
-                    fills['dRbin_Gen'] = squash(iDRGen[mask2])
             if 'nPU' in self._config['axes'] and not self._config['skipTrans']['nPU']:
                 if self._config['diagTrans']['nPU']:
                     fills['nPU'] = squash(nPU[mask2])
                 else:
                     fills['nPU_Reco'] = squash(nPU[mask2])
                     fills['nPU_Gen'] = squash(nPU[mask2])
-            if 'order' in self._config['axes'] and not self._config['skipTrans']['order']:
-                if self._config['diagTrans']['order']:
-                    fills['order'] = order
-                else:
-                    raise RuntimeError("Cannot transfer along order axis")
             if 'btag' in self._config['axes'] and not self._config['skipTrans']['btag']:
                 if self._config['diagTrans']['btag']:
                     fills['btag'] = squash(pass_btag[mask2])
@@ -354,9 +236,10 @@ class EECbinner:
 
             #print("transfer %d setup took %0.3f seconds" % (order, time()-t0))
             t0 = time()
+
             Htrans.fill(
                 **fills,
-                weight = squash(proj[mask2])
+                weight = squash(vals[mask2])
             )
             #print("transfer %d fill took %0.3f seconds" % (order, time()-t0))
 
@@ -397,9 +280,9 @@ class EECbinner:
         eta = rJet.simonjets.jetEta[iJet][mask]
         vals = (projs * wt)[mask]
 
-        pass_btag  = self._passBtag(rJet, iJet, mask)
-        pass_ctag = self._passCtag(rJet, iJet, mask)
-        genflav = self._getGenFlav(rJet, iJet, mask)
+        pass_btag  = passBtag(rJet, iJet, mask, self._config['btag'])
+        pass_ctag = passCtag(rJet, iJet, mask, self._config['ctag'])
+        genflav = getGenFlav(rJet, iJet, mask)
 
         order = ak.local_index(vals, axis=2)+2
         dRbin = ak.local_index(vals, axis=3)
@@ -411,14 +294,12 @@ class EECbinner:
         mask2 = vals > 0
 
         projfills = {}
+        projfills['dRbin'] = squash(dRbin[mask2])
+        projfills['order'] = squash(order[mask2])
         if 'pt' in self._config['axes']:
             projfills['pt'] = squash(pt[mask2])
-        if 'dRbin' in self._config['axes']:
-            projfills['dRbin'] = squash(dRbin[mask2])
         if 'nPU' in self._config['axes']:
             projfills['nPU'] = squash(nPU[mask2])
-        if 'order' in self._config['axes']:
-            projfills['order'] = squash(order[mask2])
         if 'btag' in self._config['axes']:
             projfills['btag'] = squash(pass_btag[mask2])
         if 'ctag' in self._config['axes']:
@@ -473,7 +354,7 @@ class EECbinner:
         #print("addition took %0.3f seconds" % (time()-t0))
         t0 = time()
 
-    def binAll(self, readers, mask, wt):
+    def binAll(self, readers, mask, evtMask, wt):
         Htrans = self._make_and_fill_transfer(
                 readers.rTransfer, readers.rGenEEC, readers.rGenEECUNMATCH, 
                 readers.rRecoJet, readers.rGenJet, readers.nPU, wt, mask) 

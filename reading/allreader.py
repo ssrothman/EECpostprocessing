@@ -21,7 +21,10 @@ class AllReaders:
         self._rTransfer = transferreader(x,
             config.EECnames[i] + 'Transfer')
         self._rMu = muonreader(x, config.names.muons)
-        self._nPU = x.Pileup.nPU
+        if hasattr(x, "Pileup"):
+            self._nPU = x.Pileup.nPU
+        else:
+            self._nPU = None
         self._HLT = x.HLT
 
     @property

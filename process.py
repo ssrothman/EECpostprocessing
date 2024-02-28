@@ -23,7 +23,8 @@ eec_parser = processor_parsers.add_parser('EEC', help='EEC processor')
 eec_parser.add_argument('--binwt', action='store_true')
 eec_parser.add_argument('--noeff', action='store_false', dest='ineff')
 eec_parser.add_argument('--statsplit', action='store_true')
-eec_parser.add_argument('config', type=str, default='ak8')
+eec_parser.add_argument('config', type=str)
+eec_parser.add_argument('what', type=str)
 
 matching_parser = processor_parsers.add_parser('matching', help='matching processor')
 matching_parser.add_argument('matchings', nargs='+', default=['DefaultMatchParticles', 'NaiveMatchParticles'])
@@ -77,7 +78,7 @@ elif args.processor == 'transfer':
 elif args.processor == 'EEC':
     with open("configs/%s.json"%args.config, 'r') as f:
         config = RecursiveNamespace(**json.load(f))
-    processor_instance = EECProcessor(config, args.statsplit)
+    processor_instance = EECProcessor(config, args.statsplit, what=args.what)
 else:
     raise ValueError("Unknown processor %s"%args.processor)
 
@@ -87,8 +88,8 @@ else:
 if args.input == 'local':
     destination = 'testlocal'
 else:
-    destination = "/data/submit/srothman/EEC/%s/%s"%(args.tag, args.processor)
-    destination = "./%s/%s"%(args.tag, args.processor)
+    destination = "/data/submit/srothman/EEC/%s/%s"%(args.tag, args.what)
+    destination = "./%s/%s"%(args.tag, args.what)
     if os.path.exists(destination):
         raise ValueError("Destination %s already exists"%destination)
 

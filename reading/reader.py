@@ -16,6 +16,12 @@ class EECreader:
         return self._proj[order]
 
     @property
+    def res3(self):
+        if not hasattr(self, '_res3'):
+            self._res3 = reading.readEEC.getRes3(self._x, self._name)
+        return self._res3
+
+    @property
     def iJet(self):
         if not hasattr(self, '_iJet'):
             self._iJet = reading.readEEC.getJetIdx(self._x, self._name)
@@ -47,6 +53,12 @@ class transferreader:
             self._proj[order] = reading.readEEC.getTransferP(
                 self._x, self._name, 'value%d'%order)
         return self._proj[order]
+
+    @property
+    def res3(self):
+        if not hasattr(self, '_res3'):
+            self._res3 = reading.readEEC.getTransferRes3(self._x, self._name)
+        return self._res3
 
     @property
     def iReco(self):

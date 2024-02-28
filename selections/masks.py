@@ -47,8 +47,8 @@ def addMuonSelections(selection, rmu, config):
     selection.add("twomu", ak.count(rmu.muons.pt, axis=-1) >= 2)
     selection.add("leadpt", leadmu.pt > config.leadpt)
     selection.add("subpt", submu.pt > config.subpt)
-    selection.add("leadeta", np.abs(leadmu) < config.leadeta)
-    selection.add("subeta", np.abs(submu) < config.subeta)
+    selection.add("leadeta", np.abs(leadmu.eta) < config.leadeta)
+    selection.add("subeta", np.abs(submu.eta) < config.subeta)
     if config.ID == "loose":
         selection.add("leadID", leadmu.looseId)
         selection.add("subID", submu.looseId)
@@ -76,6 +76,8 @@ def addMuonSelections(selection, rmu, config):
     if config.oppsign:
         selection.add("oppsign", (leadmu.charge * submu.charge) < 0)
 
+    mask = selection.all(*selection.names)
+
     return selection
 
 def addEventSelections(selection, HLT, config):
@@ -85,6 +87,8 @@ def addEventSelections(selection, HLT, config):
 def addZSelections(selection, rmu, config):
     Z = rmu.Zs
     selection.add("Zmass", (Z.mass > config.mass[0]) & (Z.mass < config.mass[1]))
+    selection.add("Zpt", Z.pt > config.minPt)
+    selection.add("Zy", np.abs(Z.y) < config.maxY)
     return selection
 
 def getEventSelection(rmu, HLT, config):

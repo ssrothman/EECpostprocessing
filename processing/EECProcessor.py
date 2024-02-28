@@ -13,47 +13,21 @@ import pickle
 import os
 
 from binning.binEEC import EECbinner
-
-def write_mmaps(Hdict, basepath):
-    for name in Hdict.keys():
-        os.makedirs(os.path.join(basepath, name), exist_ok=True)
-        for key in Hdict[name]:
-            fname = os.path.join(basepath, name, key+'.npy')
-            newarr = Hdict[name][key]
-            if os.path.exists(fname):
-                the_mmap = np.memmap(fname, dtype=newarr.dtype, mode='r+',
-                                     shape=newarr.shape)
-                the_mmap[:] += newarr[:]
-            else:
-                the_mmap = np.memmap(fname, dtype=newarr.dtype, mode='w+',
-                                     shape=newarr.shape)
-                the_mmap[:] = newarr[:]
-
-def recursive_merge(old, new):
-    #operation is in place
-    if type(old) is not dict:
-        return new+old
-    else:
-        for key in old.keys():
-            new[key] = recursive_merge(old[key], new[key])
-    return new
-
-def hist_to_numpy(hist):
-    return hist.values(flow=True)
-
-def recursive_hist_to_numpy(hist):
-    if type(hist) is not dict:
-        return hist_to_numpy(hist)
-    else:
-        for key in hist.keys():
-            hist[key] = recursive_hist_to_numpy(hist[key])
-    return hist
+from binning.binEvt import EventBinner
 
 class EECProcessor(processor.ProcessorABC):
-    def __init__(self, config, statsplit=False):
+    def __init__(self, config, statsplit=False, what='EEC'):
         self.config = config
         self.statsplit = statsplit
-        self.binner = EECbinner(config.binning, config.btag, config.ctag)
+        self.what = what
+
+        if what == 'EEC':
+            self.binner = EECbinner(config.binning, config.btag, config.ctag)
+        elif what == 'Event':
+            self.binner = EventBinner(config.binning, config.btag, config.ctag)
+        else:
+            raise ValueError("invalid 'what' %s" % what)
+
 
     def postprocess(self, accumulator):
         pass
@@ -63,31 +37,17 @@ class EECProcessor(processor.ProcessorABC):
         events = NanoEventsFactory.from_root(fname).events()
         return self.process(events)
 
-    def locking_merge_on_disk(self, fname, destination):
-        # a bit of a hack because I can't get things to work reasonably
-
-        new = self.process_from_fname(fname)
-        print("--"*20)
-        print("CHECK DIFFERENCE")
-        print()
-        transreco = new['EEC']['Htrans'].project('ptReco', 'dRbinReco', 'EECwtReco')
-        reco = new['EEC']['HrecoPure']
-        print(np.max(transreco.values(flow=True) - reco.values(flow=True)))
-        print()
-        print('--'*20)
-        new = recursive_hist_to_numpy(new)
-
-        print("REQUESTING LOCK")
-        with Locker():
-            print("OBTAINED LOCK")
-            write_mmaps(new, destination)
-            print("RELEASED LOCK")
-
     def process(self, events):
         #setup inputs
         readers = []
-        for i in range(len(self.config.EECnames)):
-            readers.append(AllReaders(events, self.config, i))
+        names = []
+        if self.what == 'EEC':
+            for i in range(len(self.config.EECnames)):
+                readers.append(AllReaders(events, self.config, i))
+                names.append(self.config.EECnames[i])
+        else:
+            readers = [AllReaders(events, self.config, 0)]
+            names = ['Events']
 
         evtSel = masks.getEventSelection(
                 readers[0].rMu, readers[0].HLT, self.config)
@@ -96,6 +56,7 @@ class EECProcessor(processor.ProcessorABC):
                 evtSel, self.config.jetSelection)
 
         jetMask = jetSel.all(*jetSel.names)
+        evtMask = evtSel.all(*evtSel.names)
 
         evtWeight = weights.getEventWeight(events, readers[0].rMu.muons, 
                                            self.config)
@@ -103,20 +64,16 @@ class EECProcessor(processor.ProcessorABC):
 
         #return outputs
         result = {}
-        if self.statsplit:
-            for i in range(len(readers)):
-                EECname = self.config.EECnames[i]
-                result[EECname+"1"] = self.binner.binAll(
-                        readers[i], 
-                        jetMask & (events.event%2==0), weight)
-                result[EECname+"2"] = self.binner.binAll(
-                        readers[i], 
-                        jetMask & (events.event%2==1), weight)
-        else:
-            for i in range(len(readers)):
-                EECname = self.config.EECnames[i]
-                result[EECname] = self.binner.binAll(
-                        readers[i], 
-                        jetMask, weight)
+        for reader,name in zip(readers, names):
+            if self.statsplit:
+                result[name+"1"] = self.binner.binAll(
+                        reader, jetMask & (events.event%2==0), 
+                        evtMask & (events.event%2==0), weight)
+                result[name+"2"] = self.binner.binAll(
+                        reader, jetMask & (events.event%2==1), 
+                        evtMask & (events.event%2==1), weight)
+            else:
+                result[name] = self.binner.binAll(
+                        reader, jetMask, evtMask, weight)
 
         return result
