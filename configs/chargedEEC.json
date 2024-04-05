@@ -1,0 +1,11 @@
+{
+    "names" : {
+        "EECs" : "ChargedEECs",
+        "Matches" : "ChargedGenMatch",
+        "SimonJets" : "ChargedSimonJets", 
+        "GenSimonJets" : "GenChargedSimonJets",
+        "ControlJets" : "ChargedRandomConeJets",
+        "ControlEECs" : "ChargedRandomConeEECs"
+    }
+}
+

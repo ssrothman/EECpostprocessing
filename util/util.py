@@ -1,6 +1,18 @@
 import awkward as ak
 import numpy as np
 
+#nrepeat is just for the recursive case
+#should never be passed in the top-level call
+def unflatRecursive(arr, shape, nrepeat=1):
+    if len(shape) == 0:
+        return arr
+    else:
+        ufshape = ak.flatten(ak.prod(shape, axis=0), axis=None)
+        ufshape = np.repeat(ufshape, nrepeat)
+        arr = ak.unflatten(arr, ufshape, axis=-1)
+        nrepeat = ak.flatten(shape[0]) * nrepeat
+        return unflatRecursive(arr, shape[1:], nrepeat=nrepeat)
+
 def unflatMatrix(arr, nrows, ncols):
     nrows = ak.flatten(nrows, axis=None)
     ncols = ak.flatten(ncols, axis=None)

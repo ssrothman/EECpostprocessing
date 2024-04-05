@@ -9,19 +9,17 @@ def squash(arr):
     return ak.to_numpy(ak.flatten(arr, axis=None))
 
 def getGenFlav(rJet, iReco, mask):
-    if rJet._CHSjetsname is None:
-        if hasattr(rJet.jets, 'hadronFlavour'):
-            return rJet.jets.hadronFlavour[iReco][mask]
-        else:
-            return rJet.jets.pt[iReco][mask] * 0
+    if 'Cone' in rJet._simonjetsname:
+        return ak.zeros_like(rJet.simonjets.jetPt[iReco][mask], dtype=np.int32)
+    if hasattr(rJet.jets, 'hadronFlavour'):
+        return ak.values_astype(rJet.jets.hadronFlavour[iReco][mask],
+                                np.int32)
     else:
-        if hasattr(rJet.CHSjets, 'hadronFlavour'):
-            flavors = ak.max(rJet.CHSjets.hadronFlavour[iReco][mask], axis=-1)
-        else:
-            flavors = ak.zeros_like(rJet.jets.pt[iReco][mask])
-        return flavors
+        return ak.zeros_like(rJet.jets.pt[iReco][mask] , dtype=np.int32)
 
 def getBdisc(rJet, iReco, mask, config):
+    if 'Cone' in rJet._simonjetsname:
+        return ak.zeros_like(rJet.simonjets.jetPt[iReco][mask])
     if rJet._CHSjetsname is None:
         if hasattr(rJet.jets, 'hadronFlavour'):
             return rJet.jets.hadronFlavour[iReco][mask] == 5
@@ -39,6 +37,8 @@ def getBdisc(rJet, iReco, mask, config):
     return ak.max(btag, axis=-1)
 
 def getCvLdisc(rJet, iReco, mask, config):
+    if 'Cone' in rJet._simonjetsname:
+        return ak.zeros_like(rJet.simonjets.jetPt[iReco][mask])
     if rJet._CHSjetsname is None:
         if hasattr(rJet.jets, 'hadronFlavour'):
             return rJet.jets.hadronFlavour[iReco][mask] == 5
@@ -56,6 +56,8 @@ def getCvLdisc(rJet, iReco, mask, config):
     return ak.max(CvL, axis=-1)
 
 def getCvBdisc(rJet, iReco, mask, config):
+    if 'Cone' in rJet._simonjetsname:
+        return ak.zeros_like(rJet.simonjets.jetPt[iReco][mask])
     if rJet._CHSjetsname is None:
         if hasattr(rJet.jets, 'hadronFlavour'):
             return rJet.jets.hadronFlavour[iReco][mask] == 5
@@ -72,65 +74,73 @@ def getCvBdisc(rJet, iReco, mask, config):
 
     return ak.max(CvB, axis=-1)
 
-def passBtag(rJet, iReco, mask, config):
+def getTag(rJet, iReco, mask, config):
+    if 'Cone' in rJet._simonjetsname:
+        zeros = ak.zeros_like(rJet.simonjets.jetPt[iReco][mask]) != 0
+        return zeros
     if rJet._CHSjetsname is None:
         if hasattr(rJet.jets, 'hadronFlavour'):
-            return rJet.jets.hadronFlavour[iReco][mask] == 5
+            b = rJet.jets.hadronFlavour[iReco][mask] == 5
+            c = rJet.jets.hadronFlavour[iReco][mask] == 4
+            if config['mode'] == 'region':
+                return ak.where(b, 2, ak.where(c, 1, 0))
+            elif config['mode'] == 'btag':
+                return b
+            elif config['mode'] == 'ctag':
+                return c
+            else:
+                raise ValueError('Unknown mode: %s'%config['mode'])
         else:
-            return ak.zeros_like(rJet.jets.pt[iReco][mask])
+            zeros = ak.zeros_like(rJet.jets.pt[iReco][mask]) != 0
+            return zeros
 
     CHS = rJet.CHSjets
-    if config['algo'] == 'deepjet':
-        btag = CHS.btagDeepFlavB[iReco][mask]
-    elif config['algo'] == 'deepcsv':
-        btag = CHS.btagDeepB[iReco][mask]
-    else:
-        raise NotImplementedError("deepjet and deepcsv are the only available btagging algos")
-
-    blabel = config['wp']
-    if blabel == 'tight':
-        bwp = config['WPcuts'].tight
-    elif blabel == 'medium':
-        bwp = config['WPcuts'].medium
-    elif blabel == 'loose':
-        bwp = config['WPcuts'].loose
-    else:
-        raise NotImplementedError("WP needs to be 'loose', 'medium', or 'tight'")
-
-    return ak.max(btag > bwp, axis=-1)
     
-def passCtag(rJet, iReco, mask, config):
-    if rJet._CHSjetsname is None:
-        if hasattr(rJet.jets, 'hadronFlavour'):
-            return rJet.jets.hadronFlavour[iReco][mask] == 5
-        else:
-            return ak.zeros_like(rJet.jets.pt[iReco][mask])
-
-    CHS = rJet.CHSjets
-    if config['algo'] == 'deepjet':
+    if config['mode'] == 'region':
         CvL = CHS.btagDeepFlavCvL[iReco][mask]
         CvB = CHS.btagDeepFlavCvB[iReco][mask]
-    elif config['algo'] == 'deepcsv':
-        CvL = CHS.btagDeepCvL[iReco][mask]
-        CvB = CHS.btagDeepCvB[iReco][mask]
+
+        intercept = config['bregion'].intercept
+        slope = config['bregion'].slope
+        passB = CvL > (intercept + slope*CvB)
+
+        ccut = config['cregion'].minCvL
+        passC = CvL > ccut 
+
+        passB = ak.max(passB, axis=-1)
+        passC = ak.max(passC, axis=-1)
+
+        region = ak.where(passB, 5, ak.where(passC, 4, 0))
+
+        return region
+    elif config['mode'] == 'btag':
+        wp = vars(config['bwps'])[config['wp']]
+
+        B = CHS.btagDeepFlavB[iReco][mask]
+
+        passB = B > wp
+
+        return ak.max(passB, axis=-1)
+    elif config['mode'] == 'ctag':
+        wp_CvL, wp_CvB = config['cwps'][config['wp']]
+
+        CvL = CHS.btagDeepFlavCvL[iReco][mask]
+        CvB = CHS.btagDeepFlavCvB[iReco][mask]
+
+        passCvL = CvL > wp_CvL
+        passCvB = CvB > wp_CvB
+
+        return ak.max(passCvL & passCvB, axis=-1) 
     else:
-        raise NotImplementedError("deepjet and deepcsv are the only available btagging algos")
-
-    blabel = config['wp']
-    if blabel == 'tight':
-        CvLwp = config['CvLcuts'].tight
-        CvBwp = config['CvBcuts'].tight
-    elif blabel == 'medium':
-        CvLwp = config['CvLcuts'].medium
-        CvBwp = config['CvBcuts'].medium
-    elif blabel == 'loose':
-        CvLwp = config['CvLcuts'].loose
-        CvBwp = config['CvBcuts'].loose
-
-    return ak.max((CvL > CvLwp) & (CvB > CvBwp), axis=-1)
-
+        raise ValueError('Unknown mode: %s'%config['mode'])
+    
 def getAxis(name, config, suffix=''):
-    if name == 'pt':
+    if name == 'tag':
+        return IntCategory([0, 4, 5],
+                           name='tag'+suffix,
+                           label = 'Tagging',
+                           flow=False)
+    elif name == 'pt':
         return Variable(config['pt'], 
                         name='pt'+suffix,
                         label = 'Jet $p_{T}$ [GeV]',
@@ -156,20 +166,25 @@ def getAxis(name, config, suffix=''):
                         label = 'Jet $\eta$',
                         overflow=False, underflow=False)
     elif name == 'btag':
-        return Integer(0, 2, 
-                       name='btag' + suffix,
-                       label = 'btagging',
-                       underflow=False, overflow=False)
+        return IntCategory([0, 1],
+                           name='btag' + suffix,
+                           label = 'btagging',
+                           flow=False)
     elif name == 'ctag':
-        return Integer(0, 2, 
-                       name='ctag' + suffix,
-                       label = 'ctagging',
-                       underflow=False, overflow=False)
+        return IntCategory([0, 1], 
+                           name='ctag' + suffix,
+                           label = 'ctagging',
+                           flow=False)
     elif name == 'genflav':
         return IntCategory([0, 4, 5],
                            name='genflav' + suffix,
                            label = 'Gen-level flavor',
-                           growth=False)
+                           growth=False, flow=False)
+    elif name == 'dRbin3':
+        return Integer(0, config['dRbin3'],
+                        name='dRbin'+suffix,
+                        label = '$\Delta R$ bin',
+                        underflow=False, overflow=False)
     elif name == 'xi3':
         return Integer(0, config['xi3'],
                         name='xi'+suffix,
@@ -215,6 +230,71 @@ def getAxis(name, config, suffix=''):
                         name='MUeta'+suffix,
                         label = 'Muon $\eta$',
                         overflow=True, underflow=True)
+    elif name == "dRbin4":
+        return Integer(0, config['dRbin4'],
+                        name='dRbin'+suffix,
+                        label = '$\Delta R$ bin',
+                        underflow=False, overflow=False)
+    elif name == "shape4":
+        return Integer(0, config['shape4'],
+                        name='shape'+suffix,
+                        label = 'Shape',
+                        underflow=False, overflow=False)
+    elif name == "r4":
+        return Integer(0, config['r4'],
+                        name='r'+suffix,
+                        label = '$r$',
+                        underflow=False, overflow=False)
+    elif name == "ct4":
+        return Integer(0, config['ct4'],
+                       name='ct'+suffix,
+                       label = '$cos(\\theta)$',
+                       underflow=False, overflow=False)
+    elif name == 'partPt':
+        return Variable(config['partPt'],
+                        name='partPt'+suffix,
+                        label = 'Particle $p_{T}$ [GeV]',
+                        overflow=True, underflow=True)
+    elif name == 'DRaxis':
+        return Variable(config['DRaxis'],
+                        name='DRaxis'+suffix,
+                        label = '$\Delta R$',
+                        overflow=True, underflow=True)
+    elif name == "partCharge":
+        return Integer(0, 2,
+                       name="partCharge"+suffix,
+                       label = 'Charge',
+                       overflow=False, underflow=False)
+    elif name == "Beffpt":
+        return Variable(config['Beffpt'],
+                        name='pt'+suffix,
+                        label = 'Jet $p_{T}$ [GeV]',
+                        overflow=True, underflow=False)
+    elif name == "Beffeta":
+        return Variable(config['Beffeta'],
+                        name='eta'+suffix,
+                        label = 'Jet $\eta$',
+                        overflow=False, underflow=False)
+    elif name == "NJet":
+        return Integer(config['NJet'][0], config['NJet'][1],
+                       name='NJet'+suffix,
+                       label = 'Number of jets',
+                       overflow=True, underflow=True)
+    elif name == "Jpt":
+        return Variable(config['Jpt'],
+                        name='Jpt'+suffix,
+                        label = 'Jet $p_{T}$ [GeV]',
+                        overflow=True, underflow=True)
+    elif name == "Jeta":
+        return Variable(config['Jeta'],
+                        name='Jeta'+suffix,
+                        label = 'Jet $\eta$',
+                        overflow=False, underflow=False)
+    elif name == "NumBMatch":
+        return Integer(0, 3, 
+                       name='NumBMatch'+suffix,
+                       label = 'Number of matched AK4 CHS jets',
+                       overflow=True, underflow=False)
     else:
         raise ValueError('Unknown axis name: %s'%name)
 

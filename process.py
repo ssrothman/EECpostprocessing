@@ -18,19 +18,52 @@ import json
 
 parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
 
-processor_parsers = parser.add_subparsers(help='coffea processor to use', dest='processor', required=True)
-eec_parser = processor_parsers.add_parser('EEC', help='EEC processor')
-eec_parser.add_argument('--binwt', action='store_true')
-eec_parser.add_argument('--noeff', action='store_false', dest='ineff')
-eec_parser.add_argument('--statsplit', action='store_true')
-eec_parser.add_argument('config', type=str)
-eec_parser.add_argument('what', type=str)
+parser.add_argument('--statsplit', action='store_true')
 
-matching_parser = processor_parsers.add_parser('matching', help='matching processor')
-matching_parser.add_argument('matchings', nargs='+', default=['DefaultMatchParticles', 'NaiveMatchParticles'])
-transfer_parser = processor_parsers.add_parser('transfer', help='transfer processor')
+parser.add_argument("what", type=str)
+parser.add_argument('jettype', type=str)
+parser.add_argument('EECtype', type=str)
+parser.add_argument("era", type=str)
 
-input_group = parser.add_mutually_exclusive_group(required=False)
+syst_group = parser.add_mutually_exclusive_group(required=False)
+syst_group.add_argument('--nom', dest='syst', action='store_const',
+                        const='nom')
+
+syst_group.add_argument('--JER', dest='syst', action='store_const', 
+                        const='JER')
+syst_group.add_argument('--JES', dest='syst', action='store_const',
+                        const='JES')
+
+syst_group.add_argument("--wt_prefire", dest='syst', action='store_const',
+                        const='wt_prefire')
+syst_group.add_argument("--wt_idsf", dest='syst', action='store_const',
+                        const='wt_idsf')
+syst_group.add_argument("--wt_isosf", dest='syst', action='store_const',
+                        const='wt_isosf')
+syst_group.add_argument("--wt_triggersf", dest='syst', action='store_const',
+                        const='wt_triggersf')
+syst_group.add_argument("--wt_scale", dest='syst', action='store_const',
+                        const='wt_scale')
+syst_group.add_argument("--wt_ISR", dest='syst', action='store_const',
+                        const='wt_ISR')
+syst_group.add_argument("--wt_FSR", dest='syst', action='store_const',
+                        const='wt_FSR')
+syst_group.add_argument("--wt_PDF", dest='syst', action='store_const',
+                        const='wt_PDF')
+syst_group.add_argument("--wt_aS", dest='syst', action='store_const',
+                        const='wt_aS')
+syst_group.add_argument("--wt_PDFaS", dest='syst', action='store_const',
+                        const='wt_PDFaS')
+parser.set_defaults(syst='nom')
+
+syst_updn_group = parser.add_mutually_exclusive_group(required=False)
+syst_updn_group.add_argument('--DN', dest='syst_updn', 
+                             action='store_const', const='DN')
+syst_updn_group.add_argument('--UP', dest='syst_updn',
+                             action='store_const', const='UP')
+parser.set_defaults(syst_updn=None)
+
+input_group = parser.add_mutually_exclusive_group(required=True)
 input_group.add_argument('--LPC', dest='input', action='store_const', const='LPC')
 input_group.add_argument('--MIT', dest='input', action='store_const', const='MIT')
 input_group.add_argument('--local', dest='input', action='store_const', const='local')
@@ -38,6 +71,7 @@ parser.set_defaults(input='LPC')
 
 parser.add_argument('--tag', dest='tag', type=str, help='production tag', required=True)
 parser.add_argument('--nfiles', dest='nfiles', type=int, help='number of files to process', default=None, required=False)
+parser.add_argument('--startfile', type=int, default=0, required=False)
 
 scale_group = parser.add_mutually_exclusive_group(required=False)
 scale_group.add_argument('--force-local', dest='force_local', action='store_true', help='force local execution')
@@ -46,6 +80,9 @@ scale_group.add_argument('--custom-scale', dest='custom_scale', action='store_tr
 scale_group.add_argument('--force-slurm', dest='force_slurm', action='store_true', help='force execution via slurm')
 
 args = parser.parse_args()
+
+if args.syst != 'nom' and args.syst_updn is None:
+    raise ValueError("Must specify UP or DN for systematic")
 
 ######################################################################
 
@@ -64,34 +101,47 @@ else:
 
     files = get_rootfiles(hostid, rootpath)
     if args.nfiles is not None:
-        files = files[:args.nfiles]
+        files = files[args.startfile:args.nfiles+args.startfile]
 print("Processing %d files"%len(files))
 print(files[0])
 
 ##############################################
 
 ################### PROCESSOR ###################
-if args.processor == 'matching':
-    processor_instance = MatchingProcessor(args.matchings)
-elif args.processor == 'transfer':
-    processor_instance = TransferProcessor()
-elif args.processor == 'EEC':
-    with open("configs/%s.json"%args.config, 'r') as f:
-        config = RecursiveNamespace(**json.load(f))
-    processor_instance = EECProcessor(config, args.statsplit, what=args.what)
-else:
-    raise ValueError("Unknown processor %s"%args.processor)
+with open("configs/base.json", 'r') as f:
+    config = RecursiveNamespace(**json.load(f))
+
+with open("configs/%s.json"%args.jettype, 'r') as f:
+    config.update(json.load(f))
+
+with open("configs/%sEEC.json"%args.EECtype, 'r') as f:
+    config.update(json.load(f))
+
+processor_instance = EECProcessor(config, statsplit=args.statsplit,
+                                  what=args.what, syst=args.syst,
+                                  syst_updn=args.syst_updn,
+                                  era = args.era)
 
 ##################################################
 
 ################### OUTPUT ###################
+out_fname = 'hists'
+if args.syst != 'nom':
+    out_fname += '_%s_%s'%(args.syst, args.syst_updn)
+out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
+if args.statsplit:
+    out_fname += '_statsplit'
+out_fname += '.pkl'
+
 if args.input == 'local':
     destination = 'testlocal'
 else:
     destination = "/data/submit/srothman/EEC/%s/%s"%(args.tag, args.what)
-    destination = "./%s/%s"%(args.tag, args.what)
-    if os.path.exists(destination):
-        raise ValueError("Destination %s already exists"%destination)
+    #destination = "./%s/%s"%(args.tag, args.what)
+    if os.path.exists(os.path.join(destination, out_fname)):
+        raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
+
+print("Outputting to %s"%os.path.join(destination, out_fname))
 
 os.makedirs(destination, exist_ok=True)
 ##################################################
@@ -120,7 +170,7 @@ elif not args.custom_scale:
         executor=FuturesExecutor(workers=4) if args.local_futures else IterativeExecutor(),
         #executor=FuturesExecutor(workers=10, status=True),
         #chunksize=1000,
-        schema=NanoAODSchema
+        schema=NanoAODSchema,
     )
 else:
     print("doing custom scale")
@@ -138,7 +188,7 @@ if runner is not None:
         processor_instance=processor_instance
     )
 
-    with open(os.path.join(destination,"hists.pkl"), 'wb') as fout:
+    with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle
         pickle.dump(out, fout)
 

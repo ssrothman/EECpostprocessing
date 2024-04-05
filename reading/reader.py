@@ -16,6 +16,12 @@ class EECreader:
         return self._proj[order]
 
     @property
+    def res4(self):
+        if not hasattr(self, '_res4'):
+            self._res4 = reading.readEEC.getRes4shapes(self._x, self._name)
+        return self._res4
+
+    @property
     def res3(self):
         if not hasattr(self, '_res3'):
             self._res3 = reading.readEEC.getRes3(self._x, self._name)
@@ -121,6 +127,12 @@ class muonreader:
         return self._muons
 
     @property
+    def rawmuons(self):
+        if not hasattr(self, '_rawmuons'):
+            self._rawmuons = getRawMuons(self._x, self._name)
+        return self._rawmuons
+
+    @property
     def Zs(self):
         if not hasattr(self, '_Zs'):
             self._Zs = self._muons[:,0] + self._muons[:,1]
@@ -132,3 +144,20 @@ class muonreader:
             denominator = np.sqrt(M*M + np.square(PT))
             self._Zs['y'] = np.log(numerator/denominator)
         return self._Zs
+
+class matchreader:
+    def __init__(self, x, name):
+        self._x = x
+        self._name = name
+
+    @property
+    def iGen(self):
+        if not hasattr(self, '_iGen'):
+            self._iGen = self._x[self._name+'BK'].iGen
+        return self._iGen
+
+    @property
+    def iReco(self):
+        if not hasattr(self, '_iReco'):
+            self._iReco = self._x[self._name+'BK'].iReco
+        return self._iReco

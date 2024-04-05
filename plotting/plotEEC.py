@@ -7,6 +7,9 @@ import scipy.stats
 
 from plotting.EECstats import applyRelation, diagonal
 from plotting.EECutil import EEChistReader
+from plotting.util import *
+
+import json
 
 #edges = np.linspace(0, 0.5, 51)
 #edges[0] = 1e-10
@@ -14,32 +17,13 @@ from plotting.EECutil import EEChistReader
 #dRedges = [1e-3, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 
 #           0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50]
 
-dRedges = [0.0001 ,0.001, 0.005, 
-           0.01, 0.015, 0.02, 0.025,
-           0.03, 0.035, 0.04, 0.045, 
-           0.05, 0.06, 0.07, 0.08,
-           0.09, 0.10, 0.15, 0.20, 
-           0.30, 0.40, 0.50, 0.60,
-           0.70, 0.80, 0.90, 1.00]
-dRaxis = hist.axis.Variable(dRedges, name='dR', label='$\Delta R$', flow=True)
+import mplhep as hep
 
-ptbins = [30, 50, 100, 150, 250, 500]
-ptaxis = hist.axis.Variable(ptbins, name='pt')
-
-PUbins = [0, 20, 40, 60, 80]
-PUaxis = hist.axis.Variable(PUbins, name='nPU', underflow=False)
-
-def getDRcenters_errs():
-    left = dRaxis.centers - dRaxis.edges[:-1]
-    right = dRaxis.edges[1:] - dRaxis.centers
-    return dRaxis.centers, (left, right)
+plt.style.use(hep.style.CMS)
 
 def setup_ratiopad(sharex=True):
-    return plt.subplots(2, 1, figsize=(5, 6), sharex=sharex, 
-                        height_ratios=[3,2])
-
-def savefig(fname):
-    plt.savefig(fname, format='png', bbox_inches='tight')
+    return plt.subplots(2, 1, figsize=(10, 10), sharex=sharex, 
+                        height_ratios=[3,1])
 
 def reflected_gaussian(binIndex, mu, sigma):
     left = np.where(binIndex!=0, binIndex-0.5, 0)
@@ -55,28 +39,25 @@ def reflected_gaussian(binIndex, mu, sigma):
 
     return prob_nominal + prob_mirror
 
-def plotValues(values, errs, xs, xerrs, label=None, ax=None):
+def plotValues(values, errs, xs, xerrs, label=None, ax=None, logx=True):
     if ax is None:
         ax = plt.gca()
 
-    left = dRaxis.centers - dRaxis.edges[:-1]
-    right = dRaxis.edges[1:] - dRaxis.centers
     ax.errorbar(xs, values, yerr=errs, xerr = xerrs, 
-                ms=3, fmt='o', label=label)
+                fmt='o', label=label)
     if label is not None:
         ax.legend(loc='upper left')
 
     plt.tight_layout()
     ax.grid(True)
-    ax.set_xscale('log')
+    if logx:
+        ax.set_xscale('log')
 
 def applyPlotOptions(values, errs, logwidth, dRweight):
-    xs = dRaxis.centers
-    edges = dRaxis.edges
-
     values = values[1:-1]
     errs = errs[1:-1]
 
+    edges = np.asarray(config['binning']['bins']['dRedges'])
     if logwidth:
         widths = np.log(edges[1:]) - np.log(edges[:-1])
     else:
@@ -98,7 +79,10 @@ def plotEEC(EECobj, name, key, bins={'order' : 0},
     if ax is None:
         ax = plt.gca()
 
-    vals, errs = EECobj.getProjValsErrs(name, key, bins, density)
+    hep.cms.text("Work in progress", ax=ax)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax)
+
+    vals, errs = EECobj.getProjValsErrs(name, key, bins.copy(), density)
     vals, errs = applyPlotOptions(vals, errs, logwidth, dRweight)
 
     ax.set_xlabel("$\Delta R$")
@@ -117,12 +101,72 @@ def plotEEC(EECobj, name, key, bins={'order' : 0},
     xs, xerrs = getDRcenters_errs()
     plotValues(vals, errs, xs, xerrs, label=label, ax=ax)
 
+def plotRes3(EECobj, name, key, bins={},
+             density=False, logcolor=True,
+             ax=None):
+
+    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+
+    hep.cms.text("Work in progress", ax=ax, fontsize=22)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize = 22)
+    vals, errs = EECobj.getRes3ValsErrs(name, key, bins, density)
+
+    vals = vals[1:-1, 1:-1]
+
+    ax.set_ylabel("$\\xi$ bin")
+    ax.set_xlabel("$\\phi$ bin")
+
+    tmin = 0
+    tmax = np.max(vals)
+    tminpos = np.min(vals[vals>0])
+    q = ax.imshow(vals, origin='lower', norm=matplotlib.colors.LogNorm(tminpos, tmax) if logcolor else matplotlib.colors.Normalize(tmin, tmax), cmap='Reds')
+    plt.gcf().colorbar(q)
+    plt.show()
+
+def plotRes3Ratio(obj1, obj2, 
+                  name1, name2,
+                  key1, key2,
+                  bins1, bins2,
+                  density, logcolor,
+                  ratiomode='ratio',
+                  ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+
+    hep.cms.text("Work in progress", ax=ax, fontsize=22)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
+
+    vals, errs = obj1.getRelationValsErrs(name1, key1, bins1, density,
+                                    obj2, name2, key2, bins2, density,
+                                          ratiomode=ratiomode)
+
+    ax.set_ylabel("$\\xi$ bin")
+    ax.set_xlabel("$\\phi$ bin")
+
+    vals = vals[1:-1, 1:-1]
+
+    tmin = np.nanmin(vals)
+    tmax = np.max(vals[np.isfinite(vals)])
+    tminpos = np.nanmin(vals[vals>0])
+    print(tmin)
+    print(tmax)
+    print(tminpos)
+    q = ax.imshow(vals, origin='lower', norm=matplotlib.colors.LogNorm(tminpos, tmax) if logcolor else matplotlib.colors.Normalize(tmin, tmax), cmap='Reds')
+    plt.gcf().colorbar(q)
+    plt.show()
+
+
 def plotForward(EECobj, name, other, othername, bins={'order' : 0},
                 logwidth=True, density=False, 
                 doTemplates = True,
                 label=None, ax=None):
     if ax is None:
         ax = plt.gca()
+
+
+    hep.cms.text("Work in progress", ax=ax)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax)
 
     vals, errs = EECobj.getForwardValsErrs(name, bins,
                                            other, othername,
@@ -149,6 +193,9 @@ def plotFactors(EECobj, name, bins={'order' : 0},
                 label=None, ax=None):
     if ax is None:
         ax = plt.gca()
+
+    hep.cms.text("Work in progress", ax=ax)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax)
 
     F, _ = EECobj.getFactorizedTransfer(name, bins)
     vals = F
@@ -179,15 +226,15 @@ def plotRatio(EECobj1, name1, key1, density1,
     if isinstance(EECobj1, EEChistReader):
         vals, errs = EECobj1.getRelationValsErrs(name1, key1, bins1, density1,
                                         EECobj2, name2, key2, bins2, density2,
-                                                 mode=mode)
+                                                 ratiomode=mode)
         if mode == 'difference' and key1 != 'factor':
             vals, errs = applyPlotOptions(vals, errs, logwidth, dRweight)
         else:
             vals = vals[1:-1]
             errs = errs[1:-1]
     else:
-        vals, covs = applyRelation(EECobj1, np.square(name1), 
-                                   EECobj2, np.square(name2),
+        vals, covs = applyRelation(EECobj1, np.eye(len(name1))*np.square(name1), 
+                                   EECobj2, np.eye(len(name2))*np.square(name2),
                                    None, mode)
         errs = np.sqrt(diagonal(covs))
     
@@ -246,21 +293,43 @@ def plotFactorRatio(obj1, name1, obj2, name2,
               mode=ratio_mode)
 
 def plotPurityStability(EECobj, name, bins,
-                        purity, label=None, ax=None):
+                        purity, label=None, ax=None,
+                        wrt = 'dRbin', mode='proj',
+                        factorized=True):
     if ax is None:
         ax = plt.gca()
 
-    _, trans = EECobj.getFactorizedTransfer(name, bins)
+    hep.cms.text("Work in progress", ax=ax)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax)
 
-    xs, xerr = getDRcenters_errs()
-    xlabel = "$\Delta R"
+    if factorized:
+        _, trans = EECobj.getFactorizedTransfer(name, bins, keepaxes=[wrt], mode=mode)
+    else:
+        trans = EECobj.getCombinedTransferMatrix(name, bins, keepaxes=[wrt], mode=mode)
+
+    if wrt == 'dRbin':
+        #xs, xerr = getDRcenters_errs()
+        xlabel = "$\Delta R"
+    elif wrt == 'pt':
+        #xs, xerr = getPTcenters_errs()
+        xlabel = "Jet $p_T"
+    elif wrt == 'btag':
+        #xs = [0, 1]
+        #xerr = [0, 0]
+        xlabel = 'btag$'
+        print(trans.shape)
+    elif wrt == 'xi':
+        xlabel = '$\\xi'
+    elif wrt == 'phi':
+        xlabel = '$\\phi'
     
+
     if purity:
-        xlabel += '_{Reco}$'
+        xlabel += '^{Reco}$'
         val = np.diag(trans) / np.sum(trans, axis=1)
         ax.set_ylabel("Purity")
     else:
-        xlabel += '_{Gen}$'
+        xlabel += '^{Gen}$'
         val = np.diag(trans) / np.sum(trans, axis=0)
         ax.set_ylabel("Stability")
 
@@ -268,62 +337,68 @@ def plotPurityStability(EECobj, name, bins,
 
     ax.set_ylim(0, 1)
     
-    plotValues(val[1:-1], 0, xs, xerr, label=label, ax=ax)
+    xs = np.arange(len(val))
+    print(xs.shape)
+    xerr = 0.5
 
-def showPtTransfer(EECobj, name, etabin, pubin, ax=None):
-    raise NotImplementedError
+    plotValues(val, 0, xs, xerr, label=label, ax=ax, logx=False)
+
+def showTransfer(EECobj, name, bins,
+                 ax=None,
+                 wrt = 'dRbin', mode='proj',
+                 factorized=True, logcolor=False):
     if ax is None:
         ax = plt.gca()
 
-    trans = EECobj.getDRtransfer(name, etabin, pubin)
-    trans = np.sum(trans, axis=(1,3))
+    hep.cms.text("Work in progress", ax=ax)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax)
 
-    plt.imshow(trans, origin='lower', norm=matplotlib.colors.Normalize(1,10))
-    plt.xlabel("Reco $p_T$ bin")
-    plt.ylabel("Gen $p_T$ bin")
-    plt.colorbar()
-    plt.show()
-
-def showTransfer(EECobj, name, bins={'order' : 0},
-                 ax=None, logcolor=False):
-    if ax is None:
-        ax = plt.gca()
-
-    _, trans = EECobj.getFactorizedTransfer(name, bins)
-    xtype='dR'
-
-    plt.imshow(trans, origin='lower', norm=matplotlib.colors.LogNorm(1e-5, 1) if logcolor else matplotlib.colors.Normalize(0, 1))
-    if xtype == 'dR':
-        plt.xlabel("Reco $\Delta R$ bin")
-        plt.ylabel("Gen $\Delta R$ bin")
+    if factorized:
+        _, trans = EECobj.getFactorizedTransfer(name, bins, keepaxes=[wrt], mode=mode)
     else:
-        plt.xlabel("Reco $wt$ bin")
-        plt.ylabel("Gen $wt$ bin")
-    plt.colorbar()
-    plt.show()
+        trans = EECobj.getCombinedTransferMatrix(name, bins, keepaxes=[wrt], mode=mode)
 
-def transferHist(EECobj, name, bins, dRbin, axis='Gen',  
-                 label=None, ax=None):
+    tmin = np.min(trans)
+    tmax = np.max(trans)
+    tminpos = np.min(trans[trans>0])
+    plt.imshow(trans, origin='lower', norm=matplotlib.colors.LogNorm(tminpos, tmax) if logcolor else matplotlib.colors.Normalize(tmin, tmax), cmap='Reds')
+
+    plt.xlabel("Reco bin")
+    plt.ylabel("Gen bin")
+
+    plt.colorbar()
+    plt.sh1ow()
+
+def transferHist(EECobj, name, bins, thebin, 
+                 axis='Gen', label=None, ax=None,
+                 wrt = 'dRbin', mode='proj',
+                 factorized=True):
     if ax is None:
         ax = plt.gca()
     
-    _, trans = EECobj.getFactorizedTransfer(name, bins)
+    hep.cms.text("Work in progress", ax=ax)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax)
+
+    if factorized:
+        _, trans = EECobj.getFactorizedTransfer(name, bins, keepaxes=[wrt], mode=mode)
+    else:
+        trans = EECobj.getCombinedTransferMatrix(name, bins, keepaxes=[wrt], mode=mode)
     
     if axis == 'Gen':
-        values = trans[dRbin, :]
+        values = trans[thebin, :]
         xlabel = 'Gen'
     elif axis == 'Reco':
-        values = trans[:, dRbin]
+        values = trans[:, thebin]
         xlabel = 'Reco'
 
     values = values/np.sum(values)
-    xlabel += " $\Delta R$ bin"
+    xlabel += " bin"
 
     ax.set_xlabel(xlabel)
-    ax.set_ylabel("Fraction transfered from %s bin %d"%('reco' if axis=='Gen' else 'gen', dRbin))
+    ax.set_ylabel("Fraction transfered from %s bin %d"%('reco' if axis=='Gen' else 'gen', thebin))
 
     ax.hist(np.arange(len(values)), bins=np.arange(len(values)+1)-0.5, weights=values, label=label, histtype='step')
-    ax.axvline(dRbin, color='k', linestyle='--')
+    ax.axvline(thebin, color='k', linestyle='--')
     if label is not None:
         plt.legend(loc='top left')
 
@@ -339,7 +414,6 @@ def pttitle(title, ptbin, fig=None):
         fig.suptitle("%s\n$%0.1f < p_T^{Jet} \\mathrm{[GeV]} < %0.1f$" % (title, ptmin, ptmax))
 
 def plotReco(EECobj, name, bins = {'order' : 0}, show=True, logwidth=True):
-    pttitle("Reco EEC", None)
     plotEEC(EECobj, name, 'Hreco', label='Total Reco', 
             bins = bins,
             logwidth=logwidth, density=False)
@@ -352,7 +426,6 @@ def plotReco(EECobj, name, bins = {'order' : 0}, show=True, logwidth=True):
 
 def plotPUShape(EECobj, name, bins = {'order' : 0}, 
                 show=True, logwidth=True):
-    pttitle("Reco EEC Shapes", None)
     plotEEC(EECobj, name, 'Hreco', label='Total Reco', 
             bins = bins,
             logwidth=logwidth, density=True)
@@ -364,7 +437,6 @@ def plotPUShape(EECobj, name, bins = {'order' : 0},
         plt.show()
 
 def plotGen(EECobj, name, bins={'order' : 0}, show=True, logwidth=True):
-    pttitle("Gen EEC", None)
     plotEEC(EECobj, name, 'Hgen', label='Total Gen',
             bins = bins,
             logwidth=logwidth)
@@ -410,8 +482,17 @@ def compareEECratio(EECobjs, names, keys, labels,
                     ratio_to, ratio_mode='difference',
                     density=False, show=True):
     fig, (ax0, ax1) = setup_ratiopad()
-    pttitle("Ratios to %s"%ratio_to, None, fig)
     
+    net_bins = bins_l[0].items()
+    for i in range(1, len(bins_l)):
+        net_bins = net_bins & bins_l[i].items()
+        
+    net_bins = dict(net_bins)
+
+    text = binnedtext(net_bins)
+    #ax0.text(0.05, 0.55, text, transform=ax0.transAxes)
+    ax0.text(0.55, 0.80, text, transform=ax0.transAxes)
+
     vals = []
     errs = []
     for i in range(len(EECobjs)):
@@ -431,12 +512,13 @@ def compareEECratio(EECobjs, names, keys, labels,
                       vals[0], errs[0], None, None,
                       mode=ratio_mode, ysuffix = " to %s"%labels[0])
 
+    ax0.set_ylabel('')
+
     if show:
         plt.show()
 
 def plotUnmatchedShape(EECobj, name, bins={'order' : 0},
                        show=True, logwidth=True):
-    pttitle("Gen EEC Shapes", None)
     plotEEC(EECobj, name, 'Hgen', label='Total Gen',
             bins = bins,
             logwidth=logwidth, density=True)
@@ -449,8 +531,6 @@ def plotUnmatchedShape(EECobj, name, bins={'order' : 0},
 
 def compareGenReco(EECobj, name, bins = {'order' : 0}, show=True):
     fig, (ax0, ax1) = setup_ratiopad()
-
-    pttitle("Gen vs Reco EEC", None, fig)
 
     plotEEC(EECobj, name, 'HrecoPure', label = 'Reco - background', 
             bins=bins, ax=ax0)
@@ -493,7 +573,6 @@ def compareTransferHist(EECobjs, names, labels,
                         bins_l, dRbins, axis='Reco',
                         logy=False, show=True):
     titlestr = "Slice of transfer matrix (diagonal pT bins)"
-    pttitle(titlestr, None)
 
     for EECobj, name, label, bins, dRbin in zip(EECobjs, names, 
                                                 labels, bins_l,
@@ -507,7 +586,7 @@ def compareTransferHist(EECobjs, names, labels,
 
 def compareEEC_perBins(EECobj, name, key, labels,
                      bins_l, density,
-                     show=True, ratio_mode='difference'):
+                     show=True, ratio_mode='ratio'):
     N = len(labels)
     compareEEC([EECobj]*N, [name]*N, [key]*N, labels,
                bins_l, [density]*N,
@@ -522,9 +601,17 @@ def compareEEC_perObj(EECobjs, name, key, labels,
                show=show, ratio_mode=ratio_mode)
 
 def compareEEC(EECobjs, names, keys, labels, bins_l, densities,
-               show=True, ratio_mode='difference'):
+               show=True, ratio_mode='ratio'):
     fig, (ax0, ax1) = setup_ratiopad()
-    pttitle("EEC comparison", None, fig)
+
+    net_bins = bins_l[0].items()
+    for i in range(1, len(bins_l)):
+        net_bins = net_bins & bins_l[i].items()
+        
+    net_bins = dict(net_bins)
+
+    text = binnedtext(net_bins)
+    ax0.text(0.05, 0.55, text, transform=ax0.transAxes)
 
     for i in range(len(EECobjs)):
         plotEEC(EECobjs[i], names[i], keys[i], 
@@ -550,7 +637,6 @@ def compareForward(transferobj, transfername, dataobj, dataname,
                    density=False):
     raise NotImplementedError
     fig, (ax0, ax1) = setup_ratiopad(mode!='pulls')
-    pttitle("Forward transfer test", None, fig)
 
     plotForward(transferobj, transfername, dataobj, dataname, 
                 bins=bins,
@@ -574,7 +660,6 @@ def compareForward(transferobj, transfername, dataobj, dataname,
 def compareForwardPulls(transferobjs, transfernames, dataobjs, datanames,
                         labels,bins={'order' : 0},
                         difference=False, show=True):
-    pttitle("Pulls from forward transfer", None)
 
     for i in range(len(transferobjs)):
         plotForwardRatio(transferobjs[i], transfernames[i],
@@ -591,7 +676,6 @@ def compareFactors_perObj(EECobjs, name, labels, bins, show=True):
 def compareFactors(EECobjs, names, labels, bins_l,
                    show=True):
     fig, (ax0, ax1) = setup_ratiopad()
-    pttitle("EEC weight scale factors", None, fig)
 
     for i in range(len(EECobjs)):
         plotFactors(EECobjs[i], names[i], 
@@ -607,4 +691,57 @@ def compareFactors(EECobjs, names, labels, bins_l,
 
     if show:
         plt.show()
-    
+
+pythia = EEChistReader('Mar31_2024_nom_highstats_wbugfix/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/EEC/')
+herwig = EEChistReader('Mar31_2024_nom_highstats_wbugfix/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/EEC_0to99/')
+data = EEChistReader("Mar29_2024_nom_highstats/2018/SingleMuon/EEC")
+
+compareEECratio_perObj([pythia, herwig], 'EECs', 'HrecoPure', 'Hreco',
+                       {'order' : 0, 'pt' : 1},
+                       ['Pythia', 'Herwig'],
+                       ratio_mode='ratio',
+                       density=True)
+compareEECratio_perObj([pythia, herwig], 'EECs', 'HgenPure', 'Hgen',
+                       {'order' : 0, 'pt' : 1},
+                       ['Pythia', 'Herwig'],
+                       ratio_mode='ratio',
+                       density=True)
+
+compareEEC_perBins(pythia, 'EECs', 'Hreco', 
+                   ['truth light', 'b-pass', 'truth b'],
+                   [{'order' : 0, 'pt' : 1, 'genflav' : 0},
+                    {'order' : 0, 'pt' : 1, 'btag' : 1},
+                    {'order' : 0, 'pt' : 1, 'genflav' : 2}],
+                   True)
+
+compareEEC_perBins(data, 'EECs', 'Hreco', ['b-fail', 'b-pass'],
+                   [{'order' : 0, 'pt' : 1, 'btag' : 0},
+                    {'order' : 0, 'pt' : 1, 'btag' : 1}],
+                   True)
+compareEEC_perObj([data,pythia], 'EECs', 'Hreco', ['Data', 'Pythia'],
+                  {'order' : 0, 'pt' : 1, 'btag' : 1}, True)
+plotRes3Ratio(data, data, 
+              'EECs', 'EECs', 
+              'Hres3', 'Hres3', 
+              {'pt' : 1, 'dRbin' : 1, 'btag': 1}, {'pt' : 1, 'dRbin' : 1, 'btag' : 0},
+              True, False)
+plotRes3Ratio(pythia, data, 
+              'EECs', 'EECs', 
+              'Hres3', 'Hres3', 
+              {'pt' : 1, 'dRbin' : 1, 'btag': 1}, {'pt' : 1, 'dRbin' : 1, 'btag' : 1},
+              True, False)
+
+plotRes3(data, 'EECs', 'Hres3', {'pt' : 1, 'dRbin' : 1}, True, logcolor=False)
+plotRes3(pythia, 'EECs', 'Hres3', {'pt' : 1, 'dRbin' : 1}, True, logcolor=False)
+plotRes3Ratio(pythia, data, 
+              'EECs', 'EECs', 
+              'Hres3', 'Hres3', 
+              {'pt' : 1, 'dRbin' : 1}, {'pt' : 1, 'dRbin' : 1},
+              True, False)
+
+compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 0}, True)
+compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 1}, True)
+compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 1, 'pt' : 1}, True)
+compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 2, 'pt' : 1}, True)
+compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 2}, True)
+compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 3}, True)

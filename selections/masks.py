@@ -80,25 +80,26 @@ def addMuonSelections(selection, rmu, config):
 
     return selection
 
-def addEventSelections(selection, HLT, config):
+def addEventSelections(selection, rjet, HLT, config):
     selection.add("trigger", HLT[config.trigger])
+    selection.add("numjet", ak.num(rjet.simonjets.jetPt) >= config.MinNumJets)
     return selection
 
 def addZSelections(selection, rmu, config):
     Z = rmu.Zs
     selection.add("Zmass", (Z.mass > config.mass[0]) & (Z.mass < config.mass[1]))
-    selection.add("Zpt", Z.pt > config.minPt)
+    selection.add("Zpt", Z.pt >= config.minPt)
     selection.add("Zy", np.abs(Z.y) < config.maxY)
     return selection
 
-def getEventSelection(rmu, HLT, config):
+def getEventSelection(rmu, rjet, HLT, config, isMC):
     selection = PackedSelection()
     selection = addMuonSelections(selection, rmu, config.muonSelection)
     selection = addZSelections(selection, rmu, config.Zselection)
-    selection = addEventSelections(selection, HLT, config.eventSelection)
+    selection = addEventSelections(selection, rjet, HLT, config.eventSelection)
     return selection
 
-def getJetSelection(rjet, rmu, evtSel, config):
+def getJetSelection(rjet, rmu, evtSel, config, isMC):
     jets = rjet.jets
     selection = PackedJetSelection(evtSel)
 

@@ -10,3 +10,6 @@ def getMuons(x, name):
     else:
         warnings.warn("No RoccoR found, using pt as is")
     return ans
+
+def getRawMuons(x, name):
+    return ak.pad_none(x[name], 2)
