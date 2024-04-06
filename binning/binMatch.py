@@ -236,18 +236,18 @@ def fillResHists(Hdict, jetreader, wt=1, mask=None):
 
 def fillMatchHist(H, jetreader, wt=1, mask=None):
     data = jetreader.parts
-    jets = jetreader.simonjets
+    jets = jetreader.jets
 
     mask = ensure_mask(mask, data.pt)
     mask = mask & (~ak.all(data.nmatch == 0, axis=-1)) #mask out PU jets
 
-    jetpt, _ = ak.broadcast_arrays(jets.jetPt, data.pt)
+    jetpt, _ = ak.broadcast_arrays(jets.pt, data.pt)
     ptfrac = data.pt/jetpt
 
     wt, _ = ak.broadcast_arrays(wt, data.pt)
 
-    detajet = data.eta - jets.jetEta
-    dphijet = data.phi - jets.jetPhi
+    detajet = data.eta - jets.eta
+    dphijet = data.phi - jets.phi
     dphijet = np.where(dphijet > np.pi, dphijet - 2*np.pi, dphijet)
     dphijet = np.where(dphijet < -np.pi, dphijet + 2*np.pi, dphijet)
     dRjet = np.sqrt(detajet**2 + dphijet**2)

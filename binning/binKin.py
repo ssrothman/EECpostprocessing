@@ -91,7 +91,7 @@ class KinBinner:
 
     def _fillNJet(self, hist, rJet, jetMask, weight):
 
-        nJet = ak.num(rJet.simonjets.jetPt[jetMask])
+        nJet = ak.num(rJet.jets.corrpt[jetMask])
         weight = ak.broadcast_arrays(weight, nJet)[0]
 
         hist.fill(
@@ -105,13 +105,13 @@ class KinBinner:
         return hist
 
     def _fillJet(self, hist, rJet, jetMask, weight):
-        jet = rJet.simonjets[jetMask]
+        jet = rJet.jets[jetMask]
 
-        weight = ak.broadcast_arrays(weight, jet.jetPt)[0]
+        weight = ak.broadcast_arrays(weight, jet.corrpt)[0]
 
         hist.fill(
-            Jpt=squash(jet.jetPt),
-            Jeta=squash(jet.jetEta),
+            Jpt=squash(jet.corrpt),
+            Jeta=squash(jet.eta),
             weight=squash(weight)
         )
 
