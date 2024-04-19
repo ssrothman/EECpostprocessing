@@ -5,6 +5,7 @@ from correctionlib import CorrectionSet
 
 EPS = 1e-6
 
+
 def getMuonSF(cset, name, year, eta, pt, bad):
     nom = cset[name].evaluate(
         year,
@@ -31,16 +32,17 @@ def getMuonSF(cset, name, year, eta, pt, bad):
 
     return nom, up, dn
 
-def getAllMuonSFs(weights, prefire, muons, config, isMC):
+def getAllMuonSFs(weights, prefire, muons, config, isMC,
+                  noPrefireSF, noIDsfs, noIsosfs, noTriggersfs):
     if not isMC:
         return
 
-    if config.eventSelection.PreFireWeight:
+    if config.eventSelection.PreFireWeight and not noPrefireSF:
         weights.add("wt_prefire", prefire.Nom, 
                            prefire.Up, 
                            prefire.Dn)
 
-        cset = CorrectionSet.from_file(config.muon_sfpath)
+    cset = CorrectionSet.from_file(config.muon_sfpath)
 
     idsfnames = {
         'loose': 'NUM_LooseID_DEN_genTracks',
@@ -130,15 +132,18 @@ def getAllMuonSFs(weights, prefire, muons, config, isMC):
                                                       leadpt,
                                                       badlead)
 
-    weights.add("wt_idsf", 
-                idsf_lead*idsf_sub, 
-                idsf_lead_up*idsf_sub_up, 
-                idsf_lead_dn*idsf_sub_dn)
-    weights.add("wt_isosf", 
-                isosf_lead*isosf_sub, 
-                isosf_lead_up*isosf_sub_up, 
-                isosf_lead_dn*isosf_sub_dn)
-    weights.add("wt_triggersf", triggersf, triggersf_up, triggersf_dn)
+    if not noIDsfs:
+        weights.add("wt_idsf", 
+                    idsf_lead*idsf_sub, 
+                    idsf_lead_up*idsf_sub_up, 
+                    idsf_lead_dn*idsf_sub_dn)
+    if not noIsosfs:
+        weights.add("wt_isosf", 
+                    isosf_lead*isosf_sub, 
+                    isosf_lead_up*isosf_sub_up, 
+                    isosf_lead_dn*isosf_sub_dn)
+    if not noTriggersfs:
+        weights.add("wt_triggersf", triggersf, triggersf_up, triggersf_dn)
 
 def getCtagSF(rRecoJet, config, ans, isMC):
     if not isMC:
@@ -344,7 +349,47 @@ def getPDFweights(weights, x):
     pdfas_unc = np.sqrt( np.square(pdf_unc) + np.square(as_unc) )
     weights.add('wt_PDFaS', nom, pdfas_unc + nom, nom - pdfas_unc) 
 
-def getEventWeight(x, muons, rRecoJet, config, isMC):
+def getPUweight(weights, nTruePU, config, isMC):
+    if not isMC:
+        return
+
+    cset = CorrectionSet.from_file(config.PUreweight.path)
+    ev = cset[config.PUreweight.name]
+
+    nom = ev.evaluate(
+        nTruePU,
+        "nominal"
+    )
+
+    up = ev.evaluate(
+        nTruePU,
+        "up"
+    )
+
+    dn = ev.evaluate(
+        nTruePU,
+        "down"
+    )
+
+    weights.add("wt_PU", nom, up, dn)
+
+def getZptSF(weights, Zs, config):
+    cset = CorrectionSet.from_file(config.Zwt_path)
+    bad = ak.is_none(Zs.pt)
+    Zpt = ak.fill_none(Zs.pt, 0)
+    
+    Zsf = cset['Zwt'].evaluate(Zpt)
+    Zsf = np.where(bad, 1, Zsf)
+
+    weights.add('wt_Zpt', Zsf)
+
+def getEventWeight(x, muons, Zs, rRecoJet, config, isMC,
+                   noPUweight,
+                   noPrefireSF,
+                   noIDsfs,
+                   noIsosfs,
+                   noTriggersfs,
+                   Zreweight):
     ans = Weights(len(x), storeIndividual=True)
 
     if isMC:
@@ -357,8 +402,14 @@ def getEventWeight(x, muons, rRecoJet, config, isMC):
         getPSWts(ans, x)
         getPDFweights(ans, x)
 
+        #Zpt reweighting
+        if Zreweight:
+            print("Z reweight")
+            getZptSF(ans, Zs, config)
+        
         #muon scale factors
-        getAllMuonSFs(ans, x.L1PreFiringWeight, muons, config, isMC)
+        getAllMuonSFs(ans, x.L1PreFiringWeight, muons, config, isMC,
+                      noPrefireSF, noIDsfs, noIsosfs, noTriggersfs)
 
         #ctag reshaping SFs
         if config.tagging.mode == 'regions':
@@ -371,5 +422,9 @@ def getEventWeight(x, muons, rRecoJet, config, isMC):
             print("WARNING: skipping btag SFs for now")
         else:
             raise NotImplementedError
+
+        #pileup reweighting
+        if not noPUweight:
+            getPUweight(ans, x.Pileup.nTrueInt, config, isMC)
 
     return ans

@@ -39,8 +39,8 @@ class PackedJetSelection:
         return self.selection.names
 
 def addMuonSelections(selection, rmu, config):
-    mu0 = rmu.muons[:,0]
-    mu1 = rmu.muons[:,1]
+    mu0 = rmu.rawmuons[:,0]
+    mu1 = rmu.rawmuons[:,1]
     leadmu = ak.where(mu0.pt > mu1.pt, mu0, mu1)
     submu = ak.where(mu0.pt > mu1.pt, mu1, mu0)
 
@@ -82,7 +82,15 @@ def addMuonSelections(selection, rmu, config):
 
 def addEventSelections(selection, rjet, HLT, config):
     selection.add("trigger", HLT[config.trigger])
-    selection.add("numjet", ak.num(rjet.simonjets.jetPt) >= config.MinNumJets)
+    njet = ak.num(rjet.simonjets.jetPt)
+    print("njet", njet)
+    print('\tmin:', ak.min(njet))
+    print('\tmax:', ak.max(njet))
+    mask = (njet >= config.MinNumJets)
+    print('njet[mask]', njet[mask])
+    print('\tmin:', ak.min(njet[mask]))
+    print('\tmax:', ak.max(njet[mask]))
+    selection.add("numjet", mask)
     return selection
 
 def addZSelections(selection, rmu, config):
@@ -92,11 +100,17 @@ def addZSelections(selection, rmu, config):
     selection.add("Zy", np.abs(Z.y) < config.maxY)
     return selection
 
-def getEventSelection(rmu, rjet, HLT, config, isMC):
+def getEventSelection(rmu, rjet, HLT, config, isMC, flags):
     selection = PackedSelection()
     selection = addMuonSelections(selection, rmu, config.muonSelection)
     selection = addZSelections(selection, rmu, config.Zselection)
     selection = addEventSelections(selection, rjet, HLT, config.eventSelection)
+
+    if flags is not None:
+        for flag in flags:
+            if flag.startswith("HTcut"):
+                selection.add("genHT", rjet._x.LHE.HT < int(flag[5:]))
+
     return selection
 
 def getJetSelection(rjet, rmu, evtSel, config, isMC):

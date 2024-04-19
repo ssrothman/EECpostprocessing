@@ -2,13 +2,16 @@ import awkward as ak
 import numpy as np
 import warnings
 
-def getMuons(x, name):
+def getMuons(x, name, noRoccoR):
     ans = x[name]
     ans = ak.pad_none(ans, 2)
-    if hasattr(ans, "RoccoR"):
-        ans['pt'] = ans.pt * ans.RoccoR
+    if not noRoccoR:
+        if hasattr(ans, "RoccoR"):
+            ans['pt'] = ans.pt * ans.RoccoR
+        else:
+            warnings.warn("No RoccoR found, using pt as is")
     else:
-        warnings.warn("No RoccoR found, using pt as is")
+        warnings.warn("No RoccoR applied")
     return ans
 
 def getRawMuons(x, name):

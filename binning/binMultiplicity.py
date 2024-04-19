@@ -18,27 +18,29 @@ class MultiplicityBinner:
         return Hist(
             getAxis("pt", self._config['bins']),
             getAxis("eta", self._config['bins']),
-            getAxis("partPt", self._config['bins']),
+            getAxis("partPtCategory", self._config['bins']),
             getAxis("DRaxis", self._config['bins']),
-            getAxis("partCharge", self._config['bins']),
+            getAxis("partSpecies", self._config['bins']),
             storage=Weight()
         )
     
     def _make_and_fill(self, rJet, mask, weight):
         hist = self._getMultiplicityHist()
-        sumwt = self._fill(hist, rJet, mask, weight)
-        return hist, sumwt
+        self._fill(hist, rJet, mask, weight)
+        return hist
 
     def _fill(self, hist, rJet, mask, weight):
         parts = rJet.parts
 
-        jetwt, _ = ak.broadcast_arrays(weight, rJet.jets.pt)
+        jetwt, _ = ak.broadcast_arrays(weight, rJet.jets.corrpt)
 
-        pt, eta, weight, _ = ak.broadcast_arrays(rJet.jets.pt, rJet.jets.eta, 
+        pt, eta, weight, _ = ak.broadcast_arrays(rJet.jets.corrpt, 
+                                                 rJet.jets.eta, 
                                                  weight, parts.pt)
 
         partPt = parts.pt
-        partCharge = parts.charge!=0
+        partSpecies = ak.where(parts.charge !=0, 0, 
+                               ak.where(parts.pdgid == 22, 1, 2))
         
         deta = np.abs(eta - parts.eta)
         dphi = np.abs(rJet.jets.phi - parts.phi)
@@ -47,15 +49,14 @@ class MultiplicityBinner:
         dR = np.sqrt(deta*eta + dphi*dphi)
 
         hist.fill(pt=squash(pt[mask]), 
-                  eta=squash(eta[mask]), 
-                  partPt=squash(partPt[mask]), 
+                  eta=squash(np.abs(eta[mask])), 
+                  partPtCategory=squash(partPt[mask]), 
                   DRaxis=squash(dR[mask]), 
-                  partCharge=squash(partCharge[mask]),
+                  partSpecies=squash(partSpecies[mask]),
                   weight=squash(weight[mask])
         )
-        return ak.sum(jetwt[mask], axis=None)
 
     def binAll(self, readers, jetMask, evtMask, wt):
-        H, sumwt = self._make_and_fill(readers.rRecoJet, jetMask, wt)
+        H = self._make_and_fill(readers.rRecoJet, jetMask, wt)
 
-        return {'H' : H, 'sumwt' : sumwt}
+        return {'H' : H}

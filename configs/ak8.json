@@ -5,7 +5,7 @@
     },
     "jetSelection" : {
         "pt" : 30.0,
-        "eta" : 2.0,
+        "eta" : 1.7,
         "jetID" : "tightLepVeto",
         "puJetID" : "none",
         "muonOverlapDR" : 0.8 

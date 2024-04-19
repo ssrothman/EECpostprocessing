@@ -43,7 +43,52 @@ class KinBinner:
             getAxis("Jeta", self._config['bins']),
             storage=Weight()
         )
-    
+
+    def getHTHist(self):
+        return Hist(
+            getAxis("HT", self._config['bins']),
+            storage=Weight()
+        )
+
+    def getRhoHist(self):
+        return Hist(
+            getAxis("rho", self._config['bins']),
+            storage=Weight()
+        )
+
+    def getPUhist(self):
+        return Hist(
+            getAxis("nTruePU", self._config['bins']),
+            storage=Weight()
+        )
+
+    def _make_and_fill_PU(self, rJet, evtMask, weight):
+        hist = self.getPUhist()
+        if hasattr(rJet._x, 'Pileup'):
+            hist.fill(ak.values_astype(rJet._x.Pileup.nTrueInt[evtMask], 
+                                       np.int32), 
+                      weight=weight[evtMask])
+        return hist
+
+    def _make_and_fill_rho(self, rJet, evtMask, weight):
+        hist = self.getRhoHist()
+        self._fillRho(hist, rJet, evtMask, weight)
+        return hist
+
+    def _fillRho(self, hist, rJet, evtMask, weight):
+        rho = rJet._x.fixedGridRhoFastjetAll[evtMask]
+        hist.fill(rho, weight=weight[evtMask])
+
+    def _make_and_fill_HT(self, rJet, evtMask, weight):
+        hist = self.getHTHist()
+        self._fillHT(hist, rJet, evtMask, weight)
+        return hist
+
+    def _fillHT(self, hist, rJet, evtMask, weight):
+        if hasattr(rJet._x, 'LHE'):
+            hist.fill(rJet._x.LHE.HT[evtMask], 
+                      weight=weight[evtMask])
+
     def _make_and_fill_mu(self, rMu, evtMask, weight):
         hist = self._getMuonHist()
         self._fillMuon(hist, rMu, evtMask, weight)
@@ -84,15 +129,19 @@ class KinBinner:
             weight=squash(weight[evtMask])
         )
 
-    def _make_and_fill_NJet(self, rJet, jetMask, weight):
+    def _make_and_fill_NJet(self, rJet, jetMask, evtMask, weight):
         hist = self._getNJetHist()
-        self._fillNJet(hist, rJet, jetMask, weight)
+        self._fillNJet(hist, rJet, jetMask, evtMask, weight)
         return hist
 
-    def _fillNJet(self, hist, rJet, jetMask, weight):
+    def _fillNJet(self, hist, rJet, jetMask, evtMask, weight):
 
-        nJet = ak.num(rJet.jets.corrpt[jetMask])
-        weight = ak.broadcast_arrays(weight, nJet)[0]
+        nJet = ak.num(rJet.simonjets.jetPt[jetMask])[evtMask]
+        weight = ak.broadcast_arrays(weight, evtMask)[0][evtMask]
+        
+        print(nJet)
+        print('\tmin:', ak.min(nJet))
+        print('\tmax:', ak.max(nJet))
 
         hist.fill(
             NJet=squash(nJet),
@@ -118,18 +167,19 @@ class KinBinner:
     def binAll(self, readers, jetMask, evtMask, wt):
         Hmu = self._make_and_fill_mu(readers.rMu, evtMask, wt)
         HZ = self._make_and_fill_Z(readers.rMu, evtMask, wt)
-        HNJet = self._make_and_fill_NJet(readers.rRecoJet, jetMask, wt)
+        HNJet = self._make_and_fill_NJet(readers.rRecoJet, jetMask, evtMask, wt)
         HJet = self._make_and_fill_jet(readers.rRecoJet, jetMask, wt)
+        HHT = self._make_and_fill_HT(readers.rRecoJet, evtMask, wt)
+        Hrho = self._make_and_fill_rho(readers.rRecoJet, evtMask, wt)
+        HPU = self._make_and_fill_PU(readers.rRecoJet, evtMask, wt)
 
-        #wt = ak.broadcast_arrays(wt, evtMask)[0]
-        print(wt)
-        sumwt = ak.sum(wt, axis=None)
-    
         return {
             "Hmu": Hmu,
             "HZ": HZ,
             "HNJet": HNJet,
             "HJet": HJet,
-            "sumwt": sumwt
+            'HHT': HHT,
+            'Hrho' : Hrho,
+            'HPU' : HPU,
         }
 

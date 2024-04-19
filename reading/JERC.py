@@ -5,8 +5,13 @@ import numpy as np
 import awkward as ak
 
 class JERC_handler:
-    def __init__(self, config):
+    def __init__(self, config,
+                 noJER=False, noJEC=False):
         self.config = config
+
+        self.noJER = noJER
+        self.noJEC = noJEC
+
         self.evaluators = {}
 
     def get_JER_SFs(self, rJet, isMC):
@@ -48,7 +53,7 @@ class JERC_handler:
 
             jetidx = ak.local_index(allreaders.rRecoJet.jets.pt, 
                                     axis=1)
-            maxlen = ak.max(jetidx)
+            maxlen = ak.max(jetidx)+1
             numevt = len(jetidx)
 
             iGen = np.ones((numevt, maxlen), dtype=np.int32) * -1
@@ -63,32 +68,50 @@ class JERC_handler:
             genpt = ak.fill_none(genpt, 0)
             genpt = ak.values_astype(genpt, np.float32)
 
+            geneta = allreaders.rGenJet.jets.eta[iGen]
+            geneta = ak.fill_none(geneta, 999999)
+            geneta = ak.values_astype(geneta, np.float32)
+
+            genphi = allreaders.rGenJet.jets.phi[iGen]
+            genphi = ak.fill_none(genphi, 999999)
+            genphi = ak.values_astype(genphi, np.float32)
+
             allreaders.rRecoJet.jets['pt_gen'] = genpt
+            allreaders.rRecoJet.jets['eta_gen'] = geneta
+            allreaders.rRecoJet.jets['phi_gen'] = genphi
+
 
     def setup_JEC_stack(self, era):
+        stacknames = []
         if era == 'MC':
             files = self.config.files.MC
 
-            stacknames = self.config.JECstack.MC
-            stacknames += self.config.JECuncertainties
-            stacknames += [self.config.JER.resolution]
-            stacknames += [self.config.JER.sf]
+            if not self.noJEC:
+                stacknames += self.config.JECstack.MC
+                stacknames += self.config.JECuncertainties
+            if not self.noJER:
+                stacknames += [self.config.JER.resolution]
+                stacknames += [self.config.JER.sf]
         elif era == '2018A':
             files = self.config.files.DATA_2018A
 
-            stacknames = self.config.JECstack.DATA_2018A
+            if not self.noJEC:
+                stacknames += self.config.JECstack.DATA_2018A
         elif era == '2018B':
             files = self.config.files.DATA_2018B
 
-            stacknames = self.config.JECstack.DATA_2018B
+            if not self.noJEC:
+                stacknames = self.config.JECstack.DATA_2018B
         elif era == '2018C':
             files = self.config.files.DATA_2018C
 
-            stacknames = self.config.JECstack.DATA_2018C
+            if not self.noJEC:
+                stacknames = self.config.JECstack.DATA_2018C
         elif era == '2018D':
             files = self.config.files.DATA_2018D
 
-            stacknames = self.config.JECstack.DATA_2018D
+            if not self.noJEC:
+                stacknames = self.config.JECstack.DATA_2018D
 
         if era in self.evaluators:
             ev = self.evaluators[era]
@@ -103,6 +126,14 @@ class JERC_handler:
             self.evaluators[era] = ev
 
         stack = JECStack({key: ev[key] for key in stacknames})
+        
+        for name in stacknames:
+            print(name)
+        
+        print("JEC:", stack.jec)
+        print("JUNC", stack.junc)
+        print("JER:", stack.jer)
+        print("JERSF:", stack.jersf)
 
         return stack
 

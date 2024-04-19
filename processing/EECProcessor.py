@@ -13,26 +13,49 @@ import pickle
 
 import os
 
+from binning.binMatch2 import MatchBinner
 from binning.binEEC import EECbinner
-from binning.binEvt import EventBinner
 from binning.TrainingData import TrainingData
 from binning.binMultiplicity import MultiplicityBinner
 from binning.binBeff import BeffBinner
 from binning.binKin import KinBinner
 from binning.binBtag import BtagBinner
+from binning.binHT import HTBinner
 
 class EECProcessor(processor.ProcessorABC):
     def __init__(self, config, statsplit=False, what='EEC', 
                  syst='nom', syst_updn=None,
-                 era='MC'):
+                 era='MC', flags=None,
+                 noRoccoR=False,
+                 noJER=False, noJEC=False,
+                 noPUweight=False,
+                 noPrefireSF=False,
+                 noIDsfs=False,
+                 noIsosfs=False,
+                 noTriggersfs=False,
+                 Zreweight=False):
         self.config = config
         self.statsplit = statsplit
         self.what = what
         self.syst = syst
         self.syst_updn = syst_updn
         self.era = era
+        self.flags = flags
 
-        if what == 'EEC':
+        self.noRoccoR = noRoccoR
+        self.noJER = noJER
+        self.noJEC = noJEC
+        self.noPUweight = noPUweight
+        self.noPrefireSF = noPrefireSF
+        self.noIDsfs = noIDsfs
+        self.noIsosfs = noIsosfs
+        self.noTriggersfs = noTriggersfs
+
+        self.Zreweight = Zreweight
+
+        if what == 'Match':
+            self.binner = MatchBinner(config.binning, config.tagging)
+        elif what == 'EEC':
             self.binner = EECbinner(config.binning, config.tagging, config.controlJetSelection)
         elif what == 'Event':
             self.binner = EventBinner(config.binning, config.tagging)
@@ -46,6 +69,8 @@ class EECProcessor(processor.ProcessorABC):
             self.binner = KinBinner(config.binning, config.tagging)
         elif what == "Btag":
             self.binner = BtagBinner(config.binning, config.tagging)
+        elif what == 'HT':
+            self.binner = HTBinner(config.binning)
         else:
             raise ValueError("invalid 'what' %s" % what)
 
@@ -74,13 +99,15 @@ class EECProcessor(processor.ProcessorABC):
         isMC = hasattr(events, 'genWeight')
         self.binner.isMC = isMC
 
-        readers = AllReaders(events, self.config)
+        readers = AllReaders(events, self.config, 
+                             self.noRoccoR,
+                             self.noJER, self.noJEC)
         readers.runJEC(self.era, self.syst, self.syst_updn)
 
         evtSel = masks.getEventSelection(
                 readers.rMu, readers.rRecoJet,
                 readers.HLT, self.config,
-                isMC)
+                isMC, self.flags)
         jetSel = masks.getJetSelection(
                 readers.rRecoJet, readers.rMu, 
                 evtSel, self.config.jetSelection,
@@ -88,12 +115,24 @@ class EECProcessor(processor.ProcessorABC):
 
         jetMask = jetSel.all(*jetSel.names)
         evtMask = evtSel.all(*evtSel.names)
+        print(evtSel.names)
 
         evtWeight = weights.getEventWeight(events, 
                                            readers.rMu.rawmuons, 
+                                           readers.rMu.Zs,
                                            readers.rRecoJet,
-                                           self.config, isMC)
+                                           self.config, isMC,
+                                           self.noPUweight,
+                                           self.noPrefireSF,
+                                           self.noIDsfs,
+                                           self.noIsosfs,
+                                           self.noTriggersfs,
+                                           self.Zreweight)
         weight = self.syst_weight(evtWeight)
+        print("weight from", ak.max(weight), "to", ak.min(weight))
+        print("weight sources:")
+        for wt in evtWeight.weightStatistics.keys():
+            print("\t", wt, evtWeight.weightStatistics[wt])
 
         #return outputs
         result = {}
@@ -115,5 +154,10 @@ class EECProcessor(processor.ProcessorABC):
                 ans.to_parquet(fname)
             else:
                 result = ans
+
+        
+        result['sumwt'] = ak.sum(weight, axis=None)
+        result['sumwt_pass'] = ak.sum(weight[evtMask], axis=None)
+        result['numjet'] = ak.sum(jetMask * weight, axis=None)
 
         return result

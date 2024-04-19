@@ -28,18 +28,18 @@ def setup_htcondor(minjobs, maxjobs, path=None):
 def setup_cluster_on_submit(minjobs, maxjobs, path=None):
     import random
 
-    if path is None:
-        uuid = random.getrandbits(64)
-        log_directory = 'logs/%016x'%uuid
-    else:
-        log_directory = os.path.join(path,'logs')
+    #if path is None:
+    uuid = random.getrandbits(64)
+    log_directory = 'logs/%016x'%uuid
+    #else:
+    #    log_directory = os.path.join(path,'logs')
 
     print("saving logs at",log_directory)
 
     cluster = SLURMCluster(queue = 'submit,submit-gpu,submit-centos07,submit-gpu-centos07,submit-gpu-a30-centos07',
                            cores=1,
                            processes=1,
-                           memory='24GB',
+                           memory='8GB',
                            walltime='10:00:00',
                            log_directory=log_directory)
     cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)

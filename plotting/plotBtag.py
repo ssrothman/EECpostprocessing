@@ -9,13 +9,36 @@ from plotting.util import *
 
 plt.style.use(hep.style.CMS)
 
+def plotBmatch(data):
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+
+    hep.cms.text("Work in progress", ax=ax, fontsize=22)
+    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
+
+    values = data['bmatch'].project('pt', 'NumBMatch').values()
+
+    print(values.shape)
+    pfail = values[:, 0]/np.sum(values, axis=1)
+    print(pfail.shape)
+
+    edges = np.asarray(config.binning.bins.Beffpt)
+    centers = (edges[1:] + edges[:-1])/2
+    widths = edges[1:] - edges[:-1]
+
+    ax.errorbar(centers, 1-pfail, xerr=widths/2, fmt='o')
+    ax.axhline(1.0, c='k', ls='--')
+    ax.axhline(0.0, c='k', ls='--')
+    ax.set_xscale('log')
+    ax.set_ylabel("AK8-AK4 matching efficiency")
+    plt.show()
+
 def plotBtag(data, how='purity', wp='tight'):
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 
     hep.cms.text("Work in progress", ax=ax, fontsize=22)
     hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
 
-    values = data['Events']['btag'].project("btag_%s"%wp, 'genflav').values()
+    values = data['btag'].project("btag_%s"%wp, 'genflav').values()
     if how == 'purity':
         values/=np.sum(values, axis=1, keepdims=True)
     elif how == 'efficiency':
@@ -39,8 +62,8 @@ def plotBtagEffPerPt(data, wp='tight', iflav=0, flavname='udsg', mode = 'pass'):
     hep.cms.text("Work in progress", ax=ax, fontsize=22)
     hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
 
-    values = data['Events']['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').values()
-    errs = np.sqrt(data['Events']['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').variances())
+    values = data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').values()
+    errs = np.sqrt(data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').variances())
 
     N = np.sum(values, axis=2, keepdims=True)
     values/=N
@@ -79,8 +102,8 @@ def plotBtagPurePerPt(data, wp='tight', ieta=0, mode='pass'):
     hep.cms.text("Work in progress", ax=ax, fontsize=22)
     hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
 
-    values = data['Events']['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').values()
-    errs = np.sqrt(data['Events']['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').variances())
+    values = data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').values()
+    errs = np.sqrt(data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').variances())
 
     N = np.sum(values, axis=3, keepdims=True)
     values/=N
@@ -90,7 +113,7 @@ def plotBtagPurePerPt(data, wp='tight', ieta=0, mode='pass'):
     ax.set_xlabel("Jet $p_T$ [GeV]")
 
     xs, xerrs = getAXcenters_errs('Beffpt')
-    edges = config['binning']['bins']['Beffpt']
+    edges = config.binning.bins.Beffpt
 
     tag = 0 if mode == 'fail' else 1
     nextvals = np.zeros_like(values[:, ieta, tag, 0])
@@ -106,13 +129,16 @@ def plotBtagPurePerPt(data, wp='tight', ieta=0, mode='pass'):
     savefig("btag/%s_%s_%s_eta%d.png"%(wp, mode, 'pure', ieta))
     plt.show()
 
-with open("Mar31_2024_nom_highstats_wbugfix/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Btag/hists.pkl", 'rb') as f:
+with open("/data/submit/srothman/EEC/Apr09_2024_nom_highstats/DYJetsToLL_allHT/Btag/hists.pkl", 'rb') as f:
     x = pickle.load(f)
 
-plotBtagPurePerPt(x, 'tight', 0, 'pass')
-plotBtagPurePerPt(x, 'tight', 1, 'pass')
-plotBtagPurePerPt(x, 'tight', 0, 'fail')
-plotBtagPurePerPt(x, 'tight', 1, 'fail')
+plotBmatch(x)
+
+
+#plotBtagPurePerPt(x, 'tight', 0, 'pass')
+#plotBtagPurePerPt(x, 'tight', 1, 'pass')
+#plotBtagPurePerPt(x, 'tight', 0, 'fail')
+#plotBtagPurePerPt(x, 'tight', 1, 'fail')
 
 #plotBtagEffPerPt(x, 'tight', 0, 'udsg', mode='fail')
 #plotBtagEffPerPt(x, 'tight', 1, 'c', mode='fail')

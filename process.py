@@ -1,5 +1,3 @@
-from processing.MatchingProcessor import MatchingProcessor
-from processing.TransferProcessor import TransferProcessor
 from processing.EECProcessor import EECProcessor
 from processing.scaleout import setup_cluster_on_submit, custom_scale, setup_htcondor
 
@@ -14,16 +12,29 @@ import os
 import argparse
 import json
 
+from samples.latest import SAMPLE_LIST
+
 ################### ARGUMENT PARSING ###################
 
 parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
 
 parser.add_argument('--statsplit', action='store_true')
 
+parser.add_argument("sample", type=str)
 parser.add_argument("what", type=str)
 parser.add_argument('jettype', type=str)
 parser.add_argument('EECtype', type=str)
-parser.add_argument("era", type=str)
+
+parser.add_argument('--noRoccoR', action='store_true')
+parser.add_argument('--noJER', action='store_true')
+parser.add_argument('--noJEC', action='store_true')
+parser.add_argument('--noPUweight', action='store_true')
+parser.add_argument('--noPrefireSF', action='store_true')
+parser.add_argument('--noIDsfs', action='store_true')
+parser.add_argument('--noIsosfs', action='store_true')
+parser.add_argument('--noTriggersfs', action='store_true')
+
+parser.add_argument('--Zreweight', action='store_true')
 
 syst_group = parser.add_mutually_exclusive_group(required=False)
 syst_group.add_argument('--nom', dest='syst', action='store_const',
@@ -54,6 +65,8 @@ syst_group.add_argument("--wt_aS", dest='syst', action='store_const',
                         const='wt_aS')
 syst_group.add_argument("--wt_PDFaS", dest='syst', action='store_const',
                         const='wt_PDFaS')
+syst_group.add_argument('--wt_PU', dest='syst', action='store_const',
+                        const='wt_PU')
 parser.set_defaults(syst='nom')
 
 syst_updn_group = parser.add_mutually_exclusive_group(required=False)
@@ -63,13 +76,8 @@ syst_updn_group.add_argument('--UP', dest='syst_updn',
                              action='store_const', const='UP')
 parser.set_defaults(syst_updn=None)
 
-input_group = parser.add_mutually_exclusive_group(required=True)
-input_group.add_argument('--LPC', dest='input', action='store_const', const='LPC')
-input_group.add_argument('--MIT', dest='input', action='store_const', const='MIT')
-input_group.add_argument('--local', dest='input', action='store_const', const='local')
-parser.set_defaults(input='LPC')
+parser.add_argument("--local", action='store_true')
 
-parser.add_argument('--tag', dest='tag', type=str, help='production tag', required=True)
 parser.add_argument('--nfiles', dest='nfiles', type=int, help='number of files to process', default=None, required=False)
 parser.add_argument('--startfile', type=int, default=0, required=False)
 
@@ -89,19 +97,22 @@ if args.syst != 'nom' and args.syst_updn is None:
 
 ################### INPUT ###################
 
-if args.input == 'local':
-    files = [args.tag]
+
+if args.local:
+    files = [args.sample]
 else:
-    if args.input == 'LPC':
+    sample = SAMPLE_LIST.lookup(args.sample)
+    if sample.location == 'LPC':
         hostid = "cmseos.fnal.gov"
-        rootpath = '/store/group/lpcpfnano/srothman/%s'%args.tag
-    elif args.input == 'MIT':
+        rootpath = '/store/group/lpcpfnano/srothman/%s'%sample.tag
+    elif sample.location == 'MIT':
         hostid = 'submit50.mit.edu'
-        rootpath = '/store/user/srothman/%s'%args.tag
+        rootpath = '/store/user/srothman/%s'%sample.tag
 
     files = get_rootfiles(hostid, rootpath)
     if args.nfiles is not None:
         files = files[args.startfile:args.nfiles+args.startfile]
+
 print("Processing %d files"%len(files))
 print(files[0])
 
@@ -117,10 +128,21 @@ with open("configs/%s.json"%args.jettype, 'r') as f:
 with open("configs/%sEEC.json"%args.EECtype, 'r') as f:
     config.update(json.load(f))
 
-processor_instance = EECProcessor(config, statsplit=args.statsplit,
-                                  what=args.what, syst=args.syst,
-                                  syst_updn=args.syst_updn,
-                                  era = args.era)
+processor_instance = EECProcessor(
+        config, statsplit=args.statsplit,
+        what=args.what, syst=args.syst,
+        syst_updn=args.syst_updn,
+        era = '2018A' if args.local else sample.JEC,
+        flags = None if args.local else sample.flags,
+        noRoccoR = args.noRoccoR,
+        noJER = args.noJER,
+        noJEC = args.noJEC,
+        noPUweight = args.noPUweight,
+        noPrefireSF = args.noPrefireSF,
+        noIDsfs = args.noIDsfs,
+        noIsosfs = args.noIsosfs,
+        noTriggersfs = args.noTriggersfs,
+        Zreweight = args.Zreweight)
 
 ##################################################
 
@@ -131,13 +153,31 @@ if args.syst != 'nom':
 out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
 if args.statsplit:
     out_fname += '_statsplit'
+if args.noRoccoR:
+    out_fname += '_noRoccoR'
+if args.noJER:
+    out_fname += '_noJER'
+if args.noJEC:
+    out_fname += '_noJEC'
+if args.noPUweight:
+    out_fname += '_noPUweight'
+if args.noPrefireSF:
+    out_fname += '_noPrefireSF'
+if args.noIDsfs:
+    out_fname += '_noIDsfs'
+if args.noIsosfs:
+    out_fname += '_noIsosfs'
+if args.noTriggersfs:
+    out_fname += '_noTriggersfs'
+if args.Zreweight:
+    out_fname += '_Zreweight'
+
 out_fname += '.pkl'
 
-if args.input == 'local':
+if args.local:
     destination = 'testlocal'
 else:
-    destination = "/data/submit/srothman/EEC/%s/%s"%(args.tag, args.what)
-    #destination = "./%s/%s"%(args.tag, args.what)
+    destination = "/data/submit/srothman/EEC/%s/%s/%s"%(sample.version, sample.name, args.what)
     if os.path.exists(os.path.join(destination, out_fname)):
         raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
 
@@ -156,7 +196,7 @@ if args.force_slurm:
 
 if use_slurm:
     print("using slurm")
-    cluster, client = setup_cluster_on_submit(1, 100, destination)
+    cluster, client = setup_cluster_on_submit(1, 200, destination)
     #cluster, client = setup_htcondor(1, 10, destination)
 
     runner = Runner(

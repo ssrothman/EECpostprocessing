@@ -1,6 +1,6 @@
 import numpy as np
 import awkward as ak
-from hist.axis import Variable, Integer, IntCategory
+from hist.axis import Variable, Integer, IntCategory, Regular
 from hist.storage import Double
 from hist import Hist
 from time import time
@@ -255,6 +255,11 @@ def getAxis(name, config, suffix=''):
                         name='partPt'+suffix,
                         label = 'Particle $p_{T}$ [GeV]',
                         overflow=True, underflow=True)
+    elif name == 'partPtGt1':
+        return Integer(0, 2,
+                       name='partPtGt1'+suffix,
+                       label = 'Particle $p_{T} > 1$',
+                       overflow=False, underflow=False)
     elif name == 'DRaxis':
         return Variable(config['DRaxis'],
                         name='DRaxis'+suffix,
@@ -265,6 +270,11 @@ def getAxis(name, config, suffix=''):
                        name="partCharge"+suffix,
                        label = 'Charge',
                        overflow=False, underflow=False)
+    elif name == "partSpecies":
+        return IntCategory([0, 1, 2],
+                           name='partSpecies'+suffix,
+                           label = 'Species',
+                           flow=False)
     elif name == "Beffpt":
         return Variable(config['Beffpt'],
                         name='pt'+suffix,
@@ -295,7 +305,112 @@ def getAxis(name, config, suffix=''):
                        name='NumBMatch'+suffix,
                        label = 'Number of matched AK4 CHS jets',
                        overflow=True, underflow=False)
+    elif name == 'nMatch':
+        return Integer(0, 4,
+                       name = 'nMatch'+suffix,
+                       label = 'Number of matched particles',
+                       overflow=True, underflow=False)
+    elif name == 'hasMatch':
+        return IntCategory([0,1],
+                           name='hasMatch'+suffix,
+                           label = 'Has Match',
+                           flow=False)
+    elif name == 'fracMatched':
+        return Variable(config['fracMatched'],
+                        name='fracMatched'+suffix,
+                        label = 'Fraction of matched particles',
+                        overflow=True, underflow=True)
+    elif name == 'HT':
+        return Regular(config['HT'][0], config['HT'][1], config['HT'][2],
+                       name='HT'+suffix,
+                       label = 'H_{T} [GeV]',
+                       overflow=True, underflow=True)
+    elif name == 'rho':
+        return Regular(config['rho'][0], config['rho'][1], config['rho'][2],
+                       name='rho'+suffix,
+                       label = 'rho',
+                       overflow=True, underflow=True)
+    elif name == "partPtCategory":
+        return Variable(config['partPtCategory'],
+                        name='partPtCategory'+suffix,
+                        label = 'Particle $p_{T}$ [GeV]',
+                        overflow=True, underflow=True)
+    elif name == 'EM0dpt':
+        return Regular(config['EM0dpt'][0], config['EM0dpt'][1], 
+                       config['EM0dpt'][2],
+                       name='dpt'+suffix,
+                       label = '$\Delta p_{T}/p_T^{Gen}$',
+                       overflow=True, underflow=True)
+    elif name == 'HAD0dpt':
+        return Regular(config['HAD0dpt'][0], config['HAD0dpt'][1],
+                       config['HAD0dpt'][2],
+                       name='dpt'+suffix,
+                       label = '$\Delta p_{T}/p_T^{Gen}$',
+                       overflow=True, underflow=True)
+    elif name == "TRKdpt":
+        return Regular(config['TRKdpt'][0], config['TRKdpt'][1],
+                       config['TRKdpt'][2],
+                       name='dpt'+suffix,
+                        label = '$\Delta p_{T}/p_T^{Gen}$',
+                       overflow=True, underflow=True)
+    elif name == 'EM0deta':
+        return Regular(config['EM0deta'][0], config['EM0deta'][1], 
+                       config['EM0deta'][2],
+                       name='deta'+suffix,
+                       label = '$\Delta \eta$',
+                       overflow=True, underflow=True)
+    elif name == 'HAD0deta':
+        return Regular(config['HAD0deta'][0], config['HAD0deta'][1],
+                       config['HAD0deta'][2],
+                       name='deta'+suffix,
+                       label = '$\Delta \eta$',
+                       overflow=True, underflow=True)
+    elif name == "TRKdeta":
+        return Regular(config['TRKdeta'][0], config['TRKdeta'][1],
+                       config['TRKdeta'][2],
+                       name='deta'+suffix,
+                        label = '$\Delta \eta$',
+                       overflow=True, underflow=True)
+    elif name == 'EM0dphi':
+        return Regular(config['EM0dphi'][0], config['EM0dphi'][1], 
+                       config['EM0dphi'][2],
+                       name='dphi'+suffix,
+                       label = '$\Delta \phi$',
+                       overflow=True, underflow=True)
+    elif name == 'HAD0dphi':
+        return Regular(config['HAD0dphi'][0], config['HAD0dphi'][1],
+                       config['HAD0dphi'][2],
+                       name='dphi'+suffix,
+                       label = '$\Delta \phi$',
+                       overflow=True, underflow=True)
+    elif name == "TRKdphi":
+        return Regular(config['TRKdphi'][0], config['TRKdphi'][1],
+                       config['TRKdphi'][2],
+                       name='dphi'+suffix,
+                        label = '$\Delta \phi$',
+                       overflow=True, underflow=True)
+    elif name == "Jdphi":
+        return Regular(config['Jdphi'][0], config['Jdphi'][1],
+                       config['Jdphi'][2],
+                       name='dphi'+suffix,
+                        label = '$\Delta \phi$',
+                       overflow=True, underflow=True)
+    elif name == "Jdeta":
+        return Regular(config['Jdeta'][0], config['Jdeta'][1],
+                       config['Jdeta'][2],
+                       name='deta'+suffix,
+                        label = '$\Delta \eta$',
+                       overflow=True, underflow=True)
+    elif name == "Jdpt":
+        return Regular(config['Jdpt'][0], config['Jdpt'][1],
+                       config['Jdpt'][2],
+                       name='dpt'+suffix,
+                        label = '$\Delta p_{T}/p_T^{Gen}$',
+                       overflow=True, underflow=True)
+    elif name == 'nTruePU':
+        return Integer(config['nTruePU'][0], config['nTruePU'][1],
+                       name='nTruePU'+suffix,
+                       label = 'nPU',
+                       overflow=True, underflow=True)
     else:
         raise ValueError('Unknown axis name: %s'%name)
-
-

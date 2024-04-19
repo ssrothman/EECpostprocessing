@@ -116,14 +116,15 @@ class jetreader:
         return self._x[self._jetsname]
 
 class muonreader:
-    def __init__(self, x, name):
+    def __init__(self, x, name, noRoccoR):
         self._x = x
         self._name = name
+        self.noRoccoR = noRoccoR
 
     @property
     def muons(self):
         if not hasattr(self, '_muons'):
-            self._muons = getMuons(self._x, self._name)
+            self._muons = getMuons(self._x, self._name, self.noRoccoR)
         return self._muons
 
     @property

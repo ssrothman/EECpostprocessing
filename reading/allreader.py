@@ -2,8 +2,14 @@ from .reader import *
 from .JERC import JERC_handler
 
 class AllReaders:
-    def __init__(self, x, config):
+    def __init__(self, x, config, 
+                 noRoccoR=False,
+                 noJER=False, noJEC=False):
         self._config = config
+
+        self.noRoccoR = noRoccoR
+        self.noJER = noJER
+        self.noJEC = noJEC
 
         self._rRecoJet = jetreader(x, 
             config.names.puppijets, 
@@ -11,7 +17,7 @@ class AllReaders:
             config.names.CHSjets)
         self._rGenJet = jetreader(x,
             config.names.genjets,
-            'Gen' + config.names.SimonJets,
+            config.names.GenSimonJets,
             None)
         self._rGenEEC = EECreader(x,
             'Gen' + config.names.EECs)
@@ -23,13 +29,14 @@ class AllReaders:
             'Reco' + config.names.EECs + 'PU')
         self._rTransfer = transferreader(x,
             config.names.EECs + 'Transfer')
-        self._rMu = muonreader(x, config.names.muons)
+        self._rMu = muonreader(x, config.names.muons, noRoccoR)
         self._rMatch = matchreader(x, config.names.Matches)
 
         self._rho = x[config.names.rho]
         
         if hasattr(x, "Pileup"):
             self._nPU = x.Pileup.nPU
+            self._nTrueInt = x.Pileup.nTrueInt
         else:
             self._nPU = None
         self._HLT = x.HLT
@@ -45,7 +52,10 @@ class AllReaders:
             self._rControlEEC = None
 
     def runJEC(self, era, syst, syst_updn):
-        handler = JERC_handler(self._config.JERC)
+        print("TOP OF RUN JEC")
+        print("\tera is", era)
+        handler = JERC_handler(self._config.JERC,
+                               self.noJER, self.noJEC)
         corrjets = handler.setup_factory(self, era)
         if 'JER' in syst:
             if syst_updn == 'UP':
@@ -72,6 +82,14 @@ class AllReaders:
             corrpt = corrjets.pt * JEStot
         else:
             corrpt = corrjets.pt
+
+        print("corr/raw")
+        print(ak.min(corrpt/corrjets.pt_raw))
+        print(ak.max(corrpt/corrjets.pt_raw))
+        print()
+        print("corr/cmssw")
+        print(ak.min(corrpt/self.rRecoJet.jets.pt))
+        print(ak.max(corrpt/self.rRecoJet.jets.pt))
 
         self.rRecoJet.jets['corrpt'] = corrpt
 
@@ -126,6 +144,10 @@ class AllReaders:
     @property
     def nPU(self):
         return self._nPU
+
+    @property
+    def nTrueInt(self):
+        return self._nTrueInt
 
     @property
     def HLT(self):
