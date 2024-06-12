@@ -138,12 +138,22 @@ class muonreader:
         if not hasattr(self, '_Zs'):
             self._Zs = self._muons[:,0] + self._muons[:,1]
             M = self._Zs.mass
+            E = self._Zs.energy
             cosh = np.cosh(self._Zs.eta)
             sinh = np.sinh(self._Zs.eta)
             PT = self._Zs.pt
             numerator = np.sqrt(M*M + np.square(PT*cosh)) + PT*sinh
             denominator = np.sqrt(M*M + np.square(PT))
             self._Zs['y'] = np.log(numerator/denominator)
+
+            #pz = self._Zs.pz
+            #y2 = ak.to_numpy(0.5 * np.log((E + pz)/(E - pz)))
+            #import matplotlib.pyplot as plt
+            #y1 = ak.to_numpy(self._Zs.y)
+            #plt.hist(y1/y2, bins=100, range=(0.9, 1.1))
+            #plt.show()
+            #assert np.allclose(ak.to_numpy(self._Zs.y),
+            #                   ak.to_numpy(y2))
         return self._Zs
 
 class matchreader:

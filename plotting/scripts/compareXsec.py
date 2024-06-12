@@ -3,18 +3,29 @@ from samples.latest import SAMPLE_LIST
 from plotting.util import config
 import os
 
-nom = SAMPLE_LIST.lookup("DYJetsToLL_allHT").get_hist("Kin", None)
-xsecdb1 = SAMPLE_LIST.lookup("DYJetsToLL_allHT").get_hist("Kin", ["xsecDB"])
-xsecdb2 = SAMPLE_LIST.lookup("DYJetsToLL_allHT").get_hist("Kin", ["xsecDB2"])
-inclusive = SAMPLE_LIST.lookup("DYJetsToLL").get_hist("Kin", None)
+HTnames = [
+    'DYJetsToLL_HT-0to70',
+    'DYJetsToLL_HT-70to100',
+    'DYJetsToLL_HT-100to200',
+    'DYJetsToLL_HT-200to400',
+    'DYJetsToLL_HT-400to600',
+    'DYJetsToLL_HT-600to800',
+    'DYJetsToLL_HT-800to1200',
+    'DYJetsToLL_HT-1200to2500',
+    'DYJetsToLL_HT-2500toInf',
+]
+HThists = [SAMPLE_LIST.lookup(name).get_hist("Kin", ['noBtagSF']) for name in HTnames]
+HTxsecs = [vars(config.xsecs)[name] for name in HTnames]
 
-plotAllKin(inclusive, [1], [nom, xsecdb1, xsecdb2], 
-           [1, 1, 1], 
-           ["Tuned", "xsecDB", "xsecDB2"], 
-           normToLumi=False, 
-           stack=False,
-           folder=None,
+inclusive = SAMPLE_LIST.lookup("DYJetsToLL").get_hist("Kin", ['noBtagSF'])
+
+folder = os.path.join('plots', SAMPLE_LIST.tag, "xsecValidation")
+
+plotAllKin(inclusive, 15.6, HThists, HTxsecs, HTnames, 
+           normToLumi=True, 
+           stack=True,
+           density=False,
+           dataname='HT-Inclusive',
            show=True, 
-           done=True, 
-           density=True,
-           dataname='Inclusive Sample')
+           folder=None,
+           done=True)

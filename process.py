@@ -25,6 +25,12 @@ parser.add_argument("what", type=str)
 parser.add_argument('jettype', type=str)
 parser.add_argument('EECtype', type=str)
 
+parser.add_argument('--treatAsData', action='store_true')
+
+parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
+
+parser.add_argument('--bTag', type=str, default='tight', required=False, choices=['tight', 'medium', 'loose'])
+
 parser.add_argument('--noRoccoR', action='store_true')
 parser.add_argument('--noJER', action='store_true')
 parser.add_argument('--noJEC', action='store_true')
@@ -33,6 +39,7 @@ parser.add_argument('--noPrefireSF', action='store_true')
 parser.add_argument('--noIDsfs', action='store_true')
 parser.add_argument('--noIsosfs', action='store_true')
 parser.add_argument('--noTriggersfs', action='store_true')
+parser.add_argument('--noBtagSF', action='store_true')
 
 parser.add_argument('--Zreweight', action='store_true')
 
@@ -67,6 +74,8 @@ syst_group.add_argument("--wt_PDFaS", dest='syst', action='store_const',
                         const='wt_PDFaS')
 syst_group.add_argument('--wt_PU', dest='syst', action='store_const',
                         const='wt_PU')
+syst_group.add_argument('--wt_btagSF', dest='syst', action='store_const',
+                        const='wt_btagSF')
 parser.set_defaults(syst='nom')
 
 syst_updn_group = parser.add_mutually_exclusive_group(required=False)
@@ -102,14 +111,7 @@ if args.local:
     files = [args.sample]
 else:
     sample = SAMPLE_LIST.lookup(args.sample)
-    if sample.location == 'LPC':
-        hostid = "cmseos.fnal.gov"
-        rootpath = '/store/group/lpcpfnano/srothman/%s'%sample.tag
-    elif sample.location == 'MIT':
-        hostid = 'submit50.mit.edu'
-        rootpath = '/store/user/srothman/%s'%sample.tag
-
-    files = get_rootfiles(hostid, rootpath)
+    files = sample.get_files()
     if args.nfiles is not None:
         files = files[args.startfile:args.nfiles+args.startfile]
 
@@ -128,6 +130,8 @@ with open("configs/%s.json"%args.jettype, 'r') as f:
 with open("configs/%sEEC.json"%args.EECtype, 'r') as f:
     config.update(json.load(f))
 
+config.tagging.wp = args.bTag
+
 processor_instance = EECProcessor(
         config, statsplit=args.statsplit,
         what=args.what, syst=args.syst,
@@ -142,15 +146,29 @@ processor_instance = EECProcessor(
         noIDsfs = args.noIDsfs,
         noIsosfs = args.noIsosfs,
         noTriggersfs = args.noTriggersfs,
-        Zreweight = args.Zreweight)
+        noBtagSF = args.noBtagSF,
+        Zreweight = args.Zreweight,
+        treatAsData = args.treatAsData)
 
 ##################################################
 
 ################### OUTPUT ###################
 out_fname = 'hists'
 if args.syst != 'nom':
-    out_fname += '_%s_%s'%(args.syst, args.syst_updn)
+    if args.syst.startswith('wt_'):
+        out_fname += '_%s%s'%(args.syst[3:], args.syst_updn)
+    else:
+        out_fname += '_%s%s'%(args.syst, args.syst_updn)
+
 out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
+
+if args.bTag == 'tight':
+    out_fname += '_tight'
+elif args.bTag == 'medium':
+    out_fname += '_medium'
+elif args.bTag == 'loose':
+    out_fname += '_loose'
+
 if args.statsplit:
     out_fname += '_statsplit'
 if args.noRoccoR:
@@ -169,15 +187,24 @@ if args.noIsosfs:
     out_fname += '_noIsosfs'
 if args.noTriggersfs:
     out_fname += '_noTriggersfs'
+if args.noBtagSF:
+    out_fname += '_noBtagSF'
 if args.Zreweight:
     out_fname += '_Zreweight'
+
+if args.extra_tags is not None:
+    for tag in args.extra_tags:
+        out_fname += '_%s'%tag
+
+if args.treatAsData:
+    out_fname += '_asData'
 
 out_fname += '.pkl'
 
 if args.local:
     destination = 'testlocal'
 else:
-    destination = "/data/submit/srothman/EEC/%s/%s/%s"%(sample.version, sample.name, args.what)
+    destination = "/data/submit/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.what)
     if os.path.exists(os.path.join(destination, out_fname)):
         raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
 

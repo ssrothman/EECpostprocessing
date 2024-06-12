@@ -323,7 +323,7 @@ def getAxis(name, config, suffix=''):
     elif name == 'HT':
         return Regular(config['HT'][0], config['HT'][1], config['HT'][2],
                        name='HT'+suffix,
-                       label = 'H_{T} [GeV]',
+                       label = 'Gen $H_{T}$ [GeV]',
                        overflow=True, underflow=True)
     elif name == 'rho':
         return Regular(config['rho'][0], config['rho'][1], config['rho'][2],
@@ -411,6 +411,23 @@ def getAxis(name, config, suffix=''):
         return Integer(config['nTruePU'][0], config['nTruePU'][1],
                        name='nTruePU'+suffix,
                        label = 'nPU',
+                       overflow=True, underflow=True)
+    elif name == 'METpt':
+        return Regular(config['METpt'][0], config['METpt'][1],
+                       config['METpt'][2],
+                       name='METpt'+suffix,
+                       label = 'MET $p_{T}$ [GeV]',
+                       overflow=True, underflow=True)
+    elif name == 'METsig':
+        return Regular(config['METsig'][0], config['METsig'][1],
+                       config['METsig'][2],
+                       name='METsig'+suffix,
+                       label = 'MET significance',
+                       overflow=True, underflow=True)
+    elif name == 'nBtag':
+        return Integer(config['nBtag'][0], config['nBtag'][1],
+                       name='nBtag'+suffix,
+                       label = 'Number of b-tagged jets',
                        overflow=True, underflow=True)
     else:
         raise ValueError('Unknown axis name: %s'%name)

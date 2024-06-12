@@ -17,7 +17,7 @@ H = None
 for era in ['DATA_2018A', 'DATA_2018B', 'DATA_2018C', 'DATA_2018D']:
     print(era)
 
-    Hnext = SAMPLE_LIST.lookup(era).get_hist(args.binning, args.flags)
+    Hnext = SAMPLE_LIST.get_hist(era, args.binning, args.flags)
 
     if H is None:
         H = Hnext
@@ -27,8 +27,7 @@ for era in ['DATA_2018A', 'DATA_2018B', 'DATA_2018C', 'DATA_2018D']:
     del Hnext
 
 print("sumwt =", H['sumwt'])
-destpath = SAMPLE_LIST.lookup('DATA_2018UL').get_basepath()
-destpath = os.path.join(destpath, args.binning)
+destpath = SAMPLE_LIST.get_basepath('DATA_2018UL', args.binning)
 os.makedirs(destpath, exist_ok=True)
 fname = 'hist'
 for flag in args.flags + args.extra_flags:

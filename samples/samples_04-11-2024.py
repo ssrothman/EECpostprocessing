@@ -1,11 +1,11 @@
 from samples.samples import *
 
-SAMPLE_LIST = SampleSet("Apr11_2024")
+SAMPLE_LIST = SampleSet("Apr24_2024")
 
 SAMPLE_LIST.add_sample(Sample(
     name="DYJetsToLL",
     tag="Mar31_2024_nom_highstats_wbugfix/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8",
-    location="LPC",
+    location="scratch",
     JEC="MC",
     flags=None
 ))
@@ -90,6 +90,14 @@ SAMPLE_LIST.add_sample(Sample(
 ))
 
 SAMPLE_LIST.add_sample(Sample(
+    name="DYJetsToLL_aMCatNLO",
+    tag="Apr09_2024_nom_highstats/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+    location="LPC",
+    JEC="MC",
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
     name='TTTo2L2Nu',
     tag='Mar29_2024_nom_highstats/2018/TT',
     location='LPC',
@@ -122,9 +130,57 @@ SAMPLE_LIST.add_sample(Sample(
 ))
 
 SAMPLE_LIST.add_sample(Sample(
+    name='ST_tW_antitop',
+    tag='Apr09_2024_nom_highstats/2018/ST/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8',
+    location='LPC',
+    JEC='MC',
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name='ST_tW_top',
+    tag='Apr09_2024_nom_highstats/2018/ST/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8',
+    location='LPC',
+    JEC='MC',
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name='ST_t_antitop_4f',
+    tag='Apr09_2024_nom_highstats/2018/ST/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8',
+    location='LPC',
+    JEC='MC',
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name='ST_t_antitop_5f',
+    tag='Apr09_2024_nom_highstats/2018/ST/ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8',
+    location='LPC',
+    JEC='MC',
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name='ST_t_top_4f',
+    tag='Apr09_2024_nom_highstats/2018/ST/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8',
+    location='LPC',
+    JEC='MC',
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name='ST_t_top_5f',
+    tag='Apr09_2024_nom_highstats/2018/ST/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8',
+    location='LPC',
+    JEC='MC',
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
     name="DATA_2018A",
     tag="Mar29_2024_nom_highstats/2018/SingleMuon/SingleMuon/2018A",
-    location="LPC",
+    location="scratch",
     JEC="2018A",
     flags=None
 ))
@@ -132,7 +188,7 @@ SAMPLE_LIST.add_sample(Sample(
 SAMPLE_LIST.add_sample(Sample(
     name="DATA_2018B",
     tag="Mar29_2024_nom_highstats/2018/SingleMuon/SingleMuon/2018B",
-    location="LPC",
+    location="scratch",
     JEC="2018B",
     flags=None
 ))
@@ -140,7 +196,7 @@ SAMPLE_LIST.add_sample(Sample(
 SAMPLE_LIST.add_sample(Sample(
     name="DATA_2018C",
     tag="Mar29_2024_nom_highstats/2018/SingleMuon/SingleMuon/2018C",
-    location="LPC",
+    location="scratch",
     JEC="2018C",
     flags=None
 ))

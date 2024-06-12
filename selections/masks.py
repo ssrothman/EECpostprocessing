@@ -39,8 +39,8 @@ class PackedJetSelection:
         return self.selection.names
 
 def addMuonSelections(selection, rmu, config):
-    mu0 = rmu.rawmuons[:,0]
-    mu1 = rmu.rawmuons[:,1]
+    mu0 = rmu.muons[:,0]
+    mu1 = rmu.muons[:,1]
     leadmu = ak.where(mu0.pt > mu1.pt, mu0, mu1)
     submu = ak.where(mu0.pt > mu1.pt, mu1, mu0)
 
@@ -80,17 +80,17 @@ def addMuonSelections(selection, rmu, config):
 
     return selection
 
-def addEventSelections(selection, rjet, HLT, config):
+def addEventSelections(selection, rjet, HLT, config, config_tag):
     selection.add("trigger", HLT[config.trigger])
     njet = ak.num(rjet.simonjets.jetPt)
-    print("njet", njet)
-    print('\tmin:', ak.min(njet))
-    print('\tmax:', ak.max(njet))
     mask = (njet >= config.MinNumJets)
-    print('njet[mask]', njet[mask])
-    print('\tmin:', ak.min(njet[mask]))
-    print('\tmax:', ak.max(njet[mask]))
     selection.add("numjet", mask)
+
+    selection.add("METsig", rjet._x.MET.significance < config.maxMETsig)
+    wp = vars(config_tag.bwps)[config_tag.wp]
+    passB = rjet.CHSjets.btagDeepB > wp
+    nPassB = ak.sum(ak.sum(passB, axis=-1), axis=-1)
+    selection.add("nbtag", nPassB <= config.maxNumBtag)
     return selection
 
 def addZSelections(selection, rmu, config):
@@ -104,7 +104,8 @@ def getEventSelection(rmu, rjet, HLT, config, isMC, flags):
     selection = PackedSelection()
     selection = addMuonSelections(selection, rmu, config.muonSelection)
     selection = addZSelections(selection, rmu, config.Zselection)
-    selection = addEventSelections(selection, rjet, HLT, config.eventSelection)
+    selection = addEventSelections(selection, rjet, HLT, config.eventSelection,
+                                    config.tagging)
 
     if flags is not None:
         for flag in flags:
@@ -117,7 +118,7 @@ def getJetSelection(rjet, rmu, evtSel, config, isMC):
     jets = rjet.jets
     selection = PackedJetSelection(evtSel)
 
-    selection.add("pt", jets.pt > config.pt)
+    selection.add("pt", jets.corrpt > config.pt)
     selection.add("eta", np.abs(jets.eta) < config.eta)
 
     if config.jetID == 'loose':

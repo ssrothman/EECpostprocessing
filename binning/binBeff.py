@@ -55,4 +55,4 @@ class BeffBinner:
 
     def binAll(self, readers, jetMask, evtMask, wt):
         H = self._make_and_fill(readers.rRecoJet, jetMask, wt)
-        return H
+        return {"Beff" : H}

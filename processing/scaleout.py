@@ -8,7 +8,7 @@ def setup_htcondor(minjobs, maxjobs, path=None):
     cluster = HTCondorCluster(
             disk = '2GB',
             cores = 1,
-            memory = '20GB',
+            memory = '32GB',
             processes = 1,
             nanny=True,
             job_extra_directives=
@@ -36,10 +36,10 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit,submit-gpu,submit-centos07,submit-gpu-centos07,submit-gpu-a30-centos07',
+    cluster = SLURMCluster(queue = 'submit,submit-centos07,submit-gpu-centos07,submit-gpu-a30-centos07',
                            cores=1,
                            processes=1,
-                           memory='8GB',
+                           memory='16GB',
                            walltime='10:00:00',
                            log_directory=log_directory)
     cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)

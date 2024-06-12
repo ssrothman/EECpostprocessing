@@ -33,7 +33,9 @@ class EECProcessor(processor.ProcessorABC):
                  noIDsfs=False,
                  noIsosfs=False,
                  noTriggersfs=False,
-                 Zreweight=False):
+                 noBtagSF=False,
+                 Zreweight=False,
+                 treatAsData=False):
         self.config = config
         self.statsplit = statsplit
         self.what = what
@@ -41,6 +43,8 @@ class EECProcessor(processor.ProcessorABC):
         self.syst_updn = syst_updn
         self.era = era
         self.flags = flags
+
+        self.treatAsData = treatAsData
 
         self.noRoccoR = noRoccoR
         self.noJER = noJER
@@ -50,6 +54,7 @@ class EECProcessor(processor.ProcessorABC):
         self.noIDsfs = noIDsfs
         self.noIsosfs = noIsosfs
         self.noTriggersfs = noTriggersfs
+        self.noBtagSF = noBtagSF
 
         self.Zreweight = Zreweight
 
@@ -97,7 +102,7 @@ class EECProcessor(processor.ProcessorABC):
     def process(self, events):
         #setup inputs
         isMC = hasattr(events, 'genWeight')
-        self.binner.isMC = isMC
+        self.binner.isMC = False if self.treatAsData else isMC
 
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,
@@ -127,12 +132,13 @@ class EECProcessor(processor.ProcessorABC):
                                            self.noIDsfs,
                                            self.noIsosfs,
                                            self.noTriggersfs,
+                                           self.noBtagSF,
                                            self.Zreweight)
+        for wt in evtWeight.weightStatistics.keys():
+            print("\t", wt, evtWeight.weightStatistics[wt])
         weight = self.syst_weight(evtWeight)
         print("weight from", ak.max(weight), "to", ak.min(weight))
         print("weight sources:")
-        for wt in evtWeight.weightStatistics.keys():
-            print("\t", wt, evtWeight.weightStatistics[wt])
 
         #return outputs
         result = {}

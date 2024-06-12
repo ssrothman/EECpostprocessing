@@ -10,10 +10,8 @@ from plotting.util import *
 plt.style.use(hep.style.CMS)
 
 def plotBmatch(data):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-
-    hep.cms.text("Work in progress", ax=ax, fontsize=22)
-    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
+    fig, ax = setup_plain()
+    add_cms_info(ax, True)
 
     values = data['bmatch'].project('pt', 'NumBMatch').values()
 
@@ -30,13 +28,12 @@ def plotBmatch(data):
     ax.axhline(0.0, c='k', ls='--')
     ax.set_xscale('log')
     ax.set_ylabel("AK8-AK4 matching efficiency")
+    ax.set_xlabel("AK8 jet $p_T$ [GeV]")
     plt.show()
 
 def plotBtag(data, how='purity', wp='tight'):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-
-    hep.cms.text("Work in progress", ax=ax, fontsize=22)
-    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
+    fig, ax = setup_plain()
+    add_cms_info(ax, True)
 
     values = data['btag'].project("btag_%s"%wp, 'genflav').values()
     if how == 'purity':
@@ -57,10 +54,8 @@ def plotBtag(data, how='purity', wp='tight'):
     plt.show()
 
 def plotBtagEffPerPt(data, wp='tight', iflav=0, flavname='udsg', mode = 'pass'):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-
-    hep.cms.text("Work in progress", ax=ax, fontsize=22)
-    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
+    fig, ax = setup_plain()
+    add_cms_info(ax, True)
 
     values = data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').values()
     errs = np.sqrt(data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').variances())
@@ -97,10 +92,8 @@ def plotBtagEffPerPt(data, wp='tight', iflav=0, flavname='udsg', mode = 'pass'):
     plt.show()
 
 def plotBtagPurePerPt(data, wp='tight', ieta=0, mode='pass'):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-
-    hep.cms.text("Work in progress", ax=ax, fontsize=22)
-    hep.cms.lumitext("$59.53 fb^{-1}$ (13 TeV)", ax=ax, fontsize=22)
+    fig, ax = setup_plain()
+    add_cms_info(ax, True)
 
     values = data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').values()
     errs = np.sqrt(data['btag'].project('pt', 'eta', "btag_%s"%wp, 'genflav').variances())
@@ -128,25 +121,3 @@ def plotBtagPurePerPt(data, wp='tight', ieta=0, mode='pass'):
     plt.xscale('log')
     savefig("btag/%s_%s_%s_eta%d.png"%(wp, mode, 'pure', ieta))
     plt.show()
-
-with open("/data/submit/srothman/EEC/Apr09_2024_nom_highstats/DYJetsToLL_allHT/Btag/hists.pkl", 'rb') as f:
-    x = pickle.load(f)
-
-plotBmatch(x)
-
-
-#plotBtagPurePerPt(x, 'tight', 0, 'pass')
-#plotBtagPurePerPt(x, 'tight', 1, 'pass')
-#plotBtagPurePerPt(x, 'tight', 0, 'fail')
-#plotBtagPurePerPt(x, 'tight', 1, 'fail')
-
-#plotBtagEffPerPt(x, 'tight', 0, 'udsg', mode='fail')
-#plotBtagEffPerPt(x, 'tight', 1, 'c', mode='fail')
-#plotBtagEffPerPt(x, 'tight', 2, 'b', mode='fail')
-#plotBtagEffPerPt(x, 'tight', 0, 'udsg', mode='pass')
-#plotBtagEffPerPt(x, 'tight', 1, 'c', mode='pass')
-#plotBtagEffPerPt(x, 'tight', 2, 'b', mode='pass')
-
-#plotBtag(x, 'purity')
-#plotBtag(x, 'efficiency')
-

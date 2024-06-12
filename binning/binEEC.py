@@ -489,17 +489,14 @@ class EECbinner:
                 cprojfills['tag'] = squash(cregion[cmask2])
 
         if 'genflav' in self._config['axes']:
-            if self.isMC:
-                genflav = getGenFlav(rJet, iJet, mask)
-                genflav, _ = ak.broadcast_arrays(genflav, vals)
-                projfills['genflav'] = Hproj.axes['genflav'].index(squash(genflav[mask2]))
+            genflav = getGenFlav(rJet, iJet, mask)
+            genflav, _ = ak.broadcast_arrays(genflav, vals)
+            projfills['genflav'] = Hproj.axes['genflav'].index(squash(genflav[mask2]))
 
-                if Hcontrol is not None:
-                    cgenflav = getGenFlav(rJet, iJet, mask)
-                    cgenflav, _ = ak.broadcast_arrays(cgenflav, cvals)
-                    cprojfills['genflav'] = Hcontrol.axes['genflav'].index(squash(cgenflav[cmask2]))
-            else:
-                raise ValueError("Can't fill genflav for data")
+            if Hcontrol is not None:
+                cgenflav = getGenFlav(rJet, iJet, mask)
+                cgenflav, _ = ak.broadcast_arrays(cgenflav, cvals)
+                cprojfills['genflav'] = Hcontrol.axes['genflav'].index(squash(cgenflav[cmask2]))
 
         if 'eta' in self._config['axes']:
             eta = rJet.simonjets.jetEta[iJet][mask]

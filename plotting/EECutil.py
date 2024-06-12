@@ -8,10 +8,8 @@ from .EECstats import *
 
 
 class EEChistReader:
-    def __init__(self, path):
-        self.path = path
-        self.Hdict = {}
-        self.load()
+    def __init__(self, Hdict):
+        self.Hdict = Hdict
     
     def project_out(self, H, axes_to_remove):
         axes = list(H.axes.name)
@@ -69,22 +67,6 @@ class EEChistReader:
             return values, covariance
         else:
             return H, Hcov
-
-    def load(self):
-        pklpath = os.path.join(self.path, 'hists.pkl')
-        if os.path.exists(pklpath):
-            with open(pklpath, 'rb') as f:
-                self.Hdict = pickle.load(f)
-        else:
-            raise FileNotFoundError(f'File {pklpath} not found')
-
-    def loadEvt(self, path):
-        pklpath = os.path.join(path, 'hists.pkl')
-        if os.path.exists(pklpath):
-            with open(pklpath, 'rb') as f:
-                self.evtdict = pickle.load(f)
-        else:
-            raise FileNotFoundError(f'File {pklpath} not found')
 
     @property
     def projToCov(self):
@@ -162,8 +144,8 @@ class EEChistReader:
         return ans[pureFlav, :]
 
     def getHists(self, name, key):
-        return self.Hdict[name][key], \
-               self.Hdict[name][self.projToCov[key]]
+        return self.Hdict[key], \
+               self.Hdict[self.projToCov[key]]
 
     def getProjValsErrs(self, name, key, bins,
                         density=False):
@@ -233,11 +215,11 @@ class EEChistReader:
 
     def getTransfer(self, name, mode):
         if mode == 'proj':
-            return self.Hdict[name]['Htrans']
+            return self.Hdict['Htrans']
         elif mode=='res3':
-            return self.Hdict[name]['HtransRes3']
+            return self.Hdict['HtransRes3']
         elif mode=='res4':
-            return self.Hdict[name]['HtransRes4']
+            return self.Hdict['HtransRes4']
 
     def getTransferedGen(self, name, pure, bins, keepaxes, mode):
         if pure:
@@ -259,7 +241,7 @@ class EEChistReader:
 
         names = gen.axes.name
         for axis in names:
-            if self.Hdict[name]['config']['skipTrans'][axis]:
+            if self.Hdict['config']['skipTrans'][axis]:
                 gen = self.project_out(gen, [axis])
                 covgen = self.project_out(covgen, [axis+'_1', axis+'_2'])
     
@@ -288,7 +270,7 @@ class EEChistReader:
 
         names = reco.axes.name
         for axis in names:
-            if self.Hdict[name]['config']['skipTrans'][axis]:
+            if self.Hdict['config']['skipTrans'][axis]:
                 reco = self.project_out(reco, [axis])
                 covreco = self.project_out(covreco, [axis+'_1', axis+'_2'])
 
@@ -648,7 +630,7 @@ class EEChistReader:
 
     def writeUnfoldingDocs(self, name, READMEpath, 
                            Hreco, HcovReco, Htrans):
-        config = self.Hdict[name]['config']
+        config = self.Hdict['config']
 
         with open(READMEpath, 'w') as f:
             f.write("This directory contains the transfer matrix\n")

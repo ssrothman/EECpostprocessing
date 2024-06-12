@@ -57,7 +57,7 @@ def applyPlotOptions(values, errs, logwidth, dRweight):
     values = values[1:-1]
     errs = errs[1:-1]
 
-    edges = np.asarray(config['binning']['bins']['dRedges'])
+    edges = np.asarray(config.binning.bins.dRedges)
     if logwidth:
         widths = np.log(edges[1:]) - np.log(edges[:-1])
     else:
@@ -691,57 +691,3 @@ def compareFactors(EECobjs, names, labels, bins_l,
 
     if show:
         plt.show()
-
-pythia = EEChistReader('Mar31_2024_nom_highstats_wbugfix/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/EEC/')
-herwig = EEChistReader('Mar31_2024_nom_highstats_wbugfix/2018/DYJetsToLL/DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/EEC_0to99/')
-data = EEChistReader("Mar29_2024_nom_highstats/2018/SingleMuon/EEC")
-
-compareEECratio_perObj([pythia, herwig], 'EECs', 'HrecoPure', 'Hreco',
-                       {'order' : 0, 'pt' : 1},
-                       ['Pythia', 'Herwig'],
-                       ratio_mode='ratio',
-                       density=True)
-compareEECratio_perObj([pythia, herwig], 'EECs', 'HgenPure', 'Hgen',
-                       {'order' : 0, 'pt' : 1},
-                       ['Pythia', 'Herwig'],
-                       ratio_mode='ratio',
-                       density=True)
-
-compareEEC_perBins(pythia, 'EECs', 'Hreco', 
-                   ['truth light', 'b-pass', 'truth b'],
-                   [{'order' : 0, 'pt' : 1, 'genflav' : 0},
-                    {'order' : 0, 'pt' : 1, 'btag' : 1},
-                    {'order' : 0, 'pt' : 1, 'genflav' : 2}],
-                   True)
-
-compareEEC_perBins(data, 'EECs', 'Hreco', ['b-fail', 'b-pass'],
-                   [{'order' : 0, 'pt' : 1, 'btag' : 0},
-                    {'order' : 0, 'pt' : 1, 'btag' : 1}],
-                   True)
-compareEEC_perObj([data,pythia], 'EECs', 'Hreco', ['Data', 'Pythia'],
-                  {'order' : 0, 'pt' : 1, 'btag' : 1}, True)
-plotRes3Ratio(data, data, 
-              'EECs', 'EECs', 
-              'Hres3', 'Hres3', 
-              {'pt' : 1, 'dRbin' : 1, 'btag': 1}, {'pt' : 1, 'dRbin' : 1, 'btag' : 0},
-              True, False)
-plotRes3Ratio(pythia, data, 
-              'EECs', 'EECs', 
-              'Hres3', 'Hres3', 
-              {'pt' : 1, 'dRbin' : 1, 'btag': 1}, {'pt' : 1, 'dRbin' : 1, 'btag' : 1},
-              True, False)
-
-plotRes3(data, 'EECs', 'Hres3', {'pt' : 1, 'dRbin' : 1}, True, logcolor=False)
-plotRes3(pythia, 'EECs', 'Hres3', {'pt' : 1, 'dRbin' : 1}, True, logcolor=False)
-plotRes3Ratio(pythia, data, 
-              'EECs', 'EECs', 
-              'Hres3', 'Hres3', 
-              {'pt' : 1, 'dRbin' : 1}, {'pt' : 1, 'dRbin' : 1},
-              True, False)
-
-compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 0}, True)
-compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 1}, True)
-compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 1, 'pt' : 1}, True)
-compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 2, 'pt' : 1}, True)
-compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 2}, True)
-compareEEC_perObj([data, pythia], 'EECs', 'Hreco', ['Data', 'Pythia'], {'order' : 0, 'pt' : 3}, True)

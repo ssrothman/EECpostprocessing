@@ -32,7 +32,6 @@ with open("configs/base.json") as f:
     config = json.load(f)
 
 xsecs = config['xsecs']
-xsecs['DYJetsToLL_HT-0to70'] = xsecs['DYJetsToLL']
 
 base_xsec = xsecs['DYJetsToLL']
 lumi = config['totalLumi']
@@ -51,9 +50,11 @@ for name in names:
     print("\tbase_xsec:", base_xsec)
     print("\tratio:", xsecs[name] / base_xsec)
 
-    Hnext = SAMPLE_LIST.lookup(name).get_hist("Kin", args.flags)
+    Hnext = SAMPLE_LIST.get_hist(name, args.binning, args.flags)
 
     factor = xsecs[name] / base_xsec / Hnext['sumwt']
+    print("\tsumwt:", Hnext['sumwt'])
+    print("\tfactor:", factor)
     recursive_mult(Hnext, factor)
     #print("\tsumwt =", Hnext['sumwt'])
     #print("\tsumwt_pass =", Hnext['sumwt_pass'])
@@ -69,8 +70,7 @@ for name in names:
     del Hnext
 
 print("sumwt =", H['sumwt'])
-destpath = SAMPLE_LIST.lookup("DYJetsToLL_allHT").get_basepath()
-destpath = os.path.join(destpath, args.binning)
+destpath = SAMPLE_LIST.get_basepath('DYJetsToLL_allHT', args.binning)
 os.makedirs(destpath, exist_ok=True)
 print("Writing to", destpath)
 fname = 'hists'

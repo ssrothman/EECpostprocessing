@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 
 xsecs_D = config.xsecs
 
-nom = SAMPLE_LIST.get_hist('DYJetsToLL_allHT', "Kin", ['tight',
-                                                       'Zreweight'])
+nom = SAMPLE_LIST.get_hist('DYJetsToLL_allHT', "Kin", ['tight'])
 
 backgrounds = ["TTTo2L2Nu",
                "WZ", "ZZ", "WW",
@@ -33,36 +32,12 @@ for background in backgrounds:
 data = SAMPLE_LIST.get_hist('DATA_2018UL', "Kin", ['tight'])
 lumi = config.totalLumi
 
-folder = os.path.join('plots', SAMPLE_LIST.tag, 'Kin', 'Inclusive')
+folder = os.path.join('plots', SAMPLE_LIST.tag, 'Kin', 'noReweight')
 
 plotAllKin(data, lumi,
            background_hists, background_xsecs, backgrounds,
            signals, signal_xsecs, signal_labels,
            btag=None,
-           normToLumi=True,
-           folder = folder,
-           show=False,
-           done=True,
-           density=False)
-
-folder = os.path.join('plots', SAMPLE_LIST.tag, 'Kin', 'bFail')
-
-plotAllKin(data, lumi,
-           background_hists, background_xsecs, backgrounds,
-           signals, signal_xsecs, signal_labels,
-           btag=0,
-           normToLumi=True,
-           folder = folder,
-           show=False,
-           done=True,
-           density=False)
-
-folder = os.path.join('plots', SAMPLE_LIST.tag, 'Kin', 'bPass')
-
-plotAllKin(data, lumi,
-           background_hists, background_xsecs, backgrounds,
-           signals, signal_xsecs, signal_labels,
-           btag=1,
            normToLumi=True,
            folder = folder,
            show=False,

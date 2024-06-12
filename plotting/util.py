@@ -1,4 +1,5 @@
 import json
+import hist
 import numpy as np
 import awkward as ak
 import matplotlib.pyplot as plt
@@ -49,7 +50,12 @@ def binnedtext(bins):
         elif name == 'pt':
             edges = config.binning.bins.pt
             i = bins[name]
-            ansstr += '$%d < p_T$ [GeV] $< %d$'%(edges[i], edges[i+1])
+            if i is hist.underflow:
+                ansstr += '$p_T$ [GeV] $< %d$'%(edges[0])
+            elif i is hist.overflow:
+                ansstr += '$%d < p_T$ [GeV]'%(edges[-1])
+            else:
+                ansstr += '$%d < p_T$ [GeV] $< %d$'%(edges[i], edges[i+1])
         elif name == 'btag':
             if bins[name] == 0:
                 ansstr += 'Fail b tag'

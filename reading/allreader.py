@@ -92,6 +92,8 @@ class AllReaders:
         print(ak.max(corrpt/self.rRecoJet.jets.pt))
 
         self.rRecoJet.jets['corrpt'] = corrpt
+        if hasattr(self.rRecoJet._x, "Pileup"):
+            self.rGenJet.jets['corrpt'] = self.rGenJet.jets.pt #just so the genjets.corrpt is defined
 
     @property
     def rMatch(self):
