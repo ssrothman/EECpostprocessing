@@ -34,16 +34,25 @@ def getTransferRes3(x, name):
 
     return unflatRecursive(vals, [nRL, nxi, nphi, nRL, nxi, nphi])
 
-def getRes4shapes(x, name):
-    wts = x[name+'res4shapes'].value
+def getRes4dipole(x, name):
+    wts = x[name+'res4dipole'].value
     BK = getBK(x, name)
 
-    nshape = BK.nres4shapes_shape
-    nRL = BK.nres4shapes_RL
-    nr = BK.nres4shapes_r
-    nct = BK.nres4shapes_ct
+    nRL = BK.nres4_dipole_RL
+    nr = BK.nres4_dipole_r
+    nct = BK.nres4_dipole_ct
 
-    return unflatRecursive(wts, [nshape, nRL, nr, nct])
+    return unflatRecursive(wts, [nRL, nr, nct])
+
+def getRes4tee(x, name):
+    wts = x[name+'res4tee'].value
+    BK = getBK(x, name)
+
+    nRL = BK.nres4_tee_RL
+    nr = BK.nres4_dipole_r
+    nct = BK.nres4_dipole_ct
+
+    return unflatRecursive(wts, [nRL, nr, nct])
 
 def getTransferRes4Shapes(x, name):
     vals = x[name+'res4shapes'].value

@@ -16,10 +16,16 @@ class EECreader:
         return self._proj[order]
 
     @property
-    def res4(self):
+    def res4dipole(self):
         if not hasattr(self, '_res4'):
-            self._res4 = reading.readEEC.getRes4shapes(self._x, self._name)
-        return self._res4
+            self._res4dipole = reading.readEEC.getRes4dipole(self._x, self._name)
+        return self._res4dipole
+
+    @property
+    def res4tee(self):
+        if not hasattr(self, '_res4tee'):
+            self._res4tee = reading.readEEC.getRes4tee(self._x, self._name)
+        return self._res4tee
 
     @property
     def res3(self):

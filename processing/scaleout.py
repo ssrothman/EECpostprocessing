@@ -36,7 +36,7 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit,submit-centos07,submit-gpu-centos07,submit-gpu-a30-centos07',
+    cluster = SLURMCluster(queue = 'submit,submit-centos07,submit-gpu',
                            cores=1,
                            processes=1,
                            memory='16GB',
