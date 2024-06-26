@@ -6,21 +6,18 @@ from correctionlib import CorrectionSet
 EPS = 1e-6
 
 
-def getMuonSF(cset, name, year, eta, pt, bad):
+def getMuonSF(cset, name, eta, pt, bad):
     nom = cset[name].evaluate(
-        year,
         eta,
         pt,
-        'sf'
+        'nominal'
     )
     up = cset[name].evaluate(
-        year,
         eta,
         pt,
         'systup'
     )
     dn = cset[name].evaluate(
-        year,
         eta,
         pt,
         'systdown'
@@ -99,35 +96,30 @@ def getAllMuonSFs(weights, prefire, muons, config, isMC,
 
     idsf_lead, idsf_lead_up, idsf_lead_dn = getMuonSF(cset, 
                                                       idsfname, 
-                                                      '2018_UL', 
                                                       leadeta, 
                                                       leadpt,
                                                       badlead)
 
     idsf_sub, idsf_sub_up, idsf_sub_dn = getMuonSF(cset, 
                                                    idsfname, 
-                                                   '2018_UL', 
                                                    subeta, 
                                                    subpt,
                                                    badsub)
 
     isosf_lead, isosf_lead_up, isosf_lead_dn = getMuonSF(cset, 
                                                          isosfname, 
-                                                         '2018_UL', 
                                                          leadeta,
                                                          leadpt,
                                                          badlead)
 
     isosf_sub, isosf_sub_up, isosf_sub_dn = getMuonSF(cset,
                                                       isosfname,
-                                                      '2018_UL', 
                                                       subeta, 
                                                       subpt,
                                                       badsub)
 
     triggersf, triggersf_up, triggersf_dn = getMuonSF(cset, 
                                                       triggersfname, 
-                                                      '2018_UL', 
                                                       leadeta, 
                                                       leadpt,
                                                       badlead)

@@ -36,15 +36,19 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit,submit-centos07,submit-gpu',
+    cluster = SLURMCluster(queue = 'submit,submit-centos07',
                            cores=1,
                            processes=1,
-                           memory='16GB',
+                           memory='4GB',
                            walltime='10:00:00',
-                           log_directory=log_directory)
-    cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)
+                           log_directory=log_directory,
+                           scheduler_options={'dashboard_address':":9876"})
     print(cluster.job_script())
-    #cluster.scale(maxjobs)
+    cluster.adapt(
+        minimum_jobs=1, maximum_jobs=200,
+        worker_key=lambda state: state.address.split(':')[0],
+        interval='10s'
+    )
     client = Client(cluster)
     return cluster, client
 

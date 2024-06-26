@@ -127,13 +127,13 @@ class JERC_handler:
 
         stack = JECStack({key: ev[key] for key in stacknames})
         
-        for name in stacknames:
-            print(name)
+        #for name in stacknames:
+        #    print(name)
         
-        print("JEC:", stack.jec)
-        print("JUNC", stack.junc)
-        print("JER:", stack.jer)
-        print("JERSF:", stack.jersf)
+        #print("JEC:", stack.jec)
+        #print("JUNC", stack.junc)
+        #print("JER:", stack.jer)
+        #print("JERSF:", stack.jersf)
 
         return stack
 
@@ -160,11 +160,11 @@ class JERC_handler:
         return corrected_jets
 
     def runJEC(self, rJet, era):
-        for key in stack:
-            print(key)
+        #for key in stack:
+        #    print(key)
 
         corrector = FactorizedJetCorrector(**{key: self.evaluator[key] for key in stack})
-        print(corrector)
+        #print(corrector)
 
         factors = corrector.getCorrection(
             JetEta = rJet.jets.eta,
@@ -177,9 +177,9 @@ class JERC_handler:
         #print(1/factors)
         #print(rJet.jets.jecFactor)
         diff = rJet.jets.jecFactor - 1/factors
-        
-        print("New JEC factors differ from CMSSW by a maximum of")
-        print("\t",ak.max(np.abs(diff)))
+
+        #print("New JEC factors differ from CMSSW by a maximum of")
+        #print("\t",ak.max(np.abs(diff)))
 
         return factors
 

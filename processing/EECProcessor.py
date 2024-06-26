@@ -13,6 +13,8 @@ import pickle
 
 import os
 
+from time import time
+
 from binning.binMatch2 import MatchBinner
 from binning.binEEC import EECbinner
 from binning.TrainingData import TrainingData
@@ -21,6 +23,8 @@ from binning.binBeff import BeffBinner
 from binning.binKin import KinBinner
 from binning.binBtag import BtagBinner
 from binning.binHT import HTBinner
+from binning.dummy import DummyBinner
+from binning.EECproj import EECprojBinner
 
 class EECProcessor(processor.ProcessorABC):
     def __init__(self, config, statsplit=False, what='EEC', 
@@ -57,22 +61,26 @@ class EECProcessor(processor.ProcessorABC):
         self.noBtagSF = noBtagSF
 
         self.Zreweight = Zreweight
+    
+        what= what.strip().upper()
 
-        if what == 'Match':
+        if what == 'DUMMY':
+            self.binner = DummyBinner()
+        elif what == 'EECPROJ':
+            self.binner = EECprojBinner(config.binning, config.tagging)
+        elif what == 'MATCH':
             self.binner = MatchBinner(config.binning, config.tagging)
         elif what == 'EEC':
             self.binner = EECbinner(config.binning, config.tagging, config.controlJetSelection)
-        elif what == 'Event':
+        elif what == 'EVENT':
             self.binner = EventBinner(config.binning, config.tagging)
-        elif what == 'Multiplicity':
+        elif what == 'MULTIPLICITY':
             self.binner = MultiplicityBinner(config.binning)
-        elif what == 'TrainingData':
-            self.binner = TrainingData()
-        elif what == 'Beff':
+        elif what == 'BEFF':
             self.binner = BeffBinner(config.binning, config.tagging)
-        elif what == 'Kin':
+        elif what == 'KIN':
             self.binner = KinBinner(config.binning, config.tagging)
-        elif what == "Btag":
+        elif what == "BTAG":
             self.binner = BtagBinner(config.binning, config.tagging)
         elif what == 'HT':
             self.binner = HTBinner(config.binning)
@@ -101,26 +109,33 @@ class EECProcessor(processor.ProcessorABC):
 
     def process(self, events):
         #setup inputs
+        t0 = time()
         isMC = hasattr(events, 'genWeight')
         self.binner.isMC = False if self.treatAsData else isMC
 
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,
                              self.noJER, self.noJEC)
+        t1 = time()
         readers.runJEC(self.era, self.syst, self.syst_updn)
+        readers.checkBtags(self.config)
+        t2 = time()
 
         evtSel = masks.getEventSelection(
                 readers.rMu, readers.rRecoJet,
                 readers.HLT, self.config,
                 isMC, self.flags)
+        t3 = time()
         jetSel = masks.getJetSelection(
                 readers.rRecoJet, readers.rMu, 
                 evtSel, self.config.jetSelection,
                 isMC)
+        t4 = time()
 
         jetMask = jetSel.all(*jetSel.names)
         evtMask = evtSel.all(*evtSel.names)
-        print(evtSel.names)
+        t5 = time()
+        #print(evtSel.names)
 
         evtWeight = weights.getEventWeight(events, 
                                            readers.rMu.rawmuons, 
@@ -134,11 +149,13 @@ class EECProcessor(processor.ProcessorABC):
                                            self.noTriggersfs,
                                            self.noBtagSF,
                                            self.Zreweight)
-        for wt in evtWeight.weightStatistics.keys():
-            print("\t", wt, evtWeight.weightStatistics[wt])
+        t6 = time()
+        #for wt in evtWeight.weightStatistics.keys():
+        #    print("\t", wt, evtWeight.weightStatistics[wt])
         weight = self.syst_weight(evtWeight)
-        print("weight from", ak.max(weight), "to", ak.min(weight))
-        print("weight sources:")
+        t7 = time()
+        #print("weight from", ak.max(weight), "to", ak.min(weight))
+        #print("weight sources:")
 
         #return outputs
         result = {}
@@ -161,9 +178,21 @@ class EECProcessor(processor.ProcessorABC):
             else:
                 result = ans
 
-        
+        t8 = time()
         result['sumwt'] = ak.sum(weight, axis=None)
         result['sumwt_pass'] = ak.sum(weight[evtMask], axis=None)
         result['numjet'] = ak.sum(jetMask * weight, axis=None)
+        t9 = time()
+
+        print("runtime summary:")
+        print("\tinitial setup: %0.2g" % (t1-t0))
+        print("\tJEC: %0.2g" % (t2-t1))
+        print("\tevent selection: %0.2g" % (t3-t2))
+        print("\tjet selection: %0.2g" % (t4-t3))
+        print("\tmask building: %0.2g" % (t5-t4))
+        print("\tweight computation: %0.2g" % (t6-t5))
+        print("\tweighting: %0.2g" % (t7-t6))
+        print("\tbinning: %0.2g" % (t8-t7))
+        print("\tsummary weights: %0.2g" % (t9-t8))
 
         return result
