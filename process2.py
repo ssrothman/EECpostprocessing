@@ -269,6 +269,8 @@ if __name__ == '__main__':
             print("Error in processing")
             print(ans.result())
             continue
+        finally:
+            ans.release()
 
     with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle
