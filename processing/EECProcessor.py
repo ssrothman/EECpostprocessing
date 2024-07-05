@@ -39,7 +39,9 @@ class EECProcessor(processor.ProcessorABC):
                  noTriggersfs=False,
                  noBtagSF=False,
                  Zreweight=False,
-                 treatAsData=False):
+                 treatAsData=False,
+                 manualcov=False,
+                 poissonbootstrap=0):
         self.config = config
         self.statsplit = statsplit
         self.what = what
@@ -49,6 +51,8 @@ class EECProcessor(processor.ProcessorABC):
         self.flags = flags
 
         self.treatAsData = treatAsData
+        self.manualcov = manualcov
+        self.poissonbootstrap = poissonbootstrap
 
         self.noRoccoR = noRoccoR
         self.noJER = noJER
@@ -67,7 +71,10 @@ class EECProcessor(processor.ProcessorABC):
         if what == 'DUMMY':
             self.binner = DummyBinner()
         elif what == 'EECPROJ':
-            self.binner = EECprojBinner(config.binning, config.tagging)
+            self.binner = EECprojBinner(config.binning, config.tagging,
+                                        manualcov=manualcov,
+                                        poissonbootstrap=poissonbootstrap,
+                                        statsplit=statsplit)
         elif what == 'MATCH':
             self.binner = MatchBinner(config.binning, config.tagging)
         elif what == 'EEC':
@@ -159,24 +166,17 @@ class EECProcessor(processor.ProcessorABC):
 
         #return outputs
         result = {}
-        if self.statsplit:
-            result["split"+"1"] = self.binner.binAll(
-                    readers, jetMask & (events.event%2==0), 
-                    evtMask & (events.event%2==0), weight)
-            result["split"+"2"] = self.binner.binAll(
-                    readers, jetMask & (events.event%2==1), 
-                    evtMask & (events.event%2==1), weight)
+
+        ans = self.binner.binAll(
+                readers, jetMask, evtMask, weight)
+        if type(ans) is pd.DataFrame:
+            fname = events.behavior["__events_factory__"]
+            fname = fname._partition_key.replace("/", "_")
+            fname = fname + '.parquet'
+            fname = os.path.join("trainingdata/", fname)
+            ans.to_parquet(fname)
         else:
-            ans = self.binner.binAll(
-                    readers, jetMask, evtMask, weight)
-            if type(ans) is pd.DataFrame:
-                fname = events.behavior["__events_factory__"]
-                fname = fname._partition_key.replace("/", "_")
-                fname = fname + '.parquet'
-                fname = os.path.join("trainingdata/", fname)
-                ans.to_parquet(fname)
-            else:
-                result = ans
+            result = ans
 
         t8 = time()
         result['sumwt'] = ak.sum(weight, axis=None)

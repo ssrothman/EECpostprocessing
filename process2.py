@@ -4,7 +4,6 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
 
-    parser.add_argument('--statsplit', action='store_true')
 
     parser.add_argument("sample", type=str)
     parser.add_argument("what", type=str)
@@ -12,6 +11,9 @@ if __name__ == '__main__':
     parser.add_argument('EECtype', type=str)
 
     parser.add_argument('--treatAsData', action='store_true')
+    parser.add_argument('--manualcov', action='store_true')
+    parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
+    parser.add_argument('--statsplit', type=int, default=0, required=False)
 
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
@@ -148,7 +150,9 @@ if __name__ == '__main__':
         'noTriggersfs' : args.noTriggersfs,
         'noBtagSF' : args.noBtagSF,
         'Zreweight' : args.Zreweight,
-        'treatAsData' : args.treatAsData
+        'treatAsData' : args.treatAsData,
+        'manualcov' : args.manualcov,
+        'poissonbootstrap' : args.poissonbootstrap,
     }
 
     def process_func(file, args):
@@ -175,8 +179,12 @@ if __name__ == '__main__':
     elif args.bTag == 'loose':
         out_fname += '_loose'
 
-    if args.statsplit:
-        out_fname += '_statsplit'
+    if args.statsplit > 0:
+        out_fname += '_statsplit%d'%args.statsplit
+    if args.manualcov:
+        out_fname += '_manualcov'
+    if args.poissonbootstrap > 0:
+        out_fname += '_poissonbootstrap%d'%args.poissonbootstrap
     if args.noRoccoR:
         out_fname += '_noRoccoR'
     if args.noJER:
@@ -256,21 +264,27 @@ if __name__ == '__main__':
     from coffea.processor.accumulator import iadd
 
     final_ans = None
-    t = tqdm(as_completed(futures), total=len(futures),
+    t = tqdm(as_completed(futures, with_results=True,
+                          raise_errors=False), 
+             total=len(futures),
+             leave=True,
+             miniters=1,
+             smoothing=0.1,
              desc='Events: 0')
-    for ans in t:
-        try:
+    for future, ans in t:
+        if future.status == 'finished':
             if final_ans is None:
-                final_ans = ans.result()
+                final_ans = ans
             else:
-                iadd(final_ans, ans.result())
+                iadd(final_ans, ans)
             t.set_description("Events: %g"%final_ans['sumwt'], refresh=True)
-        except:
-            print("Error in processing")
-            print(ans.result())
-            continue
-        finally:
-            ans.release()
+        else:
+            print("Error in processing file")
+            import traceback
+            traceback.print_tb(future.traceback())
+            print(future.exception())
+
+        future.release()
 
     with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle

@@ -5,7 +5,7 @@ def get_rootfiles(hostid, path):
         from fsspec.implementations.local import LocalFileSystem
         fs = LocalFileSystem()
     else:
-        fs = xrdfs.XRootDFileSystem(hostid = hostid, timeout=180)
+        fs = xrdfs.XRootDFileSystem(hostid = hostid, timeout=360)
     return get_files_recursive(fs, path,
                                lambda f : f.endswith(".root"), 
                                'root://%s/'%hostid if hostid is not None else '')
