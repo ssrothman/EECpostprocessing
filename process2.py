@@ -14,6 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('--manualcov', action='store_true')
     parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
     parser.add_argument('--statsplit', type=int, default=0, required=False)
+    parser.add_argument('--sepPt', action='store_true')
 
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
@@ -98,7 +99,6 @@ if __name__ == '__main__':
     from RecursiveNamespace import RecursiveNamespace
 
     from coffea.nanoevents import NanoAODSchema, NanoEventsFactory
-    from coffea.processor import Runner, IterativeExecutor, FuturesExecutor, DaskExecutor
 
     import os
     import json
@@ -135,6 +135,7 @@ if __name__ == '__main__':
     argsdict = {
         'config' : config,
         'statsplit' : args.statsplit,
+        'sepPt' : args.sepPt,
         'what' : args.what,
         'syst' : args.syst,
         'syst_updn' : args.syst_updn,
@@ -179,6 +180,8 @@ if __name__ == '__main__':
     elif args.bTag == 'loose':
         out_fname += '_loose'
 
+    if args.sepPt:
+        out_fname += '_sepPt'
     if args.statsplit > 0:
         out_fname += '_statsplit%d'%args.statsplit
     if args.manualcov:
@@ -261,7 +264,7 @@ if __name__ == '__main__':
 
     from dask.distributed import as_completed
     from tqdm import tqdm
-    from coffea.processor.accumulator import iadd
+    from iadd import iadd
 
     final_ans = None
     t = tqdm(as_completed(futures, with_results=True,

@@ -28,14 +28,16 @@ def proj_reduce(ans, poissonwts, evtmask):
 
 class EECprojBinner:
     def __init__(self, binning_config, tagging_config,
-                 manualcov, poissonbootstrap, statsplit):
+                 manualcov, poissonbootstrap, statsplit,
+                 sepPt):
         self.ptax = hist.axis.Variable(binning_config.bins.pt)
 
         self.manualcov = manualcov
         self.poissonbootstrap = poissonbootstrap
         self.statsplit = statsplit
+        self.sepPt = sepPt
 
-    def binTransfer(self, rTransfer,
+    def binTransfer_full(self, rTransfer,
                     rRecoEEC, rRecoJet,
                     rGenEEC, rGenJet,
                     m, wt):
@@ -50,20 +52,52 @@ class EECprojBinner:
             evt = ak.to_numpy(rTransfer._x.event)
             for k in range(N):
                 statmask = (evt % N == k)
-                self.actuallyBinTransfer(ans[k], rTransfer,
+                self.actuallyBinTransfer_full(ans[k], rTransfer,
                                         rRecoEEC, rRecoJet,
                                         rGenEEC, rGenJet,
                                         m & statmask, wt)
         else:
             ans = np.zeros((nOrder, nBtag, nPT, nProj, nBtag, nPT, nProj), dtype=np.float64)
-            self.actuallyBinTransfer(ans, rTransfer,
+            self.actuallyBinTransfer_full(ans, rTransfer,
                                     rRecoEEC, rRecoJet,
                                     rGenEEC, rGenJet,
                                     m, wt)
 
         return ans
 
-    def actuallyBinTransfer(self, ans,
+    def binTransfer_sepPt(self, rTransfer,
+                          rRecoEEC, rRecoJet,
+                          rGenEEC, rGenJet,
+                          m, wt):
+        nPT = self.ptax.extent
+        nProj = ak.flatten(rRecoEEC.nproj)[0]
+        nOrder = 5
+        nBtag = 2
+
+        if self.statsplit > 0:
+            N = self.statsplit
+            ansPT = np.zeros((N, nPT, nPT))
+            ansRest = np.zeros((N, nOrder, nPT, nBtag, nProj, nBtag, nProj), dtype=np.float64)
+            evt = ak.to_numpy(rTransfer._x.event)
+            for k in range(N):
+                statmask = (evt % N == k)
+                self.actuallyBinTransfer_sepPt(ansPT[k], ansRest[k],
+                                              rTransfer,
+                                              rRecoEEC, rRecoJet,
+                                              rGenEEC, rGenJet,
+                                              m & statmask, wt)
+        else:
+            ansPT = np.zeros((nPT, nPT))
+            ansRest = np.zeros((nOrder, nPT, nBtag, nProj, nBtag, nProj), dtype=np.float64)
+            self.actuallyBinTransfer_sepPt(ansPT, ansRest,
+                                        rTransfer,
+                                        rRecoEEC, rRecoJet,
+                                        rGenEEC, rGenJet,
+                                        m, wt)
+
+        return ansPT, ansRest
+
+    def actuallyBinTransfer_full(self, ans,
                             rTransfer,
                             rRecoEEC, rRecoJet, 
                             rGenEEC, rGenJet, 
@@ -95,8 +129,8 @@ class EECprojBinner:
 
             iDRGen = squash(iDRGen)
             iDRReco = squash(iDRReco)
-            iPTGen = self.ptax.index(squash(ptGen_broadcast))
-            iPTReco = self.ptax.index(squash(ptReco_broadcast))
+            iPTGen = self.ptax.index(squash(ptGen_broadcast)) + 1
+            iPTReco = self.ptax.index(squash(ptReco_broadcast)) + 1
             iBtagGen = squash(btagGen_broadcast)
             iBtagReco = squash(btagReco_broadcast)
 
@@ -104,7 +138,65 @@ class EECprojBinner:
 
             np.add.at(ans[order], indices, squash(vals))
 
-        return ans
+    def actuallyBinTransfer_sepPt(self, ansPT, ansRest,
+                                  rTransfer,
+                                  rRecoEEC, rRecoJet,
+                                  rGenEEC, rGenJet,
+                                  m, wt):
+        nOrder = 5
+
+        iGenJet = rTransfer.iGen
+        iRecoJet = rTransfer.iReco
+
+        mask = m[iRecoJet]
+
+        ptReco = rRecoJet.jets.corrpt[iRecoJet][mask]
+        ptGen = rGenJet.jets.corrpt[iGenJet][mask]
+
+        btagReco = ak.where(rRecoJet.jets.passTightB[iRecoJet][mask], 1, 0, dtype=np.int32)
+        btagGen = ak.where(rRecoJet.jets.hadronFlavour[iRecoJet][mask] == 5, 1, 0, dtype=np.int32)
+
+
+        iPTGen_flat = self.ptax.index(squash(ptGen)) + 1
+        iPTReco_flat = self.ptax.index(squash(ptReco)) + 1
+        wtflat,_ = ak.broadcast_arrays(wt, ptGen)
+        wtflat = squash(wtflat)
+
+        indicesPT = (iPTReco_flat, iPTGen_flat)
+        np.add.at(ansPT, indicesPT, wtflat)
+
+        ptGen_flat = squash(ptGen)
+        ptReco_flat = squash(ptReco)
+        ptGenReco = np.stack([ptReco_flat, ptGen_flat], axis=1)
+        print(ptGenReco)
+
+        print(np.min(ptGen_flat), np.max(ptGen_flat))
+        print(np.min(ptReco_flat), np.max(ptReco_flat))
+        print(np.min(iPTGen_flat), np.max(iPTGen_flat))
+        print(np.min(iPTReco_flat), np.max(iPTReco_flat))
+
+        for order in range(nOrder):
+            vals = (wt * rTransfer.proj(order+2))[mask]
+
+            iDRGen = ak.local_index(vals, axis=2)
+            iDRReco = ak.local_index(vals, axis=3)
+
+            ptGen_broadcast, ptReco_broadcast, \
+                btagGen_broadcast, btagReco_broadcast, \
+                iDRGen, iDRReco = ak.broadcast_arrays(ptGen, ptReco,
+                                                      btagGen, btagReco,
+                                                      iDRGen, iDRReco)
+
+            iDRGen = squash(iDRGen)
+            iDRReco = squash(iDRReco)
+            iPTGen = self.ptax.index(squash(ptGen_broadcast)) + 1
+            iPTReco = self.ptax.index(squash(ptReco_broadcast)) + 1
+            iBtagGen = squash(btagGen_broadcast)
+            iBtagReco = squash(btagReco_broadcast)
+
+            indicesRest = (iPTGen, iBtagReco, iDRReco, iBtagGen, iDRGen)
+
+            np.add.at(ansRest[order], indicesRest, squash(vals))
 
     def binProj(self, rEEC, rJet, mask, wt, subtract=None, noCov=False):
         t0 = time()
@@ -144,7 +236,7 @@ class EECprojBinner:
             pt_broadcast, btag_broadcast, iEVT, iDR = ak.broadcast_arrays(pt, btag, iEVT, iDR)
         
             iDR = squash(iDR)
-            iPT = self.ptax.index(squash(pt_broadcast))
+            iPT = self.ptax.index(squash(pt_broadcast)) + 1
             iBtag = squash(btag_broadcast)
             iEVT = squash(iEVT)
 
@@ -233,17 +325,34 @@ class EECprojBinner:
         genpure = self.binProj(readers.rGenEEC, readers.rGenJet, mask, wt,
                                subtract=readers.rGenEECUNMATCH, noCov=True)
 
-        transfer = self.binTransfer(readers.rTransfer,
-                                    readers.rRecoEEC, readers.rRecoJet,
-                                    readers.rGenEEC, readers.rGenJet,
-                                    mask, wt)
+        if not self.sepPt:
+            transfer = self.binTransfer_full(readers.rTransfer,
+                                        readers.rRecoEEC, readers.rRecoJet,
+                                        readers.rGenEEC, readers.rGenJet,
+                                        mask, wt)
+        else:
+            transferPT, transferRest = self.binTransfer_sepPt(readers.rTransfer,
+                                                readers.rRecoEEC, readers.rRecoJet,
+                                                readers.rGenEEC, readers.rGenJet,
+                                                mask, wt)
 
         if self.manualcov:
-            return {"reco": reco[0], "gen": gen[0],
-                    'covreco' : reco[1], 'covgen' : gen[1],
-                    'recopure': recopure, 'genpure': genpure,
-                    'transfer': transfer}
+            if self.sepPt:
+                return {"reco": reco[0], "gen": gen[0],
+                        'covreco' : reco[1], 'covgen' : gen[1],
+                        'recopure': recopure, 'genpure': genpure,
+                        'transferPT': transferPT, 'transferRest': transferRest}
+            else:
+                return {"reco": reco[0], "gen": gen[0],
+                        'covreco' : reco[1], 'covgen' : gen[1],
+                        'recopure': recopure, 'genpure': genpure,
+                        'transfer': transfer}
         else:
-            return {"reco": reco, "gen": gen,
-                    'recopure': recopure, 'genpure': genpure,
-                    'transfer': transfer}
+            if self.sepPt:
+                return {"reco": reco, "gen": gen,
+                        'recopure': recopure, 'genpure': genpure,
+                        'transferPT': transferPT, 'transferRest': transferRest}
+            else:
+                return {"reco": reco, "gen": gen,
+                        'recopure': recopure, 'genpure': genpure,
+                        'transfer': transfer}

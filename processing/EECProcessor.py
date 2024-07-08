@@ -28,6 +28,7 @@ from binning.EECproj import EECprojBinner
 
 class EECProcessor(processor.ProcessorABC):
     def __init__(self, config, statsplit=False, what='EEC', 
+                 sepPt=False,
                  syst='nom', syst_updn=None,
                  era='MC', flags=None,
                  noRoccoR=False,
@@ -74,7 +75,8 @@ class EECProcessor(processor.ProcessorABC):
             self.binner = EECprojBinner(config.binning, config.tagging,
                                         manualcov=manualcov,
                                         poissonbootstrap=poissonbootstrap,
-                                        statsplit=statsplit)
+                                        statsplit=statsplit,
+                                        sepPt=sepPt)
         elif what == 'MATCH':
             self.binner = MatchBinner(config.binning, config.tagging)
         elif what == 'EEC':
