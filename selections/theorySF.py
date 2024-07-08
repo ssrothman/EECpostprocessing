@@ -3,7 +3,7 @@ import numpy as np
 from coffea.analysis_tools import Weights
 from correctionlib import CorrectionSet
 
-def getScaleWts7pt(weights, x):
+def getScaleWts7pt(weights, readers):
     '''
     LHE scale variation weights (w_var / w_nominal); 
     [0] is MUF="0.5" MUR="0.5"; 
@@ -16,10 +16,8 @@ def getScaleWts7pt(weights, x):
     [7] is MUF="1.0" MUR="2.0"; 
     [8] is MUF="2.0" MUR="2.0"
     '''
-    if not hasattr(x, 'LHEScaleWeight'):
-        return
+    var_weights = readers.scalewt
 
-    var_weights = x.LHEScaleWeight
     nweights = len(weights.weight())
 
     nom   = np.ones(nweights)
@@ -42,11 +40,9 @@ def getScaleWts7pt(weights, x):
 
     weights.add('wt_scale', nom, up, down)
 
-def getScaleWts3pt(weights, x):
-    if not hasattr(x, 'LHEScaleWeight'):
-        return
+def getScaleWts3pt(weights, readers):
+    var_weights = readers.scalewt
 
-    var_weights = x.LHEScaleWeight
     nweights = len(weights.weight())
 
     nom   = np.ones(nweights)
@@ -58,8 +54,8 @@ def getScaleWts3pt(weights, x):
 
     weights.add('wt_scale_3pt', nom, up, down)
 
-def getPSWts(weights, x):
-    ps_weights = x.PSWeight
+def getPSWts(weights, readers):
+    ps_weights = readers.psweight
     if ak.num(ps_weights)[0] < 4:
         return
 
@@ -82,12 +78,9 @@ def getPSWts(weights, x):
     weights.add('wt_ISR', nom, up_isr, down_isr)
     weights.add('wt_FSR', nom, up_fsr, down_fsr)
 
-def getPDFweights(weights, x):
-    if not hasattr(x, 'LHEPdfWeight'):
-        return
-
+def getPDFweights(weights, readers):
     nweights = len(weights.weight())
-    pdf_weights = x.LHEPdfWeight
+    pdf_weights = readers.pdfwt
 
     nom   = np.ones(nweights)
 
@@ -110,11 +103,11 @@ def getPDFweights(weights, x):
     weights.add('wt_PDFaS', nom, pdfas_unc + nom, nom - pdfas_unc) 
 
 
-def getAllTheorySFs(weights, x):
-    weights.add('generator', x.genWeight)
+def getAllTheorySFs(weights, readers):
+    weights.add('generator', readers.genwt)
 
-    getScaleWts7pt(weights, x)
-    getScaleWts3pt(weights, x)
-    getPDFweights(weights, x)
-    getPSWts(weights, x)
+    getScaleWts7pt(weights, readers)
+    getScaleWts3pt(weights, readers)
+    getPDFweights(weights, readers)
+    getPSWts(weights, readers)
 

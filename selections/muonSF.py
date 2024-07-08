@@ -48,8 +48,7 @@ def getMuonSF(cset, name, eta, pt):
     return nom, up, dn
 
 def getAllMuonSFs(weights,
-                  prefire,
-                  muons, 
+                  readers,
                   config, 
                   noPrefireSF, 
                   noIDsfs,
@@ -57,10 +56,13 @@ def getAllMuonSFs(weights,
                   noTriggersfs):
 
     if config.eventSelection.PreFireWeight and not noPrefireSF:
+        prefire = readers.prefirewt
         weights.add("wt_prefire", 
                            prefire.Nom, 
                            prefire.Up, 
                            prefire.Dn)
+
+    muons = readers.rMu.muons
 
     sfconfig = config.muonSFs
 

@@ -18,6 +18,8 @@ if __name__ == '__main__':
     parser.add_argument('--statsplit', type=int, default=0, required=False)
     parser.add_argument('--sepPt', action='store_true')
 
+    parser.add_argument("--scanSyst", action='store_true')
+
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
     parser.add_argument('--bTag', type=str, default='tight', required=False, choices=['tight', 'medium', 'loose'])
@@ -34,48 +36,6 @@ if __name__ == '__main__':
 
     parser.add_argument('--Zreweight', action='store_true')
 
-    syst_group = parser.add_mutually_exclusive_group(required=False)
-    syst_group.add_argument('--nom', dest='syst', action='store_const',
-                            const='nom')
-
-    syst_group.add_argument('--JER', dest='syst', action='store_const', 
-                            const='JER')
-    syst_group.add_argument('--JES', dest='syst', action='store_const',
-                            const='JES')
-
-    syst_group.add_argument("--wt_prefire", dest='syst', action='store_const',
-                            const='wt_prefire')
-    syst_group.add_argument("--wt_idsf", dest='syst', action='store_const',
-                            const='wt_idsf')
-    syst_group.add_argument("--wt_isosf", dest='syst', action='store_const',
-                            const='wt_isosf')
-    syst_group.add_argument("--wt_triggersf", dest='syst', action='store_const',
-                            const='wt_triggersf')
-    syst_group.add_argument("--wt_scale", dest='syst', action='store_const',
-                            const='wt_scale')
-    syst_group.add_argument("--wt_ISR", dest='syst', action='store_const',
-                            const='wt_ISR')
-    syst_group.add_argument("--wt_FSR", dest='syst', action='store_const',
-                            const='wt_FSR')
-    syst_group.add_argument("--wt_PDF", dest='syst', action='store_const',
-                            const='wt_PDF')
-    syst_group.add_argument("--wt_aS", dest='syst', action='store_const',
-                            const='wt_aS')
-    syst_group.add_argument("--wt_PDFaS", dest='syst', action='store_const',
-                            const='wt_PDFaS')
-    syst_group.add_argument('--wt_PU', dest='syst', action='store_const',
-                            const='wt_PU')
-    syst_group.add_argument('--wt_btagSF', dest='syst', action='store_const',
-                            const='wt_btagSF')
-    parser.set_defaults(syst='nom')
-
-    syst_updn_group = parser.add_mutually_exclusive_group(required=False)
-    syst_updn_group.add_argument('--DN', dest='syst_updn', 
-                                 action='store_const', const='DN')
-    syst_updn_group.add_argument('--UP', dest='syst_updn',
-                                 action='store_const', const='UP')
-    parser.set_defaults(syst_updn=None)
-
     parser.add_argument("--local", action='store_true')
 
     parser.add_argument('--nfiles', dest='nfiles', type=int, help='number of files to process', default=None, required=False)
@@ -87,9 +47,6 @@ if __name__ == '__main__':
     scale_group.add_argument('--use-local-debug', dest='scale', action='store_const', const='local_debug')
     parser.set_defaults(scale=None)
     args = parser.parse_args()
-
-    if args.syst != 'nom' and args.syst_updn is None:
-        raise ValueError("Must specify UP or DN for systematic")
 
     ######################################################################
 
@@ -139,8 +96,7 @@ if __name__ == '__main__':
         'statsplit' : args.statsplit,
         'sepPt' : args.sepPt,
         'what' : args.what,
-        'syst' : args.syst,
-        'syst_updn' : args.syst_updn,
+        'scanSyst' : args.scanSyst,
         'era' : '2018A' if args.local else sample.JEC,
         'flags' : None if args.local else sample.flags,
         'noRoccoR' : args.noRoccoR,
@@ -167,12 +123,6 @@ if __name__ == '__main__':
 
     ################### OUTPUT ###################
     out_fname = 'hists'
-    if args.syst != 'nom':
-        if args.syst.startswith('wt_'):
-            out_fname += '_%s%s'%(args.syst[3:], args.syst_updn)
-        else:
-            out_fname += '_%s%s'%(args.syst, args.syst_updn)
-
     out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
 
     if args.bTag == 'tight':
@@ -210,6 +160,8 @@ if __name__ == '__main__':
         out_fname += '_noBtagSF'
     if args.Zreweight:
         out_fname += '_Zreweight'
+    if args.scanSyst:
+        out_fname += '_scanSyst'
 
     if args.extra_tags is not None:
         for tag in args.extra_tags:
@@ -282,7 +234,8 @@ if __name__ == '__main__':
                 final_ans = ans
             else:
                 iadd(final_ans, ans)
-            t.set_description("Events: %g"%final_ans['sumwt'], refresh=True)
+            t.set_description("Events: %g"%final_ans['nominal']['sumwt'], 
+                              refresh=True)
         else:
             print("Error in processing file")
             import traceback

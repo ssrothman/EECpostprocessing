@@ -4,7 +4,9 @@ import warnings
 
 from coffea.analysis_tools import PackedSelection
 
-def addMuonSelections(selection, rmu, config):
+def addMuonSelections(selection, readers, config):
+    rmu = readers.rMu
+
     mu0 = rmu.muons[:,0]
     mu1 = rmu.muons[:,1]
     leadmu = ak.where(mu0.pt > mu1.pt, mu0, mu1)
@@ -49,28 +51,28 @@ def addMuonSelections(selection, rmu, config):
 
     return selection
 
-def addEventSelections(selection, rjet, HLT, config, config_tag):
-    selection.add("trigger", HLT[config.trigger])
-    njet = ak.num(rjet.simonjets.jetPt)
+def addEventSelections(selection, readers, config):
+    selection.add("trigger", readers.HLT[config.trigger])
+    njet = ak.num(readers.rRecoJet.jets.pt)
     mask = (njet >= config.MinNumJets) & (njet <= config.MaxNumJets)
     selection.add("numjet", mask)
 
-    selection.add("METsig", rjet._x.MET.significance < config.maxMETsig)
+    selection.add("METsig", readers.MET.significance < config.maxMETsig)
 
     if config.maxNumBtag_level == 'loose':
-        nPassB = ak.sum(rjet.jets.passLooseB, axis=-1)
+        nPassB = ak.sum(readers.rRecoJet.jets.passLooseB, axis=-1)
     elif config.maxNumBtag_level == 'medium':
-        nPassB = ak.sum(rjet.jets.passMediumB, axis=-1)
+        nPassB = ak.sum(readers.rRecoJet.jets.passMediumB, axis=-1)
     elif config.maxNumBtag_level == 'tight':
-        nPassB = ak.sum(rjet.jets.passTightB, axis=-1)
+        nPassB = ak.sum(readers.rRecoJet.jets.passTightB, axis=-1)
     else:
         raise ValueError("Invalid btag level: %s"%(config.maxNumBtag_level))
 
     selection.add("nbtag", nPassB <= config.maxNumBtag)
     return selection
 
-def addZSelections(selection, rmu, config):
-    Z = rmu.Zs
+def addZSelections(selection, readers, config):
+    Z = readers.rMu.Zs
     upper = config.Zmass + config.ZmassWindow
     lower = config.Zmass - config.ZmassWindow
     selection.add("Zmass", (Z.mass <= upper) & (Z.mass >= lower))
@@ -78,16 +80,16 @@ def addZSelections(selection, rmu, config):
     selection.add("Zy", np.abs(Z.y) < config.maxY)
     return selection
 
-def getEventSelection(rmu, rjet, HLT, config, isMC, flags):
+def getEventSelection(readers, config, isMC, flags):
     selection = PackedSelection()
-    selection = addMuonSelections(selection, rmu, config.muonSelection)
-    selection = addZSelections(selection, rmu, config.Zselection)
-    selection = addEventSelections(selection, rjet, HLT, config.eventSelection,
-                                    config.tagging)
+    selection = addMuonSelections(selection, readers, config.muonSelection)
+    selection = addZSelections(selection, readers, config.Zselection)
+    selection = addEventSelections(selection, readers, config.eventSelection)
 
     if flags is not None:
         for flag in flags:
             if flag.startswith("HTcut"):
-                selection.add("genHT", rjet._x.LHE.HT < int(flag[5:]))
+                #this is allowd to be a hack
+                selection.add("genHT", readers.LHE.HT < int(flag[5:]))
 
     return selection

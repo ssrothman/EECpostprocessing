@@ -40,6 +40,7 @@ class EECprojBinner:
     def binTransfer_full(self, rTransfer,
                     rRecoEEC, rRecoJet,
                     rGenEEC, rGenJet,
+                    eventIdx,
                     m, wt):
         nPT = self.ptax.extent
         nProj = ak.flatten(rRecoEEC.nproj)[0]
@@ -49,7 +50,7 @@ class EECprojBinner:
         if self.statsplit > 0:
             N = self.statsplit
             ans = np.zeros((N, nOrder, nBtag, nPT, nProj, nBtag, nPT, nProj), dtype=np.float64)
-            evt = ak.to_numpy(rTransfer._x.event)
+            evt = ak.to_numpy(evtIdx)
             for k in range(N):
                 statmask = (evt % N == k)
                 self.actuallyBinTransfer_full(ans[k], rTransfer,
@@ -68,6 +69,7 @@ class EECprojBinner:
     def binTransfer_sepPt(self, rTransfer,
                           rRecoEEC, rRecoJet,
                           rGenEEC, rGenJet,
+                          evtIdx,
                           m, wt):
         nPT = self.ptax.extent
         nProj = ak.flatten(rRecoEEC.nproj)[0]
@@ -78,7 +80,7 @@ class EECprojBinner:
             N = self.statsplit
             ansPT = np.zeros((N, nPT, nPT))
             ansRest = np.zeros((N, nOrder, nPT, nBtag, nProj, nBtag, nProj), dtype=np.float64)
-            evt = ak.to_numpy(rTransfer._x.event)
+            evt = ak.to_numpy(evtIdx)
             for k in range(N):
                 statmask = (evt % N == k)
                 self.actuallyBinTransfer_sepPt(ansPT[k], ansRest[k],
@@ -109,8 +111,8 @@ class EECprojBinner:
 
         mask = m[iRecoJet]
 
-        ptReco = rRecoJet.jets.corrpt[iRecoJet][mask]
-        ptGen = rGenJet.jets.corrpt[iGenJet][mask]
+        ptReco = rRecoJet.jets.pt[iRecoJet][mask]
+        ptGen = rGenJet.jets.pt[iGenJet][mask]
 
         btagReco = ak.where(rRecoJet.jets.passTightB[iRecoJet][mask], 1, 0, dtype=np.int32)
         btagGen = ak.where(rRecoJet.jets.hadronFlavour[iRecoJet][mask] == 5, 1, 0, dtype=np.int32)
@@ -150,8 +152,8 @@ class EECprojBinner:
 
         mask = m[iRecoJet]
 
-        ptReco = rRecoJet.jets.corrpt[iRecoJet][mask]
-        ptGen = rGenJet.jets.corrpt[iGenJet][mask]
+        ptReco = rRecoJet.jets.pt[iRecoJet][mask]
+        ptGen = rGenJet.jets.pt[iGenJet][mask]
 
         btagReco = ak.where(rRecoJet.jets.passTightB[iRecoJet][mask], 1, 0, dtype=np.int32)
         btagGen = ak.where(rRecoJet.jets.hadronFlavour[iRecoJet][mask] == 5, 1, 0, dtype=np.int32)
@@ -192,7 +194,9 @@ class EECprojBinner:
 
             np.add.at(ansRest[order], indicesRest, squash(vals))
 
-    def binProj(self, rEEC, rJet, mask, wt, subtract=None, noCov=False):
+    def binProj(self, rEEC, rJet, evtIdx,
+                mask, wt, 
+                subtract=None, noCov=False):
         t0 = time()
 
         nEVT = len(mask)
@@ -213,7 +217,7 @@ class EECprojBinner:
         
         t1 = time()
 
-        pt = rJet.jets.corrpt[rEEC.iJet][mask[rEEC.iReco]]
+        pt = rJet.jets.pt[rEEC.iJet][mask[rEEC.iReco]]
 
         btag = ak.where(rJet.jets.passTightB[rEEC.iJet][mask[rEEC.iReco]], 1, 0, dtype=np.int32)
 
@@ -255,7 +259,7 @@ class EECprojBinner:
                                  nOrder, nBtag, nPT, nProj))
 
             N = self.statsplit
-            evt = ak.to_numpy(rEEC._x.event)
+            evt = ak.to_numpy(evtIdx)
             for k in range(N):
                 evtmask = (evt % N == k)
                 proj[k] = proj_reduce(ans, poissonwts, evtmask)
@@ -271,7 +275,7 @@ class EECprojBinner:
 
             if self.statsplit > 0:
                 N = self.statsplit
-                evt = ak.to_numpy(rEEC._x.event)
+                evt = ak.to_numpy(evtIdx)
 
                 cov = np.zeros((N, 
                                 nOrder, nBtag, nPT, nProj,
@@ -294,12 +298,12 @@ class EECprojBinner:
 
         t5 = time()
 
-        print("proj timing summary:")
-        print("\tinit:", t1-t0)
-        print("\tpt:", t2-t1)
-        print("\tloop:", t3-t2)
-        print("\tsum:", t4-t3)
-        print("\tcov:", t5-t4)
+        #print("proj timing summary:")
+        #print("\tinit:", t1-t0)
+        #print("\tpt:", t2-t1)
+        #print("\tloop:", t3-t2)
+        #print("\tsum:", t4-t3)
+        #print("\tcov:", t5-t4)
 
         if noCov or (not self.manualcov):
             return proj
@@ -308,24 +312,29 @@ class EECprojBinner:
 
 
     def binAll(self, readers, mask, evtMask, wt):
-        reco = self.binProj(readers.rRecoEEC, readers.rRecoJet, mask, wt)
-        recopure = self.binProj(readers.rRecoEEC, readers.rRecoJet, mask, wt,
+        reco = self.binProj(readers.rRecoEEC, readers.rRecoJet, 
+                            readers.eventIdx, mask, wt)
+        recopure = self.binProj(readers.rRecoEEC, readers.rRecoJet, 
+                                readers.eventIdx, mask, wt,
                                 subtract=readers.rRecoEECUNMATCH, noCov=True)
 
-        gen = self.binProj(readers.rGenEEC, readers.rGenJet, mask, wt)
-        genpure = self.binProj(readers.rGenEEC, readers.rGenJet, mask, wt,
+        gen = self.binProj(readers.rGenEEC, readers.rGenJet, 
+                           readers.eventIdx, mask, wt)
+        genpure = self.binProj(readers.rGenEEC, readers.rGenJet,
+                               readers.eventIdx, mask, wt,
                                subtract=readers.rGenEECUNMATCH, noCov=True)
 
         if not self.sepPt:
             transfer = self.binTransfer_full(readers.rTransfer,
                                         readers.rRecoEEC, readers.rRecoJet,
                                         readers.rGenEEC, readers.rGenJet,
-                                        mask, wt)
+                                        readers.eventIdx, mask, wt)
         else:
-            transferPT, transferRest = self.binTransfer_sepPt(readers.rTransfer,
-                                                readers.rRecoEEC, readers.rRecoJet,
-                                                readers.rGenEEC, readers.rGenJet,
-                                                mask, wt)
+            transferPT, transferRest = self.binTransfer_sepPt(
+                    readers.rTransfer,
+                    readers.rRecoEEC, readers.rRecoJet,
+                    readers.rGenEEC, readers.rGenJet,
+                    readers.eventIdx, mask, wt)
 
         if self.manualcov:
             if self.sepPt:

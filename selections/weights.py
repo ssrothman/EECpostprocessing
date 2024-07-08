@@ -9,7 +9,7 @@ from .btagSF import getBtagSF
 from .reweightingSF import getZptSF, getPUweight
 
 
-def getEventWeight(x, muons, Zs, rRecoJet, config, isMC,
+def getEventWeight(x, readers, config, isMC,
                    noPUweight,
                    noPrefireSF,
                    noIDsfs,
@@ -22,10 +22,9 @@ def getEventWeight(x, muons, Zs, rRecoJet, config, isMC,
     if not isMC:
         return
 
-    getAllTheorySFs(ans, x)
+    getAllTheorySFs(ans, readers)
     getAllMuonSFs(ans,
-                  x.L1PreFiringWeight,
-                  muons,
+                  readers,
                   config,
                   noPrefireSF,
                   noIDsfs,
@@ -33,12 +32,12 @@ def getEventWeight(x, muons, Zs, rRecoJet, config, isMC,
                   noTriggersfs)
 
     if Zreweight:
-        getZptSF(ans, Zs, config)
+        getZptSF(ans, raders.Zs, config)
         
     if not noPUweight:
-        getPUweight(ans, x.Pileup.nTrueInt, config, isMC)
+        getPUweight(ans, readers.nTrueInt, config, isMC)
 
     if not noBtagSF:
-        getBtagSF(ans, rRecoJet, config)
+        getBtagSF(ans, readers.rRecoJet, config)
 
     return ans

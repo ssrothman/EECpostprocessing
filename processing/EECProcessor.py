@@ -13,21 +13,26 @@ import pickle
 import os
 from time import time
 
-from binning.binMatch2 import MatchBinner
-from binning.binEEC import EECbinner
-from binning.TrainingData import TrainingData
-from binning.binMultiplicity import MultiplicityBinner
-from binning.binBeff import BeffBinner
-from binning.binKin import KinBinner
-from binning.binBtag import BtagBinner
-from binning.binHT import HTBinner
 from binning.dummy import DummyBinner
 from binning.EECproj import EECprojBinner
+from binning.Kinematics import KinematicsBinner
+from binning.Match import MatchBinner
+from binning.Beff import BeffBinner
+from binning.Btag import BtagBinner
+
+BINNERS = {
+    'DUMMY' : DummyBinner,
+    'EECPROJ' : EECprojBinner,
+    'KINEMATICS' : KinematicsBinner,
+    'MATCH' : MatchBinner,
+    'BEFF' : BeffBinner,
+    'BTAG' : BtagBinner
+}
 
 class EECProcessor(processor.ProcessorABC):
     def __init__(self, config, statsplit=False, what='EEC', 
                  sepPt=False,
-                 syst='nom', syst_updn=None,
+                 scanSyst = False,
                  era='MC', flags=None,
                  noRoccoR=False,
                  noJER=False, noJEC=False,
@@ -44,10 +49,9 @@ class EECProcessor(processor.ProcessorABC):
         self.config = config
         self.statsplit = statsplit
         self.what = what
-        self.syst = syst
-        self.syst_updn = syst_updn
         self.era = era
         self.flags = flags
+        self.scanSyst = scanSyst
 
         self.treatAsData = treatAsData
         self.manualcov = manualcov
@@ -67,16 +71,11 @@ class EECProcessor(processor.ProcessorABC):
     
         what= what.strip().upper()
 
-        if what == 'DUMMY':
-            self.binner = DummyBinner()
-        elif what == 'EECPROJ':
-            self.binner = EECprojBinner(config,
-                                        manualcov=manualcov,
-                                        poissonbootstrap=poissonbootstrap,
-                                        statsplit=statsplit,
-                                        sepPt=sepPt)
-        else:
-            raise ValueError("invalid 'what' %s" % what)
+        self.binner = BINNERS[what](config,
+                                    manualcov=manualcov,
+                                    poissonbootstrap=poissonbootstrap,
+                                    statsplit=statsplit,
+                                    sepPt=sepPt)
 
     def postprocess(self, accumulator):
         pass
@@ -85,18 +84,6 @@ class EECProcessor(processor.ProcessorABC):
         from coffea.nanoevents import NanoEventsFactory
         events = NanoEventsFactory.from_root(fname).events()
         return self.process(events)
-
-    def syst_weight(self, evtWeight):
-        if 'wt' in self.syst:
-            print("Varying event weight %s %s"%(self.syst, self.syst_updn))
-            if self.syst_updn == 'UP':
-                return evtWeight.weight(self.syst + 'Up')
-            elif self.syst_updn == 'DN':
-                return evtWeight.weight(self.syst + 'Down')
-            else:
-                raise ValueError("Invalid syst_updn %s" % self.syst_updn)
-        else:
-            return evtWeight.weight()
 
     def process(self, events):
         #setup inputs
@@ -108,13 +95,12 @@ class EECProcessor(processor.ProcessorABC):
                              self.noRoccoR,
                              self.noJER, self.noJEC)
         t1 = time()
-        readers.runJEC(self.era, self.syst, self.syst_updn)
+        readers.runJEC(self.era, '', '')
         readers.checkBtags(self.config)
         t2 = time()
 
         evtSel = getEventSelection(
-                readers.rMu, readers.rRecoJet,
-                readers.HLT, self.config,
+                readers, self.config,
                 isMC, self.flags)
         t3 = time()
         jetSel = getJetSelection(
@@ -129,9 +115,7 @@ class EECProcessor(processor.ProcessorABC):
         #print(evtSel.names)
 
         evtWeight = getEventWeight(events, 
-                                  readers.rMu.muons, 
-                                  readers.rMu.Zs,
-                                  readers.rRecoJet,
+                                   readers,
                                   self.config, isMC,
                                   self.noPUweight,
                                   self.noPrefireSF,
@@ -143,42 +127,59 @@ class EECProcessor(processor.ProcessorABC):
         t6 = time()
         for wt in evtWeight.weightStatistics.keys():
             print("\t", wt, evtWeight.weightStatistics[wt])
-        weight = self.syst_weight(evtWeight)
         t7 = time()
-        print("weight from", ak.max(weight), "to", ak.min(weight))
-        #print("weight sources:")
+
+        nomweight = evtWeight.weight()
+        print("CUTFLOW")
+        for name in evtSel.names:
+            print("\t", name, ak.sum(evtSel.all(name) * nomweight, axis=None))
 
         #return outputs
         result = {}
 
-        result['sumwt'] = ak.sum(weight, axis=None)
-        result['sumwt_pass'] = ak.sum(weight[evtMask], axis=None)
-        result['numjet'] = ak.sum(jetMask * weight, axis=None)
+        print("doing nominal")
+        readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['corrpt']
+        nominal = self.binner.binAll(readers, 
+                                     jetMask, evtMask,
+                                     nomweight)
 
-        print("SUMWT", result['sumwt'])
-        print("SUMWT_PASS", result['sumwt_pass'])
-        print("NUMJET", result['numjet'])
+        nominal['sumwt'] = ak.sum(nomweight, axis=None)
+        nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
+        nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
 
-        print("CUTFLOW")
-        for name in evtSel.names:
-            print("\t", name, ak.sum(evtSel.all(name) * weight, axis=None))
+        result['nominal'] = nominal
 
-        ans = self.binner.binAll(
-                readers, jetMask, evtMask, weight)
-        if type(ans) is pd.DataFrame:
-            fname = events.behavior["__events_factory__"]
-            fname = fname._partition_key.replace("/", "_")
-            fname = fname + '.parquet'
-            fname = os.path.join("trainingdata/", fname)
-            ans.to_parquet(fname)
-        else:
-            result = ans
+        if self.scanSyst:
+            for variation in evtWeight.variations:
+                print("doing", variation)
+                theweight = evtWeight.weight(variation)
+
+                result[variation] = self.binner.binAll(
+                        readers, jetMask, evtMask,
+                        theweight)
+                result[variation]['sumwt'] = ak.sum(theweight, axis=None)
+                result[variation]['sumwt_pass'] = ak.sum(theweight[evtMask],
+                                                         axis=None)
+                result[variation]['numjet'] = ak.sum(jetMask * theweight, 
+                                                     axis=None)
+
+            for jvar in ['JER_UP', 'JER_DN', 'JES_UP', 'JES_DN']:
+                print('doing', jvar)
+                readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets[jvar]
+
+                result[jvar] = self.binner.binAll(
+                        readers, jetMask, evtMask,
+                        nomweight)
+                result[jvar]['sumwt'] = result['nominal']['sumwt']
+                result[jvar]['sumwt_pass'] = result['nominal']['sumwt_pass']
+                result[jvar]['numjet'] = result['nominal']['numjet']
 
         t8 = time()
-        result['sumwt'] = ak.sum(weight, axis=None)
-        result['sumwt_pass'] = ak.sum(weight[evtMask], axis=None)
-        result['numjet'] = ak.sum(jetMask * weight, axis=None)
         t9 = time()
+
+        print("SUMWT", result['nominal']['sumwt'])
+        print("SUMWT_PASS", result['nominal']['sumwt_pass'])
+        print("NUMJET", result['nominal']['numjet'])
 
         print("runtime summary:")
         print("\tinitial setup: %0.2g" % (t1-t0))
@@ -190,5 +191,7 @@ class EECProcessor(processor.ProcessorABC):
         print("\tweighting: %0.2g" % (t7-t6))
         print("\tbinning: %0.2g" % (t8-t7))
         print("\tsummary weights: %0.2g" % (t9-t8))
+
+        result['config'] = self.config
 
         return result
