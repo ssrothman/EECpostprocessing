@@ -1,266 +1,254 @@
-from processing.EECProcessor import EECProcessor
-from processing.scaleout import setup_cluster_on_submit, custom_scale, setup_htcondor
+if __name__ == '__main__':
+    ################### ARGUMENT PARSING ###################
+    import argparse
 
-from reading.files import get_rootfiles
-
-from RecursiveNamespace import RecursiveNamespace
-
-from coffea.nanoevents import NanoAODSchema
-from coffea.processor import Runner, IterativeExecutor, FuturesExecutor, DaskExecutor
-
-import os
-import argparse
-import json
-
-from samples.latest import SAMPLE_LIST
-
-################### ARGUMENT PARSING ###################
-
-parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
-
-parser.add_argument('--statsplit', action='store_true')
-
-parser.add_argument("sample", type=str)
-parser.add_argument("what", type=str)
-parser.add_argument('jettype', type=str)
-parser.add_argument('EECtype', type=str)
-
-parser.add_argument('--treatAsData', action='store_true')
-
-parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
-
-parser.add_argument('--bTag', type=str, default='tight', required=False, choices=['tight', 'medium', 'loose'])
-
-parser.add_argument('--noRoccoR', action='store_true')
-parser.add_argument('--noJER', action='store_true')
-parser.add_argument('--noJEC', action='store_true')
-parser.add_argument('--noPUweight', action='store_true')
-parser.add_argument('--noPrefireSF', action='store_true')
-parser.add_argument('--noIDsfs', action='store_true')
-parser.add_argument('--noIsosfs', action='store_true')
-parser.add_argument('--noTriggersfs', action='store_true')
-parser.add_argument('--noBtagSF', action='store_true')
-
-parser.add_argument('--Zreweight', action='store_true')
-
-syst_group = parser.add_mutually_exclusive_group(required=False)
-syst_group.add_argument('--nom', dest='syst', action='store_const',
-                        const='nom')
-
-syst_group.add_argument('--JER', dest='syst', action='store_const', 
-                        const='JER')
-syst_group.add_argument('--JES', dest='syst', action='store_const',
-                        const='JES')
-
-syst_group.add_argument("--wt_prefire", dest='syst', action='store_const',
-                        const='wt_prefire')
-syst_group.add_argument("--wt_idsf", dest='syst', action='store_const',
-                        const='wt_idsf')
-syst_group.add_argument("--wt_isosf", dest='syst', action='store_const',
-                        const='wt_isosf')
-syst_group.add_argument("--wt_triggersf", dest='syst', action='store_const',
-                        const='wt_triggersf')
-syst_group.add_argument("--wt_scale", dest='syst', action='store_const',
-                        const='wt_scale')
-syst_group.add_argument("--wt_ISR", dest='syst', action='store_const',
-                        const='wt_ISR')
-syst_group.add_argument("--wt_FSR", dest='syst', action='store_const',
-                        const='wt_FSR')
-syst_group.add_argument("--wt_PDF", dest='syst', action='store_const',
-                        const='wt_PDF')
-syst_group.add_argument("--wt_aS", dest='syst', action='store_const',
-                        const='wt_aS')
-syst_group.add_argument("--wt_PDFaS", dest='syst', action='store_const',
-                        const='wt_PDFaS')
-syst_group.add_argument('--wt_PU', dest='syst', action='store_const',
-                        const='wt_PU')
-syst_group.add_argument('--wt_btagSF', dest='syst', action='store_const',
-                        const='wt_btagSF')
-parser.set_defaults(syst='nom')
-
-syst_updn_group = parser.add_mutually_exclusive_group(required=False)
-syst_updn_group.add_argument('--DN', dest='syst_updn', 
-                             action='store_const', const='DN')
-syst_updn_group.add_argument('--UP', dest='syst_updn',
-                             action='store_const', const='UP')
-parser.set_defaults(syst_updn=None)
-
-parser.add_argument("--local", action='store_true')
-
-parser.add_argument('--nfiles', dest='nfiles', type=int, help='number of files to process', default=None, required=False)
-parser.add_argument('--startfile', type=int, default=0, required=False)
-
-scale_group = parser.add_mutually_exclusive_group(required=False)
-scale_group.add_argument('--force-local', dest='force_local', action='store_true', help='force local execution')
-scale_group.add_argument('--local-futures', dest='local_futures', action='store_true', help='force local execution with futures')
-scale_group.add_argument('--custom-scale', dest='custom_scale', action='store_true')
-scale_group.add_argument('--force-slurm', dest='force_slurm', action='store_true', help='force execution via slurm')
-
-args = parser.parse_args()
-
-if args.syst != 'nom' and args.syst_updn is None:
-    raise ValueError("Must specify UP or DN for systematic")
-
-######################################################################
+    parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
 
 
-################### INPUT ###################
+    parser.add_argument("sample", type=str)
+    parser.add_argument("what", type=str)
+    parser.add_argument('jettype', type=str)
+    parser.add_argument('EECtype', type=str)
 
+    parser.add_argument('--force', action='store_true')
 
-if args.local:
-    files = [args.sample]
-else:
-    sample = SAMPLE_LIST.lookup(args.sample)
-    files = sample.get_files()
-    if args.nfiles is not None:
-        files = files[args.startfile:args.nfiles+args.startfile]
+    parser.add_argument('--treatAsData', action='store_true')
+    parser.add_argument('--manualcov', action='store_true')
+    parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
+    parser.add_argument('--statsplit', type=int, default=0, required=False)
+    parser.add_argument('--sepPt', action='store_true')
 
-print("Processing %d files"%len(files))
-print(files[0])
+    parser.add_argument("--scanSyst", action='store_true')
 
-##############################################
+    parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
-################### PROCESSOR ###################
-with open("configs/base.json", 'r') as f:
-    config = RecursiveNamespace(**json.load(f))
+    parser.add_argument('--bTag', type=str, default='tight', required=False, choices=['tight', 'medium', 'loose'])
 
-with open("configs/%s.json"%args.jettype, 'r') as f:
-    config.update(json.load(f))
+    parser.add_argument('--noRoccoR', action='store_true')
+    parser.add_argument('--noJER', action='store_true')
+    parser.add_argument('--noJEC', action='store_true')
+    parser.add_argument('--noPUweight', action='store_true')
+    parser.add_argument('--noPrefireSF', action='store_true')
+    parser.add_argument('--noIDsfs', action='store_true')
+    parser.add_argument('--noIsosfs', action='store_true')
+    parser.add_argument('--noTriggersfs', action='store_true')
+    parser.add_argument('--noBtagSF', action='store_true')
 
-with open("configs/%sEEC.json"%args.EECtype, 'r') as f:
-    config.update(json.load(f))
+    parser.add_argument('--Zreweight', action='store_true')
 
-config.tagging.wp = args.bTag
+    parser.add_argument("--local", action='store_true')
 
-processor_instance = EECProcessor(
-        config, statsplit=args.statsplit,
-        what=args.what, syst=args.syst,
-        syst_updn=args.syst_updn,
-        era = '2018A' if args.local else sample.JEC,
-        flags = None if args.local else sample.flags,
-        noRoccoR = args.noRoccoR,
-        noJER = args.noJER,
-        noJEC = args.noJEC,
-        noPUweight = args.noPUweight,
-        noPrefireSF = args.noPrefireSF,
-        noIDsfs = args.noIDsfs,
-        noIsosfs = args.noIsosfs,
-        noTriggersfs = args.noTriggersfs,
-        noBtagSF = args.noBtagSF,
-        Zreweight = args.Zreweight,
-        treatAsData = args.treatAsData)
+    parser.add_argument('--nfiles', dest='nfiles', type=int, help='number of files to process', default=None, required=False)
+    parser.add_argument('--startfile', type=int, default=0, required=False)
 
-##################################################
+    scale_group = parser.add_mutually_exclusive_group(required=False)
+    scale_group.add_argument('--use-slurm', dest='scale', action='store_const', const='slurm')
+    scale_group.add_argument('--use-local', dest='scale', action='store_const', const='local')
+    scale_group.add_argument('--use-local-debug', dest='scale', action='store_const', const='local_debug')
+    parser.set_defaults(scale=None)
+    args = parser.parse_args()
 
-################### OUTPUT ###################
-out_fname = 'hists'
-if args.syst != 'nom':
-    if args.syst.startswith('wt_'):
-        out_fname += '_%s%s'%(args.syst[3:], args.syst_updn)
+    ######################################################################
+
+    from processing.EECProcessor import EECProcessor
+    from processing.scaleout import setup_cluster_on_submit, custom_scale, setup_htcondor
+
+    from reading.files import get_rootfiles
+
+    from RecursiveNamespace import RecursiveNamespace
+
+    from coffea.nanoevents import NanoAODSchema, NanoEventsFactory
+
+    import os
+    import json
+
+    from samples.latest import SAMPLE_LIST
+
+    ################### INPUT ###################
+
+    if args.local:
+        files = [args.sample]
     else:
-        out_fname += '_%s%s'%(args.syst, args.syst_updn)
+        sample = SAMPLE_LIST.lookup(args.sample)
+        files = sample.get_files()
+        if args.nfiles is not None:
+            files = files[args.startfile:args.nfiles+args.startfile]
 
-out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
+    print("Processing %d files"%len(files))
+    print(files[0])
 
-if args.bTag == 'tight':
-    out_fname += '_tight'
-elif args.bTag == 'medium':
-    out_fname += '_medium'
-elif args.bTag == 'loose':
-    out_fname += '_loose'
+    ##############################################
 
-if args.statsplit:
-    out_fname += '_statsplit'
-if args.noRoccoR:
-    out_fname += '_noRoccoR'
-if args.noJER:
-    out_fname += '_noJER'
-if args.noJEC:
-    out_fname += '_noJEC'
-if args.noPUweight:
-    out_fname += '_noPUweight'
-if args.noPrefireSF:
-    out_fname += '_noPrefireSF'
-if args.noIDsfs:
-    out_fname += '_noIDsfs'
-if args.noIsosfs:
-    out_fname += '_noIsosfs'
-if args.noTriggersfs:
-    out_fname += '_noTriggersfs'
-if args.noBtagSF:
-    out_fname += '_noBtagSF'
-if args.Zreweight:
-    out_fname += '_Zreweight'
+    ################### PROCESSOR ###################
+    with open("configs/base.json", 'r') as f:
+        config = RecursiveNamespace(**json.load(f))
 
-if args.extra_tags is not None:
-    for tag in args.extra_tags:
-        out_fname += '_%s'%tag
+    with open("configs/%s.json"%args.jettype, 'r') as f:
+        config.update(json.load(f))
 
-if args.treatAsData:
-    out_fname += '_asData'
+    with open("configs/%sEEC.json"%args.EECtype, 'r') as f:
+        config.update(json.load(f))
 
-out_fname += '.pkl'
+    config.tagging.wp = args.bTag
 
-if args.local:
-    destination = 'testlocal'
-else:
-    destination = "/data/submit/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.what)
-    if os.path.exists(os.path.join(destination, out_fname)):
-        raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
+    argsdict = {
+        'config' : config,
+        'statsplit' : args.statsplit,
+        'sepPt' : args.sepPt,
+        'what' : args.what,
+        'scanSyst' : args.scanSyst,
+        'era' : '2018A' if args.local else sample.JEC,
+        'flags' : None if args.local else sample.flags,
+        'noRoccoR' : args.noRoccoR,
+        'noJER' : args.noJER,
+        'noJEC' : args.noJEC,
+        'noPUweight' : args.noPUweight,
+        'noPrefireSF' : args.noPrefireSF,
+        'noIDsfs' : args.noIDsfs,
+        'noIsosfs' : args.noIsosfs,
+        'noTriggersfs' : args.noTriggersfs,
+        'noBtagSF' : args.noBtagSF,
+        'Zreweight' : args.Zreweight,
+        'treatAsData' : args.treatAsData,
+        'manualcov' : args.manualcov,
+        'poissonbootstrap' : args.poissonbootstrap,
+    }
 
-print("Outputting to %s"%os.path.join(destination, out_fname))
+    def process_func(file, args):
+        events = NanoEventsFactory.from_root(file).events()
+        processor_instance = EECProcessor(**args)
+        return processor_instance.process(events)
 
-os.makedirs(destination, exist_ok=True)
-##################################################
+    ##################################################
 
-################### EXECUTION ###################
+    ################### OUTPUT ###################
+    out_fname = 'hists'
+    out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
 
-use_slurm = len(files) > 10
-if args.force_local or args.local_futures or args.custom_scale:
-    use_slurm = False
-if args.force_slurm:
-    use_slurm = True
+    if args.bTag == 'tight':
+        out_fname += '_tight'
+    elif args.bTag == 'medium':
+        out_fname += '_medium'
+    elif args.bTag == 'loose':
+        out_fname += '_loose'
 
-if use_slurm:
-    print("using slurm")
-    cluster, client = setup_cluster_on_submit(1, 200, destination)
-    #cluster, client = setup_htcondor(1, 10, destination)
+    if args.sepPt:
+        out_fname += '_sepPt'
+    if args.statsplit > 0:
+        out_fname += '_statsplit%d'%args.statsplit
+    if args.manualcov:
+        out_fname += '_manualcov'
+    if args.poissonbootstrap > 0:
+        out_fname += '_poissonbootstrap%d'%args.poissonbootstrap
+    if args.noRoccoR:
+        out_fname += '_noRoccoR'
+    if args.noJER:
+        out_fname += '_noJER'
+    if args.noJEC:
+        out_fname += '_noJEC'
+    if args.noPUweight:
+        out_fname += '_noPUweight'
+    if args.noPrefireSF:
+        out_fname += '_noPrefireSF'
+    if args.noIDsfs:
+        out_fname += '_noIDsfs'
+    if args.noIsosfs:
+        out_fname += '_noIsosfs'
+    if args.noTriggersfs:
+        out_fname += '_noTriggersfs'
+    if args.noBtagSF:
+        out_fname += '_noBtagSF'
+    if args.Zreweight:
+        out_fname += '_Zreweight'
+    if args.scanSyst:
+        out_fname += '_scanSyst'
 
-    runner = Runner(
-        executor=DaskExecutor(client=client, status=True),
-        #chunksize=100000,
-        schema=NanoAODSchema
-    )
-elif not args.custom_scale:
-    print("running locally")
-    runner = Runner(
-        executor=FuturesExecutor(workers=4) if args.local_futures else IterativeExecutor(),
-        #executor=FuturesExecutor(workers=10, status=True),
-        #chunksize=1000,
-        schema=NanoAODSchema,
-    )
-else:
-    print("doing custom scale")
-    custom_scale(files, processor_instance, destination)
-    runner = None
-##################################################
+    if args.extra_tags is not None:
+        for tag in args.extra_tags:
+            out_fname += '_%s'%tag
 
+    if args.treatAsData:
+        out_fname += '_asData'
 
-################### RUNNING ###################
+    out_fname += '.pkl'
 
-if runner is not None:
-    out = runner(
-        {"DYJetsToLL" : files},
-        treename='Events',
-        processor_instance=processor_instance
-    )
+    if args.local:
+        destination = 'testlocal'
+    else:
+        destination = "/data/submit/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.what)
+        if os.path.exists(os.path.join(destination, out_fname)) and not args.force:
+            raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
+
+    print("Outputting to %s"%os.path.join(destination, out_fname))
+
+    os.makedirs(destination, exist_ok=True)
+    ##################################################
+
+    ################### EXECUTION ###################
+
+    if args.scale is None:
+        if len(files) == 1:
+            args.scale = 'local_debug'
+        elif len(files) < 10:
+            args.scale = 'local'
+        else:
+            args.scale = 'slurm'
+
+    if args.scale == 'slurm':
+        cluster, client = setup_cluster_on_submit(1, 200, destination)
+    elif args.scale == 'local':
+        from dask.distributed import LocalCluster, Client
+        cluster = LocalCluster(n_workers=10, 
+                               threads_per_worker=1,
+                               dashboard_address=9876)
+        client = cluster.get_client()
+    elif args.scale == 'local_debug':
+        from dask.distributed import LocalCluster, Client
+        cluster = LocalCluster(n_workers=1, 
+                               threads_per_worker=1,
+                               dashboard_address=9876)
+        client = cluster.get_client()
+
+    print(client.dashboard_link)
+    ##################################################
+
+    ################### RUNNING ###################
+
+    futures = client.map(process_func, files, args=argsdict)
+
+    from dask.distributed import as_completed
+    from tqdm import tqdm
+    from iadd import iadd
+
+    final_ans = None
+    t = tqdm(as_completed(futures, with_results=True,
+                          raise_errors=False), 
+             total=len(futures),
+             leave=True,
+             miniters=1,
+             smoothing=0.1,
+             desc='Events: 0')
+    for future, ans in t:
+        if future.status == 'finished':
+            if final_ans is None:
+                final_ans = ans
+            else:
+                iadd(final_ans, ans)
+            t.set_description("Events: %g"%final_ans['nominal']['sumwt'], 
+                              refresh=True)
+        else:
+            print("Error in processing file")
+            import traceback
+            traceback.print_tb(future.traceback())
+            print(future.exception())
+
+        future.release()
 
     with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle
-        pickle.dump(out, fout)
+        pickle.dump(final_ans, fout)
 
-    if use_slurm:
-        client.close()
-        cluster.close()
+    client.close()
+    cluster.close()
 
-##################################################
+    ##################################################
