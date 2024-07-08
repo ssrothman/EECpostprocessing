@@ -5,14 +5,12 @@ from coffea import processor
 
 from reading.allreader import AllReaders
 
-import selections.masks as masks
-import selections.weights as weights
+from selections.masks import getEventSelection
+from selections.jetMask import getJetSelection
+from selections.weights import getEventWeight
 
-from Locker import Locker
 import pickle
-
 import os
-
 from time import time
 
 from binning.binMatch2 import MatchBinner
@@ -72,27 +70,11 @@ class EECProcessor(processor.ProcessorABC):
         if what == 'DUMMY':
             self.binner = DummyBinner()
         elif what == 'EECPROJ':
-            self.binner = EECprojBinner(config.binning, config.tagging,
+            self.binner = EECprojBinner(config,
                                         manualcov=manualcov,
                                         poissonbootstrap=poissonbootstrap,
                                         statsplit=statsplit,
                                         sepPt=sepPt)
-        elif what == 'MATCH':
-            self.binner = MatchBinner(config.binning, config.tagging)
-        elif what == 'EEC':
-            self.binner = EECbinner(config.binning, config.tagging, config.controlJetSelection)
-        elif what == 'EVENT':
-            self.binner = EventBinner(config.binning, config.tagging)
-        elif what == 'MULTIPLICITY':
-            self.binner = MultiplicityBinner(config.binning)
-        elif what == 'BEFF':
-            self.binner = BeffBinner(config.binning, config.tagging)
-        elif what == 'KIN':
-            self.binner = KinBinner(config.binning, config.tagging)
-        elif what == "BTAG":
-            self.binner = BtagBinner(config.binning, config.tagging)
-        elif what == 'HT':
-            self.binner = HTBinner(config.binning)
         else:
             raise ValueError("invalid 'what' %s" % what)
 
@@ -130,12 +112,12 @@ class EECProcessor(processor.ProcessorABC):
         readers.checkBtags(self.config)
         t2 = time()
 
-        evtSel = masks.getEventSelection(
+        evtSel = getEventSelection(
                 readers.rMu, readers.rRecoJet,
                 readers.HLT, self.config,
                 isMC, self.flags)
         t3 = time()
-        jetSel = masks.getJetSelection(
+        jetSel = getJetSelection(
                 readers.rRecoJet, readers.rMu, 
                 evtSel, self.config.jetSelection,
                 isMC)
@@ -146,28 +128,40 @@ class EECProcessor(processor.ProcessorABC):
         t5 = time()
         #print(evtSel.names)
 
-        evtWeight = weights.getEventWeight(events, 
-                                           readers.rMu.rawmuons, 
-                                           readers.rMu.Zs,
-                                           readers.rRecoJet,
-                                           self.config, isMC,
-                                           self.noPUweight,
-                                           self.noPrefireSF,
-                                           self.noIDsfs,
-                                           self.noIsosfs,
-                                           self.noTriggersfs,
-                                           self.noBtagSF,
-                                           self.Zreweight)
+        evtWeight = getEventWeight(events, 
+                                  readers.rMu.muons, 
+                                  readers.rMu.Zs,
+                                  readers.rRecoJet,
+                                  self.config, isMC,
+                                  self.noPUweight,
+                                  self.noPrefireSF,
+                                  self.noIDsfs,
+                                  self.noIsosfs,
+                                  self.noTriggersfs,
+                                  self.noBtagSF,
+                                  self.Zreweight)
         t6 = time()
-        #for wt in evtWeight.weightStatistics.keys():
-        #    print("\t", wt, evtWeight.weightStatistics[wt])
+        for wt in evtWeight.weightStatistics.keys():
+            print("\t", wt, evtWeight.weightStatistics[wt])
         weight = self.syst_weight(evtWeight)
         t7 = time()
-        #print("weight from", ak.max(weight), "to", ak.min(weight))
+        print("weight from", ak.max(weight), "to", ak.min(weight))
         #print("weight sources:")
 
         #return outputs
         result = {}
+
+        result['sumwt'] = ak.sum(weight, axis=None)
+        result['sumwt_pass'] = ak.sum(weight[evtMask], axis=None)
+        result['numjet'] = ak.sum(jetMask * weight, axis=None)
+
+        print("SUMWT", result['sumwt'])
+        print("SUMWT_PASS", result['sumwt_pass'])
+        print("NUMJET", result['numjet'])
+
+        print("CUTFLOW")
+        for name in evtSel.names:
+            print("\t", name, ak.sum(evtSel.all(name) * weight, axis=None))
 
         ans = self.binner.binAll(
                 readers, jetMask, evtMask, weight)

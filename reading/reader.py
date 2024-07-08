@@ -134,12 +134,6 @@ class muonreader:
         return self._muons
 
     @property
-    def rawmuons(self):
-        if not hasattr(self, '_rawmuons'):
-            self._rawmuons = getRawMuons(self._x, self._name)
-        return self._rawmuons
-
-    @property
     def Zs(self):
         if not hasattr(self, '_Zs'):
             self._Zs = self._muons[:,0] + self._muons[:,1]

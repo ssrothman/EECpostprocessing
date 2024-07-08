@@ -10,6 +10,8 @@ if __name__ == '__main__':
     parser.add_argument('jettype', type=str)
     parser.add_argument('EECtype', type=str)
 
+    parser.add_argument('--force', action='store_true')
+
     parser.add_argument('--treatAsData', action='store_true')
     parser.add_argument('--manualcov', action='store_true')
     parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
@@ -222,7 +224,7 @@ if __name__ == '__main__':
         destination = 'testlocal'
     else:
         destination = "/data/submit/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.what)
-        if os.path.exists(os.path.join(destination, out_fname)):
+        if os.path.exists(os.path.join(destination, out_fname)) and not args.force:
             raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
 
     print("Outputting to %s"%os.path.join(destination, out_fname))

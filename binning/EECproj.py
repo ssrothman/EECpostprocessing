@@ -27,10 +27,10 @@ def proj_reduce(ans, poissonwts, evtmask):
                              optimize=True)
 
 class EECprojBinner:
-    def __init__(self, binning_config, tagging_config,
+    def __init__(self, config,
                  manualcov, poissonbootstrap, statsplit,
                  sepPt):
-        self.ptax = hist.axis.Variable(binning_config.bins.pt)
+        self.ptax = hist.axis.Variable(config.binning.bins.pt)
 
         self.manualcov = manualcov
         self.poissonbootstrap = poissonbootstrap
@@ -168,12 +168,6 @@ class EECprojBinner:
         ptGen_flat = squash(ptGen)
         ptReco_flat = squash(ptReco)
         ptGenReco = np.stack([ptReco_flat, ptGen_flat], axis=1)
-        print(ptGenReco)
-
-        print(np.min(ptGen_flat), np.max(ptGen_flat))
-        print(np.min(ptReco_flat), np.max(ptReco_flat))
-        print(np.min(iPTGen_flat), np.max(iPTGen_flat))
-        print(np.min(iPTReco_flat), np.max(iPTReco_flat))
 
         for order in range(nOrder):
             vals = (wt * rTransfer.proj(order+2))[mask]
@@ -267,9 +261,6 @@ class EECprojBinner:
                 proj[k] = proj_reduce(ans, poissonwts, evtmask)
         else:
             proj = proj_reduce(ans, poissonwts, None)
-
-        print("PROJ IS")
-        print(proj.shape)
 
         t4 = time()
 
