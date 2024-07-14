@@ -16,6 +16,9 @@ def getScaleWts7pt(weights, readers):
     [7] is MUF="1.0" MUR="2.0"; 
     [8] is MUF="2.0" MUR="2.0"
     '''
+    if readers.scalewt is None:
+        return
+
     var_weights = readers.scalewt
 
     nweights = len(weights.weight())
@@ -41,6 +44,9 @@ def getScaleWts7pt(weights, readers):
     weights.add('wt_scale', nom, up, down)
 
 def getScaleWts3pt(weights, readers):
+    if readers.scalewt is None:
+        return
+
     var_weights = readers.scalewt
 
     nweights = len(weights.weight())
@@ -55,6 +61,9 @@ def getScaleWts3pt(weights, readers):
     weights.add('wt_scale_3pt', nom, up, down)
 
 def getPSWts(weights, readers):
+    if readers.psweight is None:
+        return
+
     ps_weights = readers.psweight
     if ak.num(ps_weights)[0] < 4:
         return
@@ -79,6 +88,9 @@ def getPSWts(weights, readers):
     weights.add('wt_FSR', nom, up_fsr, down_fsr)
 
 def getPDFweights(weights, readers):
+    if readers.pdfwt is None:
+        return
+
     nweights = len(weights.weight())
     pdf_weights = readers.pdfwt
 

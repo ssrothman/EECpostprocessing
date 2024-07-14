@@ -7,7 +7,7 @@ class MatchBinner:
     def __init__(self, config,
                  manualcov, poissonbootstrap, statsplit, sepPt):
 
-        if manualcov or poissonbootstrap or statsplit or sepPt:
+        if manualcov or poissonbootstrap or statsplit > 1 or sepPt:
             raise ValueError("Invalid configuration for MatchBinner")
 
         self.config = config

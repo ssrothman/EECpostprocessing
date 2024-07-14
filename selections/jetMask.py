@@ -1,12 +1,13 @@
 import awkward as ak
 import numpy as np
 from .PackedJetSelection import PackedJetSelection
+from correctionlib import CorrectionSet
 
-def getJetSelection(rjet, rmu, evtSel, config, isMC):
+def getJetSelection(rjet, rmu, evtSel, config, vetomapconfig, isMC):
     jets = rjet.jets
     selection = PackedJetSelection(evtSel)
 
-    selection.add("pt", jets.corrpt > config.pt)
+    selection.add("pt", jets.pt > config.pt)
     selection.add("eta", np.abs(jets.eta) < config.eta)
 
     if config.jetID == 'loose':
@@ -44,4 +45,25 @@ def getJetSelection(rjet, rmu, evtSel, config, isMC):
         dR0 = np.sqrt(deta0*deta0 + dphi0*dphi0)
         dR1 = np.sqrt(deta1*deta1 + dphi1*dphi1)
         selection.add("muVeto", (dR0>config.muonOverlapDR)&(dR1>config.muonOverlapDR))
+
+    if config.useVetoMap:
+        vetomap_cset = CorrectionSet.from_file(vetomapconfig.path)
+        vetomap = vetomap_cset[vetomapconfig.name]
+
+        njet = ak.num(jets.eta)
+        eta_flat = np.abs(ak.flatten(jets.eta))
+        phi_flat = ak.flatten(jets.phi)
+
+        veto = vetomap.evaluate(
+            vetomapconfig.whichmap,
+            eta_flat,
+            phi_flat
+        )
+
+        passveto = (veto == 0)
+
+        passveto = ak.unflatten(passveto, njet)
+
+        selection.add("vetomap", passveto)
+
     return selection

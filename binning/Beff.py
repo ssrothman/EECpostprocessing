@@ -7,7 +7,7 @@ class BeffBinner:
     def __init__(self, config,
                  manualcov, poissonbootstrap, statsplit, sepPt):
 
-        if manualcov or poissonbootstrap or statsplit or sepPt:
+        if manualcov or poissonbootstrap or statsplit > 1 or sepPt:
             raise ValueError("Invalid configuration for BeffBinner")
 
         self.config = config

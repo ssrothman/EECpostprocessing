@@ -7,7 +7,7 @@ class BtagBinner:
     def __init__(self, config,
                  manualcov, poissonbootstrap, statsplit, sepPt):
 
-        if manualcov or poissonbootstrap or statsplit or sepPt:
+        if manualcov or poissonbootstrap or statsplit > 1 or sepPt:
             raise ValueError("Invalid configuration for BeffBinner")
 
         self.config = config
@@ -56,7 +56,7 @@ class BtagBinner:
         )
 
         wt_b = ak.broadcast_arrays(wt, readers.rRecoJet.jets.pt)[0]
-        nmatch = ak.num(readers.rRecoJet.CHSjets.pt, axis=-1)
+        nmatch = ak.num(readers.rRecoJet.CHSjets.pt[readers.rRecoJet.CHSjets.pt > 0], axis=-1)
 
         H.fill(
             pt = squash(readers.rRecoJet.jets.pt[mask]),

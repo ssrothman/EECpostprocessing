@@ -7,7 +7,7 @@ class KinematicsBinner:
     def __init__(self, config,
                  manualcov, poissonbootstrap, statsplit, sepPt):
             
-        if manualcov or poissonbootstrap or statsplit or sepPt:
+        if manualcov or poissonbootstrap or statsplit > 1 or sepPt:
             raise ValueError("Invalid configuration for KinematicsBinner")
 
         self.config = config
@@ -19,9 +19,10 @@ class KinematicsBinner:
             storage=hist.storage.Double()
         )
 
-        H.fill(
-            HT = squash(readers.LHE.HT)
-        )
+        if readers.LHE is not None:
+            H.fill(
+                HT = squash(readers.LHE.HT)
+            )
 
         return H
 
@@ -35,20 +36,26 @@ class KinematicsBinner:
             storage=hist.storage.Weight()
         )
 
-        H.fill(
-            nTrueInt = squash(readers.nTrueInt[evtMask]).astype(np.int32),
-            rho      = squash(readers.rho[evtMask]),
-            weight   = squash(wt[evtMask])
-        )
+        if readers.nTrueInt is not None:
+            H.fill(
+                nTrueInt = squash(readers.nTrueInt[evtMask]).astype(np.int32),
+                rho      = squash(readers.rho[evtMask]),
+                weight   = squash(wt[evtMask])
+            )
+        else:
+            H.fill(
+                nTrueInt = np.zeros_like(evtMask).astype(np.int32)[evtMask],
+                rho      = squash(readers.rho[evtMask]),
+                weight   = squash(wt[evtMask])
+            )
 
         return H
+        
 
     def makeSelvarHist(self, readers, evtMask, wt):
         H = hist.Hist(
-            hist.axis.Regular(*self.config.binning.bins.METsig,
-                              name='METsig', label='MET significance'),
             hist.axis.Regular(*self.config.binning.bins.MET,
-                              name='MET', label='MET'),
+                              name='MET', label='MET pT'),
             hist.axis.Integer(0, 3,
                               name='numLooseB', 
                               label='Number of b-tagged jets'),
@@ -66,8 +73,7 @@ class KinematicsBinner:
         numTightB = ak.sum(readers.rRecoJet.jets.passTightB, axis=-1)
 
         H.fill(
-            METsig     = squash(readers.MET.significance[evtMask]),
-            MET        = squash(readers.MET.pt[evtMask]),
+            MET        = squash(readers.METpt[evtMask]),
             numLooseB  = squash(numLooseB[evtMask]),
             numMediumB = squash(numMediumB[evtMask]),
             numTightB  = squash(numTightB[evtMask]),

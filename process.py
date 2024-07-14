@@ -15,7 +15,7 @@ if __name__ == '__main__':
     parser.add_argument('--treatAsData', action='store_true')
     parser.add_argument('--manualcov', action='store_true')
     parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
-    parser.add_argument('--statsplit', type=int, default=0, required=False)
+    parser.add_argument('--statsplit', type=int, default=1, required=False)
     parser.add_argument('--sepPt', action='store_true')
 
     parser.add_argument("--scanSyst", action='store_true')
@@ -23,6 +23,10 @@ if __name__ == '__main__':
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
     parser.add_argument('--bTag', type=str, default='tight', required=False, choices=['tight', 'medium', 'loose'])
+
+    parser.add_argument('--samplelist', type=str, default='latest', required=False)
+
+    parser.add_argument('--noBkgVeto', action='store_true')
 
     parser.add_argument('--noRoccoR', action='store_true')
     parser.add_argument('--noJER', action='store_true')
@@ -62,7 +66,16 @@ if __name__ == '__main__':
     import os
     import json
 
-    from samples.latest import SAMPLE_LIST
+    import samples
+    SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
+
+    import dask
+    dask.config.set({'distributed.client.heartbeat': '60s'})
+    dask.config.set({'distributed.comm.retry.count': 10})
+    dask.config.set({'distributed.comm.timeouts.connect': '60s'})
+    dask.config.set({'distributed.comm.timeouts.tcp': '60s'})
+    dask.config.set({'distributed.deploy.lost-worker-timeout': '60s'})
+    dask.config.set({'distributed.scheduler.allowed-failures' : 0})
 
     ################### INPUT ###################
 
@@ -112,6 +125,7 @@ if __name__ == '__main__':
         'treatAsData' : args.treatAsData,
         'manualcov' : args.manualcov,
         'poissonbootstrap' : args.poissonbootstrap,
+        'noBkgVeto' : args.noBkgVeto
     }
 
     def process_func(file, args):
@@ -134,7 +148,7 @@ if __name__ == '__main__':
 
     if args.sepPt:
         out_fname += '_sepPt'
-    if args.statsplit > 0:
+    if args.statsplit > 1:
         out_fname += '_statsplit%d'%args.statsplit
     if args.manualcov:
         out_fname += '_manualcov'
@@ -162,6 +176,8 @@ if __name__ == '__main__':
         out_fname += '_Zreweight'
     if args.scanSyst:
         out_fname += '_scanSyst'
+    if args.noBkgVeto:
+        out_fname += '_noBkgVeto'
 
     if args.extra_tags is not None:
         for tag in args.extra_tags:
@@ -214,26 +230,29 @@ if __name__ == '__main__':
 
     ################### RUNNING ###################
 
+    import dask
     futures = client.map(process_func, files, args=argsdict)
 
     from dask.distributed import as_completed
     from tqdm import tqdm
     from iadd import iadd
 
+
     final_ans = None
-    t = tqdm(as_completed(futures, with_results=True,
+    t = tqdm(as_completed(futures, with_results=False,
                           raise_errors=False), 
              total=len(futures),
              leave=True,
              miniters=1,
              smoothing=0.1,
              desc='Events: 0')
-    for future, ans in t:
+    for future in t:
+        print("GOT A FUTURE")
         if future.status == 'finished':
             if final_ans is None:
-                final_ans = ans
+                final_ans = future.result()
             else:
-                iadd(final_ans, ans)
+                iadd(final_ans, future.result())
             t.set_description("Events: %g"%final_ans['nominal']['sumwt'], 
                               refresh=True)
         else:
@@ -243,6 +262,7 @@ if __name__ == '__main__':
             print(future.exception())
 
         future.release()
+        print("DONE WITH A FUTURE")
 
     with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle

@@ -14,6 +14,10 @@ def getProj(x, name, which):
     nproj = getBK(x, name).nproj
     return unflatVector(wts, nproj)
 
+def getAllProj(x, name):
+    projs = [getProj(x, name, 'value%d'%order)[:,:,None,:] for order in range(2,7)]
+    return ak.concatenate(projs, axis=2)
+
 def getRes3(x, name):
     wts = x[name+'res3'].value
     BK = getBK(x, name)

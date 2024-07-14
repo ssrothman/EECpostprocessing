@@ -11,6 +11,8 @@ class AllReaders:
         self.noJER = noJER
         self.noJEC = noJEC
 
+        self._Flag = x.Flag
+
         self._PrefireWeight = x.L1PreFiringWeight
 
         self._rRecoJet = jetreader(x, 
@@ -38,24 +40,27 @@ class AllReaders:
 
         self._event = x.event
 
-        self._MET = x.MET
+        self._MET = x[config.names.MET]
         
         if hasattr(x, "Pileup"):
             self._nPU = x.Pileup.nPU
             self._nTrueInt = x.Pileup.nTrueInt
-            self._LHE = x.LHE
-            self._scalewt = x.LHEScaleWeight
-            self._psweight = x.PSWeight
-            self._pdfwt = x.LHEPdfWeight
             self._genwt = x.genWeight
         else:
             self._nPU = None
             self._nTrueInt = None
+            self._genwt = None
+
+        if hasattr(x, "LHE"):
+            self._LHE = x.LHE
+            self._scalewt = x.LHEScaleWeight
+            self._psweight = x.PSWeight
+            self._pdfwt = x.LHEPdfWeight
+        else:
             self._LHE = None
             self._scalewt = None
             self._psweight = None
             self._pdfwt = None
-            self._genwt = None
 
         self._HLT = x.HLT
         if hasattr(config.names, "ControlJets"):
@@ -84,7 +89,8 @@ class AllReaders:
         self.rRecoJet.jets['passMediumB'] = ak.max(bvals > mediumwp, axis=-1)
         self.rRecoJet.jets['passTightB'] = ak.max(bvals > tightwp, axis=-1)
 
-        self.rRecoJet.jets['hadronFlavour'] = ak.where((self.rRecoJet.jets['hadronFlavour'] == 0) & (self.rRecoJet.jets.partonFlavour==21), 21, self.rRecoJet.jets['hadronFlavour'])
+        if hasattr(self.rRecoJet.jets, "partonFlavour"):
+            self.rRecoJet.jets['hadronFlavour'] = ak.where((self.rRecoJet.jets['hadronFlavour'] == 0) & (self.rRecoJet.jets.partonFlavour==21), 21, self.rRecoJet.jets['hadronFlavour'])
 
         if hasattr(self.rRecoJet._x, "Pileup"):
             genpass = self.rGenJet.jets.hadronFlavour == 5
@@ -103,37 +109,43 @@ class AllReaders:
         corrjets = handler.setup_factory(self, era)
         t2 = time()
 
-        JER_UP = corrjets.JER['up'].pt
-        JER_DN = corrjets.JER['down'].pt
-
-        JESs = []
-        for field in corrjets.fields:
-            if field.startswith("jet_energy_uncertainty"):
-                JESs.append(corrjets[field][:,:,0] - 1)
-
-        JEStot = np.sqrt(ak.sum([np.square(JES) for JES in JESs], axis=0))
-
-        JES_UP = corrjets.pt * (1+JEStot)
-        JES_DN = corrjets.pt * (1-JEStot)
-
         nominal = corrjets.pt
 
-        t3 = time()
+        if era == 'MC':
+            JER_UP = corrjets.JER['up'].pt
+            JER_DN = corrjets.JER['down'].pt
 
-        #print("corr/raw")
-        #print(ak.min(corrpt/corrjets.pt_raw))
-        #print(ak.max(corrpt/corrjets.pt_raw))
-        #print()
-        #print("corr/cmssw")
-        #print(ak.min(corrpt/self.rRecoJet.jets.pt))
-        #print(ak.max(corrpt/self.rRecoJet.jets.pt))
+            JESs = []
+            for field in corrjets.fields:
+                if field.startswith("jet_energy_uncertainty"):
+                    JESs.append(corrjets[field][:,:,0] - 1)
 
-        self.rRecoJet.jets['corrpt'] = nominal
-        self.rRecoJet.jets['JER_UP'] = JER_UP
-        self.rRecoJet.jets['JER_DN'] = JER_DN
-        self.rRecoJet.jets['JES_UP'] = JES_UP
-        self.rRecoJet.jets['JES_DN'] = JES_DN
-        self.rRecoJet.jets['pt'] = nominal
+            JEStot = np.sqrt(ak.sum([np.square(JES) for JES in JESs], axis=0))
+
+            JES_UP = corrjets.pt * (1+JEStot)
+            JES_DN = corrjets.pt * (1-JEStot)
+
+
+            t3 = time()
+
+            #print("corr/raw")
+            #print(ak.min(corrpt/corrjets.pt_raw))
+            #print(ak.max(corrpt/corrjets.pt_raw))
+            #print()
+            #print("corr/cmssw")
+            #print(ak.min(corrpt/self.rRecoJet.jets.pt))
+            #print(ak.max(corrpt/self.rRecoJet.jets.pt))
+
+            self.rRecoJet.jets['corrpt'] = nominal
+            self.rRecoJet.jets['JER_UP'] = JER_UP
+            self.rRecoJet.jets['JER_DN'] = JER_DN
+            self.rRecoJet.jets['JES_UP'] = JES_UP
+            self.rRecoJet.jets['JES_DN'] = JES_DN
+            self.rRecoJet.jets['pt'] = nominal
+        else:
+            t3 = time()
+            self.rRecoJet.jets['corrpt'] = nominal
+            self.rRecoJet.jets['pt'] = nominal
 
         if hasattr(self.rRecoJet._x, "Pileup"):
             self.rGenJet.jets['corrpt'] = self.rGenJet.jets.pt #just so the genjets.corrpt is defined
@@ -236,4 +248,8 @@ class AllReaders:
     @property
     def prefirewt(self):
         return self._PrefireWeight
+
+    @property
+    def Flag(self):
+        return self._Flag
 

@@ -4,6 +4,13 @@ import pickle
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster, HTCondorCluster
 
+from dask.distributed import WorkerPlugin
+from loky import ProcessPoolExecutor
+
+class AddProcessPool(WorkerPlugin):
+    def setup(self, worker):
+        worker.executors['processes'] = ProcessPoolExecutor(max_workers=worker.nthreads)
+
 def setup_htcondor(minjobs, maxjobs, path=None):
     cluster = HTCondorCluster(
             disk = '2GB',
@@ -21,7 +28,7 @@ def setup_htcondor(minjobs, maxjobs, path=None):
                  '+DESIRED_Sites' : 'mit_tier3'},
             local_directory='test',
             log_directory='test')
-    cluster.adapt(minimum_jobs = minjobs, maximum_jobs = maxjobs)
+    cluster.scale(minimum_jobs = minjobs, maximum_jobs = maxjobs)
     client = Client(cluster)
     return cluster, client
 
@@ -43,13 +50,25 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
                            walltime='1:00:00',
                            log_directory=log_directory,
                            scheduler_options={'dashboard_address':":9876"})
-    print(cluster.job_script())
-    cluster.adapt(
-        minimum_jobs=1, maximum_jobs=200,
-        worker_key=lambda state: state.address.split(':')[0],
-        interval='10s'
-    )
     client = Client(cluster)
+    #client.register_worker_plugin(AddProcessPool())
+    #print(cluster.job_script())
+    cluster.scale(
+        100,
+        #worker_key=lambda state: state.address.split(':')[0],
+        #interval='10s'
+    )
+    
+    #print("waiting 30 seconds for slurm jobs to spin up")
+    #now sleep for 30 sec to let jobs start up
+    #import time
+    #time.sleep(30)
+
+    print(client.run(lambda dask_worker: str(dask_worker.executors)))
+    print(cluster.job_script())
+
+    
+
     return cluster, client
 
 def custom_scale(files, processor_instance, folder):

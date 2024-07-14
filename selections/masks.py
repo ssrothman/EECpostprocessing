@@ -51,24 +51,31 @@ def addMuonSelections(selection, readers, config):
 
     return selection
 
-def addEventSelections(selection, readers, config):
+def addEventSelections(selection, readers, config, noBkgVeto):
     selection.add("trigger", readers.HLT[config.trigger])
     njet = ak.num(readers.rRecoJet.jets.pt)
     mask = (njet >= config.MinNumJets) & (njet <= config.MaxNumJets)
     selection.add("numjet", mask)
 
-    selection.add("METsig", readers.MET.significance < config.maxMETsig)
+    if not noBkgVeto:
+        selection.add("METpt", readers.METpt < config.maxMETpt)
 
-    if config.maxNumBtag_level == 'loose':
-        nPassB = ak.sum(readers.rRecoJet.jets.passLooseB, axis=-1)
-    elif config.maxNumBtag_level == 'medium':
-        nPassB = ak.sum(readers.rRecoJet.jets.passMediumB, axis=-1)
-    elif config.maxNumBtag_level == 'tight':
-        nPassB = ak.sum(readers.rRecoJet.jets.passTightB, axis=-1)
-    else:
-        raise ValueError("Invalid btag level: %s"%(config.maxNumBtag_level))
+        if config.maxNumBtag_level == 'loose':
+            nPassB = ak.sum(readers.rRecoJet.jets.passLooseB, axis=-1)
+        elif config.maxNumBtag_level == 'medium':
+            nPassB = ak.sum(readers.rRecoJet.jets.passMediumB, axis=-1)
+        elif config.maxNumBtag_level == 'tight':
+            nPassB = ak.sum(readers.rRecoJet.jets.passTightB, axis=-1)
+        else:
+            raise ValueError("Invalid btag level: %s"%(config.maxNumBtag_level))
+        selection.add("nbtag", nPassB <= config.maxNumBtag)
 
-    selection.add("nbtag", nPassB <= config.maxNumBtag)
+    filtermask = np.ones(len(readers.eventIdx), dtype=bool)
+    for flag in config.noiseFilters:
+        filtermask = filtermask & readers.Flag[flag]
+
+    selection.add("noiseFilters", filtermask)
+
     return selection
 
 def addZSelections(selection, readers, config):
@@ -80,11 +87,12 @@ def addZSelections(selection, readers, config):
     selection.add("Zy", np.abs(Z.y) < config.maxY)
     return selection
 
-def getEventSelection(readers, config, isMC, flags):
+def getEventSelection(readers, config, isMC, flags, noBkgVeto):
     selection = PackedSelection()
     selection = addMuonSelections(selection, readers, config.muonSelection)
     selection = addZSelections(selection, readers, config.Zselection)
-    selection = addEventSelections(selection, readers, config.eventSelection)
+    selection = addEventSelections(selection, readers, config.eventSelection,
+                                   noBkgVeto)
 
     if flags is not None:
         for flag in flags:

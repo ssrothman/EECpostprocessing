@@ -2,8 +2,8 @@
     "names" : {
         "EECs" : "EECs",
         "Matches" : "GenMatch",
-        "SimonJets" : "GenMatchParticles",
-        "GenSimonJets" : "GenMatchGenParticles",
+        "SimonJets" : "SimonJets",
+        "GenSimonJets" : "GenSimonJets",
         "ControlJets" : "RandomConeJets",
         "ControlEECs" : "RandomConeEECs"
     }

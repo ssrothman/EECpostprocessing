@@ -6,63 +6,57 @@ from time import time
 
 from .EECgeneric import EECgenericBinner
 
-class EECprojBinner(EECgenericBinner):
+class EECres4teeBinner(EECgenericBinner):
     def __init__(self, config,
                  manualcov, poissonbootstrap, statsplit,
                  sepPt):
-        super(EECprojBinner, self).__init__(config,
+        super(EECres4teeBinner, self).__init__(config,
                                             manualcov, poissonbootstrap,
                                             statsplit, sepPt)
 
     def binAll(self, readers, mask, evtMask, wt):
-        transfers = []
-        for order in range(2, 7):
-            transfers.append(
-                self.binTransfer(
-                    readers.rTransfer.proj(order),
-                    readers.rGenJet,
-                    readers.rRecoJet,
-                    readers.rTransfer.iGen,
-                    readers.rTransfer.iReco,
-                    readers.eventIdx,
-                    mask, wt
-                )[None,:,:,:,:,:,:]
-            )
-        transfer = np.concatenate(transfers, axis=0)
-        #print("SUMTRANSFER", transfer.sum())
+        transfer = self.binTransfer(
+            readers.rTransfer.res4tee,
+            readers.rGenJet,
+            readers.rRecoJet,
+            readers.rTransfer.iGen,
+            readers.rTransfer.iReco,
+            readers.eventIdx,
+            mask, wt
+        )
 
         reco = self.binObserved(
-                readers.rRecoEEC.allproj,
+                readers.rRecoEEC.res4tee,
                 readers.rRecoJet,
                 readers.rRecoEEC.iJet,
                 readers.rRecoEEC.iReco,
                 readers.eventIdx,
                 mask, wt)
         recopure = self.binObserved(
-                readers.rRecoEEC.allproj,
+                readers.rRecoEEC.res4tee,
                 readers.rRecoJet,
                 readers.rRecoEEC.iJet,
                 readers.rRecoEEC.iReco,
                 readers.eventIdx,
                 mask, wt, 
                 noCov=True,
-                subtract = readers.rRecoEECUNMATCH.allproj)
+                subtract = readers.rRecoEECUNMATCH.res4tee)
         gen = self.binObserved(
-                readers.rGenEEC.allproj,
+                readers.rGenEEC.res4tee,
                 readers.rGenJet,
                 readers.rGenEEC.iJet,
                 readers.rGenEEC.iReco,
                 readers.eventIdx,
                 mask, wt)
         genpure = self.binObserved(
-                readers.rGenEEC.allproj,
+                readers.rGenEEC.res4tee,
                 readers.rGenJet,
                 readers.rGenEEC.iJet,
                 readers.rGenEEC.iReco,
                 readers.eventIdx,
                 mask, wt, 
                 noCov=True,
-                subtract = readers.rGenEECUNMATCH.allproj)
+                subtract = readers.rGenEECUNMATCH.res4tee)
 
         result = {}
         result['recopure'] = recopure

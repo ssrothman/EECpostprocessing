@@ -2,7 +2,8 @@
     "names" : {
         "CHSjets" : "Jet",
         "muons" : "Muon",
-        "rho" : "fixedGridRhoFastjetAll"
+        "rho" : "fixedGridRhoFastjetAll",
+        "MET" : "PuppiMET"
     },
     "muonSelection" : {
         "leadpt" : 26,
@@ -20,9 +21,20 @@
         "PreFireWeight" : true,
         "MinNumJets" : 0,
         "MaxNumJets" : 9999,
-        "maxMETsig" : 5,
+        "maxMETpt" : 50,
         "maxNumBtag" : 1,
-        "maxNumBtag_level" : "tight"
+        "maxNumBtag_level" : "loose",
+        "noiseFilters" : [
+            "goodVertices",
+            "globalSuperTightHalo2016Filter",
+            "HBHENoiseFilter",
+            "HBHENoiseIsoFilter",
+            "EcalDeadCellTriggerPrimitiveFilter",
+            "BadPFMuonFilter",
+            "BadPFMuonDzFilter",
+            "eeBadScFilter",
+            "ecalBadCalibFilter"
+        ]
     },
     "Zselection" : {
         "Zmass" : 91.1876,
@@ -126,33 +138,32 @@
         "JECstack" : {
             "DATA_2018A" : [
                 "Summer19UL18_RunA_V6_DATA_L1FastJet_AK8PFPuppi",
-                "Summer19UL18_RunA_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunA_V6_DATA_L3Absolute_AK8PFPuppi",
+                "Summer19UL18_RunA_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunA_V6_DATA_L2L3Residual_AK8PFPuppi"
             ],
             "DATA_2018B" : [
                 "Summer19UL18_RunB_V6_DATA_L1FastJet_AK8PFPuppi",
-                "Summer19UL18_RunB_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunB_V6_DATA_L3Absolute_AK8PFPuppi",
+                "Summer19UL18_RunB_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunB_V6_DATA_L2L3Residual_AK8PFPuppi"
             ],
             "DATA_2018C" : [
                 "Summer19UL18_RunC_V6_DATA_L1FastJet_AK8PFPuppi",
-                "Summer19UL18_RunC_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunC_V6_DATA_L3Absolute_AK8PFPuppi",
+                "Summer19UL18_RunC_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunC_V6_DATA_L2L3Residual_AK8PFPuppi"
             ],
             "DATA_2018D" : [
                 "Summer19UL18_RunD_V6_DATA_L1FastJet_AK8PFPuppi",
-                "Summer19UL18_RunD_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunD_V6_DATA_L3Absolute_AK8PFPuppi",
+                "Summer19UL18_RunD_V6_DATA_L2Relative_AK8PFPuppi",
                 "Summer19UL18_RunD_V6_DATA_L2L3Residual_AK8PFPuppi"
             ],
             "MC" : [
                 "Summer19UL18_V5_MC_L1FastJet_AK8PFPuppi",
                 "Summer19UL18_V5_MC_L2Relative_AK8PFPuppi",
-                "Summer19UL18_V5_MC_L3Absolute_AK8PFPuppi",
-                "Summer19UL18_V5_MC_L2L3Residual_AK8PFPuppi"
+                "Summer19UL18_V5_MC_L3Absolute_AK8PFPuppi"
             ]
         },
         "JECuncertainties" : [
@@ -164,7 +175,11 @@
             "sf" : "Summer19UL18_JRV2_MC_SF_AK8PFPuppi"
         }
     },
-    "jet_vetopath" : "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/2018_UL/jetvetomaps.json.gz",
+    "jetvetomap" : {
+        "path" : "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/2018_UL/jetvetomaps.json.gz",
+        "name" : "Summer19UL18_V1",
+        "whichmap" : "jetvetomap"
+    },
     "tagging" : {
         "wp" : "tight",
         "bwps" : {
@@ -177,6 +192,7 @@
         "axes" : ["pt", "btag", "genflav"],
         "bins" : {
             "pt" : [50, 65, 88, 120, 150, 186, 254, 326, 408, 1500],
+            "pt_res" : [186, 254, 326, 408],
             "MUpt" : [0, 5, 10, 15, 20, 25, 30, 35, 40, 
                     50, 60, 70, 80, 90, 100,
                     120, 140, 160, 180, 200,
@@ -199,7 +215,7 @@
             "Jeta" : [40, 0, 2.0],
             "nTrueInt" : 100,
             "rho" : [30, 0, 80],
-            "MET" : [100, 0, 1000],
+            "MET" : [1000, 0, 1000],
             "METsig" : [30, 0, 15], 
             "rho" : [100, 0, 80],
             "HT" : [1000, 0, 10000],

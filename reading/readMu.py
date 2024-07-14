@@ -8,9 +8,11 @@ def getMuons(x, name, noRoccoR=False):
 
     if noRoccoR or not hasattr(ans, "RoccoR"):
         ans['rawPt'] = ans.pt
+        ans['pt'] = ans.pt
 
         warnings.warn("Not applying RoccoR")
     else:
-        ans['rawPt'] = ans.pt * ans.RoccoR
+        ans['rawPt'] = ans.pt 
+        ans['pt'] = ans.pt * ans.RoccoR
 
     return ans

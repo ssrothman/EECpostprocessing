@@ -20,7 +20,7 @@ def getEventWeight(x, readers, config, isMC,
     ans = Weights(len(x), storeIndividual=True)
 
     if not isMC:
-        return
+        return ans
 
     getAllTheorySFs(ans, readers)
     getAllMuonSFs(ans,

@@ -16,6 +16,12 @@ class EECreader:
         return self._proj[order]
 
     @property
+    def allproj(self):
+        if not hasattr(self, '_allproj'):
+            self._allproj = reading.readEEC.getAllProj(self._x, self._name)
+        return self._allproj
+
+    @property
     def res4dipole(self):
         if not hasattr(self, '_res4'):
             self._res4dipole = reading.readEEC.getRes4dipole(self._x, self._name)
