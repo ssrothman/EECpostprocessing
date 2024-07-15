@@ -53,18 +53,17 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
     client = Client(cluster)
     #client.register_worker_plugin(AddProcessPool())
     #print(cluster.job_script())
-    cluster.scale(
-        50,
-        #worker_key=lambda state: state.address.split(':')[0],
-        #interval='10s'
+    cluster.adapt(
+        minimum_jobs=1, maximum_jobs=50,
+        worker_key=lambda state: state.address.split(':')[0],
+        interval='10s'
     )
     
-    #print("waiting 30 seconds for slurm jobs to spin up")
-    #now sleep for 30 sec to let jobs start up
+    #print("waiting 10 seconds for slurm jobs to spin up")
     #import time
-    #time.sleep(30)
+    #time.sleep(10)
 
-    print(client.run(lambda dask_worker: str(dask_worker.executors)))
+    #print(client.run(lambda dask_worker: str(dask_worker.executors)))
     print(cluster.job_script())
 
     

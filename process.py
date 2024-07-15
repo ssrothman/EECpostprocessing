@@ -50,6 +50,10 @@ if __name__ == '__main__':
     scale_group.add_argument('--use-local', dest='scale', action='store_const', const='local')
     scale_group.add_argument('--use-local-debug', dest='scale', action='store_const', const='local_debug')
     parser.set_defaults(scale=None)
+
+    parser.add_argument('--numCollectionThreads', type=int, default=1, required=False)
+    parser.add_argument('--numAddingProcesses', type=int, default=1, required=False)
+
     args = parser.parse_args()
 
     ######################################################################
@@ -236,7 +240,51 @@ if __name__ == '__main__':
     from tqdm import tqdm
     from iadd import iadd
 
-    final_ans = None
+    import multiprocess as multiprocessing
+    multiprocessing.set_start_method('spawn')
+
+    import time
+    def worker_func(q, ansQ):
+        from iadd import iadd
+        final_ans = None
+        while True:
+            nextans = q.get()
+
+            if nextans is None:
+                break
+
+            if final_ans is None:
+                final_ans = nextans
+            else:
+                iadd(final_ans, nextans)
+
+        ansQ.put(final_ans)
+        return final_ans
+
+    collectedFutures = multiprocessing.Queue()
+    resultQ = multiprocessing.Queue()
+
+    addingProcesses = [multiprocessing.Process(target=worker_func, args=(collectedFutures, resultQ)) for i in range(args.numAddingProcesses)]
+    for p in addingProcesses:
+        p.start()
+    
+    def collect_func(qGet, qPut):
+        while True:
+            nextfuture = qGet.get()
+            if nextfuture is None:
+                qGet.task_done()
+                break
+            qPut.put(nextfuture.result())
+            nextfuture.release()
+            qGet.task_done()
+
+    import queue
+    import threading
+    completedFutures = queue.Queue()
+    collectingThreads = [threading.Thread(target=collect_func, args=(completedFutures, collectedFutures)) for i in range(args.numCollectionThreads)]
+    for t in collectingThreads:
+        t.start()
+
     t = tqdm(as_completed(futures, with_results=False,
                           raise_errors=False), 
              total=len(futures),
@@ -246,25 +294,66 @@ if __name__ == '__main__':
              desc='Events: 0')
     for future in t:
         if future.status == 'finished':
+            completedFutures.put(future)
+            '''
             if final_ans is None:
                 final_ans = future.result()
             else:
                 iadd(final_ans, future.result())
             t.set_description("Events: %g"%final_ans['nominal']['sumwt'], 
                               refresh=True)
+            '''
         else:
             print("Error in processing file")
             import traceback
             traceback.print_tb(future.traceback())
             print(future.exception())
+            future.release()
 
-        future.release()
+    print("cleaning up collecting threads")
+    for t in collectingThreads:
+        completedFutures.put(None)
+        t.join()
+    completedFutures.join()
+
+    print("cleaning up adding processes")
+    print("\tputting none")
+    for p in addingProcesses:
+        collectedFutures.put(None)
+    print("closing collectedFutures")
+    collectedFutures.close()
+    print("joining collectedFutures")
+    collectedFutures.join_thread()
+
+    print("joining adding processes")
+    for p in addingProcesses:
+        print(p)
+        #p.terminate()
+
+    print("cleaning up dask cluster")
+    client.close()
+    cluster.close()
+
+    print("waiting an extra 10 seconds to ensure everything is processed")
+    time.sleep(10)
+
+    print("accumulating final result")
+    final_ans = None
+    while(not resultQ.empty()):
+        ans = resultQ.get()
+        print("partial sumw: %g"%ans['nominal']['sumwt'])
+        if final_ans is None:
+            final_ans = ans
+        else:
+            iadd(final_ans, ans)
+    print("final sumw: %g"%final_ans['nominal']['sumwt'])
+
+    for p in addingProcesses:
+        print(p)
+        p.join()
 
     with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle
         pickle.dump(final_ans, fout)
 
-    client.close()
-    cluster.close()
-
-    ##################################################
+    ####################################################
