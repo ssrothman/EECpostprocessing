@@ -75,7 +75,6 @@ if __name__ == '__main__':
     dask.config.set({'distributed.comm.timeouts.connect': '60s'})
     dask.config.set({'distributed.comm.timeouts.tcp': '60s'})
     dask.config.set({'distributed.deploy.lost-worker-timeout': '60s'})
-    dask.config.set({'distributed.scheduler.allowed-failures' : 0})
 
     ################### INPUT ###################
 
@@ -237,7 +236,6 @@ if __name__ == '__main__':
     from tqdm import tqdm
     from iadd import iadd
 
-
     final_ans = None
     t = tqdm(as_completed(futures, with_results=False,
                           raise_errors=False), 
@@ -247,7 +245,6 @@ if __name__ == '__main__':
              smoothing=0.1,
              desc='Events: 0')
     for future in t:
-        print("GOT A FUTURE")
         if future.status == 'finished':
             if final_ans is None:
                 final_ans = future.result()
@@ -262,7 +259,6 @@ if __name__ == '__main__':
             print(future.exception())
 
         future.release()
-        print("DONE WITH A FUTURE")
 
     with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle

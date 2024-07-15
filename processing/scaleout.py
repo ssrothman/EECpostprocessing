@@ -43,7 +43,7 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit,submit-centos07,submit-gpu',
+    cluster = SLURMCluster(queue = 'submit,submit-centos07',
                            cores=1,
                            processes=1,
                            memory='4GB',
@@ -54,7 +54,7 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
     #client.register_worker_plugin(AddProcessPool())
     #print(cluster.job_script())
     cluster.scale(
-        100,
+        50,
         #worker_key=lambda state: state.address.split(':')[0],
         #interval='10s'
     )
