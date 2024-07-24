@@ -37,12 +37,6 @@ class EECgenericBinner:
         iPT_reco = self.ptax.index(squash(pt_reco)) + 1
         iPT_reco = ak.unflatten(iPT_reco, numpt)
 
-        print("Btagging level is", self.config.tagging.wp)
-        print("the wp is", self.config.tagging.bwps.tight)
-        print("Max btag score [CHS] is", ak.max(rRecoJet.CHSjets.btagDeepB[iReco][EECmask], axis=None))
-        print("Max btag int [CHS] is", ak.max(rRecoJet.CHSjets.passTightB[iReco][EECmask], axis=None))
-        print("Max btag int [ak8] is", ak.max(rRecoJet.jets.passTightB[iReco][EECmask], axis=None))
-
         if self.config.tagging.wp == 'tight':
             btag_gen = ak.values_astype(
                     rGenJet.jets.passTightB[iGen][EECmask], np.int32)

@@ -18,7 +18,27 @@ if __name__ == '__main__':
     parser.add_argument('--statsplit', type=int, default=1, required=False)
     parser.add_argument('--sepPt', action='store_true')
 
-    parser.add_argument("--scanSyst", action='store_true')
+    parser.add_argument('--filesplit', type=int, default=1, required=False)
+
+    #mutually exclusive systematics group
+    syst_group = parser.add_mutually_exclusive_group(required=False)
+    syst_group.add_argument('--scanSyst', action='store_const', 
+                            const='scanAll', dest='syst')
+    syst_group.add_argument('--noSyst', action='store_const',
+                            const='none', dest='syst')
+    syst_group.add_argument('--scanJetMETSyst', action='store_const',
+                           const='scanJetMET', dest='syst')
+    syst_group.add_argument('--scanMuonSyst', action='store_const',
+                            const='scanMuon', dest='syst')
+    syst_group.add_argument('--scanTheorySyst', action='store_const',
+                            const='scanTheory', dest='syst')
+    syst_group.add_argument('--scanPSSyst', action='store_const',
+                            const='scanPS', dest='syst')
+    syst_group.add_argument('--scanBtagSyst', action='store_const',
+                            const='scanBtag', dest='syst')
+    syst_group.add_argument('--scanPileupSyst', action='store_const',
+                            const='scanPileup', dest='syst')
+    parser.set_defaults(syst='noSyst')
 
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
@@ -51,15 +71,15 @@ if __name__ == '__main__':
     scale_group.add_argument('--use-local-debug', dest='scale', action='store_const', const='local_debug')
     parser.set_defaults(scale=None)
 
-    parser.add_argument('--numCollectionThreads', type=int, default=1, required=False)
-    parser.add_argument('--numAddingProcesses', type=int, default=1, required=False)
+    parser.add_argument('--numCollectionThreads', type=int, default=20, required=False)
+    parser.add_argument('--numAddingProcesses', type=int, default=10, required=False)
 
     args = parser.parse_args()
 
     ######################################################################
 
     from processing.EECProcessor import EECProcessor
-    from processing.scaleout import setup_cluster_on_submit, custom_scale, setup_htcondor
+    from processing.scaleout import setup_cluster_on_submit, setup_local_cluster
 
     from reading.files import get_rootfiles
 
@@ -74,14 +94,16 @@ if __name__ == '__main__':
     SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
 
     import dask
-    dask.config.set({'distributed.client.heartbeat': '60s'})
+    dask.config.set({'distributed.client.heartbeat': '120s'})
     dask.config.set({'distributed.comm.retry.count': 10})
-    dask.config.set({'distributed.comm.timeouts.connect': '60s'})
-    dask.config.set({'distributed.comm.timeouts.tcp': '60s'})
-    dask.config.set({'distributed.deploy.lost-worker-timeout': '60s'})
+    dask.config.set({'distributed.comm.timeouts.connect': '120s'})
+    dask.config.set({'distributed.comm.timeouts.tcp': '120s'})
+    dask.config.set({'distributed.deploy.lost-worker-timeout': '120s'})
+    dask.config.set({'distributed.scheduler.worker-saturation': 1.0})
+    dask.config.set({'distributed.scheduler.locks.lease-timeout': '120s'})
+    #dask.config.set({'distributed.nanny.pre-spawn-environ.MALLOC_TRIM_THRESHOLD_': '0'})
 
     ################### INPUT ###################
-
     if args.local:
         files = [args.sample]
     else:
@@ -112,7 +134,7 @@ if __name__ == '__main__':
         'statsplit' : args.statsplit,
         'sepPt' : args.sepPt,
         'what' : args.what,
-        'scanSyst' : args.scanSyst,
+        'scanSyst' : args.syst,
         'era' : '2018A' if args.local else sample.JEC,
         'flags' : None if args.local else sample.flags,
         'noRoccoR' : args.noRoccoR,
@@ -131,10 +153,34 @@ if __name__ == '__main__':
         'noBkgVeto' : args.noBkgVeto
     }
 
-    def process_func(file, args):
-        events = NanoEventsFactory.from_root(file).events()
-        processor_instance = EECProcessor(**args)
-        return processor_instance.process(events)
+    def process_func(inputtuple, args):
+        print()
+        print("PROCESSING")
+        print(inputtuple)
+        print()
+        import uproot
+        file, statsplit_N, statsplit_k = inputtuple
+        try:
+            nevts = uproot.open(file)['Events'].num_entries
+
+            start = statsplit_k*(nevts//statsplit_N)
+            if statsplit_k == statsplit_N-1:
+                end = nevts
+            else:
+                end = (statsplit_k+1)*(nevts//statsplit_N)
+
+            events = NanoEventsFactory.from_root(
+                file, 
+                entry_start=start,
+                entry_stop=end,
+            ).events()
+
+            processor_instance = EECProcessor(**args)
+            return processor_instance.process(events)
+        except:
+            import traceback
+            traceback.print_exc()
+            return {'errd' : [file]}
 
     ##################################################
 
@@ -177,8 +223,7 @@ if __name__ == '__main__':
         out_fname += '_noBtagSF'
     if args.Zreweight:
         out_fname += '_Zreweight'
-    if args.scanSyst:
-        out_fname += '_scanSyst'
+    out_fname += '_%s'%args.syst
     if args.noBkgVeto:
         out_fname += '_noBkgVeto'
 
@@ -216,144 +261,118 @@ if __name__ == '__main__':
     if args.scale == 'slurm':
         cluster, client = setup_cluster_on_submit(1, 200, destination)
     elif args.scale == 'local':
-        from dask.distributed import LocalCluster, Client
-        cluster = LocalCluster(n_workers=10, 
-                               threads_per_worker=1,
-                               dashboard_address=9876)
-        client = cluster.get_client()
+        cluster, client = setup_local_cluster(75)
     elif args.scale == 'local_debug':
-        from dask.distributed import LocalCluster, Client
-        cluster = LocalCluster(n_workers=1, 
-                               threads_per_worker=1,
-                               dashboard_address=9876)
-        client = cluster.get_client()
+        cluster, client = setup_local_cluster(1)
 
-    print(client.dashboard_link)
     ##################################################
 
     ################### RUNNING ###################
 
     import dask
-    futures = client.map(process_func, files, args=argsdict)
 
     from dask.distributed import as_completed
     from tqdm import tqdm
     from iadd import iadd
 
-    import multiprocess as multiprocessing
-    multiprocessing.set_start_method('spawn')
+    result_futures = None
 
-    import time
-    def worker_func(q, ansQ):
-        from iadd import iadd
-        final_ans = None
-        while True:
-            nextans = q.get()
+    #target sumwt is 208328.90519900652
 
-            if nextans is None:
-                break
+    from tree_acc import tree_acc
 
-            if final_ans is None:
-                final_ans = nextans
-            else:
-                iadd(final_ans, nextans)
+    from dask.distributed import progress
 
-        ansQ.put(final_ans)
-        return final_ans
+    import itertools
+    inputs = list(itertools.product(files, [args.filesplit], range(args.filesplit)))
 
-    collectedFutures = multiprocessing.Queue()
-    resultQ = multiprocessing.Queue()
+    #result = tree_acc(client.map(process_func, inputs, args=argsdict), client)
+    #progress(result)
 
-    addingProcesses = [multiprocessing.Process(target=worker_func, args=(collectedFutures, resultQ)) for i in range(args.numAddingProcesses)]
-    for p in addingProcesses:
-        p.start()
-    
-    def collect_func(qGet, qPut):
-        while True:
-            nextfuture = qGet.get()
-            if nextfuture is None:
-                qGet.task_done()
-                break
-            qPut.put(nextfuture.result())
-            nextfuture.release()
-            qGet.task_done()
 
-    import queue
-    import threading
-    completedFutures = queue.Queue()
-    collectingThreads = [threading.Thread(target=collect_func, args=(completedFutures, collectedFutures)) for i in range(args.numCollectionThreads)]
-    for t in collectingThreads:
-        t.start()
-
-    t = tqdm(as_completed(futures, with_results=False,
+    t = tqdm(as_completed(client.map(process_func, inputs, args=argsdict), 
+                          with_results=False,
                           raise_errors=False), 
-             total=len(futures),
+             total=len(inputs),
              leave=True,
              miniters=1,
              smoothing=0.1,
-             desc='Events: 0')
-    for future in t:
-        if future.status == 'finished':
-            completedFutures.put(future)
-            '''
-            if final_ans is None:
-                final_ans = future.result()
-            else:
-                iadd(final_ans, future.result())
-            t.set_description("Events: %g"%final_ans['nominal']['sumwt'], 
-                              refresh=True)
-            '''
-        else:
-            print("Error in processing file")
-            import traceback
-            traceback.print_tb(future.traceback())
-            print(future.exception())
-            future.release()
+             desc='Processing...')
+    from accumulatefutures import accumulate_results
+    final_ans = accumulate_results(t, 
+                                   args.numCollectionThreads,
+                                   args.numAddingProcesses)
+    #for future in t:
+    #    if future.status == 'finished':
+    #        if result_futures is None:
+    #            result_futures = future
+    #        else:
+    #            result_futures = \
+    #                client.submit(sum_func, result_futures, future,
+    #                              priority=999)
+    #            
+    #            del future
+    #        '''
+    #        if final_ans is None:
+    #            final_ans = future.result()
+    #        else:
+    #            iadd(final_ans, future.result())
+    #        t.set_description("Events: %g"%final_ans['nominal']['sumwt'], 
+    #                          refresh=True)
+    #        '''
+    #    else:
+    #        print("Error in processing file")
+    #        import traceback
+    #        traceback.print_tb(future.traceback())
+    #        print(future.exception())
+    #        future.release()
 
-    print("cleaning up collecting threads")
-    for t in collectingThreads:
-        completedFutures.put(None)
-        t.join()
-    completedFutures.join()
+    #print("cleaning up collecting threads")
+    #for t in collectingThreads:
+    #    completedFutures.put(None)
+    #    t.join()
+    #completedFutures.join()
 
-    print("cleaning up adding processes")
-    print("\tputting none")
-    for p in addingProcesses:
-        collectedFutures.put(None)
-    print("closing collectedFutures")
-    collectedFutures.close()
-    print("joining collectedFutures")
-    collectedFutures.join_thread()
+    #print("cleaning up adding processes")
+    #print("\tputting none")
+    #for p in addingProcesses:
+    #    collectedFutures.put(None)
+    #print("closing collectedFutures")
+    #collectedFutures.close()
+    #print("joining collectedFutures")
+    #collectedFutures.join_thread()
 
-    print("joining adding processes")
-    for p in addingProcesses:
-        print(p)
-        #p.terminate()
+    #print("joining adding processes")
+    #for p in addingProcesses:
+    #    print(p)
+    #    #p.terminate()
 
     print("cleaning up dask cluster")
     client.close()
     cluster.close()
 
-    print("waiting an extra 10 seconds to ensure everything is processed")
-    time.sleep(10)
+    #print("waiting an extra 10 seconds to ensure everything is processed")
+    #time.sleep(10)
 
-    print("accumulating final result")
-    final_ans = None
-    while(not resultQ.empty()):
-        ans = resultQ.get()
-        print("partial sumw: %g"%ans['nominal']['sumwt'])
-        if final_ans is None:
-            final_ans = ans
-        else:
-            iadd(final_ans, ans)
-    print("final sumw: %g"%final_ans['nominal']['sumwt'])
+    #print("accumulating final result")
+    #final_ans = None
+    #while(not resultQ.empty()):
+    #    ans = resultQ.get()
+    #    print("partial sumw: %g"%ans['nominal']['sumwt'])
+    #    if final_ans is None:
+    #        final_ans = ans
+    #    else:
+    #        iadd(final_ans, ans)
+    #print("final sumw: %g"%final_ans['nominal']['sumwt'])
 
-    for p in addingProcesses:
-        print(p)
-        p.join()
+    #for p in addingProcesses:
+    #    print(p)
+    #    p.join()
+
+    #final_ans = result_futures.result()
 
     with open(os.path.join(destination,out_fname), 'wb') as fout:
         import pickle
         pickle.dump(final_ans, fout)
 
-    ####################################################
+    #####################################################

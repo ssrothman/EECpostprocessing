@@ -24,6 +24,22 @@ from binning.EECres4dipole import EECres4dipoleBinner
 from binning.EECres4tee import EECres4teeBinner
 #from binning.EECgeneric import EECgenericBinner
 
+allowedvariations = {
+    'scanTheory' : ['wt_scaleUp', 'wt_scaleDown', 
+                    'wt_PDFaSUp', 'wt_PDFaSDown'],
+    'scanMuon' : ['wt_idsfUp', 'wt_idsfDown',
+                  'wt_isosfUp', 'wt_isosfDown'],
+    'scanTrigger' : ['wt_triggersfUp', 'wt_triggersfDown',
+                     'wt_prefireUp', 'wt_prefireDown'],
+    'scanPS' : ['wt_ISRUp', 'wt_ISRDown',
+                'wt_FSRUp', 'wt_FSRDown'],
+    'scanBtag' : ['wt_btagSF_effUp', 'wt_btagSF_effDown',
+                  'wt_btagSF_sfUp', 'wt_btagSF_sfDown'],
+    'scanPileup' : ['wt_PUUp', 'wt_PUDown'],
+    'scanJetMET' : ['JER_UP', 'JER_DN', 'JES_UP', 'JES_DN'],
+    'noSyst' : []
+}
+
 BINNERS = {
     'DUMMY' : DummyBinner,
     'KINEMATICS' : KinematicsBinner,
@@ -34,7 +50,6 @@ BINNERS = {
     "EECRES3" : EECres3Binner,
     "EECRES4DIPOLE" : EECres4dipoleBinner,
     "EECRES4TEE" : EECres4teeBinner,
-    #'EECGENERIC' : EECgenericBinner
 }
 
 class EECProcessor(processor.ProcessorABC):
@@ -152,6 +167,14 @@ class EECProcessor(processor.ProcessorABC):
         jetMask = jetSel.all(*jetSel.names)
         evtMask = evtSel.all(*evtSel.names)
         nomweight = evtWeight.weight()
+        if np.any(nomweight > 1e2):
+            print("WARNING: large weights found")
+            print("setting to 1")
+            nomweight[nomweight > 1e2] = 1
+        if np.any(nomweight < 1e-2):
+            print("WARNING: small weights found")
+            print("setting to 1")
+            nomweight[nomweight < 1e-2] = 1
 
         if object_systematic is None:
             print("CUTFLOW")
@@ -165,6 +188,12 @@ class EECProcessor(processor.ProcessorABC):
             for name in jetSel.names:
                 cuts_so_far.append(name)
                 print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
+
+            print("WEIGHTS")
+            for wt in evtWeight.weightStatistics.keys():
+                print("\t", wt, evtWeight.weightStatistics[wt])
+            print("minwt = ", np.min(nomweight))
+            print("maxwt = ", np.max(nomweight))
 
         nominal = self.binner.binAll(readers, 
                                      jetMask, evtMask,
@@ -180,10 +209,27 @@ class EECProcessor(processor.ProcessorABC):
 
         resultdict[nominalname] = nominal
 
-        if self.scanSyst and object_systematic is None:
+        if self.scanSyst != 'noSyst'\
+                and object_systematic is None \
+                and self.isMC:
+
             for variation in evtWeight.variations:
+                if variation not in allowedvariations[self.scanSyst]:
+                    continue
+
                 print("doing", variation)
                 theweight = evtWeight.weight(variation)
+                print("minwt = ", np.min(theweight))
+                print("maxwt = ", np.max(theweight))
+
+                if np.any(theweight > 1e2):
+                    print("WARNING: large weights found")
+                    print("setting to 1")
+                    theweight[theweight > 1e2] = 1
+                if np.any(theweight < 1e-2):
+                    print("WARNING: small weights found")
+                    print("setting to 1")
+                    theweight[theweight < 1e-2] = 1
 
                 resultdict[variation] = self.binner.binAll(
                         readers, jetMask, evtMask,
@@ -221,7 +267,7 @@ class EECProcessor(processor.ProcessorABC):
         #return outputs
         result = {}
 
-        if self.scanSyst:
+        if self.scanSyst in ['scanJetMET', 'scanAll'] and self.isMC:
             objsys_l = [None, 
                         'JER_UP', 'JER_DN', 'JES_UP', 'JES_DN',
                         'UNCLUSTERED_UP', 'UNCLUSTERED_DN']

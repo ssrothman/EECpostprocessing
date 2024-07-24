@@ -15,20 +15,21 @@ class EECprojBinner(EECgenericBinner):
                                             statsplit, sepPt)
 
     def binAll(self, readers, mask, evtMask, wt):
-        transfers = []
-        for order in range(2, 7):
-            transfers.append(
-                self.binTransfer(
-                    readers.rTransfer.proj(order),
-                    readers.rGenJet,
-                    readers.rRecoJet,
-                    readers.rTransfer.iGen,
-                    readers.rTransfer.iReco,
-                    readers.eventIdx,
-                    mask, wt
-                )[None,:,:,:,:,:,:]
-            )
-        transfer = np.concatenate(transfers, axis=0)
+        if self.isMC:
+            transfers = []
+            for order in range(2, 7):
+                transfers.append(
+                    self.binTransfer(
+                        readers.rTransfer.proj(order),
+                        readers.rGenJet,
+                        readers.rRecoJet,
+                        readers.rTransfer.iGen,
+                        readers.rTransfer.iReco,
+                        readers.eventIdx,
+                        mask, wt
+                    )[None,:,:,:,:,:,:]
+                )
+            transfer = np.concatenate(transfers, axis=0)
         #print("SUMTRANSFER", transfer.sum())
 
         reco = self.binObserved(
@@ -38,44 +39,48 @@ class EECprojBinner(EECgenericBinner):
                 readers.rRecoEEC.iReco,
                 readers.eventIdx,
                 mask, wt)
-        recopure = self.binObserved(
-                readers.rRecoEEC.allproj,
-                readers.rRecoJet,
-                readers.rRecoEEC.iJet,
-                readers.rRecoEEC.iReco,
-                readers.eventIdx,
-                mask, wt, 
-                noCov=True,
-                subtract = readers.rRecoEECUNMATCH.allproj)
-        gen = self.binObserved(
-                readers.rGenEEC.allproj,
-                readers.rGenJet,
-                readers.rGenEEC.iJet,
-                readers.rGenEEC.iReco,
-                readers.eventIdx,
-                mask, wt)
-        genpure = self.binObserved(
-                readers.rGenEEC.allproj,
-                readers.rGenJet,
-                readers.rGenEEC.iJet,
-                readers.rGenEEC.iReco,
-                readers.eventIdx,
-                mask, wt, 
-                noCov=True,
-                subtract = readers.rGenEECUNMATCH.allproj)
+        if self.isMC:
+            recopure = self.binObserved(
+                    readers.rRecoEEC.allproj,
+                    readers.rRecoJet,
+                    readers.rRecoEEC.iJet,
+                    readers.rRecoEEC.iReco,
+                    readers.eventIdx,
+                    mask, wt, 
+                    noCov=True,
+                    subtract = readers.rRecoEECUNMATCH.allproj)
+            gen = self.binObserved(
+                    readers.rGenEEC.allproj,
+                    readers.rGenJet,
+                    readers.rGenEEC.iJet,
+                    readers.rGenEEC.iReco,
+                    readers.eventIdx,
+                    mask, wt)
+            genpure = self.binObserved(
+                    readers.rGenEEC.allproj,
+                    readers.rGenJet,
+                    readers.rGenEEC.iJet,
+                    readers.rGenEEC.iReco,
+                    readers.eventIdx,
+                    mask, wt, 
+                    noCov=True,
+                    subtract = readers.rGenEECUNMATCH.allproj)
 
         result = {}
-        result['recopure'] = recopure
-        result['genpure'] = genpure
-        result['transfer'] = transfer
+        if self.isMC:
+            result['recopure'] = recopure
+            result['genpure'] = genpure
+            result['transfer'] = transfer
         if self.manualcov:
             result['reco'] = reco[0]
             result['covreco'] = reco[1]
-            result['gen'] = gen[0]
-            result['covgen'] = gen[1]
+            if self.isMC:
+                result['gen'] = gen[0]
+                result['covgen'] = gen[1]
         else:
             result['reco'] = reco
-            result['gen'] = gen
+            if self.isMC:
+                result['gen'] = gen
 
         return result
     
