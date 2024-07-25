@@ -19,6 +19,7 @@ if __name__ == '__main__':
     parser.add_argument('--sepPt', action='store_true')
 
     parser.add_argument('--filesplit', type=int, default=1, required=False)
+    parser.add_argument('--filebatch', type=int, default=1, required=False)
 
     #mutually exclusive systematics group
     syst_group = parser.add_mutually_exclusive_group(required=False)
@@ -30,6 +31,8 @@ if __name__ == '__main__':
                            const='scanJetMET', dest='syst')
     syst_group.add_argument('--scanMuonSyst', action='store_const',
                             const='scanMuon', dest='syst')
+    syst_group.add_argument('--scanTriggerSyst', action='store_const',
+                            const='scanTrigger', dest='syst')
     syst_group.add_argument('--scanTheorySyst', action='store_const',
                             const='scanTheory', dest='syst')
     syst_group.add_argument('--scanPSSyst', action='store_const',
@@ -39,6 +42,8 @@ if __name__ == '__main__':
     syst_group.add_argument('--scanPileupSyst', action='store_const',
                             const='scanPileup', dest='syst')
     parser.set_defaults(syst='noSyst')
+
+    parser.add_argument('--skipNominal', action='store_true')
 
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
@@ -71,8 +76,8 @@ if __name__ == '__main__':
     scale_group.add_argument('--use-local-debug', dest='scale', action='store_const', const='local_debug')
     parser.set_defaults(scale=None)
 
-    parser.add_argument('--numCollectionThreads', type=int, default=20, required=False)
-    parser.add_argument('--numAddingProcesses', type=int, default=10, required=False)
+    parser.add_argument('--numCollectionThreads', type=int, default=8, required=False)
+    parser.add_argument('--numAddingProcesses', type=int, default=8, required=False)
 
     args = parser.parse_args()
 
@@ -150,38 +155,49 @@ if __name__ == '__main__':
         'treatAsData' : args.treatAsData,
         'manualcov' : args.manualcov,
         'poissonbootstrap' : args.poissonbootstrap,
-        'noBkgVeto' : args.noBkgVeto
+        'noBkgVeto' : args.noBkgVeto,
+        'skipNominal' : args.skipNominal,
     }
 
-    def process_func(inputtuple, args):
-        print()
-        print("PROCESSING")
-        print(inputtuple)
-        print()
+    def process_func(inputfiles, args, filesplit):
+        final_result = None
+
+        processor_instance = EECProcessor(**args)
+
         import uproot
-        file, statsplit_N, statsplit_k = inputtuple
-        try:
-            nevts = uproot.open(file)['Events'].num_entries
+        for inputfile in inputfiles:
+            nevts = uproot.open(inputfile)['Events'].num_entries
+            
+            for filesplit_k in range(filesplit):
+                print("processing file %s, filesplit %d/%d"%(inputfile, 
+                                                             filesplit_k,
+                                                             filesplit))
+                try:
+                    start = filesplit_k*(nevts//filesplit)
 
-            start = statsplit_k*(nevts//statsplit_N)
-            if statsplit_k == statsplit_N-1:
-                end = nevts
-            else:
-                end = (statsplit_k+1)*(nevts//statsplit_N)
+                    if filesplit_k == filesplit-1:
+                        end = nevts
+                    else:
+                        end = (filesplit_k+1)*(nevts//filesplit)
 
-            events = NanoEventsFactory.from_root(
-                file, 
-                entry_start=start,
-                entry_stop=end,
-            ).events()
+                    events = NanoEventsFactory.from_root(
+                        inputfile, 
+                        entry_start=start,
+                        entry_stop=end,
+                    ).events()
 
-            processor_instance = EECProcessor(**args)
-            return processor_instance.process(events)
-        except:
-            import traceback
-            traceback.print_exc()
-            return {'errd' : [file]}
+                    nextresult = processor_instance.process(events)
+                except:
+                    import traceback
+                    traceback.print_exc()
+                    nextresult = {'errd' : [inputfile]}
 
+                if final_result is None:
+                    final_result = nextresult
+                else:
+                    iadd(final_result, nextresult)
+        return final_result
+    
     ##################################################
 
     ################### OUTPUT ###################
@@ -283,17 +299,18 @@ if __name__ == '__main__':
 
     from dask.distributed import progress
 
-    import itertools
-    inputs = list(itertools.product(files, [args.filesplit], range(args.filesplit)))
+    from more_itertools import batched
+    inputfiles_l = list(batched(files, args.filebatch))
 
     #result = tree_acc(client.map(process_func, inputs, args=argsdict), client)
     #progress(result)
 
-
-    t = tqdm(as_completed(client.map(process_func, inputs, args=argsdict), 
+    t = tqdm(as_completed(client.map(process_func, inputfiles_l, 
+                                     args=argsdict,
+                                     filesplit=args.filesplit), 
                           with_results=False,
                           raise_errors=False), 
-             total=len(inputs),
+             total=len(inputfiles_l),
              leave=True,
              miniters=1,
              smoothing=0.1,
@@ -301,7 +318,8 @@ if __name__ == '__main__':
     from accumulatefutures import accumulate_results
     final_ans = accumulate_results(t, 
                                    args.numCollectionThreads,
-                                   args.numAddingProcesses)
+                                   args.numAddingProcesses,
+                                   simple=True)
     #for future in t:
     #    if future.status == 'finished':
     #        if result_futures is None:

@@ -69,13 +69,15 @@ class EECProcessor(processor.ProcessorABC):
                  treatAsData=False,
                  manualcov=False,
                  poissonbootstrap=0,
-                 noBkgVeto=False):
+                 noBkgVeto=False,
+                 skipNominal=False):
         self.config = config
         self.statsplit = statsplit
         self.what = what
         self.era = era
         self.flags = flags
         self.scanSyst = scanSyst
+        self.skipNominal = skipNominal
 
         self.noBkgVeto = noBkgVeto
 
@@ -140,74 +142,74 @@ class EECProcessor(processor.ProcessorABC):
             readers.METpt = readers.MET.pt
 
 
-        evtSel = getEventSelection(
-                readers, self.config,
-                self.isMC, self.flags,
-                self.noBkgVeto)
+        if (object_systematic is not None) or (not self.skipNominal):
+            evtSel = getEventSelection(
+                    readers, self.config,
+                    self.isMC, self.flags,
+                    self.noBkgVeto)
 
+            jetSel = getJetSelection(
+                    readers.rRecoJet, readers.rMu, 
+                    evtSel, self.config.jetSelection,
+                    self.config.jetvetomap,
+                    self.isMC)
 
-        jetSel = getJetSelection(
-                readers.rRecoJet, readers.rMu, 
-                evtSel, self.config.jetSelection,
-                self.config.jetvetomap,
-                self.isMC)
+            evtWeight = getEventWeight(events, 
+                                       readers,
+                                       self.config, 
+                                       self.isMC,
+                                       self.noPUweight,
+                                       self.noPrefireSF,
+                                       self.noIDsfs,
+                                       self.noIsosfs,
+                                       self.noTriggersfs,
+                                       self.noBtagSF,
+                                       self.Zreweight)
 
-        evtWeight = getEventWeight(events, 
-                                   readers,
-                                   self.config, 
-                                   self.isMC,
-                                   self.noPUweight,
-                                   self.noPrefireSF,
-                                   self.noIDsfs,
-                                   self.noIsosfs,
-                                   self.noTriggersfs,
-                                   self.noBtagSF,
-                                   self.Zreweight)
+            jetMask = jetSel.all(*jetSel.names)
+            evtMask = evtSel.all(*evtSel.names)
+            nomweight = evtWeight.weight()
+            if np.any(nomweight > 1e2):
+                print("WARNING: large weights found")
+                print("setting to 1")
+                nomweight[nomweight > 1e2] = 1
+            if np.any(nomweight < 1e-2):
+                print("WARNING: small weights found")
+                print("setting to 1")
+                nomweight[nomweight < 1e-2] = 1
 
-        jetMask = jetSel.all(*jetSel.names)
-        evtMask = evtSel.all(*evtSel.names)
-        nomweight = evtWeight.weight()
-        if np.any(nomweight > 1e2):
-            print("WARNING: large weights found")
-            print("setting to 1")
-            nomweight[nomweight > 1e2] = 1
-        if np.any(nomweight < 1e-2):
-            print("WARNING: small weights found")
-            print("setting to 1")
-            nomweight[nomweight < 1e-2] = 1
+            if object_systematic is None:
+                print("CUTFLOW")
+                cuts_so_far = []
+                for name in evtSel.names:
+                    cuts_so_far.append(name)
+                    print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-        if object_systematic is None:
-            print("CUTFLOW")
-            cuts_so_far = []
-            for name in evtSel.names:
-                cuts_so_far.append(name)
-                print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
+                print("JET CUTFLOW")
+                cuts_so_far = []
+                for name in jetSel.names:
+                    cuts_so_far.append(name)
+                    print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-            print("JET CUTFLOW")
-            cuts_so_far = []
-            for name in jetSel.names:
-                cuts_so_far.append(name)
-                print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
+                print("WEIGHTS")
+                for wt in evtWeight.weightStatistics.keys():
+                    print("\t", wt, evtWeight.weightStatistics[wt])
+                print("minwt = ", np.min(nomweight))
+                print("maxwt = ", np.max(nomweight))
 
-            print("WEIGHTS")
-            for wt in evtWeight.weightStatistics.keys():
-                print("\t", wt, evtWeight.weightStatistics[wt])
-            print("minwt = ", np.min(nomweight))
-            print("maxwt = ", np.max(nomweight))
+            nominal = self.binner.binAll(readers, 
+                                         jetMask, evtMask,
+                                         nomweight)
+            nominal['sumwt'] = ak.sum(nomweight, axis=None)
+            nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
+            nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
 
-        nominal = self.binner.binAll(readers, 
-                                     jetMask, evtMask,
-                                     nomweight)
-        nominal['sumwt'] = ak.sum(nomweight, axis=None)
-        nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
-        nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
+            if object_systematic is None:
+                nominalname = 'nominal'
+            else:
+                nominalname = object_systematic
 
-        if object_systematic is None:
-            nominalname = 'nominal'
-        else:
-            nominalname = object_systematic
-
-        resultdict[nominalname] = nominal
+            resultdict[nominalname] = nominal
 
         if self.scanSyst != 'noSyst'\
                 and object_systematic is None \

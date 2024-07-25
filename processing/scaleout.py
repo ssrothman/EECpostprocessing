@@ -31,11 +31,11 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
     cluster = SLURMCluster(queue = 'submit,submit-centos07,submit-gpu,submit-gpu-a30',
                            cores=1,
                            processes=1,
-                           memory='4GB',
-                           walltime='1:00:00',
+                           memory='3GB',
+                           walltime='3:00:00',
                            log_directory=log_directory,
                            worker_extra_args=[
-                               '--lifetime', '55m',
+                               '--lifetime', '175m',
                                '--lifetime-stagger', '4m',
                            ],
                            scheduler_options={'dashboard_address':":9876"})

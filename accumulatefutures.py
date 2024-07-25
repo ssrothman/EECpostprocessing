@@ -44,7 +44,8 @@ def accumulate_results(ascompletediterable,
                        num_collecting_threads=4,
                        num_accumulating_processes=4,
                        joinTimeout=30,
-                       use_processes=False):
+                       use_processes=False,
+                       simple=True):
     '''
     Use multithreading and multiprocessing to accumulate future results 
     in the background. The rationale is as follows:
@@ -87,74 +88,87 @@ def accumulate_results(ascompletediterable,
 
     @return: the accumulated results
     '''
-    #setup queues
-    completed_futures = queue.Queue()
-    if use_processes:
-        collected_futures = multiprocessing.Queue()
-        accumulated_results = multiprocessing.Queue()
-        sumwt_queue = multiprocessing.Queue()
-        total_sumwt = {'sumwt' : 0}
-    else:
-        collected_futures = queue.Queue()
-        accumulated_results = queue.Queue()
-        sumwt_queue = queue.Queue()
-        total_sumwt = {'sumwt' : 0}
 
-    #setup collecting threads
-    collecting_threads = [
-        threading.Thread(target=handle_io, 
-                         args=(completed_futures,
-                               collected_futures, 
-                               sumwt_queue,
-                               i),
-                         daemon=True)
-        for i in range(num_collecting_threads)
-    ]
-    for t in collecting_threads:
-        t.start()
+    if not simple:
+        #setup queues
+        completed_futures = queue.Queue()
+        if use_processes:
+            collected_futures = multiprocessing.Queue()
+            accumulated_results = multiprocessing.Queue()
+            sumwt_queue = multiprocessing.Queue()
+            total_sumwt = {'sumwt' : 0}
+        else:
+            collected_futures = queue.Queue()
+            accumulated_results = queue.Queue()
+            sumwt_queue = queue.Queue()
+            total_sumwt = {'sumwt' : 0}
 
-    #setup accumulating processes
-    if not use_processes:
-        accumulating_processes = [
-            threading.Thread(target=handle_accumulation,
-                             args=(collected_futures, accumulated_results, i),
+        #setup collecting threads
+        collecting_threads = [
+            threading.Thread(target=handle_io, 
+                             args=(completed_futures,
+                                   collected_futures, 
+                                   sumwt_queue,
+                                   i),
                              daemon=True)
-            for i in range(num_accumulating_processes)
+            for i in range(num_collecting_threads)
         ]
-    else:
-        accumulating_processes = [
-            multiprocessing.Process(target=handle_accumulation,
-                                   args=(collected_futures, 
-                                         accumulated_results, i),
-                                    daemon=True)
-            for i in range(num_accumulating_processes)
-        ]
-    for p in accumulating_processes:
-        p.start()
+        for t in collecting_threads:
+            t.start()
 
-    #setup sumwt monitoring thread
-    def accumulate_sumwt(q, total):
-        thesumwt = 0
-        #print("starting sumwt process")
-        while True:
-            sumwt = q.get()
-            #print("got sumwt",sumwt)
-            if sumwt is None:
-                break
-            thesumwt += sumwt
-            total['sumwt'] = thesumwt
-            #print("sumwt",thesumwt)
-            #print()
+        #setup accumulating processes
+        if not use_processes:
+            accumulating_processes = [
+                threading.Thread(target=handle_accumulation,
+                                 args=(collected_futures, accumulated_results, i),
+                                 daemon=True)
+                for i in range(num_accumulating_processes)
+            ]
+        else:
+            accumulating_processes = [
+                multiprocessing.Process(target=handle_accumulation,
+                                       args=(collected_futures, 
+                                             accumulated_results, i),
+                                        daemon=True)
+                for i in range(num_accumulating_processes)
+            ]
+        for p in accumulating_processes:
+            p.start()
 
-    sumwt_thread = threading.Thread(target=accumulate_sumwt,
-                                    args=(sumwt_queue, total_sumwt),
-                                    daemon=True)
-    sumwt_thread.start()
+        #setup sumwt monitoring thread
+        def accumulate_sumwt(q, total):
+            thesumwt = 0
+            #print("starting sumwt process")
+            while True:
+                sumwt = q.get()
+                #print("got sumwt",sumwt)
+                if sumwt is None:
+                    break
+                thesumwt += sumwt
+                total['sumwt'] = thesumwt
+                #print("sumwt",thesumwt)
+                #print()
+
+        sumwt_thread = threading.Thread(target=accumulate_sumwt,
+                                        args=(sumwt_queue, total_sumwt),
+                                        daemon=True)
+        sumwt_thread.start()
+
+    if simple:
+        final_ans = None
 
     #feed futures to collecting threads
     for future in ascompletediterable:
         if future.status == 'finished':
-            completed_futures.put(future)
+            if not simple:
+                completed_futures.put(future)
+            else:
+                if final_ans is None:
+                    final_ans = future.result()
+                else:
+                    from iadd import iadd
+                    iadd(final_ans, future.result())
+                future.release()
         elif future.status == 'error':
             print("error in future",future,flush=True)
             import traceback
@@ -165,50 +179,46 @@ def accumulate_results(ascompletediterable,
             print("WARNING: unexpected future status",future.status,flush=True)
             future.release()
 
-        ascompletediterable.set_description(
-            "Events: %g"%total_sumwt['sumwt'],
-            refresh=True
-        )
+        if not simple:
+            ascompletediterable.set_description(
+                "Events: %g"%total_sumwt['sumwt'],
+                refresh=True
+            )
 
-        print("Events: %g"%total_sumwt['sumwt'],flush=True)
-        print("completed_futures",completed_futures.qsize(),flush=True)
-        print("collected_futures",collected_futures.qsize(),flush=True)
-        print("accumulated_results",accumulated_results.qsize(),flush=True)
-        print("sumwt_queue",sumwt_queue.qsize(),flush=True)
+    if not simple:
+        #send stop signals
+        for i in range(num_collecting_threads):
+            completed_futures.put(None)
 
-    #send stop signals
-    for i in range(num_collecting_threads):
-        completed_futures.put(None)
+        for i in range(num_accumulating_processes):
+            collected_futures.put(None)
 
-    for i in range(num_accumulating_processes):
-        collected_futures.put(None)
+        #wait for collecting threads to finish
+        for t in collecting_threads:
+            t.join(joinTimeout)
 
-    #wait for collecting threads to finish
-    for t in collecting_threads:
-        t.join(joinTimeout)
+        #wait for accumulating processes to finish
+        for p in accumulating_processes:
+            p.join(joinTimeout)
 
-    #wait for accumulating processes to finish
-    for p in accumulating_processes:
-        p.join(joinTimeout)
+        for t in collecting_threads:
+            if t.is_alive():
+                print("WARNING: collecting thread",t,"did not terminate",flush=True)
+                #t.terminate()
 
-    for t in collecting_threads:
-        if t.is_alive():
-            print("WARNING: collecting thread",t,"did not terminate",flush=True)
-            #t.terminate()
+        for p in accumulating_processes:
+            if p.is_alive():
+                print("WARNING: accumulating process",p,"did not terminate",flush=True)
+                #p.terminate()
 
-    for p in accumulating_processes:
-        if p.is_alive():
-            print("WARNING: accumulating process",p,"did not terminate",flush=True)
-            #p.terminate()
-
-    #collect results
-    from iadd import iadd
-    final_ans = None
-    while not accumulated_results.empty():
-        result = accumulated_results.get()
-        if final_ans is None:
-            final_ans = result
-        else:
-            iadd(final_ans, result)
+        #collect results
+        from iadd import iadd
+        final_ans = None
+        while not accumulated_results.empty():
+            result = accumulated_results.get()
+            if final_ans is None:
+                final_ans = result
+            else:
+                iadd(final_ans, result)
 
     return final_ans
