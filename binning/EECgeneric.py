@@ -2,6 +2,7 @@ import awkward as ak
 import numpy as np
 import hist
 from .util import squash
+from time import time
 
 class EECgenericBinner:
     def __init__(self, config,
@@ -18,6 +19,74 @@ class EECgenericBinner:
         self.nPT = self.ptax.extent
 
         self.config = config
+
+    def binTransferBTAGfactor(self, transfer,
+                              rGenJet, rRecoJet,
+                              iGen, iReco,
+                              evtIdx, jetMask, wt):
+        EECmask = jetMask[iReco]
+
+        if self.config.tagging.wp == 'tight':
+            btag_gen = ak.values_astype(
+                    rGenJet.jets.passTightB[iGen][EECmask], np.int32)
+            btag_reco = ak.values_astype(
+                    rRecoJet.jets.passTightB[iReco][EECmask], np.int32)
+        elif self.config.tagging.wp == 'medium':
+            btag_gen = ak.values_astype(
+                    rGenJet.jets.passMediumB[iGen][EECmask], np.int32)
+            btag_reco = ak.values_astype(
+                    rRecoJet.jets.passMediumB[iReco][EECmask], np.int32)
+        elif self.config.tagging.wp == 'loose':
+            btag_gen = ak.values_astype(
+                    rGenJet.jets.passLooseB[iGen][EECmask], np.int32)
+            btag_reco = ak.values_astype(
+                    rRecoJet.jets.passLooseB[iReco][EECmask], np.int32)
+        else:
+            raise ValueError("Unknown tagging WP")
+
+        wt_f, _ = ak.broadcast_arrays(wt, btag_gen)
+
+        ans = np.zeros((self.statsplit, self.nBtag, self.nBtag), dtype=np.float64)
+
+        N = self.statsplit
+        for k in range(N):
+            statmask = ak.to_numpy(evtIdx % N == k)
+
+            np.add.at(ans[k],
+                      (squash(btag_reco[statmask]),
+                       squash(btag_gen[statmask])),
+                      squash(wt_f[statmask]))
+
+        return ans
+
+
+    def binTransferPTfactor(self, transfer,
+                            rGenJet, rRecoJet,
+                            iGen, iReco,
+                            evtIdx, jetMask, wt):
+        EECmask = jetMask[iReco]
+        
+        pt_gen = rGenJet.jets.pt[iGen][EECmask]
+        pt_reco = rRecoJet.jets.pt[iReco][EECmask]
+        numpt = squash(ak.num(pt_reco))
+        iPT_gen = self.ptax.index(squash(pt_gen)) + 1
+        iPT_gen = ak.unflatten(iPT_gen, numpt)
+        iPT_reco = self.ptax.index(squash(pt_reco)) + 1
+        iPT_reco = ak.unflatten(iPT_reco, numpt)
+
+        wt_f, _ = ak.broadcast_arrays(wt, iPT_gen)
+
+        ans = np.zeros((self.statsplit, self.nPT, self.nPT), dtype=np.float64)
+
+        N = self.statsplit
+        for k in range(N):
+            statmask = ak.to_numpy(evtIdx % N == k)
+
+            np.add.at(ans[k],
+                      (squash(iPT_reco[statmask]),
+                       squash(iPT_gen[statmask])),
+                      squash(wt_f[statmask]))
+        return ans
 
     def binTransfer(self, transfer,
                     rGenJet, rRecoJet, 
@@ -55,21 +124,100 @@ class EECgenericBinner:
         else:
             raise ValueError("Unknown tagging WP")
 
-        iPT_gen_f = ak.to_numpy(ak.flatten(ak.flatten(iPT_gen, axis=1), axis=0))
-        iPT_reco_f = ak.to_numpy(ak.flatten(ak.flatten(iPT_reco, axis=1), axis=0))
-        btag_gen_f = ak.to_numpy(ak.flatten(ak.flatten(btag_gen, axis=1), axis=0))
-        btag_reco_f = ak.to_numpy(ak.flatten(ak.flatten(btag_reco, axis=1), axis=0))
-        vals_f = ak.to_numpy(ak.flatten(ak.flatten(vals, axis=1), axis=0))
+        ptmode = self.config.transfermode.pt
+        btagmode = self.config.transfermode.btag
+        extrashape = []
+        if ptmode == 'included':
+            extrashape += [self.nPT, self.nPT]
+        elif ptmode in ['factoredGen', 'factoredReco']:
+            extrashape += [self.nPT]
+        elif ptmode == 'ignored':
+            pass
+        else:
+            raise ValueError("Unknown pt transfer mode")
 
-        ansshape = [self.nBtag, self.nPT, self.nBtag, self.nPT, *EECshape]
+        if btagmode == 'included':
+            extrashape += [self.nBtag, self.nBtag]
+        elif btagmode in ['factoredGen', 'factoredReco']:
+            extrashape += [self.nBtag]
+        elif btagmode == 'ignored':
+            pass
+        else:
+            raise ValueError("Unknown btag transfer mode")
+
+        ansshape = [self.statsplit, 
+                    *extrashape,
+                    *EECshape]
         ans = np.zeros(ansshape, dtype=np.float64)
 
-        #print(ans.shape)
-        np.add.at(ans, 
-                  (btag_reco_f, iPT_reco_f, btag_gen_f, iPT_gen_f), 
-                  vals_f)
-        #print(ans.sum())
-        #print(np.sum(vals_f))
+        N = self.statsplit
+        for k in range(N):
+            statmask = ak.to_numpy(evtIdx % N == k)
+
+            iPT_gen_f = ak.to_numpy(
+                ak.flatten(
+                    ak.flatten(
+                        iPT_gen[statmask],
+                    axis=1),
+                axis=0)
+            )
+            iPT_reco_f = ak.to_numpy(
+                ak.flatten(
+                    ak.flatten(
+                        iPT_reco[statmask],
+                    axis=1),
+                axis=0)
+            )
+            btag_gen_f = ak.to_numpy(
+                ak.flatten(
+                    ak.flatten(
+                        btag_gen[statmask], 
+                    axis=1),
+                axis=0)
+            )
+            btag_reco_f = ak.to_numpy(
+                ak.flatten(
+                    ak.flatten(
+                        btag_reco[statmask],
+                    axis=1),
+                axis=0)
+            )
+            vals_f = ak.to_numpy(
+                ak.flatten(
+                    ak.flatten(
+                        vals[statmask], 
+                    axis=1), 
+                axis=0)
+            )
+
+            indices = []
+            if ptmode == 'included':
+                indices += [iPT_reco_f, iPT_gen_f]
+            elif ptmode == 'factoredGen':
+                indices += [iPT_gen_f]
+            elif ptmode == 'factoredReco':
+                indices += [iPT_reco_f]
+            elif ptmode == 'ignored':
+                pass
+
+            if btagmode == 'included':
+                indices += [btag_reco_f, btag_gen_f]
+            elif btagmode == 'factoredGen':
+                indices += [btag_gen_f]
+            elif btagmode == 'factoredReco':
+                indices += [btag_reco_f]
+            elif btagmode == 'ignored':
+                pass
+
+            np.add.at(ans[k],
+                      tuple(indices),
+                      vals_f)
+            #print(ans.sum())
+            #print(np.sum(vals_f))
+
+        #print("PTMODE", ptmode)
+        #print("BTAGMODE", btagmode)
+        #print("ANS SHAPE", ans.shape)
 
         return ans
 
@@ -133,15 +281,19 @@ class EECgenericBinner:
                     rJet, iJet, iReco,
                     evtIdx, jetMask, wt,
                     subtract=None, noCov=False):
+        t0 = time()
 
         binned = self.indicesPerEvt(EECs, rJet,
                                    iJet, iReco,
                                    evtIdx, jetMask, wt,
                                    subtract=subtract) 
 
+        #print("indicesPerEvt took %g"%(time()-t0))
+
         binnedshape = binned.shape
         Nevt = binnedshape[0]
 
+        t0 = time()
         if self.poissonbootstrap > 0:
             sedstr = rJet._x.behavior['__events_factory__']._partition_key
             import hashlib
@@ -157,7 +309,9 @@ class EECgenericBinner:
             #print(poissonwts)
         else:
             poissonwts = np.ones((1, Nevt))
+        #print("Poisson took %g"%(time()-t0))
 
+        t0 = time()
         if self.statsplit > 1:
             N = self.statsplit
             statmask_l = []
@@ -167,6 +321,7 @@ class EECgenericBinner:
             statmask = np.concatenate(statmask_l, axis=0)
         else:
             statmask = np.ones((1,Nevt))
+        #print("Statmask took %g"%(time()-t0))
 
         binned_indices = np.arange(len(binnedshape))
         observed_indices = [8, 9, *binned_indices[1:]] #sum over events
@@ -182,11 +337,13 @@ class EECgenericBinner:
         #print("stat indics", statsplit_indices)
         #print("observed indices", observed_indices)
 
+        t0 = time()
         observed = np.einsum(binned, binned_indices,
                              poissonwts, poisson_indices,
                              statmask, statsplit_indices,
                              observed_indices,
                              optimize=True)
+        #print("Observed einsum took %g"%(time()-t0))
         #print("observed shape", observed.shape)
         #print()
 
@@ -207,11 +364,36 @@ class EECgenericBinner:
             #print("statidxs", statsplit_indices)
             #print("covidxs", covidxs)
 
-            cov = np.einsum(binned, leftidxs,
-                            binned, rightidxs,
-                            statmask, statsplit_indices,
-                            covidxs,
-                            optimize=True)
+            #print(binned.shape)
+            #print(leftidxs)
+            #print(rightidxs)
+            #print(statmask.shape)
+            #print(statsplit_indices)
+            #print(covidxs)
+            t0 = time()
+
+            cov = np.empty((self.statsplit, 
+                            *binnedshape[1:],
+                            *binnedshape[1:]),
+                           dtype=np.float64)
+            #print(cov.shape)
+            #print(binned.shape)
+
+            N = self.statsplit
+            for k in range(N):
+                statmask = ak.to_numpy(evtIdx % N == k)
+                cov[k] = np.einsum(binned[statmask], leftidxs,
+                                   binned[statmask], rightidxs,
+                                   covidxs[1:],
+                                   optimize=True)
+    
+            #cov = np.einsum(binned, leftidxs,
+            #                binned, rightidxs,
+            #                statmask, statsplit_indices,
+            #                covidxs,
+            #                optimize=True)
+
+            #print("cov einsum took %g"%(time()-t0))
             #print("cov shape", cov.shape)
 
         if noCov or not self.manualcov:
