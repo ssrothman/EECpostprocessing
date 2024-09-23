@@ -33,9 +33,15 @@ allowedvariations = {
                      'wt_prefireUp', 'wt_prefireDown'],
     'scanPS' : ['wt_ISRUp', 'wt_ISRDown',
                 'wt_FSRUp', 'wt_FSRDown'],
-    'scanBtag' : ['wt_btagSF_effUp', 'wt_btagSF_effDown',
-                  'wt_btagSF_sfUp', 'wt_btagSF_sfDown'],
+    'scanBtagEff' : ['wt_btagSF_effUp', 'wt_btagSF_effDown',
+                    'wt_btagSF_tighteffUp', 'wt_btagSF_tighteffDown'],
+    'scanBtagSF' : ['wt_btagSF_sfUp', 'wt_btagSF_sfDown',
+                    'wt_btagSF_tightsfUp', 'wt_btagSF_tightsfDown'],
     'scanPileup' : ['wt_PUUp', 'wt_PUDown'],
+    'scanCBxsec' : ['wt_c_xsecUp', 'wt_c_xsecDown',
+                    'wt_b_xsecUp', 'wt_b_xsecDown'],
+    'scanLxsec' : ['wt_uds_xsecUp', 'wt_uds_xsecDown'
+                   'wt_g_xsecUp', 'wt_g_xsecDown'],
     'scanJetMET' : ['JER_UP', 'JER_DN', 'JES_UP', 'JES_DN'],
     'noSyst' : []
 }
@@ -142,42 +148,42 @@ class EECProcessor(processor.ProcessorABC):
             readers.METpt = readers.MET.pt
 
 
+        evtSel = getEventSelection(
+                readers, self.config,
+                self.isMC, self.flags,
+                self.noBkgVeto)
+
+        jetSel = getJetSelection(
+                readers.rRecoJet, readers.rMu, 
+                evtSel, self.config.jetSelection,
+                self.config.jetvetomap,
+                self.isMC)
+
+        evtWeight = getEventWeight(events, 
+                                   readers,
+                                   self.config, 
+                                   self.isMC,
+                                   self.noPUweight,
+                                   self.noPrefireSF,
+                                   self.noIDsfs,
+                                   self.noIsosfs,
+                                   self.noTriggersfs,
+                                   self.noBtagSF,
+                                   self.Zreweight)
+
+        jetMask = jetSel.all(*jetSel.names)
+        evtMask = evtSel.all(*evtSel.names)
+        nomweight = evtWeight.weight()
+        if np.any(nomweight > 1e2):
+            print("WARNING: large weights found")
+            print("setting to 1")
+            nomweight[nomweight > 1e2] = 1
+        if np.any(nomweight < 1e-2):
+            print("WARNING: small weights found")
+            print("setting to 1")
+            nomweight[nomweight < 1e-2] = 1
+
         if (object_systematic is not None) or (not self.skipNominal):
-            evtSel = getEventSelection(
-                    readers, self.config,
-                    self.isMC, self.flags,
-                    self.noBkgVeto)
-
-            jetSel = getJetSelection(
-                    readers.rRecoJet, readers.rMu, 
-                    evtSel, self.config.jetSelection,
-                    self.config.jetvetomap,
-                    self.isMC)
-
-            evtWeight = getEventWeight(events, 
-                                       readers,
-                                       self.config, 
-                                       self.isMC,
-                                       self.noPUweight,
-                                       self.noPrefireSF,
-                                       self.noIDsfs,
-                                       self.noIsosfs,
-                                       self.noTriggersfs,
-                                       self.noBtagSF,
-                                       self.Zreweight)
-
-            jetMask = jetSel.all(*jetSel.names)
-            evtMask = evtSel.all(*evtSel.names)
-            nomweight = evtWeight.weight()
-            if np.any(nomweight > 1e2):
-                print("WARNING: large weights found")
-                print("setting to 1")
-                nomweight[nomweight > 1e2] = 1
-            if np.any(nomweight < 1e-2):
-                print("WARNING: small weights found")
-                print("setting to 1")
-                nomweight[nomweight < 1e-2] = 1
-
             if object_systematic is None:
                 print("CUTFLOW")
                 cuts_so_far = []
@@ -196,6 +202,10 @@ class EECProcessor(processor.ProcessorABC):
                     print("\t", wt, evtWeight.weightStatistics[wt])
                 print("minwt = ", np.min(nomweight))
                 print("maxwt = ", np.max(nomweight))
+
+                print("Available weight variations")
+                for wt in evtWeight.variations:
+                    print("\t", wt)
 
             nominal = self.binner.binAll(readers, 
                                          jetMask, evtMask,
@@ -281,9 +291,9 @@ class EECProcessor(processor.ProcessorABC):
                                   result, 
                                   object_systematic=objsys)
 
-        print("SUMWT", result['nominal']['sumwt'])
-        print("SUMWT_PASS", result['nominal']['sumwt_pass'])
-        print("NUMJET", result['nominal']['numjet'])
+        #print("SUMWT", result['nominal']['sumwt'])
+        #print("SUMWT_PASS", result['nominal']['sumwt_pass'])
+        #print("NUMJET", result['nominal']['numjet'])
 
         #print("runtime summary:")
         #print("\tinitial setup: %0.2g" % (t1-t0))

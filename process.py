@@ -37,10 +37,16 @@ if __name__ == '__main__':
                             const='scanTheory', dest='syst')
     syst_group.add_argument('--scanPSSyst', action='store_const',
                             const='scanPS', dest='syst')
-    syst_group.add_argument('--scanBtagSyst', action='store_const',
-                            const='scanBtag', dest='syst')
+    syst_group.add_argument('--scanBtagEffSyst', action='store_const',
+                            const='scanBtagEff', dest='syst')
+    syst_group.add_argument('--scanBtagSFSyst', action='store_const',
+                            const='scanBtagSF', dest='syst')
     syst_group.add_argument('--scanPileupSyst', action='store_const',
                             const='scanPileup', dest='syst')
+    syst_group.add_argument('--scanCBxsec', action='store_const',
+                            const='scanCBxsec', dest='syst')
+    syst_group.add_argument('--scanLxsec', action='store_const',
+                            const='scanLxsec', dest='syst')
     parser.set_defaults(syst='noSyst')
 
     parser.add_argument('--skipNominal', action='store_true')
@@ -106,6 +112,13 @@ if __name__ == '__main__':
     dask.config.set({'distributed.deploy.lost-worker-timeout': '120s'})
     dask.config.set({'distributed.scheduler.worker-saturation': 1.0})
     dask.config.set({'distributed.scheduler.locks.lease-timeout': '120s'})
+    dask.config.set({'distributed.worker.memory.target' :  False})
+    dask.config.set({'distributed.worker.memory.spill' :  False})
+    dask.config.set({'distributed.worker.memory.pause' :  False})
+    dask.config.set({'distributed.worker.memory.kill' :  False})
+    dask.config.set({'distributed.worker.memory.rebalance.measure' : 'managed'})
+    dask.config.set({'distributed.scheduler.active-memory-manager.measure' : 'managed'})
+
     #dask.config.set({'distributed.nanny.pre-spawn-environ.MALLOC_TRIM_THRESHOLD_': '0'})
 
     ################### INPUT ###################
@@ -242,6 +255,8 @@ if __name__ == '__main__':
     out_fname += '_%s'%args.syst
     if args.noBkgVeto:
         out_fname += '_noBkgVeto'
+    if args.skipNominal:
+        out_fname += '_skipNominal'
 
     if args.extra_tags is not None:
         for tag in args.extra_tags:
@@ -255,7 +270,8 @@ if __name__ == '__main__':
     if args.local:
         destination = 'testlocal'
     else:
-        destination = "/data/submit/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.what)
+        #destination = "/data/submit/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.what)
+        destination = 'test.pickle'
         if os.path.exists(os.path.join(destination, out_fname)) and not args.force:
             raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
 
@@ -277,7 +293,7 @@ if __name__ == '__main__':
     if args.scale == 'slurm':
         cluster, client = setup_cluster_on_submit(1, 200, destination)
     elif args.scale == 'local':
-        cluster, client = setup_local_cluster(75)
+        cluster, client = setup_local_cluster(86)
     elif args.scale == 'local_debug':
         cluster, client = setup_local_cluster(1)
 
