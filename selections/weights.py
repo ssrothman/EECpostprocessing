@@ -7,7 +7,7 @@ from .theorySF import getAllTheorySFs
 from .muonSF import getAllMuonSFs
 from .btagSF import getBtagSF
 from .reweightingSF import getZptSF, getPUweight
-
+from .flavorcomposition import getAllFlavorWeights
 
 def getEventWeight(x, readers, config, isMC,
                    noPUweight,
@@ -32,12 +32,14 @@ def getEventWeight(x, readers, config, isMC,
                   noTriggersfs)
 
     if Zreweight:
-        getZptSF(ans, raders.Zs, config)
+        getZptSF(ans, readers.Zs, config)
         
     if not noPUweight:
         getPUweight(ans, readers.nTrueInt, config, isMC)
 
     if not noBtagSF:
         getBtagSF(ans, readers.rRecoJet, config)
+
+    getAllFlavorWeights(ans, readers.rRecoJet, config)
 
     return ans

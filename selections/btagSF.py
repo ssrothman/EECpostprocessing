@@ -3,7 +3,7 @@ import numpy as np
 from coffea.analysis_tools import Weights
 from correctionlib import CorrectionSet
 
-def get_effs(wp, pt, abseta, flav, cset_eff):
+def get_effs(wp, pt, abseta, flav, cset_eff, num):
     eff_nom = cset_eff['Beff'].evaluate(
         wp, 
         'nominal',
@@ -26,9 +26,13 @@ def get_effs(wp, pt, abseta, flav, cset_eff):
         flav
     )
 
+    eff_nom = ak.unflatten(eff_nom, num, axis=0)
+    eff_up = ak.unflatten(eff_up, num, axis=0)
+    eff_dn = ak.unflatten(eff_dn, num, axis=0)
+
     return eff_nom, eff_up, eff_dn
 
-def get_sf(wp, pt, abseta, flav, cset_sf, variation):
+def get_sf(wp, pt, abseta, flav, cset_sf, variation, num):
     wpstrs = {'loose' : 'L', 'medium' : 'M', 'tight' : 'T'}
 
     light = flav == 0
@@ -53,14 +57,48 @@ def get_sf(wp, pt, abseta, flav, cset_sf, variation):
     sf[light] = sf_light
     sf[~light] = sf_heavy
 
+    sf = ak.unflatten(sf, num, axis=0)
+
     return sf
 
-def get_sfs(wp, pt, abseta, flav, cset_sf):
-    sf_nom = get_sf(wp, pt, abseta, flav, cset_sf, 'central')
-    sf_up = get_sf(wp, pt, abseta, flav, cset_sf, 'up')
-    sf_dn = get_sf(wp, pt, abseta, flav, cset_sf, 'down')
+def get_sfs(wp, pt, abseta, flav, cset_sf, num):
+    sf_nom = get_sf(wp, pt, abseta, flav, cset_sf, 'central', num)
+    sf_up = get_sf(wp, pt, abseta, flav, cset_sf, 'up', num)
+    sf_dn = get_sf(wp, pt, abseta, flav, cset_sf, 'down', num)
 
     return sf_nom, sf_up, sf_dn
+
+def the_double_wp_sf(eff_smaller, eff_larger,
+                     sf_smaller, sf_larger,
+                     passWP_smaller, passWP_larger):
+    cat1 = passWP_larger
+    cat2 = passWP_smaller & ~passWP_larger
+    cat3 = ~passWP_smaller
+
+    PMC_cat1 = ak.prod(eff_larger[cat1], axis=1)
+    PMC_cat2 = ak.prod((1-eff_larger[cat2]) *\
+                       (eff_larger[cat2] - eff_smaller[cat2]),
+                       axis=1)
+    PMC_cat3 = ak.prod(1-eff_smaller[cat3], axis=1)
+
+    PMC = PMC_cat1 * PMC_cat2 * PMC_cat3
+    PMC = ak.where(PMC == 0, 1, PMC)
+
+    SFeff_smaller = sf_smaller * eff_smaller
+    SFeff_larger = sf_larger * eff_larger
+
+    PData_cat1 = ak.prod(SFeff_larger[cat1], axis=1)
+    PData_cat2 = ak.prod((1-SFeff_larger[cat2]) *\
+                        (SFeff_larger[cat2] - SFeff_smaller[cat2]),
+                        axis=1)
+    PData_cat3 = ak.prod(1-SFeff_smaller[cat3], axis=1)
+
+    PData = PData_cat1 * PData_cat2 * PData_cat3
+    PData = ak.where(PData == 0, 1, PData)
+
+    w = PData / PMC
+
+    return w
 
 def double_wp_btagSF(weights,
                      pt, abseta, flav, 
@@ -68,118 +106,74 @@ def double_wp_btagSF(weights,
                      num,
                      smaller, larger, 
                      cset_sf, cset_eff):
-    eff_nom_smaller, eff_up_smaller, eff_dn_smaller = get_effs(smaller, pt, abseta, flav, cset_eff)
-    eff_nom_larger, eff_up_larger, eff_dn_larger = get_effs(larger, pt, abseta, flav, cset_eff)
-    sf_nom_smaller, sf_up_smaller, sf_dn_smaller = get_sfs(smaller, pt, abseta, flav, cset_sf)
-    sf_nom_larger, sf_up_larger, sf_dn_larger = get_sfs(larger, pt, abseta, flav, cset_sf)
-
-    eff_nom_smaller = ak.unflatten(eff_nom_smaller, num, axis=0)
-    eff_up_smaller = ak.unflatten(eff_up_smaller, num, axis=0)
-    eff_dn_smaller = ak.unflatten(eff_dn_smaller, num, axis=0)
-    eff_nom_larger = ak.unflatten(eff_nom_larger, num, axis=0)
-    eff_up_larger = ak.unflatten(eff_up_larger, num, axis=0)
-    eff_dn_larger = ak.unflatten(eff_dn_larger, num, axis=0)
-    sf_nom_smaller = ak.unflatten(sf_nom_smaller, num, axis=0)
-    sf_up_smaller = ak.unflatten(sf_up_smaller, num, axis=0)
-    sf_dn_smaller = ak.unflatten(sf_dn_smaller, num, axis=0)
-    sf_nom_larger = ak.unflatten(sf_nom_larger, num, axis=0)
-    sf_up_larger = ak.unflatten(sf_up_larger, num, axis=0)
-    sf_dn_larger = ak.unflatten(sf_dn_larger, num, axis=0)
+    eff_smaller = get_effs(smaller, pt, abseta, flav, cset_eff, num)
+    eff_larger  = get_effs(larger,  pt, abseta, flav, cset_eff, num)
+    sf_smaller  = get_sfs(smaller,  pt, abseta, flav, cset_sf , num)
+    sf_larger   = get_sfs(larger,   pt, abseta, flav, cset_sf , num)
 
     passWP_smaller = ak.unflatten(passWP_smaller, num, axis=0)
     passWP_larger = ak.unflatten(passWP_larger, num, axis=0)
 
-    cat1 = passWP_larger
-    cat2 = passWP_smaller & ~passWP_larger
-    cat3 = ~passWP_smaller
+    NOM = 0
+    UP = 1
+    DN = 2
+    w_nom = the_double_wp_sf(eff_smaller[NOM], eff_larger[NOM],
+                             sf_smaller[NOM],  sf_larger[NOM],
+                             passWP_smaller, passWP_larger)
 
-    PMC_nom_cat1 = ak.prod(eff_nom_larger[cat1], axis=1) 
-    PMC_nom_cat2 = ak.prod((1-eff_nom_larger[cat2]) *\
-                           (eff_nom_larger[cat2] - eff_nom_smaller[cat2]),
-                           axis=1)
-    PMC_nom_cat3 = ak.prod(1-eff_nom_smaller[cat3], axis=1)
+    w_upEff = the_double_wp_sf(eff_smaller[UP], eff_larger[UP],
+                               sf_smaller[NOM],  sf_larger[NOM],
+                               passWP_smaller, passWP_larger)
+    w_dnEff = the_double_wp_sf(eff_smaller[DN], eff_larger[DN],
+                               sf_smaller[NOM],  sf_larger[NOM],
+                               passWP_smaller, passWP_larger)
 
-    PMC_upEff_cat1 = ak.prod(eff_up_larger[cat1], axis=1)
-    PMC_upEff_cat2 = ak.prod((1-eff_up_larger[cat2]) *\
-                            (eff_up_larger[cat2] - eff_up_smaller[cat2]),
-                            axis=1)
-    PMC_upEff_cat3 = ak.prod(1-eff_up_smaller[cat3], axis=1)
+    w_upTightEff = the_double_wp_sf(eff_smaller[NOM], eff_larger[UP],
+                                    sf_smaller[NOM],  sf_larger[NOM],
+                                    passWP_smaller, passWP_larger)
+    w_dnTightEff = the_double_wp_sf(eff_smaller[NOM], eff_larger[DN],
+                                    sf_smaller[NOM],  sf_larger[NOM],
+                                    passWP_smaller, passWP_larger)
 
-    PMC_dnEff_cat1 = ak.prod(eff_dn_larger[cat1], axis=1)
-    PMC_dnEff_cat2 = ak.prod((1-eff_dn_larger[cat2]) *\
-                            (eff_dn_larger[cat2] - eff_dn_smaller[cat2]),
-                            axis=1)
-    PMC_dnEff_cat3 = ak.prod(1-eff_dn_smaller[cat3], axis=1)
+    w_upSF = the_double_wp_sf(eff_smaller[NOM], eff_larger[NOM],
+                              sf_smaller[UP],  sf_larger[UP],
+                              passWP_smaller, passWP_larger)
+    w_dnSF = the_double_wp_sf(eff_smaller[NOM], eff_larger[NOM],
+                              sf_smaller[DN],  sf_larger[DN],
+                              passWP_smaller, passWP_larger)
 
-    PMC_nom = PMC_nom_cat1 * PMC_nom_cat2 * PMC_nom_cat3
-    PMC_upEff = PMC_upEff_cat1 * PMC_upEff_cat2 * PMC_upEff_cat3
-    PMC_dnEff = PMC_dnEff_cat1 * PMC_dnEff_cat2 * PMC_dnEff_cat3
-
-    SFeff_nom_larger = sf_nom_larger * eff_nom_larger
-    SFeff_nom_smaller = sf_nom_smaller * eff_nom_smaller
-    SFeff_upEff_larger = sf_nom_larger * eff_up_larger
-    SFeff_upEff_smaller = sf_nom_smaller * eff_up_smaller
-    SFeff_dnEff_larger = sf_nom_larger * eff_dn_larger
-    SFeff_dnEff_smaller = sf_nom_smaller * eff_dn_smaller
-    SFeff_upSF_larger = sf_up_larger * eff_nom_larger
-    SFeff_upSF_smaller = sf_up_smaller * eff_nom_smaller
-    SFeff_dnSF_larger = sf_dn_larger * eff_nom_larger
-    SFeff_dnSF_smaller = sf_dn_smaller * eff_nom_smaller
-
-    PData_nom_cat1 = ak.prod(SFeff_nom_larger[cat1], axis=1)
-    PData_nom_cat2 = ak.prod((1-SFeff_nom_larger[cat2]) *\
-                            (SFeff_nom_larger[cat2] - SFeff_nom_smaller[cat2]),
-                            axis=1)
-    PData_nom_cat3 = ak.prod(1-SFeff_nom_smaller[cat3], axis=1)
-
-    PData_upEff_cat1 = ak.prod(SFeff_upEff_larger[cat1], axis=1)
-    PData_upEff_cat2 = ak.prod((1-SFeff_upEff_larger[cat2]) *\
-                            (SFeff_upEff_larger[cat2] - SFeff_upEff_smaller[cat2]),
-                            axis=1)
-    PData_upEff_cat3 = ak.prod(1-SFeff_upEff_smaller[cat3], axis=1)
-
-    PData_dnEff_cat1 = ak.prod(SFeff_dnEff_larger[cat1], axis=1)
-    PData_dnEff_cat2 = ak.prod((1-SFeff_dnEff_larger[cat2]) *\
-            (SFeff_dnEff_larger[cat2] - SFeff_dnEff_smaller[cat2]),
-            axis=1)
-    PData_dnEff_cat3 = ak.prod(1-SFeff_dnEff_smaller[cat3], axis=1)
-
-    PData_upSF_cat1 = ak.prod(SFeff_upSF_larger[cat1], axis=1)
-    PData_upSF_cat2 = ak.prod((1-SFeff_upSF_larger[cat2]) *\
-            (SFeff_upSF_larger[cat2] - SFeff_upSF_smaller[cat2]),
-            axis=1)
-    PData_upSF_cat3 = ak.prod(1-SFeff_upSF_smaller[cat3], axis=1)
-
-    PData_dnSF_cat1 = ak.prod(SFeff_dnSF_larger[cat1], axis=1)
-    PData_dnSF_cat2 = ak.prod((1-SFeff_dnSF_larger[cat2]) *\
-            (SFeff_dnSF_larger[cat2] - SFeff_dnSF_smaller[cat2]),
-            axis=1)
-    PData_dnSF_cat3 = ak.prod(1-SFeff_dnSF_smaller[cat3], axis=1)
-
-    PData_nom = PData_nom_cat1 * PData_nom_cat2 * PData_nom_cat3
-    PData_upEff = PData_upEff_cat1 * PData_upEff_cat2 * PData_upEff_cat3
-    PData_dnEff = PData_dnEff_cat1 * PData_dnEff_cat2 * PData_dnEff_cat3
-    PData_upSF = PData_upSF_cat1 * PData_upSF_cat2 * PData_upSF_cat3
-    PData_dnSF = PData_dnSF_cat1 * PData_dnSF_cat2 * PData_dnSF_cat3
-
-    w_nom = PData_nom / PMC_nom
-    w_upEff = PData_upEff / PMC_upEff
-    w_dnEff = PData_dnEff / PMC_dnEff
-    w_upSF = PData_upSF / PMC_nom
-    w_dnSF = PData_dnSF / PMC_nom
-
-    w_nom = np.nan_to_num(w_nom)
-    w_upEff = np.nan_to_num(w_upEff)
-    w_dnEff = np.nan_to_num(w_dnEff)
-    w_upSF = np.nan_to_num(w_upSF)
-    w_dnSF = np.nan_to_num(w_dnSF)
+    w_upTightSF = the_double_wp_sf(eff_smaller[NOM], eff_larger[NOM],
+                                   sf_smaller[NOM],  sf_larger[UP],
+                                   passWP_smaller, passWP_larger)
+    w_dnTightSF = the_double_wp_sf(eff_smaller[NOM], eff_larger[NOM],
+                                   sf_smaller[NOM],  sf_larger[DN],
+                                   passWP_smaller, passWP_larger)
 
     weights.add_multivariation(
         'wt_btagSF', w_nom,
-        modifierNames = ['eff', 'sf'],
-        weightsUp=[w_upEff, w_upSF],
-        weightsDown=[w_dnEff, w_dnSF]
+        modifierNames = ['eff', 'tighteff', 'sf', 'tightsf'],
+        weightsUp=[w_upEff, w_upTightEff, w_upSF, w_upTightSF],
+        weightsDown=[w_dnEff, w_dnTightEff, w_dnSF, w_dnTightSF]
     )
+
+def the_single_wp_sf(eff, sf, passWP):
+    passMC = ak.prod(eff[passWP], axis=1)
+    failMC = ak.prod(1-eff[~passWP], axis=1)
+
+    PMC = passMC * failMC
+    PMC = ak.where(PMC == 0, 1, PMC)
+
+    SFeff = sf * eff
+
+    passData = ak.prod(SFeff[passWP], axis=1)
+    failData = ak.prod(1-SFeff[~passWP], axis=1)
+
+    PData = passData * failData
+    PData = ak.where(PData == 0, 1, PData)
+
+    w = PData / PMC
+
+    return w
 
 def single_wp_btagSF(weights,
                      pt, abseta, flav, passWP, num,
@@ -188,61 +182,17 @@ def single_wp_btagSF(weights,
     eff_nom, eff_up, eff_dn = get_effs(wp, pt, abseta, flav, cset_eff)
     sf_nom, sf_up, sf_dn = get_sfs(wp, pt, abseta, flav, cset_sf)
 
-    eff_nom = ak.unflatten(eff, num, axis=0)
-    eff_up = ak.unflatten(eff_up, num, axis=0)
-    eff_dn = ak.unflatten(eff_dn, num, axis=0)
-
-    sf_nom = ak.unflatten(sf_nom, num, axis=0)
-    sf_up = ak.unflatten(sf_up, num, axis=0)
-    sf_dn = ak.unflatten(sf_dn, num, axis=0)
-
     passWP = ak.unflatten(passWP, num, axis=0)
 
-    passMC_nom = ak.prod(eff_nom[passWP], axis=1)
-    failMC_nom = ak.prod(1-eff_nom[~passWP], axis=1)
-    passMC_upEff = ak.prod(eff_up[passWP], axis=1)
-    failMC_upEff = ak.prod(1-eff_up[~passWP], axis=1)
-    passMC_dnEff = ak.prod(eff_dn[passWP], axis=1)
-    failMC_dnEff = ak.prod(1-eff_dn[~passWP], axis=1)
+    NOM = 0
+    UP = 1
+    DN = 2
 
-    PMC_nom = passMC_nom * failMC_nom
-    PMC_upEff = passMC_upEff * failMC_upEff
-    PMC_dnEff = passMC_dnEff * failMC_dnEff
-
-    SFeff = sf_nom * eff_nom
-    SFeff_upEff = sf_nom * eff_up
-    SFeff_dnEff = sf_nom * eff_dn
-    SFeff_upSF = sf_up * eff_nom
-    SFeff_dnSF = sf_dn * eff_nom
-
-    passData_nom = ak.prod(SFeff[passWP], axis=1)
-    failData_nom = ak.prod(1-SFeff[~passWP], axis=1)
-    passData_upEff = ak.prod(SFeff_upEff[passWP], axis=1)
-    failData_upEff = ak.prod(1-SFeff_upEff[~passWP], axis=1)
-    passData_dnEff = ak.prod(SFeff_dnEff[passWP], axis=1)
-    failData_dnEff = ak.prod(1-SFeff_dnEff[~passWP], axis=1)
-    passData_upSF = ak.prod(SFeff_upSF[passWP], axis=1)
-    failData_upSF = ak.prod(1-SFeff_upSF[~passWP], axis=1)
-    passData_dnSF = ak.prod(SFeff_dnSF[passWP], axis=1)
-    failData_dnSF = ak.prod(1-SFeff_dnSF[~passWP], axis=1)
-
-    PData_nom = passData_nom * failData_nom
-    PData_upEff = passData_upEff * failData_upEff
-    PData_dnEff = passData_dnEff * failData_dnEff
-    PData_upSF = passData_upSF * failData_upSF
-    PData_dnSF = passData_dnSF * failData_dnSF
-
-    w_nom = PData_nom / PMC_nom
-    w_upEff = PData_upEff / PMC_upEff
-    w_dnEff = PData_dnEff / PMC_dnEff
-    w_upSF = PData_upSF / PMC_nom
-    w_dnSF = PData_dnSF / PMC_nom
-
-    w_nom = np.nan_to_num(w_nom)
-    w_upEff = np.nan_to_num(w_upEff)
-    w_dnEff = np.nan_to_num(w_dnEff)
-    w_upSF = np.nan_to_num(w_upSF)
-    w_dnSF = np.nan_to_num(w_dnSF)
+    w_nom = the_single_wp_sf(eff_nom[NOM], sf_nom[NOM], passWP)
+    w_upEff = the_single_wp_sf(eff_up[UP], sf_nom[NOM], passWP)
+    w_dnEff = the_single_wp_sf(eff_dn[DN], sf_nom[NOM], passWP)
+    w_upSF = the_single_wp_sf(eff_nom[NOM], sf_up[UP], passWP)
+    w_dnSF = the_single_wp_sf(eff_nom[NOM], sf_dn[DN], passWP)
 
     weights.add_multivariation(
         'wt_btagSF', w_nom,
