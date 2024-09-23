@@ -151,11 +151,11 @@ class AllReaders:
             self.rGenJet.jets['corrpt'] = self.rGenJet.jets.pt #just so the genjets.corrpt is defined
         t4 = time()
 
-        print("JERC timing summary:")
-        print("\tsetup: %g"%(t1-t0))
-        print("\tsetup_factory: %g"%(t2-t1))
-        print("\tsystematics: %g"%(t3-t2))
-        print("\tset answer: %g"%(t4-t3))
+        #print("JERC timing summary:")
+        #print("\tsetup: %g"%(t1-t0))
+        #print("\tsetup_factory: %g"%(t2-t1))
+        #print("\tsystematics: %g"%(t3-t2))
+        #print("\tset answer: %g"%(t4-t3))
 
     @property
     def rMatch(self):
