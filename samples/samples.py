@@ -48,6 +48,9 @@ class Sample:
         elif self.location == 'scratch':
             hostid = None
             rootpath = '/scratch/submit/cms/srothman/%s'%self.tag
+        elif self.location == 'test':
+            hostid = None
+            rootpath = '/work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/%s'%self.tag
         return get_rootfiles(hostid, rootpath)
 
     @property
