@@ -1,4 +1,8 @@
 { 
+    "transfermode" : {
+        "pt" : "included",
+        "btag" : "ignored"
+    },
     "names" : {
         "CHSjets" : "Jet",
         "muons" : "Muon",
@@ -45,6 +49,12 @@
     "controlJetSelection" : {
         "maxPt" : 30.0,
         "maxEta" : 2.0
+    },
+    "flavorSystematicFactors" : {
+        "0"  : 0.0,
+        "4"  : 0.2,
+        "5"  : 0.2,
+        "21" : 0.2
     },
     "muonSFs" : {
         "path" : "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/MUO/2018_UL/muon_Z.json.gz",
@@ -189,9 +199,8 @@
         }
     },
     "binning" : {
-        "axes" : ["pt", "btag", "genflav"],
         "bins" : {
-            "pt" : [50, 65, 88, 120, 150, 186, 254, 326, 408, 1500],
+            "pt" : [50, 88, 150, 254, 408, 1500],
             "pt_res" : [186, 254, 326, 408],
             "MUpt" : [0, 5, 10, 15, 20, 25, 30, 35, 40, 
                     50, 60, 70, 80, 90, 100,
