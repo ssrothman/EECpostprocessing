@@ -97,6 +97,12 @@ class jetreader:
         self._simonjetsname = simonjetsname
         self._CHSjetsname = CHSjetsname
 
+    def check(self):
+        return hasattr(self._x, self._jetsname)
+
+    def checkCHS(self):
+        return hasattr(self._x, self._CHSjetsname)
+
     @property
     def parts(self):
         if not hasattr(self, '_parts'):
@@ -142,7 +148,25 @@ class muonreader:
     @property
     def Zs(self):
         if not hasattr(self, '_Zs'):
-            self._Zs = self._muons[:,0] + self._muons[:,1]
+            mu0p4 = ak.zip(
+                {
+                    'pt': self._muons[:,0].pt,
+                    'eta': self._muons[:,0].eta,
+                    'phi': self._muons[:,0].phi,
+                    'mass': self._muons[:,0].mass,
+                },
+                with_name='PtEtaPhiMLorentzVector'
+            )
+            mu1p4 = ak.zip(
+                {
+                    'pt': self._muons[:,1].pt,
+                    'eta': self._muons[:,1].eta,
+                    'phi': self._muons[:,1].phi,
+                    'mass': self._muons[:,1].mass,
+                },
+                with_name='PtEtaPhiMLorentzVector'
+            )
+            self._Zs = mu0p4 + mu1p4 
             M = self._Zs.mass
             E = self._Zs.energy
             cosh = np.cosh(self._Zs.eta)

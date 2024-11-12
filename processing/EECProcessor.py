@@ -59,7 +59,7 @@ BINNERS = {
 }
 
 class EECProcessor(processor.ProcessorABC):
-    def __init__(self, config, statsplit=False, what='EEC', 
+    def __init__(self, config, statsplit=False, binningtype='EEC', 
                  sepPt=False,
                  scanSyst = False,
                  era='MC', flags=None,
@@ -72,14 +72,14 @@ class EECProcessor(processor.ProcessorABC):
                  noTriggersfs=False,
                  noBtagSF=False,
                  Zreweight=False,
-                 treatAsData=False,
+                 isMC=False,
                  manualcov=False,
                  poissonbootstrap=0,
                  noBkgVeto=False,
                  skipNominal=False):
         self.config = config
         self.statsplit = statsplit
-        self.what = what
+        self.binningtype = binningtype
         self.era = era
         self.flags = flags
         self.scanSyst = scanSyst
@@ -87,7 +87,7 @@ class EECProcessor(processor.ProcessorABC):
 
         self.noBkgVeto = noBkgVeto
 
-        self.treatAsData = treatAsData
+        self.isMC = isMC
         self.manualcov = manualcov
         self.poissonbootstrap = poissonbootstrap
 
@@ -103,9 +103,9 @@ class EECProcessor(processor.ProcessorABC):
 
         self.Zreweight = Zreweight
     
-        what= what.strip().upper()
+        binningtype= binningtype.strip().upper()
 
-        self.binner = BINNERS[what](config,
+        self.binner = BINNERS[binningtype](config,
                                     manualcov=manualcov,
                                     poissonbootstrap=poissonbootstrap,
                                     statsplit=statsplit,
@@ -145,8 +145,11 @@ class EECProcessor(processor.ProcessorABC):
                 raise ValueError("Unknown systematic: %s" % object_systematic)
         else:
             readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['corrpt']
-            readers.METpt = readers.MET.pt
-
+            if hasattr(readers, '_MET'):
+                readers.METpt = readers.MET.pt
+            else:
+                import warnings
+                warnings.warn("No MET in events")
 
         evtSel = getEventSelection(
                 readers, self.config,
@@ -155,8 +158,7 @@ class EECProcessor(processor.ProcessorABC):
 
         jetSel = getJetSelection(
                 readers.rRecoJet, readers.rMu, 
-                evtSel, self.config.jetSelection,
-                self.config.jetvetomap,
+                evtSel, self.config,
                 self.isMC)
 
         evtWeight = getEventWeight(events, 
@@ -184,28 +186,28 @@ class EECProcessor(processor.ProcessorABC):
             nomweight[nomweight < 1e-2] = 1
 
         if (object_systematic is not None) or (not self.skipNominal):
-            if object_systematic is None:
-                print("CUTFLOW")
-                cuts_so_far = []
-                for name in evtSel.names:
-                    cuts_so_far.append(name)
-                    print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
+            #if object_systematic is None:
+            #    print("CUTFLOW")
+            #    cuts_so_far = []
+            #    for name in evtSel.names:
+            #        cuts_so_far.append(name)
+            #        print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-                print("JET CUTFLOW")
-                cuts_so_far = []
-                for name in jetSel.names:
-                    cuts_so_far.append(name)
-                    print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
+            #    print("JET CUTFLOW")
+            #    cuts_so_far = []
+            #    for name in jetSel.names:
+            #        cuts_so_far.append(name)
+            #        print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-                print("WEIGHTS")
-                for wt in evtWeight.weightStatistics.keys():
-                    print("\t", wt, evtWeight.weightStatistics[wt])
-                print("minwt = ", np.min(nomweight))
-                print("maxwt = ", np.max(nomweight))
+            #    print("WEIGHTS")
+            #    for wt in evtWeight.weightStatistics.keys():
+            #        print("\t", wt, evtWeight.weightStatistics[wt])
+            #    print("minwt = ", np.min(nomweight))
+            #    print("maxwt = ", np.max(nomweight))
 
-                print("Available weight variations")
-                for wt in evtWeight.variations:
-                    print("\t", wt)
+            #    print("Available weight variations")
+            #    for wt in evtWeight.variations:
+            #        print("\t", wt)
 
             nominal = self.binner.binAll(readers, 
                                          jetMask, evtMask,
@@ -259,8 +261,7 @@ class EECProcessor(processor.ProcessorABC):
     def process(self, events):
         #setup inputs
         t0 = time()
-        self.isMC = hasattr(events, 'genWeight')
-        self.binner.isMC = False if self.treatAsData else self.isMC
+        self.binner.isMC = self.isMC
 
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,

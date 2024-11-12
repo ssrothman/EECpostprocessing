@@ -1,0 +1,6 @@
+{
+    "transfermode" : {
+        "pt" : "included",
+        "btag" : "ignored"
+    },
+}

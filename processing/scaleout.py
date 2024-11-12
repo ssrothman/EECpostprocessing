@@ -12,6 +12,7 @@ def setup_local_cluster(nworkers):
                            threads_per_worker=1,
                            dashboard_address=':9876',
                            lifetime='30m',
+                           memory_limit = 0,
                            lifetime_stagger='4m',
                            lifetime_restart=True)
     client = Client(cluster)

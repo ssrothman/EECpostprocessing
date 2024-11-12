@@ -16,6 +16,15 @@ class RecursiveNamespace:
             else:
                 setattr(self, key, val)
 
+    def to_dict(self):
+        ans = {}
+        for key, val in self.__dict__.items():
+            if isinstance(val, RecursiveNamespace):
+                ans[key] = val.to_dict()
+            else:
+                ans[key] = val
+        return ans
+
     def __add__(self, other):
         return self
 

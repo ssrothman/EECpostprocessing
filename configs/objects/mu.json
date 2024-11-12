@@ -1,0 +1,17 @@
+{
+    "names" : {
+        "muons" : "Muon"
+    },
+    "muons" : {
+        "leadpt" : 26,
+        "subpt" : 15,
+        "leadeta" : 2.399,
+        "subeta" : 2.399,
+        "oppsign" : true,
+        "ID" : "medium",
+        "iso" : "loose",
+        "checkPdgId" : false,
+        "onlyCheckLeading" : true,
+        "applyRoccoR" : true
+    }
+}

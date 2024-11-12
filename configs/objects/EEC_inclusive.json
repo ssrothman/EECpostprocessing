@@ -1,0 +1,10 @@
+{
+    "names" : {
+        "EECs" : "EECs",
+        "Matches" : "GenMatch",
+        "SimonJets" : "SimonJets",
+        "GenSimonJets" : "GenSimonJets",
+        "ControlJets" : "RandomConeJets",
+        "ControlEECs" : "RandomConeEECs"
+    }
+}

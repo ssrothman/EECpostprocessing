@@ -1,4 +1,5 @@
 import fsspec_xrootd as xrdfs
+import os.path
 
 def get_rootfiles(hostid, path):
     if hostid is None:
@@ -7,7 +8,7 @@ def get_rootfiles(hostid, path):
     else:
         fs = xrdfs.XRootDFileSystem(hostid = hostid, timeout=60)
     return get_files_recursive(fs, path,
-                               lambda f : f.endswith(".root"), 
+                               lambda f : f.endswith(".root") and not os.path.basename(f).startswith('dropped'), 
                                'root://%s/'%hostid if hostid is not None else '')
 
 def get_files_recursive(fs, rootpath, allowed = lambda f : True, prepend = ''):

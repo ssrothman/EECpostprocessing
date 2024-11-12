@@ -4,15 +4,14 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
 
-
     parser.add_argument("sample", type=str)
-    parser.add_argument("what", type=str)
-    parser.add_argument('jettype', type=str)
-    parser.add_argument('EECtype', type=str)
+    parser.add_argument("binningtype", type=str)
+    parser.add_argument('configsuite', type=str)
 
     parser.add_argument('--force', action='store_true')
 
-    parser.add_argument('--treatAsData', action='store_true')
+    parser.add_argument('--isMC', action='store_true')
+
     parser.add_argument('--manualcov', action='store_true')
     parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
     parser.add_argument('--statsplit', type=int, default=1, required=False)
@@ -53,8 +52,6 @@ if __name__ == '__main__':
 
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
-    parser.add_argument('--bTag', type=str, default='tight', required=False, choices=['tight', 'medium', 'loose'])
-
     parser.add_argument('--samplelist', type=str, default='latest', required=False)
 
     parser.add_argument('--noBkgVeto', action='store_true')
@@ -84,6 +81,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--numCollectionThreads', type=int, default=8, required=False)
     parser.add_argument('--numAddingProcesses', type=int, default=8, required=False)
+
+    parser.add_argument('--JECera', type=str, default='', required=False)
+    parser.add_argument('--verbose', type=int, default=0, required=False)
 
     args = parser.parse_args()
 
@@ -130,30 +130,48 @@ if __name__ == '__main__':
         if args.nfiles is not None:
             files = files[args.startfile:args.nfiles+args.startfile]
 
-    print("Processing %d files"%len(files))
-    print(files[0])
+    if args.verbose:
+        print("Processing %d files"%len(files))
+        print(files[0])
 
     ##############################################
 
     ################### PROCESSOR ###################
-    with open("configs/base.json", 'r') as f:
-        config = RecursiveNamespace(**json.load(f))
+    with open("configs/suites/%s.json"%args.configsuite, 'r') as f:
+        configsuite = RecursiveNamespace(**json.load(f))
 
-    with open("configs/%s.json"%args.jettype, 'r') as f:
+
+    config = RecursiveNamespace()
+    for configname in configsuite.configs:
+        with open(configname, 'r') as f:
+            config.update(json.load(f))
+
+    with open("configs/binning/%s.json"%args.binningtype, 'r') as f:
         config.update(json.load(f))
 
-    with open("configs/%sEEC.json"%args.EECtype, 'r') as f:
-        config.update(json.load(f))
+    if args.verbose:
+        print("config suite", args.configsuite)
+        print("binning type", args.binningtype)
+        print()
+        configstr = json.dumps(config.to_dict(), indent=4)
+        print(configstr)
+        print()
 
-    config.tagging.wp = args.bTag
+    if args.JECera == '':
+        if args.local:
+            JECera = 'skip'
+        else:
+            JECera = sample.JEC
+    else:
+        JECera = args.JECera
 
     argsdict = {
-        'config' : config,
+        'isMC' : args.isMC,
         'statsplit' : args.statsplit,
         'sepPt' : args.sepPt,
-        'what' : args.what,
+        'binningtype' : args.binningtype,
         'scanSyst' : args.syst,
-        'era' : '2018A' if args.local else sample.JEC,
+        'era' : JECera,
         'flags' : None if args.local else sample.flags,
         'noRoccoR' : args.noRoccoR,
         'noJER' : args.noJER,
@@ -165,12 +183,18 @@ if __name__ == '__main__':
         'noTriggersfs' : args.noTriggersfs,
         'noBtagSF' : args.noBtagSF,
         'Zreweight' : args.Zreweight,
-        'treatAsData' : args.treatAsData,
         'manualcov' : args.manualcov,
         'poissonbootstrap' : args.poissonbootstrap,
         'noBkgVeto' : args.noBkgVeto,
         'skipNominal' : args.skipNominal,
     }
+
+    if args.verbose:
+        print("extra args")
+        print(json.dumps(argsdict, indent=4))
+        print()
+
+    argsdict['config'] = config
 
     def process_func(inputfiles, args, filesplit):
         final_result = None
@@ -217,13 +241,6 @@ if __name__ == '__main__':
     out_fname = 'hists'
     out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
 
-    if args.bTag == 'tight':
-        out_fname += '_tight'
-    elif args.bTag == 'medium':
-        out_fname += '_medium'
-    elif args.bTag == 'loose':
-        out_fname += '_loose'
-
     if args.sepPt:
         out_fname += '_sepPt'
     if args.statsplit > 1:
@@ -262,26 +279,22 @@ if __name__ == '__main__':
         for tag in args.extra_tags:
             out_fname += '_%s'%tag
 
-    if args.treatAsData:
-        out_fname += '_asData'
-
     out_fname += '.pkl'
 
     if args.local:
         destination = 'testlocal'
     else:
-        #destination = "/data/submit/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.what)
-        destination = 'test.pickle'
+        destination = "/ceph/submit/data/user/s/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.binningtype)
         if os.path.exists(os.path.join(destination, out_fname)) and not args.force:
             raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
 
-    print("Outputting to %s"%os.path.join(destination, out_fname))
+    if args.verbose:
+        print("Outputting to %s"%os.path.join(destination, out_fname))
 
     os.makedirs(destination, exist_ok=True)
     ##################################################
 
     ################### EXECUTION ###################
-
     if args.scale is None:
         if len(files) == 1:
             args.scale = 'local_debug'
@@ -291,10 +304,16 @@ if __name__ == '__main__':
             args.scale = 'slurm'
 
     if args.scale == 'slurm':
+        if args.verbose:
+            print("Running on slurm")
         cluster, client = setup_cluster_on_submit(1, 200, destination)
     elif args.scale == 'local':
+        if args.verbose:
+            print("Running locally")
         cluster, client = setup_local_cluster(86)
     elif args.scale == 'local_debug':
+        if args.verbose:
+            print("Running locally in debug mode")
         cluster, client = setup_local_cluster(1)
 
     ##################################################
@@ -381,7 +400,8 @@ if __name__ == '__main__':
     #    print(p)
     #    #p.terminate()
 
-    print("cleaning up dask cluster")
+    if args.verbose:
+        print("cleaning up dask cluster")
     client.close()
     cluster.close()
 

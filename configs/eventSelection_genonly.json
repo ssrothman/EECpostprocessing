@@ -1,0 +1,16 @@
+{
+    "eventSelection" : {
+        "trigger" : "",
+        "PreFireWeight" : false,
+        "MinNumJets" : 0,
+        "MaxNumJets" : -1,
+        "maxMETpt" : -1,
+        "maxNumBtag" : -1,
+        "maxNumBtag_level" : "loose",
+        "noiseFilters" : [],
+        "Zmass" : 91.1876,
+        "ZmassWindow" : 20.0,
+        "minZPt" : 0.0,
+        "maxZY" : -1
+    }
+}

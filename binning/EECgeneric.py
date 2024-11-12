@@ -8,7 +8,7 @@ class EECgenericBinner:
     def __init__(self, config,
                  manualcov, poissonbootstrap, statsplit,
                  sepPt):
-        self.ptax = hist.axis.Variable(config.binning.bins.pt)
+        self.ptax = hist.axis.Variable(config.binning.pt)
 
         self.manualcov = manualcov
         self.poissonbootstrap = poissonbootstrap

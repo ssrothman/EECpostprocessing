@@ -42,6 +42,9 @@ class Sample:
         if self.location == 'LPC':
             hostid = "cmseos.fnal.gov"
             rootpath = '/store/group/lpcpfnano/srothman/%s'%self.tag
+        elif self.location == 'LPC-PERSONAL':
+            hostid = "cmseos.fnal.gov"
+            rootpath = '/store/user/srothman/%s'%self.tag
         elif self.location == 'MIT':
             hostid = 'submit50.mit.edu'
             rootpath = '/store/user/srothman/%s'%self.tag

@@ -1,0 +1,11 @@
+{
+    "doc" : "configuration to run on GEN from Phil's custom generation",
+    "configs" : [
+        "configs/eventSelection_genonly.json",
+        "configs/objects/EEC_inclusive_genonly.json",
+        "configs/objects/jets_ak8_genonly.json",
+        "configs/objects/mu_genonly.json",
+        "configs/objects/common.json",
+        "configs/btag.json"
+    ]
+}

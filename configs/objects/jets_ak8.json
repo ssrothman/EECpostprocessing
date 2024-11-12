@@ -1,0 +1,18 @@
+{
+    "names" : {
+        "puppijets" : "selectedJetsAK8",
+        "genjets" : "selectedGenJetsAK8"
+    },
+    "jetSelection" : {
+        "pt" : 30.0,
+        "eta" : 1.7,
+        "jetID" : "tightLepVeto",
+        "puJetID" : "none",
+        "muonOverlapDR" : 0.8,
+        "useVetoMap" : true
+    },
+    "controlJetSelection" : {
+        "maxPt" : 30.0,
+        "maxEta" : 2.0
+    }
+}

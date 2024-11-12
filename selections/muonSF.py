@@ -5,7 +5,6 @@ from correctionlib import CorrectionSet
 from .util import findBinEdges
 
 def getMuonSF(cset, name, eta, pt):
-    
     badnone = ak.is_none(eta) | ak.is_none(pt)
     pt = ak.fill_none(pt, 0)
     eta = ak.fill_none(eta, 0)
