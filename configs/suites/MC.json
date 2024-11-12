@@ -1,0 +1,7 @@
+{
+    "doc" : "configuration to run on MC",
+    "configs" : [
+        "configs/MC_main.json",
+        "configs/systematics.json"
+    ]
+}

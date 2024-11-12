@@ -1,7 +1,0 @@
-{
-    "names" : {
-        "CHSjets" : "Jet",
-        "rho" : "fixedGridRhoFastjetAll",
-        "MET" : "PuppiMET"
-    }
-}
