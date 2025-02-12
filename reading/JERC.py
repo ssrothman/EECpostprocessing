@@ -6,13 +6,16 @@ import awkward as ak
 
 class JERC_handler:
     def __init__(self, config,
-                 noJER=False, noJEC=False):
+                 noJER=False, noJEC=False,
+                 verbose=False):
         self.config = config
 
         self.noJER = noJER
         self.noJEC = noJEC
 
         self.evaluators = {}
+
+        self.verbose=verbose
 
     def get_JER_SFs(self, rJet, isMC):
         if isMC:
@@ -127,14 +130,6 @@ class JERC_handler:
 
         stack = JECStack({key: ev[key] for key in stacknames})
         
-        #for name in stacknames:
-        #    print(name)
-        
-        #print("JEC:", stack.jec)
-        #print("JUNC", stack.junc)
-        #print("JER:", stack.jer)
-        #print("JERSF:", stack.jersf)
-
         return stack
 
     def setup_factory(self, allreaders, era):
@@ -157,14 +152,18 @@ class JERC_handler:
         corrected_jets = jet_factory.build(allreaders.rRecoJet.jets, 
                                            lazy_cache=jec_cache)
 
+        if self.verbose:
+            print()
+            print("RUNNING JERC:")
+            print("JEC:\n", stack.jec)
+            print("JER:\n", stack.jer)
+            print("JUNC:\n", stack.junc)
+            print("JERSF:\n", stack.jersf)
+
         return corrected_jets
 
     def runJEC(self, rJet, era):
-        #for key in stack:
-        #    print(key)
-
         corrector = FactorizedJetCorrector(**{key: self.evaluator[key] for key in stack})
-        #print(corrector)
 
         factors = corrector.getCorrection(
             JetEta = rJet.jets.eta,
@@ -172,14 +171,6 @@ class JERC_handler:
             JetPt = rJet.jets.rawPt,
             JetA = rJet.jets.area,
         )
-
-        #print(factors)
-        #print(1/factors)
-        #print(rJet.jets.jecFactor)
-        diff = rJet.jets.jecFactor - 1/factors
-
-        #print("New JEC factors differ from CMSSW by a maximum of")
-        #print("\t",ak.max(np.abs(diff)))
 
         return factors
 

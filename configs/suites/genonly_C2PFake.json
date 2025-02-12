@@ -1,0 +1,6 @@
+{
+    "doc" : "configuration to run on GEN from Phil's custom generation, with 'Cos2phi fake' jets",
+    "configs" : [
+        "configs/genonly_C2PFake_main.json"
+    ]
+}

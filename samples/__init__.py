@@ -7,6 +7,19 @@ import samples.samples_08_01_2024
 import samples.samples_08_23_2024
 import samples.samples_10_09_2024
 import samples.samples_10_14_2024
+import samples.samples_11_11_2024
+import samples.samples_11_12_2024
+import samples.samples_11_13_2024
+import samples.samples_11_14_2024
+import samples.samples_11_19_2024
+import samples.samples_11_20_2024
+import samples.samples_11_22_2024
+import samples.samples_11_23_2024
+import samples.samples_12_04_2024
+import samples.samples_12_09_2024
+import samples.samples_12_24_2024
+import samples.samples_12_26_2024
+import samples.samples_01_22_2025
 
 samplelists = {
     '04_09_2024' : samples.samples_04_09_2024,
@@ -17,5 +30,18 @@ samplelists = {
     '08_23_2024' : samples.samples_08_23_2024,
     '10_09_2024' : samples.samples_10_09_2024,
     '10_14_2024' : samples.samples_10_14_2024,
+    '11_11_2024' : samples.samples_11_11_2024,
+    '11_12_2024' : samples.samples_11_12_2024,
+    '11_13_2024' : samples.samples_11_13_2024,
+    '11_14_2024' : samples.samples_11_14_2024,
+    '11_19_2024' : samples.samples_11_19_2024,
+    '11_20_2024' : samples.samples_11_20_2024,
+    '11_22_2024' : samples.samples_11_22_2024,
+    '11_23_2024' : samples.samples_11_23_2024,
+    '12_04_2024' : samples.samples_12_04_2024,
+    '12_09_2024' : samples.samples_12_09_2024,
+    '12_24_2024' : samples.samples_12_24_2024,
+    '12_26_2024' : samples.samples_12_26_2024,
+    '01_22_2025' : samples.samples_01_22_2025,
     'latest' : None
 }

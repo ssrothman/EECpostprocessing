@@ -58,6 +58,27 @@ def getRes4tee(x, name):
 
     return unflatRecursive(wts, [nRL, nr, nct])
 
+def getRes4triangle(x, name):
+    wts = x[name+'res4triangle'].value
+    BK = getBK(x, name)
+
+    nRL = BK.nres4_triangle_RL
+    nr = BK.nres4_triangle_r
+    nct = BK.nres4_triangle_ct
+
+    return unflatRecursive(wts, [nRL, nr, nct])
+
+def getRes4minR(x, name):
+    wts = x[name+'res4minR'].value
+    BK = getBK(x, name)
+
+    nR = BK.nres4_minR_RL
+    nr1 = BK.nres4_minR_r1
+    nr2 = BK.nres4_minR_r2
+    nphi = BK.nres4_minR_phi
+
+    return unflatRecursive(wts, [nR, nr1, nr2, nphi])
+
 def getTransferRes4Shapes(x, name):
     vals = x[name+'res4shapes'].value
     BK = getBK(x, name)

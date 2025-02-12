@@ -150,7 +150,7 @@ def double_wp_btagSF(weights,
                                    passWP_smaller, passWP_larger)
 
     weights.add_multivariation(
-        'wt_btagSF', w_nom,
+        'wt_btagSF_2wp', w_nom,
         modifierNames = ['eff', 'tighteff', 'sf', 'tightsf'],
         weightsUp=[w_upEff, w_upTightEff, w_upSF, w_upTightSF],
         weightsDown=[w_dnEff, w_dnTightEff, w_dnSF, w_dnTightSF]
@@ -195,7 +195,7 @@ def single_wp_btagSF(weights,
     w_dnSF = the_single_wp_sf(eff_nom[NOM], sf_dn[DN], passWP)
 
     weights.add_multivariation(
-        'wt_btagSF', w_nom,
+        'wt_btagSF_1wp', w_nom,
         modifierNames = ['eff', 'sf'],
         weightsUp=[w_upEff, w_upSF],
         weightsDown=[w_dnEff, w_dnSF]
@@ -233,7 +233,7 @@ def getBtagSF(weights, rRecoJet, config):
             passWP = ak.flatten(CHSjets.passTightB, axis=None)
 
         single_wp_btagSF(weights, pt, abseta, flav, passWP, num, 
-                         taggingwp, cset_sf, cset_eff)
+                         taggingwp, cset_sf, cset_eff, verbose)
     else:
         sortvals = {'loose' : 0, 'medium' : 1, 'tight' : 2}
         if sortvals[taggingwp] > sortvals[vetowp]:
@@ -263,4 +263,5 @@ def getBtagSF(weights, rRecoJet, config):
 
         double_wp_btagSF(weights, pt, abseta, flav, 
                          passWP_smaller, passWP_larger, num,
-                         smaller, larger, cset_sf, cset_eff)
+                         smaller, larger, cset_sf, cset_eff,
+                         verbose)

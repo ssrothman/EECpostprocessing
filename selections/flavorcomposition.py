@@ -21,4 +21,5 @@ def getAllFlavorWeights(weights, recojets, config):
 
     for flav, name in zip(flavs, names):
         w_nom, w_up, w_down = getSpecificFlavorWeights(recojets, config, flav)
+
         weights.add("wt_%s_xsec"%name, w_nom, w_up, w_down)

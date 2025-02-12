@@ -22,6 +22,9 @@ from binning.EECproj import EECprojBinner
 from binning.EECres3 import EECres3Binner
 from binning.EECres4dipole import EECres4dipoleBinner
 from binning.EECres4tee import EECres4teeBinner
+from binning.EECres4triangle import EECres4triangleBinner
+from binning.EECres4minR import EECres4minRBinner
+
 #from binning.EECgeneric import EECgenericBinner
 
 allowedvariations = {
@@ -56,6 +59,8 @@ BINNERS = {
     "EECRES3" : EECres3Binner,
     "EECRES4DIPOLE" : EECres4dipoleBinner,
     "EECRES4TEE" : EECres4teeBinner,
+    'EECRES4TRIANGLE' : EECres4triangleBinner,
+    'EECRES4MINR' : EECres4minRBinner
 }
 
 class EECProcessor(processor.ProcessorABC):
@@ -76,7 +81,10 @@ class EECProcessor(processor.ProcessorABC):
                  manualcov=False,
                  poissonbootstrap=0,
                  noBkgVeto=False,
-                 skipNominal=False):
+                 skipNominal=False,
+                 verbose=False):
+        self.verbose = verbose
+
         self.config = config
         self.statsplit = statsplit
         self.binningtype = binningtype
@@ -154,12 +162,14 @@ class EECProcessor(processor.ProcessorABC):
         evtSel = getEventSelection(
                 readers, self.config,
                 self.isMC, self.flags,
-                self.noBkgVeto)
+                self.noBkgVeto, 
+                self.verbose)
 
         jetSel = getJetSelection(
                 readers.rRecoJet, readers.rMu, 
                 evtSel, self.config,
-                self.isMC)
+                self.isMC,
+                self.verbose)
 
         evtWeight = getEventWeight(events, 
                                    readers,
@@ -186,28 +196,31 @@ class EECProcessor(processor.ProcessorABC):
             nomweight[nomweight < 1e-2] = 1
 
         if (object_systematic is not None) or (not self.skipNominal):
-            #if object_systematic is None:
-            #    print("CUTFLOW")
-            #    cuts_so_far = []
-            #    for name in evtSel.names:
-            #        cuts_so_far.append(name)
-            #        print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
+            if self.verbose and object_systematic is None:
+                print("CUTFLOW")
+                cuts_so_far = []
+                print("\tnone:%g"%(ak.sum(evtSel.all()*nomweight, axis=None)))
+                for name in evtSel.names:
+                    cuts_so_far.append(name)
+                    print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-            #    print("JET CUTFLOW")
-            #    cuts_so_far = []
-            #    for name in jetSel.names:
-            #        cuts_so_far.append(name)
-            #        print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
+                print("JET CUTFLOW")
+                cuts_so_far = []
+                print("\tnone:%g"%(ak.sum(jetSel.all()*nomweight,axis=None)))
+                for name in jetSel.names:
+                    cuts_so_far.append(name)
+                    print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-            #    print("WEIGHTS")
-            #    for wt in evtWeight.weightStatistics.keys():
-            #        print("\t", wt, evtWeight.weightStatistics[wt])
-            #    print("minwt = ", np.min(nomweight))
-            #    print("maxwt = ", np.max(nomweight))
+                print("WEIGHTS")
+                for wt in evtWeight.weightStatistics.keys():
+                    print("\t", wt, evtWeight.weightStatistics[wt])
+                print("minwt = ", np.min(nomweight))
+                print("maxwt = ", np.max(nomweight))
 
-            #    print("Available weight variations")
-            #    for wt in evtWeight.variations:
-            #        print("\t", wt)
+                if len(evtWeight.variations) > 0:
+                    print("Available weight variations")
+                    for wt in evtWeight.variations:
+                        print("\t", wt)
 
             nominal = self.binner.binAll(readers, 
                                          jetMask, evtMask,
@@ -215,6 +228,8 @@ class EECProcessor(processor.ProcessorABC):
             nominal['sumwt'] = ak.sum(nomweight, axis=None)
             nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
             nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
+            if 'reco' in nominal:
+                nominal['sumwt_reco'] = nominal['reco'][:,0].sum()
 
             if object_systematic is None:
                 nominalname = 'nominal'
@@ -257,6 +272,8 @@ class EECProcessor(processor.ProcessorABC):
                 resultdict[variation]['numjet'] = ak.sum(
                         jetMask * theweight, 
                         axis=None)
+                if 'reco' in resultdict[variation]:
+                    resultdict[variation]['sumwt_reco'] = resultdict[variation]['reco'][:,0].sum()
 
     def process(self, events):
         #setup inputs
@@ -267,17 +284,9 @@ class EECProcessor(processor.ProcessorABC):
                              self.noRoccoR,
                              self.noJER, self.noJEC)
 
-        readers.runJEC(self.era, '', '')
+        readers.runJEC(self.era, self.verbose)
         readers.checkBtags(self.config)
 
-        #for wt in evtWeight.weightStatistics.keys():
-        #    print("\t", wt, evtWeight.weightStatistics[wt])
-
-        #print("CUTFLOW")
-        #for name in evtSel.names:
-        #    print("\t", name, ak.sum(evtSel.all(name) * nomweight, axis=None))
-
-        #return outputs
         result = {}
 
         if self.scanSyst in ['scanJetMET', 'scanAll'] and self.isMC:
@@ -292,20 +301,12 @@ class EECProcessor(processor.ProcessorABC):
                                   result, 
                                   object_systematic=objsys)
 
-        #print("SUMWT", result['nominal']['sumwt'])
-        #print("SUMWT_PASS", result['nominal']['sumwt_pass'])
-        #print("NUMJET", result['nominal']['numjet'])
-
-        #print("runtime summary:")
-        #print("\tinitial setup: %0.2g" % (t1-t0))
-        #print("\tJEC: %0.2g" % (t2-t1))
-        #print("\tevent selection: %0.2g" % (t3-t2))
-        #print("\tjet selection: %0.2g" % (t4-t3))
-        #print("\tmask building: %0.2g" % (t5-t4))
-        #print("\tweight computation: %0.2g" % (t6-t5))
-        #print("\tweighting: %0.2g" % (t7-t6))
-        #print("\tbinning: %0.2g" % (t8-t7))
-        #print("\tsummary weights: %0.2g" % (t9-t8))
+        if self.verbose:
+            print("SUMWT", result['nominal']['sumwt'])
+            print("SUMWT_PASS", result['nominal']['sumwt_pass'])
+            print("NUMJET", result['nominal']['numjet'])
+            if 'reco' in result['nominal']:
+                print("SUMWT_RECO", result['nominal']['sumwt_reco'])
 
         result['config'] = self.config
 

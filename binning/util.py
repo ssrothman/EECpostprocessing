@@ -74,66 +74,6 @@ def getCvBdisc(rJet, iReco, mask, config):
 
     return ak.max(CvB, axis=-1)
 
-def getTag(rJet, iReco, mask, config):
-    if 'Cone' in rJet._simonjetsname:
-        zeros = ak.zeros_like(rJet.simonjets.jetPt[iReco][mask]) != 0
-        return zeros
-    if rJet._CHSjetsname is None:
-        if hasattr(rJet.jets, 'hadronFlavour'):
-            b = rJet.jets.hadronFlavour[iReco][mask] == 5
-            c = rJet.jets.hadronFlavour[iReco][mask] == 4
-            if config['mode'] == 'region':
-                return ak.where(b, 2, ak.where(c, 1, 0))
-            elif config['mode'] == 'btag':
-                return b
-            elif config['mode'] == 'ctag':
-                return c
-            else:
-                raise ValueError('Unknown mode: %s'%config['mode'])
-        else:
-            zeros = ak.zeros_like(rJet.jets.pt[iReco][mask]) != 0
-            return zeros
-
-    CHS = rJet.CHSjets
-    
-    if config['mode'] == 'region':
-        CvL = CHS.btagDeepFlavCvL[iReco][mask]
-        CvB = CHS.btagDeepFlavCvB[iReco][mask]
-
-        intercept = config['bregion'].intercept
-        slope = config['bregion'].slope
-        passB = CvL > (intercept + slope*CvB)
-
-        ccut = config['cregion'].minCvL
-        passC = CvL > ccut 
-
-        passB = ak.max(passB, axis=-1)
-        passC = ak.max(passC, axis=-1)
-
-        region = ak.where(passB, 5, ak.where(passC, 4, 0))
-
-        return region
-    elif config['mode'] == 'btag':
-        wp = vars(config['bwps'])[config['wp']]
-
-        B = CHS.btagDeepFlavB[iReco][mask]
-
-        passB = B > wp
-
-        return ak.max(passB, axis=-1)
-    elif config['mode'] == 'ctag':
-        wp_CvL, wp_CvB = config['cwps'][config['wp']]
-
-        CvL = CHS.btagDeepFlavCvL[iReco][mask]
-        CvB = CHS.btagDeepFlavCvB[iReco][mask]
-
-        passCvL = CvL > wp_CvL
-        passCvB = CvB > wp_CvB
-
-        return ak.max(passCvL & passCvB, axis=-1) 
-    else:
-        raise ValueError('Unknown mode: %s'%config['mode'])
-    
 def getAxis(name, config, suffix=''):
     if name == 'tag':
         return IntCategory([0, 4, 5],

@@ -26,23 +26,10 @@ class EECgenericBinner:
                               evtIdx, jetMask, wt):
         EECmask = jetMask[iReco]
 
-        if self.config.tagging.wp == 'tight':
-            btag_gen = ak.values_astype(
-                    rGenJet.jets.passTightB[iGen][EECmask], np.int32)
-            btag_reco = ak.values_astype(
-                    rRecoJet.jets.passTightB[iReco][EECmask], np.int32)
-        elif self.config.tagging.wp == 'medium':
-            btag_gen = ak.values_astype(
-                    rGenJet.jets.passMediumB[iGen][EECmask], np.int32)
-            btag_reco = ak.values_astype(
-                    rRecoJet.jets.passMediumB[iReco][EECmask], np.int32)
-        elif self.config.tagging.wp == 'loose':
-            btag_gen = ak.values_astype(
-                    rGenJet.jets.passLooseB[iGen][EECmask], np.int32)
-            btag_reco = ak.values_astype(
-                    rRecoJet.jets.passLooseB[iReco][EECmask], np.int32)
-        else:
-            raise ValueError("Unknown tagging WP")
+        btag_gen = ak.values_astype(
+                rGenJet.jets.passB[iGen][EECmask], np.int32)
+        btag_reco = ak.values_astype(
+                rRecoJet.jets.passB[iReco][EECmask], np.int32)
 
         wt_f, _ = ak.broadcast_arrays(wt, btag_gen)
 
@@ -106,23 +93,10 @@ class EECgenericBinner:
         iPT_reco = self.ptax.index(squash(pt_reco)) + 1
         iPT_reco = ak.unflatten(iPT_reco, numpt)
 
-        if self.config.tagging.wp == 'tight':
-            btag_gen = ak.values_astype(
-                    rGenJet.jets.passTightB[iGen][EECmask], np.int32)
-            btag_reco = ak.values_astype(
-                    rRecoJet.jets.passTightB[iReco][EECmask], np.int32)
-        elif self.config.tagging.wp == 'medium':
-            btag_gen = ak.values_astype(
-                    rGenJet.jets.passMediumB[iGen][EECmask], np.int32)
-            btag_reco = ak.values_astype(
-                    rRecoJet.jets.passMediumB[iReco][EECmask], np.int32)
-        elif self.config.tagging.wp == 'loose':
-            btag_gen = ak.values_astype(
-                    rGenJet.jets.passLooseB[iGen][EECmask], np.int32)
-            btag_reco = ak.values_astype(
-                    rRecoJet.jets.passLooseB[iReco][EECmask], np.int32)
-        else:
-            raise ValueError("Unknown tagging WP")
+        btag_gen = ak.values_astype(
+                rGenJet.jets.passB[iGen][EECmask], np.int32)
+        btag_reco = ak.values_astype(
+                rRecoJet.jets.passB[iReco][EECmask], np.int32)
 
         ptmode = self.config.transfermode.pt
         btagmode = self.config.transfermode.btag
@@ -241,20 +215,12 @@ class EECgenericBinner:
 
         pt = rJet.jets.pt[iJet][EECmask]
         numpt = squash(ak.num(pt))
+    
         iPT = self.ptax.index(squash(pt)) + 1
         iPT = ak.unflatten(iPT, numpt)
 
-        if self.config.tagging.wp == 'tight':
-            btag = ak.values_astype(rJet.jets.passTightB[iJet][EECmask], 
-                                    np.int32)
-        elif self.config.tagging.wp == 'medium':
-            btag = ak.values_astype(rJet.jets.passMediumB[iJet][EECmask], 
-                                    np.int32)
-        elif self.config.tagging.wp == 'loose':
-            btag = ak.values_astype(rJet.jets.passLooseB[iJet][EECmask], 
-                                    np.int32)
-        else:
-            raise ValueError("Unknown tagging WP")
+        btag = ak.values_astype(rJet.jets.passB[iJet][EECmask], 
+                                np.int32)
 
         iEVT = ak.local_index(vals, axis=0)
 

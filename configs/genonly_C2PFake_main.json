@@ -37,11 +37,11 @@
         "wp" : "hadronFlavour"
     },
     "names" : {
-        "EECs" : "EECs",
-        "SimonJets" : "GenSimonJets",
+        "EECs" : "C2PFakeEECs",
+        "SimonJets" : "GenCos2PhiFakeJets",
         "GenSimonJets" : "",
         "Matches" : "",
-        "puppijets" : "arbitratedGenJetsAK8",
+        "puppijets" : "selectedGenJetsAK8",
         "genjets" : "",
         "CHSjets" : "",
         "muons" : "ZMuMuMuons"

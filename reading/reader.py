@@ -34,6 +34,18 @@ class EECreader:
         return self._res4tee
 
     @property
+    def res4triangle(self):
+        if not hasattr(self, '_res4triangle'):
+            self._res4triangle = reading.readEEC.getRes4triangle(self._x, self._name)
+        return self._res4triangle
+    
+    @property
+    def res4minR(self):
+        if not hasattr(self, '_res4minR'):
+            self._res4minR = reading.readEEC.getRes4minR(self._x, self._name)
+        return self._res4minR
+
+    @property
     def res3(self):
         if not hasattr(self, '_res3'):
             self._res3 = reading.readEEC.getRes3(self._x, self._name)
@@ -174,16 +186,8 @@ class muonreader:
             PT = self._Zs.pt
             numerator = np.sqrt(M*M + np.square(PT*cosh)) + PT*sinh
             denominator = np.sqrt(M*M + np.square(PT))
-            self._Zs['y'] = np.log(numerator/denominator)
+            self._Zs['rapidity'] = np.log(numerator/denominator)
 
-            #pz = self._Zs.pz
-            #y2 = ak.to_numpy(0.5 * np.log((E + pz)/(E - pz)))
-            #import matplotlib.pyplot as plt
-            #y1 = ak.to_numpy(self._Zs.y)
-            #plt.hist(y1/y2, bins=100, range=(0.9, 1.1))
-            #plt.show()
-            #assert np.allclose(ak.to_numpy(self._Zs.y),
-            #                   ak.to_numpy(y2))
         return self._Zs
 
 class matchreader:

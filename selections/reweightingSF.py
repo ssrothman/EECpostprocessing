@@ -9,8 +9,8 @@ def getZptSF(weights, Zs, config):
     badpt = ak.is_none(Zs.pt)
     Zpt = ak.fill_none(Zs.pt, 0)
 
-    bady = ak.is_none(Zs.y) | (np.abs(Zs.y) > 2.4)
-    Zy = ak.fill_none(Zs.y, 0)
+    bady = ak.is_none(Zs.rapidity) | (np.abs(Zs.rapidity) > 2.4)
+    Zy = ak.fill_none(Zs.rapidity, 0)
     
     Zsf = cset['Zwt'].evaluate(Zpt, np.abs(Zy))
 

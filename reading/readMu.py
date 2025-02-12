@@ -10,7 +10,8 @@ def getMuons(x, name, noRoccoR=False):
         ans['rawPt'] = ans.pt
         ans['pt'] = ans.pt
 
-        #warnings.warn("Not applying RoccoR")
+        if not noRoccoR:
+            warnings.warn("Could not find RoccoR - not applying")
     else:
         ans['rawPt'] = ans.pt 
         ans['pt'] = ans.pt * ans.RoccoR

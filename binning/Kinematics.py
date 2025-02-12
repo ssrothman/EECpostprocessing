@@ -134,7 +134,7 @@ class KinematicsBinner:
         Z = readers.rMu.Zs
         H.fill(
             pt     = squash(Z.pt[evtMask]),
-            y      = np.abs(squash(Z.y[evtMask])),
+            y      = np.abs(squash(Z.rapidity[evtMask])),
             mass   = squash(Z.mass[evtMask]),
             weight = squash(wt[evtMask])
         )

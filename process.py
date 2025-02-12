@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     from RecursiveNamespace import RecursiveNamespace
 
-    from coffea.nanoevents import NanoAODSchema, NanoEventsFactory
+    from coffea.nanoevents import NanoAODSchema, NanoEventsFactory, BaseSchema
 
     import os
     import json
@@ -129,6 +129,9 @@ if __name__ == '__main__':
         files = sample.get_files()
         if args.nfiles is not None:
             files = files[args.startfile:args.nfiles+args.startfile]
+
+    import numpy as np
+    np.random.shuffle(files)
 
     if args.verbose:
         print("Processing %d files"%len(files))
@@ -187,6 +190,7 @@ if __name__ == '__main__':
         'poissonbootstrap' : args.poissonbootstrap,
         'noBkgVeto' : args.noBkgVeto,
         'skipNominal' : args.skipNominal,
+        'verbose' : args.verbose,
     }
 
     if args.verbose:
@@ -206,9 +210,9 @@ if __name__ == '__main__':
             nevts = uproot.open(inputfile)['Events'].num_entries
             
             for filesplit_k in range(filesplit):
-                print("processing file %s, filesplit %d/%d"%(inputfile, 
-                                                             filesplit_k,
-                                                             filesplit))
+                #print("processing file %s, filesplit %d/%d"%(inputfile, 
+                #                                             filesplit_k,
+                #                                             filesplit))
                 try:
                     start = filesplit_k*(nevts//filesplit)
 
@@ -217,10 +221,13 @@ if __name__ == '__main__':
                     else:
                         end = (filesplit_k+1)*(nevts//filesplit)
 
+                    schema = NanoAODSchema
+                    schema.warn_missing_crossrefs = False
                     events = NanoEventsFactory.from_root(
                         inputfile, 
                         entry_start=start,
                         entry_stop=end,
+                        schemaclass = schema
                     ).events()
 
                     nextresult = processor_instance.process(events)
@@ -279,6 +286,8 @@ if __name__ == '__main__':
         for tag in args.extra_tags:
             out_fname += '_%s'%tag
 
+    out_fname += '_%s'%args.configsuite
+
     out_fname += '.pkl'
 
     if args.local:
@@ -310,7 +319,7 @@ if __name__ == '__main__':
     elif args.scale == 'local':
         if args.verbose:
             print("Running locally")
-        cluster, client = setup_local_cluster(86)
+        cluster, client = setup_local_cluster(32)
     elif args.scale == 'local_debug':
         if args.verbose:
             print("Running locally in debug mode")
@@ -400,11 +409,6 @@ if __name__ == '__main__':
     #    print(p)
     #    #p.terminate()
 
-    if args.verbose:
-        print("cleaning up dask cluster")
-    client.close()
-    cluster.close()
-
     #print("waiting an extra 10 seconds to ensure everything is processed")
     #time.sleep(10)
 
@@ -429,4 +433,8 @@ if __name__ == '__main__':
         import pickle
         pickle.dump(final_ans, fout)
 
+    if args.verbose:
+        print("cleaning up dask cluster")
+    client.close()
+    cluster.close()
     #####################################################
