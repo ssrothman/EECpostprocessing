@@ -123,10 +123,7 @@ class AllReaders:
             self.rRecoJet.jets['passB'] = isB
 
         if self.isMC:
-            if config.tagging.wp == 'hadronFlavour':
-                genpass = self.rGenJet.jets.hadronFlavour == 5
-            else:
-                genpass = self.rGen
+            genpass = self.rGenJet.jets.hadronFlavour == 5
 
             self.rGenJet.jets['passLooseB'] = genpass
             self.rGenJet.jets['passMediumB'] = genpass
@@ -134,7 +131,7 @@ class AllReaders:
             self.rGenJet.jets['passB'] = genpass
 
     def runJEC(self, era, verbose):
-        if era != 'skip':
+        if era != 'skip' and not self.noJEC:
             handler = JERC_handler(self._config.JERC,
                                    self.noJER, self.noJEC,
                                    verbose)

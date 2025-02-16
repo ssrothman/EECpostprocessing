@@ -1,4 +1,3 @@
-import os
 import pickle
 
 from dask.distributed import Client, LocalCluster
@@ -29,7 +28,7 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit,submit-centos07,submit-gpu,submit-gpu-a30',
+    cluster = SLURMCluster(queue = 'submit,submit-gpu,submit-gpu-a30',
                            cores=1,
                            processes=1,
                            memory='4GB',

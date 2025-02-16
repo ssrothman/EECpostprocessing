@@ -11,10 +11,10 @@
         "maxEta" : 2.0
     },
     "names" : {
-        "genjets" : "selectedGenJetsAK8",
+        "genjets" : "arbitratedGenJetsAK8",
         "Matches" : "ChargedGenMatch",
-        "SimonJets" : "ChargedGenMatchParticles",
-        "GenSimonJets" : "ChargedGenMatchGenParticles",
+        "SimonJets" : "ChargedSimonJets",
+        "GenSimonJets" : "GenChargedSimonJets",
         "ControlJets" : "ChargedRandomConeJets",
         "ControlEECs" : "ChargedRandomConeEECs"
     }
