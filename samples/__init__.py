@@ -21,6 +21,7 @@ import samples.samples_12_24_2024
 import samples.samples_12_26_2024
 import samples.samples_01_22_2025
 import samples.samples_02_12_2025
+import samples.samples_02_15_2025
 
 samplelists = {
     '04_09_2024' : samples.samples_04_09_2024,
@@ -45,5 +46,6 @@ samplelists = {
     '12_26_2024' : samples.samples_12_26_2024,
     '01_22_2025' : samples.samples_01_22_2025,
     '02_12_2025' : samples.samples_02_12_2025,
+    '02_15_2025' : samples.samples_02_15_2025,
     'latest' : None
 }
