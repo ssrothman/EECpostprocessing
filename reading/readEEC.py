@@ -39,32 +39,32 @@ def getTransferRes3(x, name):
     return unflatRecursive(vals, [nRL, nxi, nphi, nRL, nxi, nphi])
 
 def getRes4dipole(x, name):
-    wts = x[name+'res4dipole'].value
+    wts = x[name+'dipole'].value
     BK = getBK(x, name)
 
-    nRL = BK.nres4_dipole_RL
-    nr = BK.nres4_dipole_r
-    nct = BK.nres4_dipole_ct
+    nRL = BK.nR_dipole
+    nr = BK.nr_dipole
+    nct = BK.nc_dipole
 
     return unflatRecursive(wts, [nRL, nr, nct])
 
 def getRes4tee(x, name):
-    wts = x[name+'res4tee'].value
+    wts = x[name+'tee'].value
     BK = getBK(x, name)
 
-    nRL = BK.nres4_tee_RL
-    nr = BK.nres4_dipole_r
-    nct = BK.nres4_dipole_ct
+    nRL = BK.nR_tee
+    nr = BK.nr_tee
+    nct = BK.nc_tee
 
     return unflatRecursive(wts, [nRL, nr, nct])
 
 def getRes4triangle(x, name):
-    wts = x[name+'res4triangle'].value
+    wts = x[name+'triangle'].value
     BK = getBK(x, name)
 
-    nRL = BK.nres4_triangle_RL
-    nr = BK.nres4_triangle_r
-    nct = BK.nres4_triangle_ct
+    nRL = BK.nR_triangle
+    nr = BK.nr_triangle
+    nct = BK.nc_triangle
 
     return unflatRecursive(wts, [nRL, nr, nct])
 

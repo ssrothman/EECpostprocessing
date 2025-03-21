@@ -124,7 +124,11 @@ class jetreader:
     @property
     def simonjets(self):
         if not hasattr(self, '_simonjets'):
-            self._simonjets = getSimonJets(self._x, self._simonjetsname)
+            self._simonjets = getSimonJets(
+                    self._x, 
+                    self._simonjetsname,
+                    self._CHSjetsname
+            )
         return self._simonjets
 
     @property
@@ -137,9 +141,18 @@ class jetreader:
     @property
     def CHSjets(self):
         if not hasattr(self, '_CHSjets'):
-            self._CHSjets = getCHSjets(self._x, self._CHSjetsname, 
-                                              self._simonjetsname)
+            self._CHSjets = getCHSjets(self._x, self._CHSjetsname)
         return self._CHSjets
+
+    @property
+    def matchedCHSjets(self):
+        if not hasattr(self, '_matchedCHSjets'):
+            self._matchedCHSjets = getMatchedCHSjets(
+                self._x, 
+                self._CHSjetsname, 
+                self._simonjetsname
+            )
+        return self._matchedCHSjets
 
     @property
     def alljets(self):

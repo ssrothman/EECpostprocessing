@@ -32,16 +32,21 @@ class AllReaders:
                 None)
             self._rGenEEC = EECreader(x,
                 'Gen' + config.names.EECs)
-            self._rGenEECUNMATCH = EECreader(x,
-                'Gen' + config.names.EECs + 'UNMATCH')
+            self._rUnmatchedGenEEC = EECreader(x,
+                'UnmatchedGen' + config.names.EECs)
+            self._rUntransferedGenEEC = EECreader(x,
+                'UntransferedGen' + config.names.EECs)
             self._rTransfer = transferreader(x,
                 config.names.EECs + 'Transfer')
             self._rMatch = matchreader(x, config.names.Matches)
 
+            self._rUnmatchedRecoEEC = EECreader(x,
+                'UnmatchedReco' + config.names.EECs)
+            self._rUntransferedRecoEEC = EECreader(x,
+                'UntransferedReco' + config.names.EECs)
+
         self._rRecoEEC = EECreader(x,
             'Reco' + config.names.EECs)
-        self._rRecoEECUNMATCH = EECreader(x,
-            'Reco' + config.names.EECs + 'PU')
 
         self._rMu = muonreader(x, config.names.muons, noRoccoR or not config.muons.applyRoccoR)
 
@@ -90,22 +95,25 @@ class AllReaders:
             self.rRecoJet.CHSjets['passMediumB'] = bvals > mediumwp
             self.rRecoJet.CHSjets['passTightB'] = bvals > tightwp
 
-            self.rRecoJet.jets['passLooseB'] = ak.max(bvals > loosewp, axis=-1)
-            self.rRecoJet.jets['passMediumB'] = ak.max(bvals > mediumwp, axis=-1)
-            self.rRecoJet.jets['passTightB'] = ak.max(bvals > tightwp, axis=-1)
+            bvals = self.rRecoJet.matchedCHSjets.btagDeepFlavB
+            self.rRecoJet.matchedCHSjets['passLooseB'] = bvals > loosewp
+            self.rRecoJet.matchedCHSjets['passMediumB'] = bvals > mediumwp
+            self.rRecoJet.matchedCHSjets['passTightB'] = bvals > tightwp
+
+            self.rRecoJet.jets['passLosseB'] = ak.max(self.rRecoJet.matchedCHSjets.passLooseB, axis=-1)
+            self.rRecoJet.jets['passMediumB'] = ak.max(self.rRecoJet.matchedCHSjets.passMediumB, axis=-1)
+            self.rRecoJet.jets['passTightB'] = ak.max(self.rRecoJet.matchedCHSjets.passTightB, axis=-1)
 
             if config.tagging.wp == 'tight':
-                self.rRecoJet.jets['passB'] = self.rRecoJet.jets['passTightB']
+                passname = 'passTightB'
             elif config.tagging.wp == 'medium':
-                self.rRecoJet.jets['passB'] = self.rRecoJet.jets['passMediumB']
+                passnme = 'passMediumB'
             elif config.tagging.wp == 'loose':
-                self.rRecoJet.jets['passB'] = self.rRecoJet.jets['passLooseB']
-            elif config.tagging.wp == 'hadronFlavour':
-                self.rRecoJet.jets['passB'] = self.rRecoJet.jets.hadronFlavour == 5
-            elif config.tagging.wp == 'partonFlavour':
-                self.rRecoJet.jets['passB'] = self.rRecoJet.jets.partonFlavour == 5
+                passname = 'passLooseB'
             else:
                 raise ValueError("Unknown b-tagging working point")
+
+            self.rRecoJet.jets['passB'] = self.rRecoJet.jets[passname]
         else:
             import warnings
             #warnings.warn("WARNING: no available CHS jets for b-tagging\nfalling back on hadron flavour")
@@ -213,16 +221,24 @@ class AllReaders:
         return self._rGenEEC
 
     @property
-    def rGenEECUNMATCH(self):
-        return self._rGenEECUNMATCH
+    def rUnmatchedGenEEC(self):
+        return self._rUnmatchedGenEEC
+
+    @property
+    def rUntransferedGenEEC(self):
+        return self._rUntransferedGenEEC
 
     @property
     def rRecoEEC(self):
         return self._rRecoEEC
 
     @property
-    def rRecoEECUNMATCH(self):
-        return self._rRecoEECUNMATCH
+    def rUnmatchedRecoEEC(self):
+        return self._rUnmatchedRecoEEC
+
+    @property
+    def rUntransferedRecoEEC(self):
+        return self._rUntransferedRecoEEC
 
     @property
     def rTransfer(self):
