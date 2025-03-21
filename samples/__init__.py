@@ -22,6 +22,10 @@ import samples.samples_12_26_2024
 import samples.samples_01_22_2025
 import samples.samples_02_12_2025
 import samples.samples_02_15_2025
+import samples.samples_02_24_2025
+import samples.samples_02_25_2025
+import samples.samples_03_07_2025
+import samples.samples_03_11_2025
 
 samplelists = {
     '04_09_2024' : samples.samples_04_09_2024,
@@ -47,5 +51,9 @@ samplelists = {
     '01_22_2025' : samples.samples_01_22_2025,
     '02_12_2025' : samples.samples_02_12_2025,
     '02_15_2025' : samples.samples_02_15_2025,
+    '02_24_2025' : samples.samples_02_24_2025,
+    '02_25_2025' : samples.samples_02_25_2025,
+    '03_07_2025' : samples.samples_03_07_2025,
+    '03_11_2025' : samples.samples_03_11_2025,
     'latest' : None
 }
