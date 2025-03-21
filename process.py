@@ -14,6 +14,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--manualcov', action='store_true')
     parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
+    parser.add_argument('--skipBtag', action='store_true')
     parser.add_argument('--statsplit', type=int, default=1, required=False)
     parser.add_argument('--sepPt', action='store_true')
 
@@ -188,6 +189,7 @@ if __name__ == '__main__':
         'Zreweight' : args.Zreweight,
         'manualcov' : args.manualcov,
         'poissonbootstrap' : args.poissonbootstrap,
+        'skipBtag' : args.skipBtag,
         'noBkgVeto' : args.noBkgVeto,
         'skipNominal' : args.skipNominal,
         'verbose' : args.verbose,
@@ -256,6 +258,8 @@ if __name__ == '__main__':
         out_fname += '_manualcov'
     if args.poissonbootstrap > 0:
         out_fname += '_poissonbootstrap%d'%args.poissonbootstrap
+    if args.skipBtag:
+        out_fname += '_skipBtag'
     if args.noRoccoR:
         out_fname += '_noRoccoR'
     if args.noJER:
