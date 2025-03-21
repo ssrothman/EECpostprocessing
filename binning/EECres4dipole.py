@@ -8,50 +8,20 @@ from .EECgeneric import EECgenericBinner
 
 class EECres4dipoleBinner(EECgenericBinner):
     def __init__(self, config,
-                 manualcov, poissonbootstrap, statsplit,
+                 manualcov,
+                 poissonbootstrap, 
+                 skipBtag,
+                 statsplit,
                  sepPt):
         super(EECres4dipoleBinner, self).__init__(config,
-                                            manualcov, poissonbootstrap,
-                                            statsplit, sepPt)
+                                            manualcov, 
+                                            poissonbootstrap,
+                                            skipBtag,
+                                            statsplit, 
+                                            sepPt)
 
     def binAll(self, readers, mask, evtMask, wt):
         result = {}
-        if self.isMC:
-            result['transfer'] = self.binTransfer(
-                readers.rTransfer.res4dipole,
-                readers.rGenJet,
-                readers.rRecoJet,
-                readers.rTransfer.iGen,
-                readers.rTransfer.iReco,
-                readers.eventIdx,
-                mask, wt
-            )
-            result['recopure'] = self.binObserved(
-                    readers.rRecoEEC.res4dipole,
-                    readers.rRecoJet,
-                    readers.rRecoEEC.iJet,
-                    readers.rRecoEEC.iReco,
-                    readers.eventIdx,
-                    mask, wt, 
-                    noCov=True,
-                    subtract = readers.rRecoEECUNMATCH.res4dipole)
-            result['gen'] = self.binObserved(
-                    readers.rGenEEC.res4dipole,
-                    readers.rGenJet,
-                    readers.rGenEEC.iJet,
-                    readers.rGenEEC.iReco,
-                    readers.eventIdx,
-                    mask, wt)
-            result['genpure'] = self.binObserved(
-                    readers.rGenEEC.res4dipole,
-                    readers.rGenJet,
-                    readers.rGenEEC.iJet,
-                    readers.rGenEEC.iReco,
-                    readers.eventIdx,
-                    mask, wt, 
-                    noCov=True,
-                    subtract = readers.rGenEECUNMATCH.res4dipole)
-
         result['reco'] = self.binObserved(
                 readers.rRecoEEC.res4dipole,
                 readers.rRecoJet,
@@ -59,12 +29,46 @@ class EECres4dipoleBinner(EECgenericBinner):
                 readers.rRecoEEC.iReco,
                 readers.eventIdx,
                 mask, wt)
+        
+        result['gen'] = self.binObserved(
+                readers.rGenEEC.res4dipole,
+                readers.rGenJet,
+                readers.rGenEEC.iJet,
+                readers.rGenEEC.iReco,
+                readers.eventIdx,
+                mask, wt)
 
-        if self.manualcov:
-            result['covreco'] = result['reco'][1]
-            result['reco'] = result['reco'][0]
-            result['covgen'] = result['gen'][1]
-            result['gen'] = result['gen'][0]
+        result['unmatchedReco'] = self.binObserved(
+                readers.rUnmatchedRecoEEC.res4dipole,
+                readers.rRecoJet,
+                readers.rUnmatchedRecoEEC.iJet,
+                readers.rUnmatchedRecoEEC.iReco,
+                readers.eventIdx,
+                mask, wt)
+
+        result['unmatchedGen'] = self.binObserved(
+                readers.rUnmatchedGenEEC.res4dipole,
+                readers.rGenJet,
+                readers.rUnmatchedGenEEC.iJet,
+                readers.rUnmatchedGenEEC.iReco,
+                readers.eventIdx,
+                mask, wt)
+
+        result['untransferedReco'] = self.binObserved(
+                readers.rUntransferedRecoEEC.res4dipole,
+                readers.rRecoJet,
+                readers.rUntransferedRecoEEC.iReco,
+                readers.rUntransferedRecoEEC.iReco,
+                readers.eventIdx,
+                mask, wt)
+
+        result['untransferedGen'] = self.binObserved(
+                readers.rUntransferedGenEEC.res4dipole,
+                readers.rGenJet,
+                readers.rUntransferedGenEEC.iJet,
+                readers.rUntransferedGenEEC.iReco,
+                readers.eventIdx,
+                mask, wt)
 
         return result
     
