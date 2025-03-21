@@ -37,8 +37,8 @@ def getEventWeight(x, readers, config, isMC,
     if not noPUweight:
         getPUweight(ans, readers.nTrueInt, config, isMC)
 
-    if not noBtagSF:
-        getBtagSF(ans, readers.rRecoJet, config)
+    #if not noBtagSF:
+    #  getBtagSF(ans, readers.rRecoJet, config)
 
     getAllFlavorWeights(ans, readers.rRecoJet, config)
 

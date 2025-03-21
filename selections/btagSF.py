@@ -233,7 +233,7 @@ def getBtagSF(weights, rRecoJet, config):
             passWP = ak.flatten(CHSjets.passTightB, axis=None)
 
         single_wp_btagSF(weights, pt, abseta, flav, passWP, num, 
-                         taggingwp, cset_sf, cset_eff, verbose)
+                         taggingwp, cset_sf, cset_eff)
     else:
         sortvals = {'loose' : 0, 'medium' : 1, 'tight' : 2}
         if sortvals[taggingwp] > sortvals[vetowp]:
@@ -263,5 +263,4 @@ def getBtagSF(weights, rRecoJet, config):
 
         double_wp_btagSF(weights, pt, abseta, flav, 
                          passWP_smaller, passWP_larger, num,
-                         smaller, larger, cset_sf, cset_eff,
-                         verbose)
+                         smaller, larger, cset_sf, cset_eff)

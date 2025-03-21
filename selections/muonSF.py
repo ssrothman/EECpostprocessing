@@ -90,15 +90,15 @@ def getAllMuonSFs(weights,
     subpt = np.where(mask, subpt, tmppt)
     subeta = np.where(mask, subeta, np.abs(tmpeta))
 
-    whichID = config.muonSelection.ID
-    whichIso = config.muonSelection.iso
+    whichID = config.muons.ID
+    whichIso = config.muons.iso
     #this is the only time it's awkward to not be using a regular dict
     idsfname = vars(sfconfig.idsfnames)[whichID]
     isosfname = vars(vars(sfconfig.isosfnames)[whichIso])[whichID]
     triggersfname = vars(sfconfig.triggersfnames)[config.eventSelection.trigger]
 
-    clipPt = config.muonSelection.subpt
-    clipEta = config.muonSelection.subeta
+    clipPt = config.muons.subpt
+    clipEta = config.muons.subeta
 
     if not noIDsfs:
         idsf_lead, idsf_lead_up, idsf_lead_dn = getMuonSF(cset, 
