@@ -16,6 +16,7 @@ from time import time
 from binning.dummy import DummyBinner
 from binning.Kinematics import KinematicsBinner
 from binning.Match import MatchBinner
+from binning.Res import ResBinner
 from binning.Beff import BeffBinner
 from binning.Btag import BtagBinner
 from binning.EECproj import EECprojBinner
@@ -53,6 +54,7 @@ BINNERS = {
     'DUMMY' : DummyBinner,
     'KINEMATICS' : KinematicsBinner,
     'MATCH' : MatchBinner,
+    "RES" : ResBinner,
     'BEFF' : BeffBinner,
     'BTAG' : BtagBinner,
     'EECPROJ' : EECprojBinner,
@@ -80,6 +82,7 @@ class EECProcessor(processor.ProcessorABC):
                  isMC=False,
                  manualcov=False,
                  poissonbootstrap=0,
+                 skipBtag = False,
                  noBkgVeto=False,
                  skipNominal=False,
                  verbose=False):
@@ -98,6 +101,7 @@ class EECProcessor(processor.ProcessorABC):
         self.isMC = isMC
         self.manualcov = manualcov
         self.poissonbootstrap = poissonbootstrap
+        self.skipBtag = skipBtag
 
         self.noRoccoR = noRoccoR
         self.noJER = noJER
@@ -116,6 +120,7 @@ class EECProcessor(processor.ProcessorABC):
         self.binner = BINNERS[binningtype](config,
                                     manualcov=manualcov,
                                     poissonbootstrap=poissonbootstrap,
+                                    skipBtag=skipBtag,
                                     statsplit=statsplit,
                                     sepPt=sepPt)
 
