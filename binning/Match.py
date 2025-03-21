@@ -21,19 +21,57 @@ class MatchBinner:
                               name='eta', label='Particle eta'),
             hist.axis.IntCategory([], name='pdgid', label='Particle type', growth=True),
             hist.axis.IntCategory([], name='matchType', label='Match type', growth=True),
+            hist.axis.Integer(0, 2, name='sameCharge', label='Charge match'),
             hist.axis.Integer(-1, 2, name='match', label='Matched to gen jet'),
             storage=hist.storage.Weight()
         )
 
-        wt_b, _ = ak.broadcast_arrays(wt, readers.rRecoJet.parts.pt)
+        themask = jetMask[:]
+        recoparts = readers.rRecoJet.parts
 
+        wt_b, _ = ak.broadcast_arrays(wt, recoparts.pt)
+
+        sameCharge = recoparts.charge == recoparts.matchCharge
         H.fill(
-            pt = squash(readers.rRecoJet.parts.pt[jetMask]),
-            eta = np.abs(squash(readers.rRecoJet.parts.eta[jetMask])),
-            pdgid = squash(readers.rRecoJet.parts.pdgid[jetMask]),
-            match = squash(readers.rRecoJet.parts.nMatches[jetMask]),
-            matchType = squash(readers.rRecoJet.parts.matchTypes[jetMask]),
-            weight = squash(wt_b[jetMask])
+            pt = squash(recoparts.pt[themask]),
+            eta = np.abs(squash(recoparts.eta[themask])),
+            pdgid = squash(recoparts.pdgid[themask]),
+            match = squash(recoparts.nMatches[themask]),
+            matchType = squash(recoparts.matchTypes[themask]),
+            sameCharge = squash(sameCharge[themask]),
+            weight = squash(wt_b[themask])
+        )
+
+        return H
+
+    def genPartMatchHist(self, readers, jetMask, wt):
+        H = hist.Hist(
+            hist.axis.Regular(100, 0.1, 100,
+                              name='pt', label='Particle pT',
+                              transform=hist.axis.transform.log),
+            hist.axis.Regular(6, 0, 3,
+                              name='eta', label='Particle eta'),
+            hist.axis.IntCategory([], name='pdgid', label='Particle type', growth=True),
+            hist.axis.Integer(0, 2, name='match', label='Matched to reco jet'),
+            storage=hist.storage.Weight()
+        )
+
+        
+        tBK = readers.rGenJet._x.ChargedEECsTransferBK
+        iReco = tBK.iReco
+        iGen = tBK.iGen
+
+        themask = jetMask[iReco]
+        genparts = readers.rGenJet.parts[iGen]
+
+        wt_b, _ = ak.broadcast_arrays(wt, genparts.pt)
+        
+        H.fill(
+            pt = squash(genparts.pt[themask]),
+            eta = np.abs(squash(genparts.eta[themask])),
+            pdgid = squash(genparts.pdgid[themask]),
+            match = squash(genparts.nMatches[themask]),
+            weight = squash(wt_b[themask])
         )
 
         return H
@@ -60,176 +98,38 @@ class MatchBinner:
 
         return H
 
-    def partResHists(self, readers, jetMask, wt):
-        wt_b, _ = ak.broadcast_arrays(wt, readers.rRecoJet.parts.pt)
-        themask = jetMask & (readers.rRecoJet.parts.nMatches > 0)
-        print("Part Res Hists");
-        print("min nmatches:", ak.min(readers.rRecoJet.parts.nMatches[themask]))
-
-        Hpt = hist.Hist(
-            hist.axis.Regular(201, -1, 1,
-                              name='dpt', label="(Reco pT - Gen pT)/Gen pT"),
-            hist.axis.Regular(100, 0.1, 100,
-                              name='pt', label='Particle pT',
-                              transform=hist.axis.transform.log),
-            hist.axis.Regular(6, 0, 3,
-                              name='eta', label='Particle eta'),
-            hist.axis.IntCategory([], name='pdgid', label='Particle type', growth=True),
-            hist.axis.IntCategory([], name='matchType', label='Match type', growth=True),
-            storage=hist.storage.Weight()
-        )
-        dpt = (readers.rRecoJet.parts.pt - readers.rRecoJet.parts.matchPt) / readers.rRecoJet.parts.matchPt
-        print("min dpt:", ak.min(dpt[themask]))
-        print("max dpt:", ak.max(dpt[themask]))
-
-        Hpt.fill(
-            dpt = squash(dpt[themask]),
-            pt = squash(readers.rRecoJet.parts.pt[themask]),
-            eta = np.abs(squash(readers.rRecoJet.parts.eta[themask])),
-            pdgid = squash(readers.rRecoJet.parts.pdgid[themask]),
-            matchType = squash(readers.rRecoJet.parts.matchTypes[themask]),
-            weight = squash(wt_b[themask])
-        )
-
-        Heta = hist.Hist(
-            hist.axis.Regular(201, -0.1, 0.1,
-                              name='deta', label='Reco eta - Gen eta'),
-            hist.axis.Regular(100, 0.1, 100,
-                              name='pt', label='Particle pT',
-                              transform=hist.axis.transform.log),
-            hist.axis.Regular(6, 0, 3,
-                              name='eta', label='Particle eta'),
-            hist.axis.IntCategory([], name='pdgid', label='Particle type', growth=True),
-            hist.axis.IntCategory([], name='matchType', label='Match type', growth=True),
-            storage=hist.storage.Weight()
-        )
-
-        deta = readers.rRecoJet.parts.eta - readers.rRecoJet.parts.matchEta
-        print("min deta:", ak.min(deta[themask]))
-        print("max deta:", ak.max(deta[themask]))
-        Heta.fill(
-            deta = squash(deta[themask]),
-            pt = squash(readers.rRecoJet.parts.pt[themask]),
-            eta = np.abs(squash(readers.rRecoJet.parts.eta[themask])),
-            pdgid = squash(readers.rRecoJet.parts.pdgid[themask]),
-            matchType = squash(readers.rRecoJet.parts.matchTypes[themask]),
-            weight = squash(wt_b[themask])
-        )
-
-        Hphi = hist.Hist(
-            hist.axis.Regular(201, -0.1, 0.1,
-                              name='dphi', label='Reco phi - Gen phi'),
-            hist.axis.Regular(100, 0.1, 100,
-                              name='pt', label='Particle pT',
-                              transform=hist.axis.transform.log),
-            hist.axis.Regular(6, 0, 3,
-                              name='eta', label='Particle eta'),
-            hist.axis.IntCategory([], name='pdgid', label='Particle type', growth=True),
-            hist.axis.IntCategory([], name='matchType', label='Match type', growth=True),
-            storage=hist.storage.Weight()
-        )
-
-        dphi2 = readers.rRecoJet.parts.phi - readers.rRecoJet.parts.matchPhi
-        dphi1 = ak.where(dphi2 > np.pi, dphi2 - 2*np.pi, dphi2)
-        dphi = ak.where(dphi1 < -np.pi, dphi1 + 2*np.pi, dphi1)
-        print("min dphi:", ak.min(dphi[themask]))
-        print("max dphi:", ak.max(dphi[themask]))
-
-        Hphi.fill(
-            dphi = squash(dphi[themask]),
-            pt = squash(readers.rRecoJet.parts.pt[themask]),
-            eta = np.abs(squash(readers.rRecoJet.parts.eta[themask])),
-            pdgid = squash(readers.rRecoJet.parts.pdgid[themask]),
-            matchType = squash(readers.rRecoJet.parts.matchTypes[themask]),
-            weight = squash(wt_b[themask])
-        )
-
-        return {
-            'pt' : Hpt,
-            'eta' : Heta,
-            'phi' : Hphi
-        }
-
-    def jetResHists(self, readers, jetMask, wt):
-        wt_b, _ = ak.broadcast_arrays(wt, readers.rRecoJet.jets.pt)
-        themask = jetMask & (readers.rRecoJet.simonjets.jetMatched == 1)
-
-        Hpt = hist.Hist(
-            hist.axis.Regular(101, -1, 1,
-                             name='dpt', label="(Reco pT - Gen pT)/Gen pT"),
+    def genJetMatchHist(self, readers, jetMask, wt):
+        H = hist.Hist(
             hist.axis.Regular(100, 30, 1200,
-                              name='pt', label='Reco pT',
+                              name='pt', label='Jet pT',
                               transform=hist.axis.transform.log),
             hist.axis.Regular(5, 0, 1.7,
-                              name='eta', label='Reco eta'),
-            storage=hist.storage.Weight()
-        )
-        dpt = (readers.rRecoJet.jets.pt - readers.rRecoJet.simonjets.jetMatchPt) / readers.rRecoJet.simonjets.jetMatchPt
-
-        Hpt.fill(
-            dpt = squash(dpt[themask]),
-            pt = squash(readers.rRecoJet.jets.pt[themask]),
-            eta = np.abs(squash(readers.rRecoJet.jets.eta[themask])),
-            weight = squash(wt_b[themask])
-        )
-
-        Heta = hist.Hist(
-            hist.axis.Regular(101, -1, 1,
-                              name='deta', label='Reco eta - Gen eta'),
-            hist.axis.Regular(100, 30, 1200,
-                              name='pt', label='Reco pT',
-                              transform=hist.axis.transform.log),
-            hist.axis.Regular(5, 0, 1.7,
-                              name='eta', label='Reco eta'),
-            storage=hist.storage.Weight()
-        )
-        deta = readers.rRecoJet.jets.eta - readers.rRecoJet.simonjets.jetMatchEta
-        
-        Heta.fill(
-            deta = squash(deta[themask]),
-            pt = squash(readers.rRecoJet.jets.pt[themask]),
-            eta = np.abs(squash(readers.rRecoJet.jets.eta[themask])),
-            weight = squash(wt_b[themask])
-        )
-
-        Hphi = hist.Hist(
-            hist.axis.Regular(101, -1, 1,
-                              name='dphi', label='Reco phi - Gen phi'),
-            hist.axis.Regular(100, 30, 1200,
-                              name='pt', label='Reco pT',
-                              transform=hist.axis.transform.log),
-            hist.axis.Regular(5, 0, 1.7,
-                              name='eta', label='Reco eta'),
+                              name='eta', label='Jet eta'),
+            hist.axis.Integer(0, 2, name='match', label='Matched to reco jet'),
             storage=hist.storage.Weight()
         )
 
-        dphi2 = readers.rRecoJet.jets.phi - readers.rRecoJet.simonjets.jetMatchPhi
-        dphi1 = ak.where(dphi2 > np.pi, dphi2 - 2*np.pi, dphi2)
-        dphi = ak.where(dphi1 < -np.pi, dphi1 + 2*np.pi, dphi1)
+        wt_b, _ = ak.broadcast_arrays(wt, readers.rGenJet.jets.pt)
 
-        Hphi.fill(
-            dphi = squash(dphi[themask]),
-            pt = squash(readers.rRecoJet.jets.pt[themask]),
-            eta = np.abs(squash(readers.rRecoJet.jets.eta[themask])),
-            weight = squash(wt_b[themask])
+        H.fill(
+            pt = squash(readers.rGenJet.jets.pt),
+            eta = np.abs(squash(readers.rGenJet.jets.eta)),
+            match = squash(readers.rGenJet.simonjets.genJetMatched),
+            weight = squash(wt_b)
         )
 
-        return {
-            'pt' : Hpt,
-            'eta' : Heta,
-            'phi' : Hphi
-        }
+        return H
 
     def binAll(self, readers, mask, evtMask, wt):
         HPmatch = self.partMatchHist(readers, mask, wt)
         HJmatch = self.jetMatchHist(readers, mask, wt)
 
-        HPres = self.partResHists(readers, mask, wt)
-        HJres = self.jetResHists(readers, mask, wt)
+        HgenJmatch = self.genJetMatchHist(readers, mask, wt)
+        HgenPmatch = self.genPartMatchHist(readers, mask, wt)
 
         return {
             'Pmatch' : HPmatch,
             'Jmatch' : HJmatch,
-            'Pres' : HPres,
-            'Jres' : HJres
+            'genJmatch' : HgenJmatch,
+            'genPmatch' : HgenPmatch
         }
