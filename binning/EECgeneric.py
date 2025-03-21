@@ -6,7 +6,10 @@ from time import time
 
 class EECgenericBinner:
     def __init__(self, config,
-                 manualcov, poissonbootstrap, statsplit,
+                 manualcov,
+                 poissonbootstrap,
+                 skipBtag,
+                 statsplit,
                  sepPt):
         self.ptax = hist.axis.Variable(config.binning.pt)
 
@@ -15,7 +18,12 @@ class EECgenericBinner:
         self.statsplit = statsplit
         self.sepPt = sepPt
 
-        self.nBtag = 2
+        self.skipBtag = skipBtag
+        if skipBtag:
+            self.nBtag = 1
+        else:
+            self.nBtag = 2
+
         self.nPT = self.ptax.extent
 
         self.config = config
@@ -219,8 +227,11 @@ class EECgenericBinner:
         iPT = self.ptax.index(squash(pt)) + 1
         iPT = ak.unflatten(iPT, numpt)
 
-        btag = ak.values_astype(rJet.jets.passB[iJet][EECmask], 
-                                np.int32)
+        if self.skipBtag:
+            btag = np.zeros_like(iPT)
+        else:
+            btag = ak.values_astype(rJet.jets.passB[iJet][EECmask], 
+                                    np.int32)
 
         iEVT = ak.local_index(vals, axis=0)
 
