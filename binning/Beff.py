@@ -4,12 +4,7 @@ import numpy as np
 from .util import squash
 
 class BeffBinner:
-    def __init__(self, config,
-                 manualcov, poissonbootstrap, statsplit, sepPt):
-
-        if manualcov or poissonbootstrap or statsplit > 1 or sepPt:
-            raise ValueError("Invalid configuration for BeffBinner")
-
+    def __init__(self, config, *args, **kwargs):
         self.config = config
 
     def binAll(self, readers, mask, evtMask, wt):

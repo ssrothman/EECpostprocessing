@@ -7,7 +7,7 @@ import hist
 from .util import *
 
 class MultiplicityBinner:
-    def __init__(self, config):
+    def __init__(self, config, *ags, **kwargs):
         self._config = {}
         self._config['axes'] = config.axes
         self._config['bins'] = vars(config.bins)

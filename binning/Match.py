@@ -4,12 +4,7 @@ import numpy as np
 from .util import squash
 
 class MatchBinner:
-    def __init__(self, config,
-                 manualcov, poissonbootstrap, statsplit, sepPt):
-
-        if manualcov or poissonbootstrap or statsplit > 1 or sepPt:
-            raise ValueError("Invalid configuration for MatchBinner")
-
+    def __init__(self, config, *args, **kwargs):
         self.config = config
 
     def partMatchHist(self, readers, jetMask, wt):

@@ -4,11 +4,7 @@ import numpy as np
 from .util import squash
 
 class ResBinner:
-    def __init__(self, config,
-                 manualcov, poissonbootstrap, statsplit, sepPt):
-
-        if manualcov or poissonbootstrap or statsplit > 1 or sepPt:
-            raise ValueError("Invalid configuration for ResBinner")
+    def __init__(self, config, *args, **kwargs):
 
         self.config = config
 
@@ -151,14 +147,19 @@ class ResBinner:
         themask = jetMask & (simonjets.jetMatched == 1)
 
         #binning variables
-        dpt = (recojets.corrpt - simonjets.jetMatchPt) / simonjets.jetMatchPt
+        dpt_corr = (recojets.corrpt - simonjets.jetMatchPt) / simonjets.jetMatchPt
+        dpt_raw = (recojets.pt_raw - simonjets.jetMatchPt) / simonjets.jetMatchPt
+        dpt_CMSSW = (recojets.CMSSWpt - simonjets.jetMatchPt) / simonjets.jetMatchPt
         deta = recojets.eta - simonjets.jetMatchEta
         dphi2 = recojets.phi - simonjets.jetMatchPhi
         dphi1 = ak.where(dphi2 > np.pi, dphi2 - 2*np.pi, dphi2)
         dphi = ak.where(dphi1 < -np.pi, dphi1 + 2*np.pi, dphi1)
         dR = np.sqrt(np.square(dphi) + np.square(deta))
 
-        dpt = squash(dpt[themask])
+        dpt_corr = squash(dpt_corr[themask])
+        dpt_raw = squash(dpt_raw[themask])
+        dpt_CMSSW = squash(dpt_CMSSW[themask])
+
         deta = squash(deta[themask])
         dphi = squash(dphi[themask])
         dR = squash(dR[themask])
@@ -174,13 +175,29 @@ class ResBinner:
                               transform=hist.axis.transform.log),
             hist.axis.Regular(5, 0, 1.7,
                               name='eta', label='Reco eta'),
+            hist.axis.Integer(0, 3, name='type', label='pT type', overflow=False, underflow=False),
             storage=hist.storage.Weight()
         )
 
         Hpt.fill(
-            dpt = dpt,
+            dpt = dpt_corr,
             pt = pt,
             eta = eta,
+            type = 0,
+            weight = wt_b
+        )
+        Hpt.fill(
+            dpt = dpt_raw,
+            pt = pt,
+            eta = eta,
+            type = 1,
+            weight = wt_b
+        )
+        Hpt.fill(
+            dpt = dpt_CMSSW,
+            pt = pt,
+            eta = eta,
+            type = 2,
             weight = wt_b
         )
 
