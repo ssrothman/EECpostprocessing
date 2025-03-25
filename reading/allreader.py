@@ -4,7 +4,7 @@ from .JERC import JERC_handler
 class AllReaders:
     def __init__(self, x, config, 
                  noRoccoR=False,
-                 noJER=False, noJEC=False):
+                 noJER=False, noJEC=False, noJUNC=False):
 
         self.isMC = hasattr(x, 'Generator')
 
@@ -13,6 +13,7 @@ class AllReaders:
         self.noRoccoR = noRoccoR
         self.noJER = noJER
         self.noJEC = noJEC
+        self.noJUNC = noJUNC
 
         if hasattr(x, "Flag"):
             self._Flag = x.Flag
@@ -139,57 +140,53 @@ class AllReaders:
             self.rGenJet.jets['passB'] = genpass
 
     def runJEC(self, era, verbose):
-        if era != 'skip' and not self.noJEC:
+        if era != 'skip':
             handler = JERC_handler(self._config.JERC,
                                    self.noJER, self.noJEC,
+                                   self.noJUNC,
                                    verbose)
             corrjets = handler.setup_factory(self, era)
 
             nominal = corrjets.pt
 
             if era == 'MC':
-                JER_UP = corrjets.JER['up'].pt
-                JER_DN = corrjets.JER['down'].pt
+                if not self.noJER:
+                    JER_UP = corrjets.JER['up'].pt
+                    JER_DN = corrjets.JER['down'].pt
 
-                JESs = []
-                for field in corrjets.fields:
-                    if field.startswith("jet_energy_uncertainty"):
-                        JESs.append(corrjets[field][:,:,0] - 1)
+                    self.rRecoJet.jets['JER_UP'] = JER_UP
+                    self.rRecoJet.jets['JER_DN'] = JER_DN
 
-                JEStot = np.sqrt(ak.sum([np.square(JES) for JES in JESs], axis=0))
+                if not self.noJUNC:
+                    JESs = []
+                    for field in corrjets.fields:
+                        if field.startswith("jet_energy_uncertainty"):
+                            JESs.append(corrjets[field][:,:,0] - 1)
 
-                JES_UP = corrjets.pt * (1+JEStot)
-                JES_DN = corrjets.pt * (1-JEStot)
+                    JEStot = np.sqrt(ak.sum([np.square(JES) for JES in JESs], axis=0))
+
+                    JES_UP = corrjets.pt * (1+JEStot)
+                    JES_DN = corrjets.pt * (1-JEStot)
+
+                    self.rRecoJet.jets['JES_UP'] = JES_UP
+                    self.rRecoJet.jets['JES_DN'] = JES_DN
 
                 self.rRecoJet.jets['corrpt'] = nominal
-                self.rRecoJet.jets['JER_UP'] = JER_UP
-                self.rRecoJet.jets['JER_DN'] = JER_DN
-                self.rRecoJet.jets['JES_UP'] = JES_UP
-                self.rRecoJet.jets['JES_DN'] = JES_DN
-                self.rRecoJet.jets['pt'] = nominal
+                self.rRecoJet.jets['CMSSWpt'] = self.rRecoJet.jets.pt
+                self.rRecoJet.jets['pt'] = None
+                self.rRecoJet.simonjets['jetPt'] = None
 
                 #just so the genjets.corrpt is defined
                 self.rGenJet.jets['corrpt'] = self.rGenJet.jets.pt
 
             else: #data doesn't have JER/JES variations
-                #TEST
-                #print("JERC TEST")
-                #print('raw', ak.flatten(self.rRecoJet.jets.pt_raw))
-                #print('cmssw', ak.flatten(self.rRecoJet.jets.pt))
-                #print('coffea', ak.flatten(corrjets.pt))
-                #print('coffea_orig', ak.flatten(corrjets.pt_orig))
-                #print('coffea_JEC', 1/ak.flatten(corrjets.jet_energy_correction))
-                #print('coffea_pt_JEC', ak.flatten(corrjets.pt_jec))
-                #print("cmssw jec factor",ak.flatten(corrjets.jecFactor))
-                #print(corrjets.fields)
-                #print()
-
                 self.rRecoJet.jets['corrpt'] = nominal
-                self.rRecoJet.jets['pt'] = nominal
+                self.rRecoJet.jets['CMSSWpt'] = self.rRecoJet.jets.pt
+            
+                self.rRecoJet.jets['pt'] = None
+                self.rRecoJet.simonjets['jetPt'] = None
 
-
-
-        else: #eta == 'skip'
+        else: #era == 'skip'
             self.rRecoJet.jets['corrpt'] = self.rRecoJet.jets.pt
 
     @property

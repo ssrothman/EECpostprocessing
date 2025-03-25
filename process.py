@@ -60,6 +60,7 @@ if __name__ == '__main__':
     parser.add_argument('--noRoccoR', action='store_true')
     parser.add_argument('--noJER', action='store_true')
     parser.add_argument('--noJEC', action='store_true')
+    parser.add_argument('--noJUNC', action='store_true')
     parser.add_argument('--noPUweight', action='store_true')
     parser.add_argument('--noPrefireSF', action='store_true')
     parser.add_argument('--noIDsfs', action='store_true')
@@ -180,6 +181,7 @@ if __name__ == '__main__':
         'noRoccoR' : args.noRoccoR,
         'noJER' : args.noJER,
         'noJEC' : args.noJEC,
+        'noJUNC' : args.noJUNC,
         'noPUweight' : args.noPUweight,
         'noPrefireSF' : args.noPrefireSF,
         'noIDsfs' : args.noIDsfs,
@@ -266,6 +268,8 @@ if __name__ == '__main__':
         out_fname += '_noJER'
     if args.noJEC:
         out_fname += '_noJEC'
+    if args.noJUNC:
+        out_fname += '_noJUNC'
     if args.noPUweight:
         out_fname += '_noPUweight'
     if args.noPrefireSF:

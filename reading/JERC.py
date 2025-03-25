@@ -6,12 +6,15 @@ import awkward as ak
 
 class JERC_handler:
     def __init__(self, config,
-                 noJER=False, noJEC=False,
+                 noJER=False,
+                 noJEC=False,
+                 noJUNC=False,
                  verbose=False):
         self.config = config
 
         self.noJER = noJER
         self.noJEC = noJEC
+        self.noJUNC = noJUNC
 
         self.evaluators = {}
 
@@ -48,10 +51,11 @@ class JERC_handler:
 
             if not self.noJEC:
                 stacknames += self.config.JECstack.MC
-                stacknames += self.config.JECuncertainties
             if not self.noJER:
                 stacknames += [self.config.JER.resolution]
                 stacknames += [self.config.JER.sf]
+            if not self.noJUNC:
+                stacknames += self.config.JECuncertainties
         elif era == '2018A':
             files = self.config.files.DATA_2018A
 

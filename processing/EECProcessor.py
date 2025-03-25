@@ -72,6 +72,7 @@ class EECProcessor(processor.ProcessorABC):
                  era='MC', flags=None,
                  noRoccoR=False,
                  noJER=False, noJEC=False,
+                 noJUNC=False,
                  noPUweight=False,
                  noPrefireSF=False,
                  noIDsfs=False,
@@ -106,6 +107,7 @@ class EECProcessor(processor.ProcessorABC):
         self.noRoccoR = noRoccoR
         self.noJER = noJER
         self.noJEC = noJEC
+        self.noJUNC = noJUNC
         self.noPUweight = noPUweight
         self.noPrefireSF = noPrefireSF
         self.noIDsfs = noIDsfs
@@ -287,7 +289,7 @@ class EECProcessor(processor.ProcessorABC):
 
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,
-                             self.noJER, self.noJEC)
+                             self.noJER, self.noJEC, self.noJUNC)
 
         readers.runJEC(self.era, self.verbose)
         readers.checkBtags(self.config)
