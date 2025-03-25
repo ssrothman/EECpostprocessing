@@ -102,6 +102,24 @@ class transferreader:
             self._iGen = reading.readEEC.getGenIdx(self._x, self._name)
         return self._iGen
 
+    @property
+    def res4dipole(self):
+        if not hasattr(self, '_res4'):
+            self._res4dipole = reading.readEEC.getTransferRes4dipole(self._x, self._name)
+        return self._res4dipole
+
+    @property
+    def res4tee(self):
+        if not hasattr(self, '_res4tee'):
+            self._res4tee = reading.readEEC.getTransferRes4tee(self._x, self._name)
+        return self._res4tee
+
+    @property
+    def res4triangle(self):
+        if not hasattr(self, '_res4triangle'):
+            self._res4triangle = reading.readEEC.getTransferRes4triangle(self._x, self._name)
+        return self._res4triangle
+
 class jetreader:
     def __init__(self, x, jetsname, simonjetsname, CHSjetsname):
         self._x = x

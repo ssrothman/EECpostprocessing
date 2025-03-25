@@ -68,45 +68,26 @@ def getRes4triangle(x, name):
 
     return unflatRecursive(wts, [nRL, nr, nct])
 
-def getRes4minR(x, name):
-    wts = x[name+'res4minR'].value
-    BK = getBK(x, name)
+def getTransferRes4dipole(x, name):
+    result = x[name+'dipole']
+    nEntry = x[name+'BK'].nEntries_dipole
+    result = unflatVector(result, nEntry)
+    result = result[result.wt_gen >= 0]
+    return result
 
-    nR = BK.nres4_minR_RL
-    nr1 = BK.nres4_minR_r1
-    nr2 = BK.nres4_minR_r2
-    nphi = BK.nres4_minR_phi
+def getTransferRes4tee(x, name):
+    result = x[name+'tee']
+    nEntry = x[name+'BK'].nEntries_tee
+    result = unflatVector(result, nEntry)
+    result = result[result.wt_gen >= 0]
+    return result
 
-    return unflatRecursive(wts, [nR, nr1, nr2, nphi])
-
-def getTransferRes4Shapes(x, name):
-    vals = x[name+'res4shapes'].value
-    BK = getBK(x, name)
-
-    nshape = BK.nres4shapes_shape
-    nRL = BK.nres4shapes_RL
-    nr = BK.nres4shapes_r
-    nct = BK.nres4shapes_ct
-
-    return unflatRecursive(vals, [nshape, nRL, nr, nct, nshape, nRL, nr, nct])
-
-def getRes4fixed(x, name):
-    wts = x[name+'res4fixed'].value
-    BK = getBK(x, name)
-
-    nshape = BK.nres4fixed_shape
-    nRL = BK.nres4fixed_RL
-
-    return unflatRecursive(wts, [nshape, nRL])
-
-def getTransferRes4Fixed(x, name):
-    vals = x[name+'res4fixed'].value
-    BK = getBK(x, name)
-
-    nshape = BK.nres4fixed_shape
-    nRL = BK.nres4fixed_RL
-
-    return unflatRecursive(vals, [nshape, nRL, nshape, nRL])
+def getTransferRes4triangle(x, name):
+    result = x[name+'triangle']
+    nEntry = x[name+'BK'].nEntries_triangle
+    result = unflatVector(result, nEntry)
+    result = result[result.wt_gen >= 0]
+    return result
 
 def getJetIdx(x, name):
     return x[name+"BK"].iJet
