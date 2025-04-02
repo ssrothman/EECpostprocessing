@@ -69,6 +69,12 @@ class EECreader:
             self._nproj = reading.readEEC.getNProj(self._x, self._name)
         return self._nproj
     
+    @property
+    def ptDenom(self):
+        if not hasattr(self, '_ptDenom'):
+            self._ptDenom = reading.readEEC.getPtDenom(self._x, self._name)
+        return self._ptDenom
+
 class transferreader:
     def __init__(self, x, name):
         self._x = x
@@ -103,6 +109,18 @@ class transferreader:
         return self._iGen
 
     @property
+    def ptDenomGen(self):
+        if not hasattr(self, '_ptDenomGen'):
+            self._ptDenomGen = reading.readEEC.getPtDenomGen(self._x, self._name)
+        return self._ptDenomGen
+
+    @property
+    def ptDenomReco(self):
+        if not hasattr(self, '_ptDenomReco'):
+            self._ptDenomReco = reading.readEEC.getPtDenomReco(self._x, self._name)
+        return self._ptDenomReco
+
+    @property
     def res4dipole(self):
         if not hasattr(self, '_res4'):
             self._res4dipole = reading.readEEC.getTransferRes4dipole(self._x, self._name)
@@ -119,6 +137,24 @@ class transferreader:
         if not hasattr(self, '_res4triangle'):
             self._res4triangle = reading.readEEC.getTransferRes4triangle(self._x, self._name)
         return self._res4triangle
+
+    @property
+    def shape_res4tee(self):
+        if not hasattr(self, '_shape_res4tee'):
+            self._shape_res4tee = reading.readEEC.getTransferShapeRes4tee(self._x, self._name)
+        return self._shape_res4tee
+
+    @property
+    def shape_res4dipole(self):
+        if not hasattr(self, '_shape_res4dipole'):
+            self._shape_res4dipole = reading.readEEC.getTransferShapeRes4dipole(self._x, self._name)
+        return self._shape_res4dipole
+
+    @property
+    def shape_res4triangle(self):
+        if not hasattr(self, '_shape_res4triangle'):
+            self._shape_res4triangle = reading.readEEC.getTransferShapeRes4triangle(self._x, self._name)
+        return self._shape_res4triangle
 
 class jetreader:
     def __init__(self, x, jetsname, simonjetsname, CHSjetsname):

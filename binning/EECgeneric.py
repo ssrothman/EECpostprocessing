@@ -1,8 +1,10 @@
 import awkward as ak
+import pandas as pd
 import numpy as np
 import hist
 from .util import squash
 from time import time
+from DataFrameAccumulator import DataFrameAccumulator as DFA
 
 class EECgenericBinner:
     def __init__(self, config,
@@ -83,127 +85,176 @@ class EECgenericBinner:
                       squash(wt_f[statmask]))
         return ans
 
-    def binTransfer(self, transfer,
+    def binTransfer(self, 
+                    transfervals,
+                    transfershape,
+                    ptDenomReco, ptDenomGen,
+                    order,
                     rGenJet, rRecoJet, 
                     iGen, iReco,
                     evtIdx, jetMask, wt):
+
         EECmask = jetMask[iReco]
 
-        EECshape = ak.to_numpy(ak.flatten(transfer, axis=1)).shape[1:]
-        
-        vals = (transfer * wt)[EECmask]
+        vals = transfervals[EECmask]
+        DenomReco = ptDenomReco[EECmask]
+        DenomGen = ptDenomGen[EECmask]
 
         pt_gen = rGenJet.jets.pt[iGen][EECmask]
         pt_reco = rRecoJet.jets.pt[iReco][EECmask]
-        numpt = squash(ak.num(pt_reco))
-        iPT_gen = self.ptax.index(squash(pt_gen)) + 1
-        iPT_gen = ak.unflatten(iPT_gen, numpt)
-        iPT_reco = self.ptax.index(squash(pt_reco)) + 1
-        iPT_reco = ak.unflatten(iPT_reco, numpt)
 
-        btag_gen = ak.values_astype(
-                rGenJet.jets.passB[iGen][EECmask], np.int32)
-        btag_reco = ak.values_astype(
-                rRecoJet.jets.passB[iReco][EECmask], np.int32)
+        print(squash(pt_gen))
+        print(squash(pt_reco))
+
+        correction_gen = np.power(DenomGen/pt_gen, order)
+        correction_reco = np.power(DenomReco/pt_reco, order)
+
+        vals['wt_gen'] = vals['wt_gen'] * correction_gen
+        vals['wt_reco'] = vals['wt_reco'] * correction_reco
+
+        pt_reco_b, _ = ak.broadcast_arrays(pt_reco, vals.R_reco)
+        pt_gen_b, _ = ak.broadcast_arrays(pt_gen, vals.R_gen)
 
         ptmode = self.config.transfermode.pt
         btagmode = self.config.transfermode.btag
-        extrashape = []
+
+        if btagmode != 'ignored':
+            if not self.skipBtag:
+                btag_gen = ak.values_astype(
+                        rGenJet.jets.passB[iGen][EECmask], np.int32)
+                btag_reco = ak.values_astype(
+                        rRecoJet.jets.passB[iReco][EECmask], np.int32)
+            else:
+                btag_gen = np.zeros_like(iPT_gen)
+                btag_reco = np.zeros_like(iPT_reco)
+
+            btag_reco_b, _ = ak.broadcast_arrays(btag_reco, vals.R_reco)
+            btag_gen_b, _ = ak.broadcast_arrays(btag_gen, vals.R_gen)
+
+        #axes = [
+        #    hist.axis.Integer(0, transfershape['R_reco'],
+        #                      name='R_reco', label='$R_{reco}$',
+        #                      overflow=False, underflow=False),
+        #    hist.axis.Integer(0, transfershape['r_reco'],
+        #                      name='r_reco', label='$r_{reco}$',
+        #                      overflow=False, underflow=False),
+        #    hist.axis.Integer(0, transfershape['c_reco'],
+        #                      name='c_reco', label='$c_{reco}$',
+        #                      overflow=False, underflow=False),
+        #    hist.axis.Integer(0, transfershape['R_gen'],
+        #                      name='R_gen', label='$R_{gen}$',
+        #                      overflow=False, underflow=False),
+        #    hist.axis.Integer(0, transfershape['r_gen'],
+        #                      name='r_gen', label='$r_{gen}$',
+        #                      overflow=False, underflow=False),
+        #    hist.axis.Integer(0, transfershape['c_gen'],
+        #                      name='c_gen', label='$c_{gen}$',
+        #                      overflow=False, underflow=False),
+        #    #hist.axis.Regular(20, 1e-11, 1e-3, 
+        #    #                  name='wt_gen', label='$wt_{gen}$',
+        #    #                  overflow=True, underflow=True,
+        #    #                  transform=hist.axis.transform.log),
+        #    #hist.axis.Regular(20, 1e-11, 1e-3, 
+        #    #                  name='wt_reco', label='$wt_{reco}$',
+        #    #                  overflow=True, underflow=True,
+        #    #                  transform=hist.axis.transform.log),
+        #]
+        #if ptmode == 'included':
+        #    axes += [
+        #        hist.axis.Variable(self.config.binning.pt,
+        #                           name='pt_reco', label='$p_{T,reco}$',
+        #                           overflow=True, underflow=True),
+        #        hist.axis.Variable(self.config.binning.pt,
+        #                           name='pt_gen', label='$p_{T,gen}$',
+        #                           overflow=True, underflow=True),
+        #    ]
+        #elif ptmode == 'factoredGen':
+        #    axes += [
+        #        hist.axis.Variable(self.config.binning.pt,
+        #                           name='pt_gen', label='$p_{T,gen}$',
+        #                           overflow=True, underflow=True),
+        #    ]
+        #elif ptmode == 'factoredReco':
+        #    axes += [
+        #        hist.axis.Variable(self.config.binning.pt,
+        #                           name='pt_reco', label='$p_{T,reco}$',
+        #                           overflow=True, underflow=True),
+        #    ]
+        #elif ptmode == 'ignored':
+        #    pass
+
+        #if btagmode == 'included':
+        #    axes += [
+        #        hist.axis.Integer(0, 2, name='btag_reco', label='btag_reco',
+        #                          overflow=False, underflow=False),
+        #        hist.axis.Integer(0, 2, name='btag_gen', label='btag_gen',
+        #                          overflow=False, underflow=False),
+        #    ]
+        #elif btagmode == 'factoredGen':
+        #    axes += [
+        #        hist.axis.Integer(0, 2, name='btag_gen', label='btag_gen',
+        #                          overflow=False, underflow=False),
+        #    ]
+        #elif btagmode == 'factoredReco':
+        #    axes += [
+        #        hist.axis.Integer(0, 2, name='btag_reco', label='btag_reco',
+        #                          overflow=False, underflow=False),
+        #    ]
+        #elif btagmode == 'ignored':
+        #    pass
+
+        #ans = hist.Hist(
+        #    *axes,
+        #    storage=hist.storage.Double(),
+        #)
+
+        wt_b, _ = ak.broadcast_arrays(wt, vals.R_reco)
+
+        fillvals = {
+            'R_reco':   squash(vals.R_reco),
+            'r_reco':   squash(vals.r_reco),
+            'c_reco':   squash(vals.c_reco),
+            'R_gen':    squash(vals.R_gen),
+            'r_gen':    squash(vals.r_gen),
+            'c_gen':    squash(vals.c_gen),
+            'wt_gen':   squash(vals.wt_gen),
+            'wt_reco':  squash(vals.wt_reco),
+            'evtwt' :   squash(wt_b),
+        }
+
+
         if ptmode == 'included':
-            extrashape += [self.nPT, self.nPT]
-        elif ptmode in ['factoredGen', 'factoredReco']:
-            extrashape += [self.nPT]
+            fillvals['pt_reco'] = squash(pt_reco_b)
+            fillvals['pt_gen'] = squash(pt_gen_b)
+        elif ptmode == 'factoredGen':
+            fillvals['pt_gen'] = squash(pt_gen_b)
+        elif ptmode == 'factoredReco':
+            fillvals['pt_reco'] = squash(pt_reco_b)
         elif ptmode == 'ignored':
             pass
-        else:
-            raise ValueError("Unknown pt transfer mode")
 
         if btagmode == 'included':
-            extrashape += [self.nBtag, self.nBtag]
-        elif btagmode in ['factoredGen', 'factoredReco']:
-            extrashape += [self.nBtag]
+            fillvals['btag_reco'] = squash(btag_reco_b)
+            fillvals['btag_gen'] = squash(btag_gen_b)
+        elif btagmode == 'factoredGen':
+            fillvals['btag_gen'] = squash(btag_gen_b)
+        elif btagmode == 'factoredReco':
+            fillvals['btag_reco'] = squash(btag_reco_b)
         elif btagmode == 'ignored':
             pass
-        else:
-            raise ValueError("Unknown btag transfer mode")
 
-        ansshape = [self.statsplit, 
-                    *extrashape,
-                    *EECshape]
-        ans = np.zeros(ansshape, dtype=np.float64)
 
-        N = self.statsplit
-        for k in range(N):
-            statmask = ak.to_numpy(evtIdx % N == k)
+        #ans.fill(
+        #    **fillvals,
+        #    weight=squash(wt_b*vals.wt_gen)
+        #)
 
-            iPT_gen_f = ak.to_numpy(
-                ak.flatten(
-                    ak.flatten(
-                        iPT_gen[statmask],
-                    axis=1),
-                axis=0)
-            )
-            iPT_reco_f = ak.to_numpy(
-                ak.flatten(
-                    ak.flatten(
-                        iPT_reco[statmask],
-                    axis=1),
-                axis=0)
-            )
-            btag_gen_f = ak.to_numpy(
-                ak.flatten(
-                    ak.flatten(
-                        btag_gen[statmask], 
-                    axis=1),
-                axis=0)
-            )
-            btag_reco_f = ak.to_numpy(
-                ak.flatten(
-                    ak.flatten(
-                        btag_reco[statmask],
-                    axis=1),
-                axis=0)
-            )
-            vals_f = ak.to_numpy(
-                ak.flatten(
-                    ak.flatten(
-                        vals[statmask], 
-                    axis=1), 
-                axis=0)
-            )
+        df = DFA(fillvals)
 
-            indices = []
-            if ptmode == 'included':
-                indices += [iPT_reco_f, iPT_gen_f]
-            elif ptmode == 'factoredGen':
-                indices += [iPT_gen_f]
-            elif ptmode == 'factoredReco':
-                indices += [iPT_reco_f]
-            elif ptmode == 'ignored':
-                pass
-
-            if btagmode == 'included':
-                indices += [btag_reco_f, btag_gen_f]
-            elif btagmode == 'factoredGen':
-                indices += [btag_gen_f]
-            elif btagmode == 'factoredReco':
-                indices += [btag_reco_f]
-            elif btagmode == 'ignored':
-                pass
-
-            np.add.at(ans[k],
-                      tuple(indices),
-                      vals_f)
-            #print(ans.sum())
-            #print(np.sum(vals_f))
-
-        #print("PTMODE", ptmode)
-        #print("BTAGMODE", btagmode)
-        #print("ANS SHAPE", ans.shape)
-
-        return ans
+        return df
 
     def indicesPerEvt(self, EECs, 
+                      ptDenom, order,
                       rJet, iJet, iReco,
                       evtIdx, jetMask, wt,
                       subtract=None):
@@ -222,6 +273,10 @@ class EECgenericBinner:
         ansshape = [nEVT, self.nBtag, self.nPT, *EECshape]
 
         pt = rJet.jets.pt[iJet][EECmask]
+
+        correction = np.power(ptDenom[EECmask]/pt, order)
+        vals = vals * correction
+
         numpt = squash(ak.num(pt))
     
         iPT = self.ptax.index(squash(pt)) + 1
@@ -254,13 +309,19 @@ class EECgenericBinner:
 
         return ans
 
-    def binObserved(self, EECs, 
-                    rJet, iJet, iReco,
-                    evtIdx, jetMask, wt,
+    def binObserved(self, 
+                    EECs, 
+                    ptDenom, order,
+                    rJet, 
+                    iJet, iReco,
+                    evtIdx, 
+                    jetMask, wt,
                     subtract=None, noCov=False):
         t0 = time()
 
-        binned = self.indicesPerEvt(EECs, rJet,
+        binned = self.indicesPerEvt(EECs, 
+                                    ptDenom, order,
+                                    rJet,
                                    iJet, iReco,
                                    evtIdx, jetMask, wt,
                                    subtract=subtract) 

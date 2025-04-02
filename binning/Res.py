@@ -163,18 +163,18 @@ class ResBinner:
         deta = squash(deta[themask])
         dphi = squash(dphi[themask])
         dR = squash(dR[themask])
-        pt = squash(recojets.corrpt[themask])
-        eta = np.abs(squash(recojets.eta[themask]))
+        pt = squash(simonjets.jetMatchPt[themask])
+        eta = np.abs(squash(simonjets.jetMatchEta[themask]))
         wt_b = squash(wt_b[themask])
 
         Hpt = hist.Hist(
             hist.axis.Regular(201, -1, 1,
                              name='dpt', label="(Reco pT - Gen pT)/Gen pT"),
             hist.axis.Regular(100, 30, 1200,
-                              name='pt', label='Reco pT',
+                              name='pt', label='Gen pT',
                               transform=hist.axis.transform.log),
             hist.axis.Regular(5, 0, 1.7,
-                              name='eta', label='Reco eta'),
+                              name='eta', label='Gen eta'),
             hist.axis.Integer(0, 3, name='type', label='pT type', overflow=False, underflow=False),
             storage=hist.storage.Weight()
         )
@@ -205,10 +205,10 @@ class ResBinner:
             hist.axis.Regular(201, -1, 1,
                               name='deta', label='Reco eta - Gen eta'),
             hist.axis.Regular(100, 30, 1200,
-                              name='pt', label='Reco pT',
+                              name='pt', label='Gen pT',
                               transform=hist.axis.transform.log),
             hist.axis.Regular(5, 0, 1.7,
-                              name='eta', label='Reco eta'),
+                              name='eta', label='Gen eta'),
             storage=hist.storage.Weight()
         )
         
@@ -223,10 +223,10 @@ class ResBinner:
             hist.axis.Regular(201, -1, 1,
                               name='dphi', label='Reco phi - Gen phi'),
             hist.axis.Regular(100, 30, 1200,
-                              name='pt', label='Reco pT',
+                              name='pt', label='Gen pT',
                               transform=hist.axis.transform.log),
             hist.axis.Regular(5, 0, 1.7,
-                              name='eta', label='Reco eta'),
+                              name='eta', label='Gen eta'),
             storage=hist.storage.Weight()
         )
 
@@ -242,10 +242,10 @@ class ResBinner:
             hist.axis.Regular(201, 0, 1,
                               name='dR', label='deltaR(reco, gen)'),
             hist.axis.Regular(100, 30, 1200,
-                              name='pt', label='Reco pT',
+                              name='pt', label='Gen pT',
                               transform=hist.axis.transform.log),
             hist.axis.Regular(5, 0, 1.7,
-                              name='eta', label='Reco eta'),
+                              name='eta', label='Gen eta'),
             storage=hist.storage.Weight()
         )
 

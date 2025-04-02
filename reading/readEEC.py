@@ -89,6 +89,51 @@ def getTransferRes4triangle(x, name):
     result = result[result.wt_gen >= 0]
     return result
 
+def getTransferShapeRes4tee(x, name):
+    idx = ak.where(ak.num(x[name+'BK']))[0][0]
+    BK0 = x[name+'BK'][idx]
+    return {
+        'R_reco' : BK0.nR_tee_reco[0],
+        'r_reco' : BK0.nr_tee_reco[0],
+        'c_reco' : BK0.nc_tee_reco[0],
+        'R_gen' : BK0.nR_tee_gen[0],
+        'r_gen' : BK0.nr_tee_gen[0],
+        'c_gen' : BK0.nc_tee_gen[0]
+    }
+
+def getTransferShapeRes4dipole(x, name):
+    idx = ak.where(ak.num(x[name+'BK']))[0][0]
+    BK0 = x[name+'BK'][idx]
+    return {
+        'R_reco' : BK0.nR_dipole_reco[0],
+        'r_reco' : BK0.nr_dipole_reco[0],
+        'c_reco' : BK0.nc_dipole_reco[0],
+        'R_gen' : BK0.nR_dipole_gen[0],
+        'r_gen' : BK0.nr_dipole_gen[0],
+        'c_gen' : BK0.nc_dipole_gen[0]
+    }
+
+def getTransferShapeRes4triangle(x, name):
+    idx = ak.where(ak.num(x[name+'BK']))[0][0]
+    BK0 = x[name+'BK'][idx]
+    return {
+        'R_reco' : BK0.nR_triangle_reco[0],
+        'r_reco' : BK0.nr_triangle_reco[0],
+        'c_reco' : BK0.nc_triangle_reco[0],
+        'R_gen' : BK0.nR_triangle_gen[0],
+        'r_gen' : BK0.nr_triangle_gen[0],
+        'c_gen' : BK0.nc_triangle_gen[0]
+    }
+
+def getPtDenom(x, name):
+    return x[name+"BK"].pt_denom
+
+def getPtDenomGen(x, name):
+    return x[name+"BK"].pt_denom_gen
+
+def getPtDenomReco(x, name):
+    return x[name+"BK"].pt_denom_reco
+
 def getJetIdx(x, name):
     return x[name+"BK"].iJet
 
