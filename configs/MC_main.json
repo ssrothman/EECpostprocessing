@@ -12,10 +12,11 @@
     },
     "names" : {
         "genjets" : "arbitratedGenJetsAK8",
-        "Matches" : "ChargedGenMatch",
-        "SimonJets" : "ChargedSimonJets",
-        "GenSimonJets" : "GenChargedSimonJets",
+        "Matches" : "ChargedGenMatchNOM",
+        "SimonJets" : "ChargedSimonJetsNOM",
+        "GenSimonJets" : "GenChargedSimonJetsNOM",
         "ControlJets" : "ChargedRandomConeJets",
-        "ControlEECs" : "ChargedRandomConeEECs"
+        "ControlEECs" : "ChargedRandomConeEECs",
+        "EECs" : "ChargedEECsNOM"
     }
 }

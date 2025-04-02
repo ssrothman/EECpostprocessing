@@ -7,17 +7,8 @@ from time import time
 from .EECgeneric import EECgenericBinner
 
 class EECres4teeBinner(EECgenericBinner):
-    def __init__(self, config,
-                 manualcov, 
-                 poissonbootstrap, 
-                 skipBtag,
-                 statsplit,
-                 sepPt):
-        super(EECres4teeBinner, self).__init__(config,
-                                            manualcov,
-                                            poissonbootstrap,
-                                            skipBtag,
-                                            statsplit, sepPt)
+    def __init__(self, *args, **kwargs):
+        super(EECres4teeBinner, self).__init__(*args, **kwargs)
 
     def binAll(self, readers, mask, evtMask, wt):
         result = {}

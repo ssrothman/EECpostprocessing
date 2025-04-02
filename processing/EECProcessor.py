@@ -139,27 +139,26 @@ class EECProcessor(processor.ProcessorABC):
                          object_systematic=None):
         if object_systematic is not None:
             if object_systematic == 'JER_UP':
-                readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['JER_UP']
+                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JER_UP']
                 readers.METpt = readers.MET.ptJERUp
             elif object_systematic == 'JER_DN':
-                readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['JER_DN']
+                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JER_DN']
                 readers.METpt = readers.MET.ptJERDown
             elif object_systematic == 'JES_UP':
-                readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['JES_UP']
+                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JES_UP']
                 readers.METpt = readers.MET.ptJESUp
             elif object_systematic == 'JES_DN':
-                readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['JES_DN']
+                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JES_DN']
                 readers.METpt = readers.MET.ptJESDown 
             elif object_systematic == "UNCLUSTERED_UP":
-                readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['corrpt']
+                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['corrpt']
                 readers.METpt = readers.MET.ptUnclusteredUp
             elif object_systematic == "UNCLUSTERED_DN":
-                readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['corrpt']
+                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['corrpt']
                 readers.METpt = readers.MET.ptUnclusteredDown
             else:
                 raise ValueError("Unknown systematic: %s" % object_systematic)
         else:
-            readers.rRecoJet.jets['pt'] = readers.rRecoJet.jets['corrpt']
             if hasattr(readers, '_MET'):
                 readers.METpt = readers.MET.pt
             else:
@@ -236,7 +235,7 @@ class EECProcessor(processor.ProcessorABC):
             nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
             nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
             if 'reco' in nominal:
-                nominal['sumwt_reco'] = nominal['reco'][:,0].sum()
+                nominal['sumwt_reco'] = nominal['reco'].df['wt'].sum()
 
             if object_systematic is None:
                 nominalname = 'nominal'

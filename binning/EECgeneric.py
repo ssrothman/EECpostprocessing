@@ -7,15 +7,16 @@ from time import time
 from DataFrameAccumulator import DataFrameAccumulator as DFA
 
 class EECgenericBinner:
-    def __init__(self, config,
-                 manualcov,
+    def __init__(self, 
+                 config,
                  poissonbootstrap,
                  skipBtag,
                  statsplit,
-                 sepPt):
+                 sepPt,
+                 baseRNG = 0,
+                 **kwargs):
         self.ptax = hist.axis.Variable(config.binning.pt)
 
-        self.manualcov = manualcov
         self.poissonbootstrap = poissonbootstrap
         self.statsplit = statsplit
         self.sepPt = sepPt
@@ -29,6 +30,8 @@ class EECgenericBinner:
         self.nPT = self.ptax.extent
 
         self.config = config
+    
+        self.baseRNG = baseRNG
 
     def binTransferBTAGfactor(self, transfer,
                               rGenJet, rRecoJet,
@@ -100,11 +103,8 @@ class EECgenericBinner:
         DenomReco = ptDenomReco[EECmask]
         DenomGen = ptDenomGen[EECmask]
 
-        pt_gen = rGenJet.jets.pt[iGen][EECmask]
-        pt_reco = rRecoJet.jets.pt[iReco][EECmask]
-
-        print(squash(pt_gen))
-        print(squash(pt_reco))
+        pt_gen = rGenJet.jets.corrpt[iGen][EECmask]
+        pt_reco = rRecoJet.jets.corrpt[iReco][EECmask]
 
         correction_gen = np.power(DenomGen/pt_gen, order)
         correction_reco = np.power(DenomReco/pt_reco, order)
@@ -130,83 +130,6 @@ class EECgenericBinner:
 
             btag_reco_b, _ = ak.broadcast_arrays(btag_reco, vals.R_reco)
             btag_gen_b, _ = ak.broadcast_arrays(btag_gen, vals.R_gen)
-
-        #axes = [
-        #    hist.axis.Integer(0, transfershape['R_reco'],
-        #                      name='R_reco', label='$R_{reco}$',
-        #                      overflow=False, underflow=False),
-        #    hist.axis.Integer(0, transfershape['r_reco'],
-        #                      name='r_reco', label='$r_{reco}$',
-        #                      overflow=False, underflow=False),
-        #    hist.axis.Integer(0, transfershape['c_reco'],
-        #                      name='c_reco', label='$c_{reco}$',
-        #                      overflow=False, underflow=False),
-        #    hist.axis.Integer(0, transfershape['R_gen'],
-        #                      name='R_gen', label='$R_{gen}$',
-        #                      overflow=False, underflow=False),
-        #    hist.axis.Integer(0, transfershape['r_gen'],
-        #                      name='r_gen', label='$r_{gen}$',
-        #                      overflow=False, underflow=False),
-        #    hist.axis.Integer(0, transfershape['c_gen'],
-        #                      name='c_gen', label='$c_{gen}$',
-        #                      overflow=False, underflow=False),
-        #    #hist.axis.Regular(20, 1e-11, 1e-3, 
-        #    #                  name='wt_gen', label='$wt_{gen}$',
-        #    #                  overflow=True, underflow=True,
-        #    #                  transform=hist.axis.transform.log),
-        #    #hist.axis.Regular(20, 1e-11, 1e-3, 
-        #    #                  name='wt_reco', label='$wt_{reco}$',
-        #    #                  overflow=True, underflow=True,
-        #    #                  transform=hist.axis.transform.log),
-        #]
-        #if ptmode == 'included':
-        #    axes += [
-        #        hist.axis.Variable(self.config.binning.pt,
-        #                           name='pt_reco', label='$p_{T,reco}$',
-        #                           overflow=True, underflow=True),
-        #        hist.axis.Variable(self.config.binning.pt,
-        #                           name='pt_gen', label='$p_{T,gen}$',
-        #                           overflow=True, underflow=True),
-        #    ]
-        #elif ptmode == 'factoredGen':
-        #    axes += [
-        #        hist.axis.Variable(self.config.binning.pt,
-        #                           name='pt_gen', label='$p_{T,gen}$',
-        #                           overflow=True, underflow=True),
-        #    ]
-        #elif ptmode == 'factoredReco':
-        #    axes += [
-        #        hist.axis.Variable(self.config.binning.pt,
-        #                           name='pt_reco', label='$p_{T,reco}$',
-        #                           overflow=True, underflow=True),
-        #    ]
-        #elif ptmode == 'ignored':
-        #    pass
-
-        #if btagmode == 'included':
-        #    axes += [
-        #        hist.axis.Integer(0, 2, name='btag_reco', label='btag_reco',
-        #                          overflow=False, underflow=False),
-        #        hist.axis.Integer(0, 2, name='btag_gen', label='btag_gen',
-        #                          overflow=False, underflow=False),
-        #    ]
-        #elif btagmode == 'factoredGen':
-        #    axes += [
-        #        hist.axis.Integer(0, 2, name='btag_gen', label='btag_gen',
-        #                          overflow=False, underflow=False),
-        #    ]
-        #elif btagmode == 'factoredReco':
-        #    axes += [
-        #        hist.axis.Integer(0, 2, name='btag_reco', label='btag_reco',
-        #                          overflow=False, underflow=False),
-        #    ]
-        #elif btagmode == 'ignored':
-        #    pass
-
-        #ans = hist.Hist(
-        #    *axes,
-        #    storage=hist.storage.Double(),
-        #)
 
         wt_b, _ = ak.broadcast_arrays(wt, vals.R_reco)
 
@@ -242,12 +165,6 @@ class EECgenericBinner:
             fillvals['btag_reco'] = squash(btag_reco_b)
         elif btagmode == 'ignored':
             pass
-
-
-        #ans.fill(
-        #    **fillvals,
-        #    weight=squash(wt_b*vals.wt_gen)
-        #)
 
         df = DFA(fillvals)
 
@@ -310,131 +227,61 @@ class EECgenericBinner:
         return ans
 
     def binObserved(self, 
-                    EECs, 
-                    ptDenom, order,
+                    EECvals, 
+                    ptDenom, 
+                    order,
                     rJet, 
                     iJet, iReco,
                     evtIdx, 
                     jetMask, wt,
-                    subtract=None, noCov=False):
+                    subtract=None):
         t0 = time()
 
-        binned = self.indicesPerEvt(EECs, 
-                                    ptDenom, order,
-                                    rJet,
-                                   iJet, iReco,
-                                   evtIdx, jetMask, wt,
-                                   subtract=subtract) 
+        EECmask = jetMask[iReco]
 
-        #print("indicesPerEvt took %g"%(time()-t0))
+        vals = EECvals[EECmask]
+        denom = ptDenom[EECmask]
 
-        binnedshape = binned.shape
-        Nevt = binnedshape[0]
+        pt = rJet.jets.corrpt[iJet][EECmask]
 
-        t0 = time()
+        correction = np.power(denom/pt, order)
+
+        vals['wt'] = vals['wt'] * correction
+
+        pt_b, _ = ak.broadcast_arrays(pt, vals.R)
+
+        if not self.skipBtag:
+            btag = ak.values_astype(
+                rJet.jets.passB[iJet][EECmask], np.int32
+            )
+        else:
+            btag = np.zeros_like(pt_b, dtype=np.int32)
+
+        wt_b, _ = ak.broadcast_arrays(wt, vals.R)
+
+        fillvals = {
+            'R' : squash(vals.R),
+            'r' : squash(vals.r),
+            'c' : squash(vals.c),
+            'wt' : squash(vals.wt),
+            'pt' : squash(pt_b),
+            'evtwt' : squash(wt_b)
+        }
+
         if self.poissonbootstrap > 0:
-            sedstr = rJet._x.behavior['__events_factory__']._partition_key
-            import hashlib
-            seed = int(hashlib.md5(sedstr.encode()).hexdigest(), 16)
-            generator = np.random.default_rng(seed=seed)
+            run = rJet._x.run
+            event = rJet._x.event
+            lumi = rJet._x.luminosityBlock
 
-            Npoi = self.poissonbootstrap
+            #use some arbitrary large primes to "hash" the (run, lumi, event) into a unique-ish number
+            #the actual requirement is that subsequent events must have different codes
+            #and that a given (run, lumi, event) always has the same code
+            #this satisfies that requirement with very high probability
+            eventhash = event + lumi*1299827 + run*2038074743 
 
-            poissonwts = generator.poisson(1, size=(Npoi, Nevt))
-            ones = np.ones((1, Nevt), dtype=poissonwts.dtype)
-            poissonwts = np.concatenate((ones, poissonwts), 
-                                        axis=0)
-            #print(poissonwts)
-        else:
-            poissonwts = np.ones((1, Nevt))
-        #print("Poisson took %g"%(time()-t0))
+            eventhash_b, _ = ak.broadcast_arrays(eventhash, vals.R)
+            fillvals['eventhash'] = squash(eventhash_b)
 
-        t0 = time()
-        if self.statsplit > 1:
-            N = self.statsplit
-            statmask_l = []
-            for k in range(N):
-                statmask_l += [ak.to_numpy(evtIdx % N == k)[None,:]]
+        df = DFA(fillvals)
 
-            statmask = np.concatenate(statmask_l, axis=0)
-        else:
-            statmask = np.ones((1,Nevt))
-        #print("Statmask took %g"%(time()-t0))
-
-        binned_indices = np.arange(len(binnedshape))
-        observed_indices = [8, 9, *binned_indices[1:]] #sum over events
-        poisson_indices = [9, 0]
-        statsplit_indices = [8, 0]
-
-        #print("FOR OBSERVED:")
-        #print("binned shape", binned.shape)
-        #print("binned indices", binned_indices)
-        #print("poisson shape", poissonwts.shape)
-        #print("poisson indices", poisson_indices)
-        #print("stat shape", statmask.shape)
-        #print("stat indics", statsplit_indices)
-        #print("observed indices", observed_indices)
-
-        t0 = time()
-        observed = np.einsum(binned, binned_indices,
-                             poissonwts, poisson_indices,
-                             statmask, statsplit_indices,
-                             observed_indices,
-                             optimize=True)
-        #print("Observed einsum took %g"%(time()-t0))
-        #print("observed shape", observed.shape)
-        #print()
-
-        if not noCov and self.manualcov:
-            #we ignore poissonbootstrap for cov
-            leftidxs = binned_indices
-            rightidxs = binned_indices + 10
-            rightidxs[0] = 0 #diagonal in events dimension
- 
-            covidxs = np.concatenate(([8], #statsplit
-                                       leftidxs[1:], #sum over events
-                                       rightidxs[1:])) #sum over events
-
-            #print("FOR COV:")
-            #print("binned shape", binned.shape)
-            #print("leftidxs", leftidxs)
-            #print("rightixs", rightidxs)
-            #print("statidxs", statsplit_indices)
-            #print("covidxs", covidxs)
-
-            #print(binned.shape)
-            #print(leftidxs)
-            #print(rightidxs)
-            #print(statmask.shape)
-            #print(statsplit_indices)
-            #print(covidxs)
-            t0 = time()
-
-            cov = np.empty((self.statsplit, 
-                            *binnedshape[1:],
-                            *binnedshape[1:]),
-                           dtype=np.float64)
-            #print(cov.shape)
-            #print(binned.shape)
-
-            N = self.statsplit
-            for k in range(N):
-                statmask = ak.to_numpy(evtIdx % N == k)
-                cov[k] = np.einsum(binned[statmask], leftidxs,
-                                   binned[statmask], rightidxs,
-                                   covidxs[1:],
-                                   optimize=True)
-    
-            #cov = np.einsum(binned, leftidxs,
-            #                binned, rightidxs,
-            #                statmask, statsplit_indices,
-            #                covidxs,
-            #                optimize=True)
-
-            #print("cov einsum took %g"%(time()-t0))
-            #print("cov shape", cov.shape)
-
-        if noCov or not self.manualcov:
-            return observed
-        else:
-            return observed, cov
+        return df

@@ -56,7 +56,6 @@
     "names" : {
         "puppijets" : "finalSelectedJetsAK8",
         "muons" : "Muon",
-        "EECs" : "ChargedEECs",
         "CHSjets" : "Jet",
         "rho" : "fixedGridRhoFastjetAll",
         "MET" : "PuppiMET"

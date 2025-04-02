@@ -12,7 +12,7 @@ def getJetSelection(rjet, rmu, evtSel, config, isMC, verbose):
     if config.jetSelection.pt > 0:
         if verbose:
             print("\tRequiring jet pt > %g"%config.jetSelection.pt)
-        selection.add("pt", jets.pt > config.jetSelection.pt)
+        selection.add("pt", jets.corrpt > config.jetSelection.pt)
     if config.jetSelection.eta > 0:
         if verbose:
             print("\tRequiring jet |eta| < %g"%config.jetSelection.eta)
