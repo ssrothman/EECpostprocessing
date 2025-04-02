@@ -11,6 +11,7 @@ from selections.weights import getEventWeight
 
 import pickle
 import os
+import os.path
 from time import time
 
 from binning.dummy import DummyBinner
@@ -66,7 +67,7 @@ BINNERS = {
 }
 
 class EECProcessor(processor.ProcessorABC):
-    def __init__(self, config, statsplit=False, binningtype='EEC', 
+    def __init__(self, config,basepath, statsplit=False, binningtype='EEC', 
                  sepPt=False,
                  scanSyst = False,
                  era='MC', flags=None,
@@ -87,6 +88,9 @@ class EECProcessor(processor.ProcessorABC):
                  noBkgVeto=False,
                  skipNominal=False,
                  verbose=False):
+        
+        self.basepath = basepath
+
         self.verbose = verbose
 
         self.config = config
@@ -230,12 +234,11 @@ class EECProcessor(processor.ProcessorABC):
 
             nominal = self.binner.binAll(readers, 
                                          jetMask, evtMask,
-                                         nomweight)
+                                         nomweight,
+                                         os.path.join(self.basepath,'nominal'))
             nominal['sumwt'] = ak.sum(nomweight, axis=None)
             nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
             nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
-            if 'reco' in nominal:
-                nominal['sumwt_reco'] = nominal['reco'].df['wt'].sum()
 
             if object_systematic is None:
                 nominalname = 'nominal'
@@ -268,7 +271,8 @@ class EECProcessor(processor.ProcessorABC):
 
                 resultdict[variation] = self.binner.binAll(
                         readers, jetMask, evtMask,
-                        theweight)
+                        theweight,
+                        os.path.join(self.basepath, variation))
                 resultdict[variation]['sumwt'] = ak.sum(
                         theweight, 
                         axis=None)
@@ -278,8 +282,6 @@ class EECProcessor(processor.ProcessorABC):
                 resultdict[variation]['numjet'] = ak.sum(
                         jetMask * theweight, 
                         axis=None)
-                if 'reco' in resultdict[variation]:
-                    resultdict[variation]['sumwt_reco'] = resultdict[variation]['reco'][:,0].sum()
 
     def process(self, events):
         #setup inputs
@@ -311,8 +313,6 @@ class EECProcessor(processor.ProcessorABC):
             print("SUMWT", result['nominal']['sumwt'])
             print("SUMWT_PASS", result['nominal']['sumwt_pass'])
             print("NUMJET", result['nominal']['numjet'])
-            if 'reco' in result['nominal']:
-                print("SUMWT_RECO", result['nominal']['sumwt_reco'])
 
         result['config'] = self.config
 

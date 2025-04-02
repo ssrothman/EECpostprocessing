@@ -3,6 +3,7 @@ import awkward as ak
 import hist
 from binning.util import *
 from time import time
+import os.path
 
 from .EECgeneric import EECgenericBinner
 
@@ -10,7 +11,7 @@ class EECres4teeBinner(EECgenericBinner):
     def __init__(self, *args, **kwargs):
         super(EECres4teeBinner, self).__init__(*args, **kwargs)
 
-    def binAll(self, readers, mask, evtMask, wt):
+    def binAll(self, readers, mask, evtMask, wt, basepath):
         result = {}
         result['reco'] = self.binObserved(
                 readers.rRecoEEC.res4tee,
@@ -19,7 +20,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rRecoEEC.iJet,
                 readers.rRecoEEC.iReco,
                 readers.eventIdx,
-                mask, wt)
+                mask, wt,
+                os.path.join(basepath, 'reco'))
         
         result['gen'] = self.binObserved(
                 readers.rGenEEC.res4tee,
@@ -28,7 +30,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rGenEEC.iJet,
                 readers.rGenEEC.iReco,
                 readers.eventIdx,
-                mask, wt)
+                mask, wt,
+                os.path.join(basepath, 'gen'))
 
         result['unmatchedReco'] = self.binObserved(
                 readers.rUnmatchedRecoEEC.res4tee,
@@ -37,7 +40,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rUnmatchedRecoEEC.iJet,
                 readers.rUnmatchedRecoEEC.iReco,
                 readers.eventIdx,
-                mask, wt)
+                mask, wt,
+                os.path.join(basepath, 'unmatchedReco'))
 
         result['unmatchedGen'] = self.binObserved(
                 readers.rUnmatchedGenEEC.res4tee,
@@ -46,7 +50,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rUnmatchedGenEEC.iJet,
                 readers.rUnmatchedGenEEC.iReco,
                 readers.eventIdx,
-                mask, wt)
+                mask, wt,
+                os.path.join(basepath, 'unmatchedGen'))
 
         result['untransferedReco'] = self.binObserved(
                 readers.rUntransferedRecoEEC.res4tee,
@@ -55,7 +60,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rUntransferedRecoEEC.iReco,
                 readers.rUntransferedRecoEEC.iReco,
                 readers.eventIdx,
-                mask, wt)
+                mask, wt,
+                os.path.join(basepath, 'untransferedReco'))
 
         result['untransferedGen'] = self.binObserved(
                 readers.rUntransferedGenEEC.res4tee,
@@ -64,7 +70,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rUntransferedGenEEC.iJet,
                 readers.rUntransferedGenEEC.iReco,
                 readers.eventIdx,
-                mask, wt)
+                mask, wt,
+                os.path.join(basepath, 'untransferedGen'))
 
         result['transfer'] = self.binTransfer(
             readers.rTransfer.res4tee,
@@ -77,7 +84,8 @@ class EECres4teeBinner(EECgenericBinner):
             readers.rTransfer.iGen,
             readers.rTransfer.iReco,
             readers.eventIdx,
-            mask, wt
+            mask, wt,
+            os.path.join(basepath, 'transfer')
         )
 
         return result

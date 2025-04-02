@@ -5,6 +5,10 @@ import hist
 from .util import squash
 from time import time
 from DataFrameAccumulator import DataFrameAccumulator as DFA
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+import os.path
 
 class EECgenericBinner:
     def __init__(self, 
@@ -13,7 +17,6 @@ class EECgenericBinner:
                  skipBtag,
                  statsplit,
                  sepPt,
-                 baseRNG = 0,
                  **kwargs):
         self.ptax = hist.axis.Variable(config.binning.pt)
 
@@ -30,63 +33,6 @@ class EECgenericBinner:
         self.nPT = self.ptax.extent
 
         self.config = config
-    
-        self.baseRNG = baseRNG
-
-    def binTransferBTAGfactor(self, transfer,
-                              rGenJet, rRecoJet,
-                              iGen, iReco,
-                              evtIdx, jetMask, wt):
-        EECmask = jetMask[iReco]
-
-        btag_gen = ak.values_astype(
-                rGenJet.jets.passB[iGen][EECmask], np.int32)
-        btag_reco = ak.values_astype(
-                rRecoJet.jets.passB[iReco][EECmask], np.int32)
-
-        wt_f, _ = ak.broadcast_arrays(wt, btag_gen)
-
-        ans = np.zeros((self.statsplit, self.nBtag, self.nBtag), dtype=np.float64)
-
-        N = self.statsplit
-        for k in range(N):
-            statmask = ak.to_numpy(evtIdx % N == k)
-
-            np.add.at(ans[k],
-                      (squash(btag_reco[statmask]),
-                       squash(btag_gen[statmask])),
-                      squash(wt_f[statmask]))
-
-        return ans
-
-
-    def binTransferPTfactor(self, transfer,
-                            rGenJet, rRecoJet,
-                            iGen, iReco,
-                            evtIdx, jetMask, wt):
-        EECmask = jetMask[iReco]
-        
-        pt_gen = rGenJet.jets.pt[iGen][EECmask]
-        pt_reco = rRecoJet.jets.pt[iReco][EECmask]
-        numpt = squash(ak.num(pt_reco))
-        iPT_gen = self.ptax.index(squash(pt_gen)) + 1
-        iPT_gen = ak.unflatten(iPT_gen, numpt)
-        iPT_reco = self.ptax.index(squash(pt_reco)) + 1
-        iPT_reco = ak.unflatten(iPT_reco, numpt)
-
-        wt_f, _ = ak.broadcast_arrays(wt, iPT_gen)
-
-        ans = np.zeros((self.statsplit, self.nPT, self.nPT), dtype=np.float64)
-
-        N = self.statsplit
-        for k in range(N):
-            statmask = ak.to_numpy(evtIdx % N == k)
-
-            np.add.at(ans[k],
-                      (squash(iPT_reco[statmask]),
-                       squash(iPT_gen[statmask])),
-                      squash(wt_f[statmask]))
-        return ans
 
     def binTransfer(self, 
                     transfervals,
@@ -95,7 +41,8 @@ class EECgenericBinner:
                     order,
                     rGenJet, rRecoJet, 
                     iGen, iReco,
-                    evtIdx, jetMask, wt):
+                    evtIdx, jetMask, wt,
+                    outpath):
 
         EECmask = jetMask[iReco]
 
@@ -166,65 +113,17 @@ class EECgenericBinner:
         elif btagmode == 'ignored':
             pass
 
-        df = DFA(fillvals)
+        table = pa.Table.from_pandas(pd.DataFrame(fillvals),
+                                     preserve_index=False)
+         
+        filekey = rGenJet._x.behavior['__events_factory__']._partition_key
+        filekey = filekey.replace('/','_')
+        destination = os.path.join(outpath, filekey + '.parquet')
+        os.makedirs(outpath, exist_ok=True)
+        pq.write_table(table, destination)
 
-        return df
-
-    def indicesPerEvt(self, EECs, 
-                      ptDenom, order,
-                      rJet, iJet, iReco,
-                      evtIdx, jetMask, wt,
-                      subtract=None):
-
-        EECmask = jetMask[iReco]
-
-        EECshape = ak.to_numpy(ak.flatten(EECs, axis=1)).shape[1:]
-
-        if subtract is not None:
-            vals = ((EECs-subtract)*wt)[EECmask]
-        else:
-            vals = (EECs * wt)[EECmask] 
-
-
-        nEVT = len(wt)
-        ansshape = [nEVT, self.nBtag, self.nPT, *EECshape]
-
-        pt = rJet.jets.pt[iJet][EECmask]
-
-        correction = np.power(ptDenom[EECmask]/pt, order)
-        vals = vals * correction
-
-        numpt = squash(ak.num(pt))
-    
-        iPT = self.ptax.index(squash(pt)) + 1
-        iPT = ak.unflatten(iPT, numpt)
-
-        if self.skipBtag:
-            btag = np.zeros_like(iPT)
-        else:
-            btag = ak.values_astype(rJet.jets.passB[iJet][EECmask], 
-                                    np.int32)
-
-        iEVT = ak.local_index(vals, axis=0)
-
-        iEVT, _ = ak.broadcast_arrays(iEVT, iPT)
-
-        #now iPT, btag, iEVT all have shape (event, jet)
-        #and the vals should have shape (event, jet, *EECshape)
-        
-        iPT_f = ak.to_numpy(ak.flatten(ak.flatten(iPT, axis=1), axis=0))
-        btag_f = ak.to_numpy(ak.flatten(ak.flatten(btag, axis=1), axis=0))
-        iEVT_f = ak.to_numpy(ak.flatten(ak.flatten(iEVT, axis=1), axis=0))
-        vals_f = ak.to_numpy(ak.flatten(ak.flatten(vals, axis=1), axis=0))
-
-        ans = np.zeros(ansshape, dtype=np.float64)
-
-        np.add.at(ans, (iEVT_f, btag_f, iPT_f), vals_f)
-        #print(ak.sum(vals_f))
-        #print(np.sum(ans))
-        #print(ans.shape)
-
-        return ans
+        return ak.sum(vals.wt_reco)
+        #return df
 
     def binObserved(self, 
                     EECvals, 
@@ -234,7 +133,8 @@ class EECgenericBinner:
                     iJet, iReco,
                     evtIdx, 
                     jetMask, wt,
-                    subtract=None):
+                    outpath):
+
         t0 = time()
 
         EECmask = jetMask[iReco]
@@ -268,20 +168,26 @@ class EECgenericBinner:
             'evtwt' : squash(wt_b)
         }
 
-        if self.poissonbootstrap > 0:
-            run = rJet._x.run
-            event = rJet._x.event
-            lumi = rJet._x.luminosityBlock
+        run = rJet._x.run
+        event = rJet._x.event
+        lumi = rJet._x.luminosityBlock
 
-            #use some arbitrary large primes to "hash" the (run, lumi, event) into a unique-ish number
-            #the actual requirement is that subsequent events must have different codes
-            #and that a given (run, lumi, event) always has the same code
-            #this satisfies that requirement with very high probability
-            eventhash = event + lumi*1299827 + run*2038074743 
+        #use some arbitrary large primes to "hash" the (run, lumi, event) into a unique-ish number
+        #the actual requirement is that subsequent events must have different codes
+        #and that a given (run, lumi, event) always has the same code
+        #this satisfies that requirement with very high probability
+        eventhash = event + lumi*1299827 + run*2038074743 
 
-            eventhash_b, _ = ak.broadcast_arrays(eventhash, vals.R)
-            fillvals['eventhash'] = squash(eventhash_b)
+        eventhash_b, _ = ak.broadcast_arrays(eventhash, vals.R)
+        fillvals['eventhash'] = squash(eventhash_b)
 
-        df = DFA(fillvals)
+        table = pa.Table.from_pandas(pd.DataFrame(fillvals),
+                                     preserve_index=False)
+         
+        filekey = rJet._x.behavior['__events_factory__']._partition_key
+        filekey = filekey.replace('/','_')
+        os.makedirs(outpath, exist_ok=True)
+        destination = os.path.join(outpath, filekey + '.parquet')
+        pq.write_table(table, destination)
 
-        return df
+        return ak.sum(vals.wt)

@@ -101,6 +101,7 @@ if __name__ == '__main__':
     from coffea.nanoevents import NanoAODSchema, NanoEventsFactory, BaseSchema
 
     import os
+    import os.path
     import json
 
     import samples
@@ -296,7 +297,7 @@ if __name__ == '__main__':
 
     out_fname += '_%s'%args.configsuite
 
-    out_fname += '.pkl'
+    #out_fname += '.pkl'
 
     if args.local:
         destination = 'testlocal'
@@ -309,6 +310,7 @@ if __name__ == '__main__':
         print("Outputting to %s"%os.path.join(destination, out_fname))
 
     os.makedirs(destination, exist_ok=True)
+    argsdict['basepath'] = destination
     ##################################################
 
     ################### EXECUTION ###################
