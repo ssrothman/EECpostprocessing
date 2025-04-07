@@ -18,3 +18,35 @@ SAMPLE_LIST.add_sample(Sample(
     flags=None
 ))
 
+SAMPLE_LIST.add_sample(Sample(
+    name="DATA_2018A",
+    tag='crab/crab_Apr_01_2025/2018/SingleMuon/SingleMuon/2018A',
+    location="LPC",
+    JEC="DATA_2018A",
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name="DATA_2018B",
+    tag='crab/crab_Apr_01_2025/2018/SingleMuon/SingleMuon/2018B',
+    location="LPC",
+    JEC="DATA_2018B",
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name="DATA_2018C",
+    tag='crab/crab_Apr_01_2025/2018/SingleMuon/SingleMuon/2018C',
+    location="LPC",
+    JEC="DATA_2018C",
+    flags=None
+))
+
+SAMPLE_LIST.add_sample(Sample(
+    name="DATA_2018D",
+    tag='crab/crab_Apr_01_2025/2018/SingleMuon/SingleMuon/2018D',
+    location="LPC",
+    JEC="DATA_2018D",
+    flags=None
+))
+
