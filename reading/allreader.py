@@ -1,10 +1,19 @@
 from .reader import *
 from .JERC import JERC_handler
 
+JETMET_SYSTS = [
+    'JER_UP', 'JER_UN',
+    'JES_UP', 'JES_DN',
+    'UNCLUSTERED_UP', 'UNCLUSTERED_DN'
+]
+
 class AllReaders:
     def __init__(self, x, config, 
                  noRoccoR=False,
-                 noJER=False, noJEC=False, noJUNC=False):
+                 noJER=False, noJEC=False, noJUNC=False,
+                 syst='nominal'):
+
+        self.syst = syst
 
         self.isMC = hasattr(x, 'Generator')
 
@@ -171,23 +180,53 @@ class AllReaders:
                     self.rRecoJet.jets['JES_UP'] = JES_UP
                     self.rRecoJet.jets['JES_DN'] = JES_DN
 
-                self.rRecoJet.jets['corrpt'] = nominal
                 self.rRecoJet.jets['CMSSWpt'] = self.rRecoJet.jets.pt
+
+                #null so that we can't accidentally use uncorrected pT
                 self.rRecoJet.jets['pt'] = None
                 self.rRecoJet.simonjets['jetPt'] = None
 
                 #just so the genjets.corrpt is defined
                 self.rGenJet.jets['corrpt'] = self.rGenJet.jets.pt
 
+                if self.syst == 'JER_UP':
+                    self.rRecoJet.jets['corrpt'] = JER_UP
+                    self.METpt = self.MET.ptJERUp
+                elif self.syst == 'JER_DN':
+                    self.rRecoJet.jets['corrpt'] = JER_DN
+                    self.METpt = self.MET.ptJERDown
+                elif self.syst == 'JES_UP':
+                    self.rRecoJet.jets['corrpt'] = JES_UP
+                    self.METpt = self.MET.ptJESUp
+                elif self.syst == 'JES_DN':
+                    self.rRecoJet.jets['corrpt'] = JES_DN
+                    self.METpt = self.MET.ptJESDown
+                elif self.syst == 'UNCLUSTERED_UP':
+                    self.rRecoJet.jets['corrpt'] = nominal
+                    self.METpt = self.MET.ptUnclusteredUp
+                elif self.syst == 'UNCLUSTERED_DN':
+                    self.rRecoJet.jets['corrpt'] = nominal
+                    self.METpt = self.MET.ptUnclusteredDown
+                else:   
+                    self.rRecoJet.jets['corrpt'] = nominal
+                    self.METpt = self.MET.pt
+
             else: #data doesn't have JER/JES variations
                 self.rRecoJet.jets['corrpt'] = nominal
                 self.rRecoJet.jets['CMSSWpt'] = self.rRecoJet.jets.pt
-            
+                self.METpt = self.MET.pt
+
+                #null so that we can't accidentally use uncorrected pT
                 self.rRecoJet.jets['pt'] = None
                 self.rRecoJet.simonjets['jetPt'] = None
 
+                if self.syst in JETMET_SYSTS:
+                    raise ValueError("JETMET systematics not available in data")
+
         else: #era == 'skip'
             self.rRecoJet.jets['corrpt'] = self.rRecoJet.jets.pt
+            if self.syst in JETMET_SYSTS:
+                raise ValueError("JETMET systematics not available in 'skip' mode")
 
     @property
     def rMatch(self):

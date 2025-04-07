@@ -29,7 +29,8 @@ class EECgenericBinner:
                     order,
                     rGenJet, rRecoJet, 
                     iGen, iReco,
-                    evtIdx, jetMask, wt,
+                    evtIdx, jetMask, 
+                    wtVars,
                     outpath):
 
         EECmask = jetMask[iReco]
@@ -66,7 +67,6 @@ class EECgenericBinner:
             btag_reco_b, _ = ak.broadcast_arrays(btag_reco, vals.R_reco)
             btag_gen_b, _ = ak.broadcast_arrays(btag_gen, vals.R_gen)
 
-        wt_b, _ = ak.broadcast_arrays(wt, vals.R_reco)
 
         fillvals = {
             'R_reco':   squash(vals.R_reco),
@@ -77,9 +77,12 @@ class EECgenericBinner:
             'c_gen':    squash(vals.c_gen),
             'wt_gen':   squash(vals.wt_gen),
             'wt_reco':  squash(vals.wt_reco),
-            'evtwt' :   squash(wt_b),
         }
 
+        for variation in wtVars:
+            thewt = wtVars[variation]
+            thwt_b, _ = ak.broadcast_arrays(thewt, vals.R_reco)
+            fillvals[variation] = squash(thwt_b)
 
         if ptmode == 'included':
             fillvals['pt_reco'] = squash(pt_reco_b)
@@ -120,7 +123,8 @@ class EECgenericBinner:
                     rJet, 
                     iJet, iReco,
                     evtIdx, 
-                    jetMask, wt,
+                    jetMask, 
+                    wtVars,
                     outpath):
 
         t0 = time()
@@ -145,7 +149,6 @@ class EECgenericBinner:
         else:
             btag = np.zeros_like(pt_b, dtype=np.int32)
 
-        wt_b, _ = ak.broadcast_arrays(wt, vals.R)
 
         fillvals = {
             'R' : squash(vals.R),
@@ -153,8 +156,12 @@ class EECgenericBinner:
             'c' : squash(vals.c),
             'wt' : squash(vals.wt),
             'pt' : squash(pt_b),
-            'evtwt' : squash(wt_b)
         }
+
+        for variation in wtVars:
+            thewt = wtVars[variation]
+            thewt_b, _ = ak.broadcast_arrays(thewt, vals.R)
+            fillvals[variation] = squash(thewt_b)
 
         run = rJet._x.run
         event = rJet._x.event

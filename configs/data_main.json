@@ -1,8 +1,11 @@
 {
+    "isMC" : false,
+    "skipBtag" : true,
     "eventSelection" : {
         "PreFireWeight" : false
     },
     "names" : {
-        "SimonJets" : "ChargedSimonJets"
+        "SimonJets" : "ChargedSimonJets",
+        "EECs" : "ChargedEECs"
     }
 }

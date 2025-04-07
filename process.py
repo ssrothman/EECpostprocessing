@@ -17,6 +17,12 @@ if __name__ == '__main__':
 
     parser.add_argument('--samplelist', type=str, default='latest', required=False)
 
+    parser.add_argument('--syst', type=str, default='nominal', 
+                        choices=['nominal', 'JES_UP', 'JES_DN',
+                                 'JER_UP', 'JER_DN',
+                                 'UNCLUSTERED_UP',
+                                 'UNCLUSTERED_DN'])
+
     parser.add_argument('--noBkgVeto', action='store_true')
     parser.add_argument('--noRoccoR', action='store_true')
     parser.add_argument('--noJER', action='store_true')
@@ -149,6 +155,7 @@ if __name__ == '__main__':
         'Zreweight' : args.Zreweight,
         'noBkgVeto' : args.noBkgVeto,
         'verbose' : args.verbose,
+        'syst' : args.syst,
     }
 
     if args.verbose:
@@ -250,7 +257,7 @@ if __name__ == '__main__':
         print("Outputting to %s"%os.path.join(destination, out_fname))
 
     os.makedirs(destination, exist_ok=True)
-    argsdict['basepath'] = destination
+    argsdict['basepath'] = os.path.join(destination, out_fname)
     ##################################################
 
     ################### EXECUTION ###################
@@ -379,7 +386,7 @@ if __name__ == '__main__':
 
     #final_ans = result_futures.result()
 
-    with open(os.path.join(destination,out_fname), 'wb') as fout:
+    with open(os.path.join(destination,out_fname+"_%s.pickle"%args.syst), 'wb') as fout:
         import pickle
         pickle.dump(final_ans, fout)
 

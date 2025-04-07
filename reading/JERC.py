@@ -56,22 +56,22 @@ class JERC_handler:
                 stacknames += [self.config.JER.sf]
             if not self.noJUNC:
                 stacknames += self.config.JECuncertainties
-        elif era == '2018A':
+        elif era == 'DATA_2018A':
             files = self.config.files.DATA_2018A
 
             if not self.noJEC:
                 stacknames += self.config.JECstack.DATA_2018A
-        elif era == '2018B':
+        elif era == 'DATA_2018B':
             files = self.config.files.DATA_2018B
 
             if not self.noJEC:
                 stacknames = self.config.JECstack.DATA_2018B
-        elif era == '2018C':
+        elif era == 'DATA_2018C':
             files = self.config.files.DATA_2018C
 
             if not self.noJEC:
                 stacknames = self.config.JECstack.DATA_2018C
-        elif era == '2018D':
+        elif era == 'DATA_2018D':
             files = self.config.files.DATA_2018D
 
             if not self.noJEC:

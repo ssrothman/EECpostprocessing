@@ -29,28 +29,6 @@ from binning.EECres4minR import EECres4minRBinner
 
 #from binning.EECgeneric import EECgenericBinner
 
-allowedvariations = {
-    'scanTheory' : ['wt_scaleUp', 'wt_scaleDown', 
-                    'wt_PDFaSUp', 'wt_PDFaSDown'],
-    'scanMuon' : ['wt_idsfUp', 'wt_idsfDown',
-                  'wt_isosfUp', 'wt_isosfDown'],
-    'scanTrigger' : ['wt_triggersfUp', 'wt_triggersfDown',
-                     'wt_prefireUp', 'wt_prefireDown'],
-    'scanPS' : ['wt_ISRUp', 'wt_ISRDown',
-                'wt_FSRUp', 'wt_FSRDown'],
-    'scanBtagEff' : ['wt_btagSF_effUp', 'wt_btagSF_effDown',
-                    'wt_btagSF_tighteffUp', 'wt_btagSF_tighteffDown'],
-    'scanBtagSF' : ['wt_btagSF_sfUp', 'wt_btagSF_sfDown',
-                    'wt_btagSF_tightsfUp', 'wt_btagSF_tightsfDown'],
-    'scanPileup' : ['wt_PUUp', 'wt_PUDown'],
-    'scanCBxsec' : ['wt_c_xsecUp', 'wt_c_xsecDown',
-                    'wt_b_xsecUp', 'wt_b_xsecDown'],
-    'scanLxsec' : ['wt_uds_xsecUp', 'wt_uds_xsecDown'
-                   'wt_g_xsecUp', 'wt_g_xsecDown'],
-    'scanJetMET' : ['JER_UP', 'JER_DN', 'JES_UP', 'JES_DN'],
-    'noSyst' : []
-}
-
 BINNERS = {
     'DUMMY' : DummyBinner,
     'KINEMATICS' : KinematicsBinner,
@@ -67,32 +45,36 @@ BINNERS = {
 }
 
 class EECProcessor(processor.ProcessorABC):
-    def __init__(self, config,basepath, statsplit=False, binningtype='EEC', 
-                 sepPt=False,
-                 era='MC', flags=None,
-                 noRoccoR=False,
-                 noJER=False, noJEC=False,
-                 noJUNC=False,
-                 noPUweight=False,
-                 noPrefireSF=False,
-                 noIDsfs=False,
-                 noIsosfs=False,
-                 noTriggersfs=False,
-                 noBtagSF=False,
-                 Zreweight=False,
-                 noBkgVeto=False,
-                 verbose=False):
+    def __init__(self, 
+                 config,
+                 basepath, 
+                 binningtype,
+                 era,
+                 flags,
+                 noRoccoR,
+                 noJER,
+                 noJEC,
+                 noJUNC,
+                 noPUweight,
+                 noPrefireSF,
+                 noIDsfs,
+                 noIsosfs,
+                 noTriggersfs,
+                 noBtagSF,
+                 Zreweight,
+                 noBkgVeto,
+                 syst,
+                 verbose):
         
+        self.syst = syst
         self.basepath = basepath
 
         self.verbose = verbose
 
         self.config = config
-        self.statsplit = statsplit
         self.binningtype = binningtype
         self.era = era
         self.flags = flags
-        self.scanSyst = 'noSyst'
 
         self.noBkgVeto = noBkgVeto
 
@@ -113,9 +95,7 @@ class EECProcessor(processor.ProcessorABC):
     
         binningtype= binningtype.strip().upper()
 
-        self.binner = BINNERS[binningtype](config,
-                                    statsplit=statsplit,
-                                    sepPt=sepPt)
+        self.binner = BINNERS[binningtype](config)
 
     def postprocess(self, accumulator):
         pass
@@ -126,35 +106,7 @@ class EECProcessor(processor.ProcessorABC):
         return self.process(events)
 
     def actually_process(self, events, readers,
-                         resultdict,
-                         object_systematic=None):
-        if object_systematic is not None:
-            if object_systematic == 'JER_UP':
-                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JER_UP']
-                readers.METpt = readers.MET.ptJERUp
-            elif object_systematic == 'JER_DN':
-                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JER_DN']
-                readers.METpt = readers.MET.ptJERDown
-            elif object_systematic == 'JES_UP':
-                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JES_UP']
-                readers.METpt = readers.MET.ptJESUp
-            elif object_systematic == 'JES_DN':
-                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['JES_DN']
-                readers.METpt = readers.MET.ptJESDown 
-            elif object_systematic == "UNCLUSTERED_UP":
-                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['corrpt']
-                readers.METpt = readers.MET.ptUnclusteredUp
-            elif object_systematic == "UNCLUSTERED_DN":
-                readers.rRecoJet.jets['corrpt'] = readers.rRecoJet.jets['corrpt']
-                readers.METpt = readers.MET.ptUnclusteredDown
-            else:
-                raise ValueError("Unknown systematic: %s" % object_systematic)
-        else:
-            if hasattr(readers, '_MET'):
-                readers.METpt = readers.MET.pt
-            else:
-                import warnings
-                warnings.warn("No MET in events")
+                         resultdict):
 
         evtSel = getEventSelection(
                 readers, self.config,
@@ -192,83 +144,47 @@ class EECProcessor(processor.ProcessorABC):
             print("setting to 1")
             nomweight[nomweight < 1e-2] = 1
 
-        if (object_systematic is not None):
-            if self.verbose and object_systematic is None:
-                print("CUTFLOW")
-                cuts_so_far = []
-                print("\tnone:%g"%(ak.sum(evtSel.all()*nomweight, axis=None)))
-                for name in evtSel.names:
-                    cuts_so_far.append(name)
-                    print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
+        weightvariations = {'wt_nominal' : nomweight}
+        if self.config.isMC and self.syst == 'nominal':
+            for wt in evtWeight.variations:
+                weightvariations["evt"+wt] = evtWeight.weight(wt)
 
-                print("JET CUTFLOW")
-                cuts_so_far = []
-                print("\tnone:%g"%(ak.sum(jetSel.all()*nomweight,axis=None)))
-                for name in jetSel.names:
-                    cuts_so_far.append(name)
-                    print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
+        if self.verbose:
+            print("CUTFLOW")
+            cuts_so_far = []
+            print("\tnone:%g"%(ak.sum(evtSel.all()*nomweight, axis=None)))
+            for name in evtSel.names:
+                cuts_so_far.append(name)
+                print("\t%s:%g"%(name, ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-                print("WEIGHTS")
-                for wt in evtWeight.weightStatistics.keys():
-                    print("\t", wt, evtWeight.weightStatistics[wt])
-                print("minwt = ", np.min(nomweight))
-                print("maxwt = ", np.max(nomweight))
+            print("JET CUTFLOW")
+            cuts_so_far = []
+            print("\tnone:%g"%(ak.sum(jetSel.all()*nomweight,axis=None)))
+            for name in jetSel.names:
+                cuts_so_far.append(name)
+                print("\t%s:%g"%(name, ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)))
 
-                if len(evtWeight.variations) > 0:
-                    print("Available weight variations")
-                    for wt in evtWeight.variations:
-                        print("\t", wt)
+            print("WEIGHTS")
+            for wt in evtWeight.weightStatistics.keys():
+                print("\t", wt, evtWeight.weightStatistics[wt])
+            print("minwt = ", np.min(nomweight))
+            print("maxwt = ", np.max(nomweight))
 
-            nominal = self.binner.binAll(readers, 
-                                         jetMask, evtMask,
-                                         nomweight,
-                                         os.path.join(self.basepath,'nominal'))
-            nominal['sumwt'] = ak.sum(nomweight, axis=None)
-            nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
-            nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
+            if len(evtWeight.variations) > 0:
+                print("Available weight variations")
+                for wt in evtWeight.variations:
+                    print("\t", wt)
 
-            if object_systematic is None:
-                nominalname = 'nominal'
-            else:
-                nominalname = object_systematic
+        thepath = os.path.join(self.basepath, self.syst)
+        nominal = self.binner.binAll(readers, 
+                                     jetMask, evtMask,
+                                        weightvariations,
+                                     thepath)
+        nominal['sumwt'] = ak.sum(nomweight, axis=None)
+        nominal['sumwt_pass'] = ak.sum(nomweight[evtMask], axis=None)
+        nominal['numjet'] = ak.sum(jetMask * nomweight, axis=None)
 
-            resultdict[nominalname] = nominal
-
-        if self.scanSyst != 'noSyst'\
-                and object_systematic is None \
-                and self.isMC:
-
-            for variation in evtWeight.variations:
-                if variation not in allowedvariations[self.scanSyst]:
-                    continue
-
-                print("doing", variation)
-                theweight = evtWeight.weight(variation)
-                print("minwt = ", np.min(theweight))
-                print("maxwt = ", np.max(theweight))
-
-                if np.any(theweight > 1e2):
-                    print("WARNING: large weights found")
-                    print("setting to 1")
-                    theweight[theweight > 1e2] = 1
-                if np.any(theweight < 1e-2):
-                    print("WARNING: small weights found")
-                    print("setting to 1")
-                    theweight[theweight < 1e-2] = 1
-
-                resultdict[variation] = self.binner.binAll(
-                        readers, jetMask, evtMask,
-                        theweight,
-                        os.path.join(self.basepath, variation))
-                resultdict[variation]['sumwt'] = ak.sum(
-                        theweight, 
-                        axis=None)
-                resultdict[variation]['sumwt_pass'] = ak.sum(
-                        theweight[evtMask],
-                        axis=None)
-                resultdict[variation]['numjet'] = ak.sum(
-                        jetMask * theweight, 
-                        axis=None)
+        resultdict[self.syst] = nominal
 
     def process(self, events):
         #setup inputs
@@ -277,30 +193,22 @@ class EECProcessor(processor.ProcessorABC):
 
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,
-                             self.noJER, self.noJEC, self.noJUNC)
+                             self.noJER, self.noJEC, self.noJUNC,
+                             self.syst)
 
         readers.runJEC(self.era, self.verbose)
         readers.checkBtags(self.config)
 
         result = {}
 
-        if self.scanSyst in ['scanJetMET', 'scanAll'] and self.isMC:
-            objsys_l = [None, 
-                        'JER_UP', 'JER_DN', 'JES_UP', 'JES_DN',
-                        'UNCLUSTERED_UP', 'UNCLUSTERED_DN']
-        else:
-            objsys_l = [None]
+        self.actually_process(events, readers, 
+                              result)
 
-        for objsys in objsys_l:
-            self.actually_process(events, readers, 
-                                  result, 
-                                  object_systematic=objsys)
-
-        print(result.keys())
         if self.verbose:
-            print("SUMWT", result['nominal']['sumwt'])
-            print("SUMWT_PASS", result['nominal']['sumwt_pass'])
-            print("NUMJET", result['nominal']['numjet'])
+            for key in result.keys():
+                print("SUMWT", result[key]['sumwt'])
+                print("SUMWT_PASS", result[key]['sumwt_pass'])
+                print("NUMJET", result[key]['numjet'])
 
         result['config'] = self.config
 
