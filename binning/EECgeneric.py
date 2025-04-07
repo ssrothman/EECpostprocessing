@@ -13,22 +13,10 @@ import os.path
 class EECgenericBinner:
     def __init__(self, 
                  config,
-                 poissonbootstrap,
-                 skipBtag,
-                 statsplit,
-                 sepPt,
                  **kwargs):
         self.ptax = hist.axis.Variable(config.binning.pt)
 
-        self.poissonbootstrap = poissonbootstrap
-        self.statsplit = statsplit
-        self.sepPt = sepPt
-
-        self.skipBtag = skipBtag
-        if skipBtag:
-            self.nBtag = 1
-        else:
-            self.nBtag = 2
+        self.skipBtag = config.skipBtag
 
         self.nPT = self.ptax.extent
 

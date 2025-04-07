@@ -10,53 +10,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--force', action='store_true')
 
-    parser.add_argument('--isMC', action='store_true')
-
-    parser.add_argument('--manualcov', action='store_true')
-    parser.add_argument('--poissonbootstrap', type=int, default=0, required=False)
-    parser.add_argument('--skipBtag', action='store_true')
-    parser.add_argument('--statsplit', type=int, default=1, required=False)
-    parser.add_argument('--sepPt', action='store_true')
-
     parser.add_argument('--filesplit', type=int, default=1, required=False)
     parser.add_argument('--filebatch', type=int, default=1, required=False)
-
-    #mutually exclusive systematics group
-    syst_group = parser.add_mutually_exclusive_group(required=False)
-    syst_group.add_argument('--scanSyst', action='store_const', 
-                            const='scanAll', dest='syst')
-    syst_group.add_argument('--noSyst', action='store_const',
-                            const='none', dest='syst')
-    syst_group.add_argument('--scanJetMETSyst', action='store_const',
-                           const='scanJetMET', dest='syst')
-    syst_group.add_argument('--scanMuonSyst', action='store_const',
-                            const='scanMuon', dest='syst')
-    syst_group.add_argument('--scanTriggerSyst', action='store_const',
-                            const='scanTrigger', dest='syst')
-    syst_group.add_argument('--scanTheorySyst', action='store_const',
-                            const='scanTheory', dest='syst')
-    syst_group.add_argument('--scanPSSyst', action='store_const',
-                            const='scanPS', dest='syst')
-    syst_group.add_argument('--scanBtagEffSyst', action='store_const',
-                            const='scanBtagEff', dest='syst')
-    syst_group.add_argument('--scanBtagSFSyst', action='store_const',
-                            const='scanBtagSF', dest='syst')
-    syst_group.add_argument('--scanPileupSyst', action='store_const',
-                            const='scanPileup', dest='syst')
-    syst_group.add_argument('--scanCBxsec', action='store_const',
-                            const='scanCBxsec', dest='syst')
-    syst_group.add_argument('--scanLxsec', action='store_const',
-                            const='scanLxsec', dest='syst')
-    parser.set_defaults(syst='noSyst')
-
-    parser.add_argument('--skipNominal', action='store_true')
 
     parser.add_argument('--extra-tags', type=str, default=None, required=False, nargs='*')
 
     parser.add_argument('--samplelist', type=str, default='latest', required=False)
 
     parser.add_argument('--noBkgVeto', action='store_true')
-
     parser.add_argument('--noRoccoR', action='store_true')
     parser.add_argument('--noJER', action='store_true')
     parser.add_argument('--noJEC', action='store_true')
@@ -172,11 +133,7 @@ if __name__ == '__main__':
         JECera = args.JECera
 
     argsdict = {
-        'isMC' : args.isMC,
-        'statsplit' : args.statsplit,
-        'sepPt' : args.sepPt,
         'binningtype' : args.binningtype,
-        'scanSyst' : args.syst,
         'era' : JECera,
         'flags' : None if args.local else sample.flags,
         'noRoccoR' : args.noRoccoR,
@@ -190,11 +147,7 @@ if __name__ == '__main__':
         'noTriggersfs' : args.noTriggersfs,
         'noBtagSF' : args.noBtagSF,
         'Zreweight' : args.Zreweight,
-        'manualcov' : args.manualcov,
-        'poissonbootstrap' : args.poissonbootstrap,
-        'skipBtag' : args.skipBtag,
         'noBkgVeto' : args.noBkgVeto,
-        'skipNominal' : args.skipNominal,
         'verbose' : args.verbose,
     }
 
@@ -253,16 +206,6 @@ if __name__ == '__main__':
     out_fname = 'hists'
     out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
 
-    if args.sepPt:
-        out_fname += '_sepPt'
-    if args.statsplit > 1:
-        out_fname += '_statsplit%d'%args.statsplit
-    if args.manualcov:
-        out_fname += '_manualcov'
-    if args.poissonbootstrap > 0:
-        out_fname += '_poissonbootstrap%d'%args.poissonbootstrap
-    if args.skipBtag:
-        out_fname += '_skipBtag'
     if args.noRoccoR:
         out_fname += '_noRoccoR'
     if args.noJER:
@@ -285,11 +228,8 @@ if __name__ == '__main__':
         out_fname += '_noBtagSF'
     if args.Zreweight:
         out_fname += '_Zreweight'
-    out_fname += '_%s'%args.syst
     if args.noBkgVeto:
         out_fname += '_noBkgVeto'
-    if args.skipNominal:
-        out_fname += '_skipNominal'
 
     if args.extra_tags is not None:
         for tag in args.extra_tags:

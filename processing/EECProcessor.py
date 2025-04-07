@@ -69,7 +69,6 @@ BINNERS = {
 class EECProcessor(processor.ProcessorABC):
     def __init__(self, config,basepath, statsplit=False, binningtype='EEC', 
                  sepPt=False,
-                 scanSyst = False,
                  era='MC', flags=None,
                  noRoccoR=False,
                  noJER=False, noJEC=False,
@@ -81,12 +80,7 @@ class EECProcessor(processor.ProcessorABC):
                  noTriggersfs=False,
                  noBtagSF=False,
                  Zreweight=False,
-                 isMC=False,
-                 manualcov=False,
-                 poissonbootstrap=0,
-                 skipBtag = False,
                  noBkgVeto=False,
-                 skipNominal=False,
                  verbose=False):
         
         self.basepath = basepath
@@ -98,15 +92,11 @@ class EECProcessor(processor.ProcessorABC):
         self.binningtype = binningtype
         self.era = era
         self.flags = flags
-        self.scanSyst = scanSyst
-        self.skipNominal = skipNominal
+        self.scanSyst = 'noSyst'
 
         self.noBkgVeto = noBkgVeto
 
-        self.isMC = isMC
-        self.manualcov = manualcov
-        self.poissonbootstrap = poissonbootstrap
-        self.skipBtag = skipBtag
+        self.isMC = config.isMC
 
         self.noRoccoR = noRoccoR
         self.noJER = noJER
@@ -124,9 +114,6 @@ class EECProcessor(processor.ProcessorABC):
         binningtype= binningtype.strip().upper()
 
         self.binner = BINNERS[binningtype](config,
-                                    manualcov=manualcov,
-                                    poissonbootstrap=poissonbootstrap,
-                                    skipBtag=skipBtag,
                                     statsplit=statsplit,
                                     sepPt=sepPt)
 
@@ -205,7 +192,7 @@ class EECProcessor(processor.ProcessorABC):
             print("setting to 1")
             nomweight[nomweight < 1e-2] = 1
 
-        if (object_systematic is not None) or (not self.skipNominal):
+        if (object_systematic is not None):
             if self.verbose and object_systematic is None:
                 print("CUTFLOW")
                 cuts_so_far = []
@@ -309,6 +296,7 @@ class EECProcessor(processor.ProcessorABC):
                                   result, 
                                   object_systematic=objsys)
 
+        print(result.keys())
         if self.verbose:
             print("SUMWT", result['nominal']['sumwt'])
             print("SUMWT_PASS", result['nominal']['sumwt_pass'])
