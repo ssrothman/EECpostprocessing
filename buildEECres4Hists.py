@@ -7,6 +7,8 @@ import pyarrow.dataset as ds
 
 from tqdm import tqdm
 
+ptbins = [50, 65, 88, 120, 150, 186, 254, 326, 408, 1500]
+
 class sm64_rng:
     def __init__(self, seedarr, repeats):
         self.repeats = repeats
@@ -53,7 +55,7 @@ class sm64_rng:
             k[mask] += 1
         return np.repeat(k - 1, self.repeats) #unpack the run lengths
 
-def fill_hist_from_parquet(basepath, bootstrap, random_seed=0):
+def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0):
 
     dataset = ds.dataset(basepath, format="parquet")
 
@@ -65,7 +67,15 @@ def fill_hist_from_parquet(basepath, bootstrap, random_seed=0):
     minr = None
     minc = None
 
-    for batch in tqdm(dataset.to_batches()):
+    if systwt == 'nominal':
+        the_evtwt = 'wt_nominal'
+    else:
+        the_evtwt = 'evtwt_%s'%systwt
+
+    for batch in tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
+                                                  'pt', 'wt',
+                                                  the_evtwt,
+                                                  'eventhash'])):
         maxR = max(maxR, np.max(batch['R'])) if maxR is not None else np.max(batch['R'])
         maxr = max(maxr, np.max(batch['r'])) if maxr is not None else np.max(batch['r'])
         maxc = max(maxc, np.max(batch['c'])) if maxc is not None else np.max(batch['c'])
@@ -83,7 +93,7 @@ def fill_hist_from_parquet(basepath, bootstrap, random_seed=0):
         hist.axis.Integer(minc, maxc+1,
                           name="c", label = '$c$',
                           underflow=False, overflow=False),
-        hist.axis.Variable([200, 400, 800, 1600],
+        hist.axis.Variable(ptbins,
                            name='pt', label='$p_{T}$ [GeV]',
                            underflow=True, overflow=True),
         hist.axis.Integer(0, bootstrap+1,
@@ -97,7 +107,7 @@ def fill_hist_from_parquet(basepath, bootstrap, random_seed=0):
         r = batch['r'].to_numpy(zero_copy_only=True)
         c = batch['c'].to_numpy(zero_copy_only=True)
         pt = batch['pt'].to_numpy(zero_copy_only=True)
-        evtwt = batch['evtwt'].to_numpy(zero_copy_only=True)
+        evtwt = batch[the_evtwt].to_numpy(zero_copy_only=True)
         wt = batch['wt'].to_numpy(zero_copy_only=True)
         evthash = batch['eventhash'].to_numpy(zero_copy_only=True)
 
@@ -126,7 +136,7 @@ def fill_hist_from_parquet(basepath, bootstrap, random_seed=0):
 
     return H
 
-def fill_transferhist_from_parquet(basepath):
+def fill_transferhist_from_parquet(basepath, systwt):
 
     dataset = ds.dataset(basepath, format="parquet")
 
@@ -144,7 +154,18 @@ def fill_transferhist_from_parquet(basepath):
     minc_reco = None
     minc_gen = None
 
-    for batch in tqdm(dataset.to_batches()):
+    if systwt == 'nominal':
+        the_evtwt = 'wt_nominal'
+    else:
+        the_evtwt = 'evtwt_%s'%systwt
+
+    for batch in tqdm(dataset.to_batches(columns=['R_reco', 'r_reco', 'c_reco', 
+                                                  'R_gen', 'r_gen', 'c_gen', 
+                                                  'pt_reco', 'pt_gen', 
+                                                  'wt_reco', 'wt_gen', 
+                                                  'eventhash', 
+                                                  the_evtwt])):
+
         maxR_reco = max(maxR_reco, np.max(batch['R_reco'])) if maxR_reco is not None else np.max(batch['R_reco'])
         maxR_gen = max(maxR_gen, np.max(batch['R_gen'])) if maxR_gen is not None else np.max(batch['R_gen'])
         maxr_reco = max(maxr_reco, np.max(batch['r_reco'])) if maxr_reco is not None else np.max(batch['r_reco'])
@@ -177,10 +198,10 @@ def fill_transferhist_from_parquet(basepath):
         hist.axis.Integer(minc_gen, maxc_gen+1,
                           name="c_gen", label = '$c_{gen}$',
                           underflow=False, overflow=False),
-        hist.axis.Variable([200, 400, 800, 1600],
+        hist.axis.Variable(ptbins,
                            name='pt_reco', label='$p_{T,reco}$ [GeV]',
                            underflow=True, overflow=True),
-        hist.axis.Variable([200, 400, 800, 1600],
+        hist.axis.Variable(ptbins,
                            name='pt_gen', label='$p_{T,gen}$ [GeV]',
                            underflow=True, overflow=True),
         storage=hist.storage.Double()
@@ -196,7 +217,7 @@ def fill_transferhist_from_parquet(basepath):
             c_gen=batch['c_gen'].to_numpy(),
             pt_reco=batch['pt_reco'].to_numpy(),
             pt_gen=batch['pt_gen'].to_numpy(),
-            weight=batch['evtwt'].to_numpy()*batch['wt_reco'].to_numpy(),
+            weight=batch[the_evtwt].to_numpy()*batch['wt_reco'].to_numpy(),
         )
 
     return H
