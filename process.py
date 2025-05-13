@@ -171,9 +171,6 @@ if __name__ == '__main__':
         with open(configname, 'r') as f:
             config.update(json.load(f))
 
-    with open("configs/binning/%s.json"%args.binningtype, 'r') as f:
-        config.update(json.load(f))
-
     if args.verbose:
         print("config suite", args.configsuite)
         print("binning type", args.binningtype)

@@ -14,10 +14,6 @@ class EECgenericBinner:
     def __init__(self, 
                  config,
                  **kwargs):
-        self.ptax = hist.axis.Variable(config.binning.pt)
-
-        self.nPT = self.ptax.extent
-
         self.config = config
 
     def binTransfer(self, 
