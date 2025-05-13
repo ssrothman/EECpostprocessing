@@ -71,7 +71,8 @@ if __name__ == '__main__':
     import json
 
     import samples
-    SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
+    if not args.local:
+        SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
 
     import dask
     dask.config.set({'distributed.client.heartbeat': '120s'})

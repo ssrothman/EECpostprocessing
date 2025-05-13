@@ -225,6 +225,8 @@ class AllReaders:
 
         else: #era == 'skip'
             self.rRecoJet.jets['corrpt'] = self.rRecoJet.jets.pt
+            self.rGenJet.jets['corrpt'] = self.rGenJet.jets.pt
+            self.METpt = self.MET.pt
             if self.syst in JETMET_SYSTS:
                 raise ValueError("JETMET systematics not available in 'skip' mode")
 

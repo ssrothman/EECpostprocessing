@@ -3,40 +3,19 @@ import awkward as ak
 
 from util.util import unflatMatrix, unflatVector, unflatRecursive
 
-def getBK(x, name):
-    return x[name+"BK"]
-
-def getNProj(x, name):
-    return getBK(x, name).nproj
-
 def getProj(x, name, which):
-    wts = x[name+'proj'][which]
-    nproj = ak.values_astype(getBK(x, name).nproj, np.int32)
-    return unflatVector(wts, nproj)
+    vals = x[name+which]
+    nEntry = ak.values_astype(x[name+'BK']['nEntry'+which], np.int32)
+    result = unflatVector(vals, nEntry)
+    result = result[result.wt > 0]
+    return result
 
-def getAllProj(x, name):
-    projs = [getProj(x, name, 'value%d'%order)[:,:,None,:] for order in range(2,7)]
-    return ak.concatenate(projs, axis=2)
-
-def getRes3(x, name):
-    wts = x[name+'res3'].value
-    BK = getBK(x, name)
-    
-    nRL = ak.values_astype(BK.nres3_RL, np.int32)
-    nxi = ak.values_astype(BK.nres3_xi, np.int32)
-    nphi = ak.values_astype(BK.nres3_phi, np.int32)
-
-    return unflatRecursive(wts, [nRL, nxi, nphi])
-
-def getTransferRes3(x, name):
-    vals = x[name+'res3'].value
-    BK = getBK(x, name)
-
-    nRL = ak.values_astype(BK.nres3_RL, np.int32)
-    nxi = ak.values_astype(BK.nres3_xi, np.int32)
-    nphi = ak.values_astype(BK.nres3_phi, np.int32)
-
-    return unflatRecursive(vals, [nRL, nxi, nphi, nRL, nxi, nphi])
+def getTransferProj(x, name, which):
+    vals = x[name+which]
+    nEntry = ak.values_astype(x[name+'BK']['nEntries'+which], np.int32)
+    result = unflatVector(vals, nEntry)
+    result = result[result.wt_gen > 0]
+    return result
 
 def getRes4dipole(x, name):
     result = x[name+'dipole']
@@ -133,12 +112,3 @@ def getRecoIdx(x, name):
 
 def getGenIdx(x, name):
     return x[name+"BK"].iGen
-
-def getTransferP(x, name, which):
-    vals = x[name+'proj'][which]
-    
-    nproj = getNProj(x, name)
-    nmat = nproj*nproj
-
-    return unflatMatrix(vals, nproj, nproj)
-
