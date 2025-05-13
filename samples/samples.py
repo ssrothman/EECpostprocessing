@@ -32,29 +32,36 @@ def no_flags(Hpath):
 class Sample:
     def __init__(self, name, tag, location, JEC, flags):
         self._name = name
-        self._tag = tag
+        if type(tag) not in [list, tuple]:
+            self._tag = [tag]
+        else:
+            self._tag = tag
+
         self._location = location
         self._JEC = JEC
         self._flags = flags
 
-    def get_files(self):
+    def get_files(self, exclude_dropped=True):
         from reading.files import get_rootfiles
-        if self.location == 'LPC':
-            hostid = "cmseos.fnal.gov"
-            rootpath = '/store/group/lpcpfnano/srothman/%s'%self.tag
-        elif self.location == 'LPC-PERSONAL':
-            hostid = "cmseos.fnal.gov"
-            rootpath = '/store/user/srothman/%s'%self.tag
-        elif self.location == 'MIT':
-            hostid = 'submit50.mit.edu'
-            rootpath = '/store/user/srothman/%s'%self.tag
-        elif self.location == 'scratch':
-            hostid = None
-            rootpath = '/scratch/submit/cms/srothman/%s'%self.tag
-        elif self.location == 'test':
-            hostid = None
-            rootpath = '/work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/%s'%self.tag
-        return get_rootfiles(hostid, rootpath)
+        result = []
+        for t in self._tag:
+            if self.location == 'LPC':
+                hostid = "cmseos.fnal.gov"
+                rootpath = '/store/group/lpcpfnano/srothman/%s'%t
+            elif self.location == 'LPC-PERSONAL':
+                hostid = "cmseos.fnal.gov"
+                rootpath = '/store/user/srothman/%s'%t
+            elif self.location == 'MIT':
+                hostid = 'submit50.mit.edu'
+                rootpath = '/store/user/srothman/%s'%t
+            elif self.location == 'scratch':
+                hostid = None
+                rootpath = '/scratch/submit/cms/srothman/%s'%t
+            elif self.location == 'test':
+                hostid = None
+                rootpath = '/work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/%s'%t
+            result += get_rootfiles(hostid, rootpath, exclude_dropped=exclude_dropped)
+        return result
 
     @property
     def name(self):

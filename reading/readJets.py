@@ -15,7 +15,7 @@ def getSimonJets(x, name, CHSname):
     parts = getParts(x, name)
     ans['nPart'] = ak.num(parts, axis=-1)
 
-    if CHSname is not None:
+    if CHSname is not None and CHSname != '':
         matchedCHS = getMatchedCHSjets(x, CHSname, name)
         ans['nCHS'] = ak.num(matchedCHS.pt, axis=2)
 

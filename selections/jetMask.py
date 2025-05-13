@@ -78,6 +78,8 @@ def getJetSelection(rjet, rmu, evtSel, config, isMC, verbose):
         njet = ak.num(jets.eta)
         eta_flat = np.abs(ak.flatten(jets.eta))
         phi_flat = ak.flatten(jets.phi)
+        phi_flat = ak.where(phi_flat < -3.14159, -3.14159, phi_flat)
+        phi_flat = ak.where(phi_flat > +3.14159, +3.14159, phi_flat)
 
         veto = vetomap.evaluate(
             config.jetvetomap.whichmap,

@@ -14,6 +14,6 @@ def getMuons(x, name, noRoccoR=False):
             warnings.warn("Could not find RoccoR - not applying")
     else:
         ans['rawPt'] = ans.pt 
-        ans['pt'] = ans.pt * ans.RoccoR
+        ans['pt'] = ak.where(ans.pt < 200, ans.pt * ans.RoccoR, ans.pt)
 
     return ans

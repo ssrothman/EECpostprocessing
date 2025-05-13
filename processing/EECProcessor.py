@@ -41,7 +41,7 @@ BINNERS = {
     "EECRES4DIPOLE" : EECres4dipoleBinner,
     "EECRES4TEE" : EECres4teeBinner,
     'EECRES4TRIANGLE' : EECres4triangleBinner,
-    'EECRES4MINR' : EECres4minRBinner
+    'EECRES4MINR' : EECres4minRBinner,
 }
 
 class EECProcessor(processor.ProcessorABC):
@@ -95,7 +95,10 @@ class EECProcessor(processor.ProcessorABC):
     
         binningtype= binningtype.strip().upper()
 
-        self.binner = BINNERS[binningtype](config)
+        if binningtype == 'COUNT':
+            self.binner = None
+        else:
+            self.binner = BINNERS[binningtype](config)
 
     def postprocess(self, accumulator):
         pass
@@ -144,7 +147,7 @@ class EECProcessor(processor.ProcessorABC):
             print("setting to 1")
             nomweight[nomweight < 1e-2] = 1
 
-        weightvariations = {'wt_nominal' : nomweight}
+        weightvariations = {'evtwt_nominal' : nomweight}
         if self.config.isMC and self.syst == 'nominal':
             for wt in evtWeight.variations:
                 weightvariations["evt"+wt] = evtWeight.weight(wt)
@@ -189,8 +192,17 @@ class EECProcessor(processor.ProcessorABC):
     def process(self, events):
         #setup inputs
         t0 = time()
-        self.binner.isMC = self.isMC
 
+        if(len(events) == 0):
+            return {}
+
+        if self.binner is None:
+            if self.isMC:
+                return {'num_evt': np.sum(events.genWeight)}
+            else:
+                return {'num_evt': len(events)}
+
+        self.binner.isMC = self.isMC
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,
                              self.noJER, self.noJEC, self.noJUNC,

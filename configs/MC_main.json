@@ -1,10 +1,5 @@
 {
     "isMC" : true,
-    "skipBtag" : true,
-    "transfermode" : {
-        "pt" : "included",
-        "btag" : "ignored"
-    },
     "eventSelection" : {
         "PreFireWeight" : true
     },

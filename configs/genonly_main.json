@@ -1,4 +1,5 @@
 {
+    "isMC" : false,
     "eventSelection" : {
         "trigger" : "",
         "PreFireWeight" : false,
@@ -32,9 +33,6 @@
         "checkPdgId" : false,
         "onlyCheckLeading" : true,
         "applyRoccoR" : false
-    },
-    "tagging" : {
-        "wp" : "hadronFlavour"
     },
     "names" : {
         "EECs" : "EECs",

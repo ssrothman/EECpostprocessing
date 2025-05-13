@@ -28,10 +28,10 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
 
     print("saving logs at",log_directory)
 
-    cluster = SLURMCluster(queue = 'submit,submit-gpu,submit-gpu-a30',
+    cluster = SLURMCluster(queue = 'submit,submit-gpu,submit-gpu-a30,submit-1gbs',
                            cores=1,
                            processes=1,
-                           memory='4GB',
+                           memory='8GB',
                            walltime='3:00:00',
                            log_directory=log_directory,
                            worker_extra_args=[

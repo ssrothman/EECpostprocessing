@@ -16,15 +16,12 @@ class EECgenericBinner:
                  **kwargs):
         self.ptax = hist.axis.Variable(config.binning.pt)
 
-        self.skipBtag = config.skipBtag
-
         self.nPT = self.ptax.extent
 
         self.config = config
 
     def binTransfer(self, 
                     transfervals,
-                    transfershape,
                     ptDenomReco, ptDenomGen,
                     order,
                     rGenJet, rRecoJet, 
@@ -32,6 +29,9 @@ class EECgenericBinner:
                     evtIdx, jetMask, 
                     wtVars,
                     outpath):
+
+        iReco = ak.values_astype(iReco, np.int32)
+        iGen = ak.values_astype(iGen, np.int32)
 
         EECmask = jetMask[iReco]
 
@@ -51,22 +51,25 @@ class EECgenericBinner:
         pt_reco_b, _ = ak.broadcast_arrays(pt_reco, vals.R_reco)
         pt_gen_b, _ = ak.broadcast_arrays(pt_gen, vals.R_gen)
 
-        ptmode = self.config.transfermode.pt
-        btagmode = self.config.transfermode.btag
+        btag_gen = ak.values_astype(
+                rGenJet.jets.passB[iGen][EECmask], np.int32)
+        btag_reco = ak.values_astype(
+                rRecoJet.jets.passB[iReco][EECmask], np.int32)
 
-        if btagmode != 'ignored':
-            if not self.skipBtag:
-                btag_gen = ak.values_astype(
-                        rGenJet.jets.passB[iGen][EECmask], np.int32)
-                btag_reco = ak.values_astype(
-                        rRecoJet.jets.passB[iReco][EECmask], np.int32)
-            else:
-                btag_gen = np.zeros_like(iPT_gen)
-                btag_reco = np.zeros_like(iPT_reco)
+        btag_reco_b, _ = ak.broadcast_arrays(btag_reco, vals.R_reco)
+        btag_gen_b, _ = ak.broadcast_arrays(btag_gen, vals.R_gen)
 
-            btag_reco_b, _ = ak.broadcast_arrays(btag_reco, vals.R_reco)
-            btag_gen_b, _ = ak.broadcast_arrays(btag_gen, vals.R_gen)
+        pflav_reco = rRecoJet.jets.partonFlavour[iReco][EECmask]
+        pflav_gen = rGenJet.jets.partonFlavour[iGen][EECmask]
+        hflav_reco = rRecoJet.jets.hadronFlavour[iReco][EECmask]
+        hflav_gen = rGenJet.jets.hadronFlavour[iGen][EECmask]
 
+        flav_reco = ak.where((pflav_reco == 21) & (hflav_reco == 0), 21, hflav_reco)
+        flav_gen = ak.where((pflav_gen == 21) & (hflav_gen == 0), 21, hflav_gen)
+
+        flav_reco_b, flav_gen_b, _ = ak.broadcast_arrays(
+            flav_reco, flav_gen, vals.R_reco
+        )
 
         fillvals = {
             'R_reco':   squash(vals.R_reco),
@@ -84,25 +87,14 @@ class EECgenericBinner:
             thwt_b, _ = ak.broadcast_arrays(thewt, vals.R_reco)
             fillvals[variation] = squash(thwt_b)
 
-        if ptmode == 'included':
-            fillvals['pt_reco'] = squash(pt_reco_b)
-            fillvals['pt_gen'] = squash(pt_gen_b)
-        elif ptmode == 'factoredGen':
-            fillvals['pt_gen'] = squash(pt_gen_b)
-        elif ptmode == 'factoredReco':
-            fillvals['pt_reco'] = squash(pt_reco_b)
-        elif ptmode == 'ignored':
-            pass
+        fillvals['pt_reco'] = squash(pt_reco_b)
+        fillvals['pt_gen'] = squash(pt_gen_b)
 
-        if btagmode == 'included':
-            fillvals['btag_reco'] = squash(btag_reco_b)
-            fillvals['btag_gen'] = squash(btag_gen_b)
-        elif btagmode == 'factoredGen':
-            fillvals['btag_gen'] = squash(btag_gen_b)
-        elif btagmode == 'factoredReco':
-            fillvals['btag_reco'] = squash(btag_reco_b)
-        elif btagmode == 'ignored':
-            pass
+        fillvals['btag_reco'] = squash(btag_reco_b)
+        fillvals['btag_gen'] = squash(btag_gen_b)
+
+        fillvals['flav_reco'] = squash(flav_reco_b)
+        fillvals['flav_gen'] = squash(flav_gen_b)
 
         table = pa.Table.from_pandas(pd.DataFrame(fillvals),
                                      preserve_index=False)
@@ -127,6 +119,9 @@ class EECgenericBinner:
                     wtVars,
                     outpath):
 
+        iReco = ak.values_astype(iReco, np.int32)
+        iJet = ak.values_astype(iJet, np.int32)
+
         t0 = time()
 
         EECmask = jetMask[iReco]
@@ -142,13 +137,13 @@ class EECgenericBinner:
 
         pt_b, _ = ak.broadcast_arrays(pt, vals.R)
 
-        if not self.skipBtag:
-            btag = ak.values_astype(
-                rJet.jets.passB[iJet][EECmask], np.int32
-            )
-        else:
-            btag = np.zeros_like(pt_b, dtype=np.int32)
+        btag = rJet.jets.passB[iJet][EECmask]
+        btag_b, _ = ak.broadcast_arrays(btag, vals.R)
 
+        pflav = rJet.jets.partonFlavour[iJet][EECmask]
+        hflav = rJet.jets.hadronFlavour[iJet][EECmask]
+        flav = ak.where((pflav == 21) & (hflav == 0), 21, hflav)
+        flav_b, _ = ak.broadcast_arrays(flav, vals.R)
 
         fillvals = {
             'R' : squash(vals.R),
@@ -156,6 +151,8 @@ class EECgenericBinner:
             'c' : squash(vals.c),
             'wt' : squash(vals.wt),
             'pt' : squash(pt_b),
+            'btag' : squash(btag_b),
+            'flav' : squash(flav_b),
         }
 
         for variation in wtVars:

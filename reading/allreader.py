@@ -78,6 +78,11 @@ class AllReaders:
             self._scalewt = x.LHEScaleWeight
             self._psweight = x.PSWeight
             self._pdfwt = x.LHEPdfWeight
+        else:
+            self._LHE = None
+            self._scalewt = None
+            self._psweight = None
+            self._pdfwt = None
 
         if hasattr(x, "HLT"):
             self._HLT = x.HLT
@@ -91,54 +96,49 @@ class AllReaders:
                 'Reco' + config.names.ControlEECs)
 
     def checkBtags(self, config):
+        if not hasattr(config, 'tagging'):
+            self.rRecoJet.jets['passB'] = False
+            self.rRecoJet.jets['passLooseB'] = False
+            self.rRecoJet.jets['passMediumB'] = False
+            self.rRecoJet.jets['passTightB'] = False
+            return
+
         if hasattr(self.rRecoJet.jets, "partonFlavour"):
             self.rRecoJet.jets['hadronFlavour'] = ak.where((self.rRecoJet.jets['hadronFlavour'] == 0) & (self.rRecoJet.jets.partonFlavour==21), 21, self.rRecoJet.jets['hadronFlavour'])
 
-        if self.rRecoJet.checkCHS():
-            bvals = self.rRecoJet.CHSjets.btagDeepFlavB
+        loosewp = config.tagging.bwps.loose
+        mediumwp = config.tagging.bwps.medium
+        tightwp = config.tagging.bwps.tight
 
-            loosewp = config.tagging.bwps.loose
-            mediumwp = config.tagging.bwps.medium
-            tightwp = config.tagging.bwps.tight
+        bvals = self.rRecoJet.simonjets.CHSbtagDeepFlavB
 
-            self.rRecoJet.CHSjets['passLooseB'] = bvals > loosewp
-            self.rRecoJet.CHSjets['passMediumB'] = bvals > mediumwp
-            self.rRecoJet.CHSjets['passTightB'] = bvals > tightwp
+        self.rRecoJet.jets['passLooseB'] = bvals > loosewp
+        self.rRecoJet.jets['passMediumB'] = bvals > mediumwp
+        self.rRecoJet.jets['passTightB'] = bvals > tightwp
 
-            bvals = self.rRecoJet.matchedCHSjets.btagDeepFlavB
-            self.rRecoJet.matchedCHSjets['passLooseB'] = bvals > loosewp
-            self.rRecoJet.matchedCHSjets['passMediumB'] = bvals > mediumwp
-            self.rRecoJet.matchedCHSjets['passTightB'] = bvals > tightwp
-
-            self.rRecoJet.jets['passLosseB'] = ak.max(self.rRecoJet.matchedCHSjets.passLooseB, axis=-1)
-            self.rRecoJet.jets['passMediumB'] = ak.max(self.rRecoJet.matchedCHSjets.passMediumB, axis=-1)
-            self.rRecoJet.jets['passTightB'] = ak.max(self.rRecoJet.matchedCHSjets.passTightB, axis=-1)
-
-            if config.tagging.wp == 'tight':
-                passname = 'passTightB'
-            elif config.tagging.wp == 'medium':
-                passnme = 'passMediumB'
-            elif config.tagging.wp == 'loose':
-                passname = 'passLooseB'
-            else:
-                raise ValueError("Unknown b-tagging working point")
-
-            self.rRecoJet.jets['passB'] = self.rRecoJet.jets[passname]
+        if config.tagging.wp == 'tight':
+            passname = 'passTightB'
+        elif config.tagging.wp == 'medium':
+            passnme = 'passMediumB'
+        elif config.tagging.wp == 'loose':
+            passname = 'passLooseB'
         else:
-            import warnings
-            #warnings.warn("WARNING: no available CHS jets for b-tagging\nfalling back on hadron flavour")
-        
-            if config.tagging.wp == 'hadronFlavour':
-                isB = self.rRecoJet.jets.hadronFlavour == 5
-            elif config.tagging.wp == 'partonFlavour':
-                isB = self.rRecoJet.jets.partonFlavour == 5
-            else:
-                raise ValueError("Unknown b-tagging working point [without CHS jets]")
+            raise ValueError("Unknown b-tagging working point")
 
-            self.rRecoJet.jets['passLooseB'] = isB
-            self.rRecoJet.jets['passMediumB'] = isB
-            self.rRecoJet.jets['passTightB'] = isB
-            self.rRecoJet.jets['passB'] = isB
+        self.rRecoJet.jets['passB'] = self.rRecoJet.jets[passname]
+
+        CHSval = self.rRecoJet.CHSjets.btagDeepFlavB
+
+        self.rRecoJet.CHSjets['passLooseB'] = CHSval > loosewp
+        self.rRecoJet.CHSjets['passMediumB'] = CHSval > mediumwp
+        self.rRecoJet.CHSjets['passTightB'] = CHSval > tightwp
+        self.rRecoJet.CHSjets['passB'] = self.rRecoJet.CHSjets[passname]
+
+        CHSval2 = self.rRecoJet.matchedCHSjets.btagDeepFlavB
+        self.rRecoJet.matchedCHSjets['passLooseB'] = CHSval2 > loosewp
+        self.rRecoJet.matchedCHSjets['passMediumB'] = CHSval2 > mediumwp
+        self.rRecoJet.matchedCHSjets['passTightB'] = CHSval2 > tightwp
+        self.rRecoJet.matchedCHSjets['passB'] = self.rRecoJet.matchedCHSjets[passname]
 
         if self.isMC:
             genpass = self.rGenJet.jets.hadronFlavour == 5

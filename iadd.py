@@ -42,6 +42,9 @@ def iadd(a: Accumulatable, b: Accumulatable) -> Accumulatable:
             if key not in lhs:
                 a[key] = copy.deepcopy(b[key])
         return a
+
+    print(a)
+    print(b)
     raise ValueError(
         f"Cannot add accumulators of incompatible type ({type(a)} vs. {type(b)})"
     )

@@ -7,7 +7,11 @@ import pyarrow.dataset as ds
 
 from tqdm import tqdm
 
-ptbins = [50, 65, 88, 120, 150, 186, 254, 326, 408, 1500]
+ptbins = [50, 88, 150, 254, 408, 1500]
+Rbins = [0.3, 0.4, 0.5, 0.6]
+#ptbins = [150, 300, 600, 1200, 2400]
+rbins = np.linspace(0, 1, 16)
+cbins = np.linspace(0, np.pi/2, 16)
 
 class sm64_rng:
     def __init__(self, seedarr, repeats):
@@ -59,57 +63,44 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0):
 
     dataset = ds.dataset(basepath, format="parquet")
 
-    # discover value ranges
-    maxR = None
-    maxr = None
-    maxc = None
-    minR = None
-    minr = None
-    minc = None
-
-    if systwt == 'nominal':
-        the_evtwt = 'wt_nominal'
-    else:
-        the_evtwt = 'evtwt_%s'%systwt
-
-    for batch in tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
-                                                  'pt', 'wt',
-                                                  the_evtwt,
-                                                  'eventhash'])):
-        maxR = max(maxR, np.max(batch['R'])) if maxR is not None else np.max(batch['R'])
-        maxr = max(maxr, np.max(batch['r'])) if maxr is not None else np.max(batch['r'])
-        maxc = max(maxc, np.max(batch['c'])) if maxc is not None else np.max(batch['c'])
-        minR = min(minR, np.min(batch['R'])) if minR is not None else np.min(batch['R'])
-        minr = min(minr, np.min(batch['r'])) if minr is not None else np.min(batch['r'])
-        minc = min(minc, np.min(batch['c'])) if minc is not None else np.min(batch['c'])
+    the_evtwt = 'evtwt_%s'%systwt
 
     H = hist.Hist(
-        hist.axis.Integer(minR, maxR+1,
-                          name="R", label = '$R$',
-                          underflow=False, overflow=False),
-        hist.axis.Integer(minr, maxr+1,
-                          name="r", label = '$r$',
-                          underflow=False, overflow=False),
-        hist.axis.Integer(minc, maxc+1,
-                          name="c", label = '$c$',
-                          underflow=False, overflow=False),
+        hist.axis.Integer(0, bootstrap+1,
+                          name='bootstrap', label='bootstrap',
+                          underflow=True, overflow=True),
         hist.axis.Variable(ptbins,
                            name='pt', label='$p_{T}$ [GeV]',
                            underflow=True, overflow=True),
-        hist.axis.Integer(0, bootstrap+1,
-                          name='bootstrap', label='bootstrap',
+        hist.axis.Variable(Rbins,
+                          name="R", label = '$R$',
+                          underflow=True, overflow=True),
+        hist.axis.Variable(rbins,
+                          name="r", label = '$r$',
+                          underflow=False, overflow=False),
+        hist.axis.Variable(cbins,
+                          name="c", label = '$c$',
                           underflow=False, overflow=False),
         storage=hist.storage.Double()
     )
 
-    for batch in tqdm(dataset.to_batches(batch_size=1000000)):
-        R = batch['R'].to_numpy(zero_copy_only=True)
-        r = batch['r'].to_numpy(zero_copy_only=True)
-        c = batch['c'].to_numpy(zero_copy_only=True)
-        pt = batch['pt'].to_numpy(zero_copy_only=True)
-        evtwt = batch[the_evtwt].to_numpy(zero_copy_only=True)
-        wt = batch['wt'].to_numpy(zero_copy_only=True)
-        evthash = batch['eventhash'].to_numpy(zero_copy_only=True)
+    for batch in tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
+                                                  'pt', 'wt', 
+                                                  the_evtwt, 'eventhash'],
+                                         batch_size=1000000000)):
+        R = batch['R'].to_numpy()
+        r = batch['r'].to_numpy()
+        try:
+            c = batch['c'].to_numpy()
+        except:
+            print("error")
+            print(c)
+            c = batch['c'].to_numpy(zero_copy_only=False)
+
+        pt = batch['pt'].to_numpy()
+        evtwt = batch[the_evtwt].to_numpy()
+        wt = batch['wt'].to_numpy()
+        evthash = batch['eventhash'].to_numpy()
 
         H.fill(
             R=R,
@@ -140,74 +131,43 @@ def fill_transferhist_from_parquet(basepath, systwt):
 
     dataset = ds.dataset(basepath, format="parquet")
 
-    # discover value ranges
-    maxR_reco = None
-    maxR_gen = None
-    maxr_reco = None
-    maxr_gen = None
-    maxc_reco = None
-    maxc_gen = None
-    minR_reco = None
-    minR_gen = None
-    minr_reco = None
-    minr_gen = None
-    minc_reco = None
-    minc_gen = None
-
-    if systwt == 'nominal':
-        the_evtwt = 'wt_nominal'
-    else:
-        the_evtwt = 'evtwt_%s'%systwt
-
-    for batch in tqdm(dataset.to_batches(columns=['R_reco', 'r_reco', 'c_reco', 
-                                                  'R_gen', 'r_gen', 'c_gen', 
-                                                  'pt_reco', 'pt_gen', 
-                                                  'wt_reco', 'wt_gen', 
-                                                  'eventhash', 
-                                                  the_evtwt])):
-
-        maxR_reco = max(maxR_reco, np.max(batch['R_reco'])) if maxR_reco is not None else np.max(batch['R_reco'])
-        maxR_gen = max(maxR_gen, np.max(batch['R_gen'])) if maxR_gen is not None else np.max(batch['R_gen'])
-        maxr_reco = max(maxr_reco, np.max(batch['r_reco'])) if maxr_reco is not None else np.max(batch['r_reco'])
-        maxr_gen = max(maxr_gen, np.max(batch['r_gen'])) if maxr_gen is not None else np.max(batch['r_gen'])
-        maxc_reco = max(maxc_reco, np.max(batch['c_reco'])) if maxc_reco is not None else np.max(batch['c_reco'])
-        maxc_gen = max(maxc_gen, np.max(batch['c_gen'])) if maxc_gen is not None else np.max(batch['c_gen'])
-        minR_reco = min(minR_reco, np.min(batch['R_reco'])) if minR_reco is not None else np.min(batch['R_reco'])
-        minR_gen = min(minR_gen, np.min(batch['R_gen'])) if minR_gen is not None else np.min(batch['R_gen'])
-        minr_reco = min(minr_reco, np.min(batch['r_reco'])) if minr_reco is not None else np.min(batch['r_reco'])
-        minr_gen = min(minr_gen, np.min(batch['r_gen'])) if minr_gen is not None else np.min(batch['r_gen'])
-        minc_reco = min(minc_reco, np.min(batch['c_reco'])) if minc_reco is not None else np.min(batch['c_reco'])
-        minc_gen = min(minc_gen, np.min(batch['c_gen'])) if minc_gen is not None else np.min(batch['c_gen'])
+    the_evtwt = 'evtwt_%s'%systwt
 
     H = hist.Hist(
-        hist.axis.Integer(minR_reco, maxR_reco+1,
-                          name="R_reco", label = '$R_{reco}$',
-                          underflow=False, overflow=False),
-        hist.axis.Integer(minR_gen, maxR_gen+1,
-                          name="R_gen", label = '$R_{gen}$',
-                          underflow=False, overflow=False),
-        hist.axis.Integer(minr_reco, maxr_reco+1,
-                          name="r_reco", label = '$r_{reco}$',
-                          underflow=False, overflow=False),
-        hist.axis.Integer(minr_gen, maxr_gen+1,
-                          name="r_gen", label = '$r_{gen}$',
-                          underflow=False, overflow=False),
-        hist.axis.Integer(minc_reco, maxc_reco+1,
-                          name="c_reco", label = '$c_{reco}$',
-                          underflow=False, overflow=False),
-        hist.axis.Integer(minc_gen, maxc_gen+1,
-                          name="c_gen", label = '$c_{gen}$',
-                          underflow=False, overflow=False),
         hist.axis.Variable(ptbins,
                            name='pt_reco', label='$p_{T,reco}$ [GeV]',
                            underflow=True, overflow=True),
+        hist.axis.Variable(Rbins,
+                          name="R_reco", label = '$R_{reco}$',
+                          underflow=True, overflow=True),
+        hist.axis.Variable(rbins,
+                          name="r_reco", label = '$r_{reco}$',
+                          underflow=False, overflow=False),
+        hist.axis.Variable(cbins,
+                          name="c_reco", label = '$c_{reco}$',
+                          underflow=False, overflow=False),
         hist.axis.Variable(ptbins,
                            name='pt_gen', label='$p_{T,gen}$ [GeV]',
                            underflow=True, overflow=True),
+        hist.axis.Variable(Rbins,
+                          name="R_gen", label = '$R_{gen}$',
+                          underflow=True, overflow=True),
+        hist.axis.Variable(rbins,
+                          name="r_gen", label = '$r_{gen}$',
+                          underflow=False, overflow=False),
+        hist.axis.Variable(cbins,
+                          name="c_gen", label = '$c_{gen}$',
+                          underflow=False, overflow=False),
         storage=hist.storage.Double()
     )
 
-    for batch in tqdm(dataset.to_batches()):
+    for batch in tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco', 
+                                                  'r_reco', 'c_reco',
+                                                  'pt_gen', 'R_gen',
+                                                  'r_gen', 'c_gen',
+                                                  'wt_reco', 'wt_gen',
+                                                  the_evtwt])):
+        
         H.fill(
             R_reco=batch['R_reco'].to_numpy(),
             R_gen=batch['R_gen'].to_numpy(),
@@ -221,3 +181,67 @@ def fill_transferhist_from_parquet(basepath, systwt):
         )
 
     return H
+
+
+def fill_wtratiohist_from_parquet(basepath, systwt):
+
+    dataset = ds.dataset(basepath, format="parquet")
+
+    the_evtwt = 'evtwt_%s'%systwt
+
+    H_wtgen = hist.Hist(
+        hist.axis.Variable(ptbins,
+                           name='pt_gen', label='$p_{T,gen}$ [GeV]',
+                           underflow=True, overflow=True),
+        hist.axis.Variable(Rbins,
+                          name="R_gen", label = '$R_{gen}$',
+                          underflow=True, overflow=True),
+        hist.axis.Variable(rbins,
+                          name="r_gen", label = '$r_{gen}$',
+                          underflow=False, overflow=False),
+        hist.axis.Variable(cbins,
+                          name="c_gen", label = '$c_{gen}$',
+                          underflow=False, overflow=False),
+        storage=hist.storage.Double()
+    )
+    H_wtreco = hist.Hist(
+        hist.axis.Variable(ptbins,
+                           name='pt_gen', label='$p_{T,gen}$ [GeV]',
+                           underflow=True, overflow=True),
+        hist.axis.Variable(Rbins,
+                          name="R_gen", label = '$R_{gen}$',
+                          underflow=True, overflow=True),
+        hist.axis.Variable(rbins,
+                          name="r_gen", label = '$r_{gen}$',
+                          underflow=False, overflow=False),
+        hist.axis.Variable(cbins,
+                          name="c_gen", label = '$c_{gen}$',
+                          underflow=False, overflow=False),
+        storage=hist.storage.Double()
+    )
+
+    for batch in tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco',
+                                                  'r_reco', 'c_reco',
+                                                  'pt_gen', 'R_gen',
+                                                  'r_gen', 'c_gen',
+                                                  'wt_reco', 'wt_gen',
+                                                  the_evtwt])):
+        H_wtgen.fill(
+            R_gen=batch['R_gen'].to_numpy(),
+            r_gen=batch['r_gen'].to_numpy(),
+            c_gen=batch['c_gen'].to_numpy(),
+            pt_gen=batch['pt_gen'].to_numpy(),
+            weight=batch[the_evtwt].to_numpy()*batch['wt_gen'].to_numpy(),
+        )
+        H_wtreco.fill(
+            R_gen=batch['R_gen'].to_numpy(),
+            r_gen=batch['r_gen'].to_numpy(),
+            c_gen=batch['c_gen'].to_numpy(),
+            pt_gen=batch['pt_gen'].to_numpy(),
+            weight=batch[the_evtwt].to_numpy()*batch['wt_reco'].to_numpy(),
+        )
+
+    Hresult = H_wtgen.copy().reset()
+    Hresult += H_wtreco.values(flow=True)/H_wtgen.values(flow=True)
+
+    return Hresult, H_wtgen, H_wtreco

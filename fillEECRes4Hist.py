@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 import os
 
-basepath = f'/ceph/submit/data/user/s/srothman/EEC/{args.Runtag}/{args.Sample}/{args.Binner}'
+basepath = f'/ceph/submit/data/group/cms/store/user/srothman/EEC/{args.Runtag}/{args.Sample}/{args.Binner}'
 print(f"Basepath: {basepath}")
 subpaths = os.scandir(basepath)
 
@@ -40,15 +40,23 @@ else:
     thepath = os.path.join(basepath, options[choice])
     print()
 
-thepath = os.path.join(thepath, args.Objsyst, args.Hist)
+if args.Hist == 'wtratio':
+    outpath = os.path.join(thepath, args.Objsyst, 'wtratio')
+    thepath = os.path.join(thepath, args.Objsyst, 'transfer')
+else:
+    thepath = os.path.join(thepath, args.Objsyst, args.Hist)
+    outpath = thepath
+
 print("The path is: %s" % thepath)
 
 
-from buildEECres4Hists import fill_hist_from_parquet, fill_transferhist_from_parquet
+from buildEECres4Hists import fill_hist_from_parquet, fill_transferhist_from_parquet, fill_wtratiohist_from_parquet
 
 print("\nBuilding hist...")
 if args.Hist == 'transfer':
     H = fill_transferhist_from_parquet(thepath, args.Wtsyst)
+elif args.Hist == 'wtratio':
+    H = fill_wtratiohist_from_parquet(thepath, args.Wtsyst)
 else:
     H = fill_hist_from_parquet(thepath, args.nboot, 
                                args.Wtsyst, args.rng)
@@ -56,6 +64,6 @@ print("Done.\n")
 
 print("Saving result...")
 import pickle
-with open(thepath + '_%s_%s.pkl'%(args.Objsyst, args.Wtsyst), 'wb') as f:
+with open(outpath + '_%s_%s.pkl'%(args.Objsyst, args.Wtsyst), 'wb') as f:
     pickle.dump(H, f)
 print("Done.\n")

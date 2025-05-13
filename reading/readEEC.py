@@ -11,7 +11,7 @@ def getNProj(x, name):
 
 def getProj(x, name, which):
     wts = x[name+'proj'][which]
-    nproj = getBK(x, name).nproj
+    nproj = ak.values_astype(getBK(x, name).nproj, np.int32)
     return unflatVector(wts, nproj)
 
 def getAllProj(x, name):
@@ -22,9 +22,9 @@ def getRes3(x, name):
     wts = x[name+'res3'].value
     BK = getBK(x, name)
     
-    nRL = BK.nres3_RL
-    nxi = BK.nres3_xi
-    nphi = BK.nres3_phi
+    nRL = ak.values_astype(BK.nres3_RL, np.int32)
+    nxi = ak.values_astype(BK.nres3_xi, np.int32)
+    nphi = ak.values_astype(BK.nres3_phi, np.int32)
 
     return unflatRecursive(wts, [nRL, nxi, nphi])
 
@@ -32,50 +32,50 @@ def getTransferRes3(x, name):
     vals = x[name+'res3'].value
     BK = getBK(x, name)
 
-    nRL = BK.nres3_RL
-    nxi = BK.nres3_xi
-    nphi = BK.nres3_phi
+    nRL = ak.values_astype(BK.nres3_RL, np.int32)
+    nxi = ak.values_astype(BK.nres3_xi, np.int32)
+    nphi = ak.values_astype(BK.nres3_phi, np.int32)
 
     return unflatRecursive(vals, [nRL, nxi, nphi, nRL, nxi, nphi])
 
 def getRes4dipole(x, name):
     result = x[name+'dipole']
-    nEntry = x[name+'BK'].nEntry_dipole
+    nEntry = ak.values_astype(x[name+'BK'].nEntry_dipole, np.int32)
     result = unflatVector(result, nEntry)
     result = result[result.wt > 0]
     return result
 
 def getRes4tee(x, name):
     result = x[name+'tee']
-    nEntry = x[name+'BK'].nEntry_tee
+    nEntry = ak.values_astype(x[name+'BK'].nEntry_tee, np.int32)
     result = unflatVector(result, nEntry)
     result = result[result.wt > 0]
     return result
 
 def getRes4triangle(x, name):
     result = x[name+'triangle']
-    nEntry = x[name+'BK'].nEntry_triangle
+    nEntry = ak.values_astype(x[name+'BK'].nEntry_triangle, np.int32)
     result = unflatVector(result, nEntry)
     result = result[result.wt > 0]
     return result
 
 def getTransferRes4dipole(x, name):
     result = x[name+'dipole']
-    nEntry = x[name+'BK'].nEntries_dipole
+    nEntry = ak.values_astype(x[name+'BK'].nEntries_dipole, np.int32)
     result = unflatVector(result, nEntry)
     result = result[result.wt_gen > 0]
     return result
 
 def getTransferRes4tee(x, name):
     result = x[name+'tee']
-    nEntry = x[name+'BK'].nEntries_tee
+    nEntry = ak.values_astype(x[name+'BK'].nEntries_tee, np.int32)
     result = unflatVector(result, nEntry)
     result = result[result.wt_gen > 0]
     return result
 
 def getTransferRes4triangle(x, name):
     result = x[name+'triangle']
-    nEntry = x[name+'BK'].nEntries_triangle
+    nEntry = ak.values_astype(x[name+'BK'].nEntries_triangle, np.int32)
     result = unflatVector(result, nEntry)
     result = result[result.wt_gen > 0]
     return result

@@ -9,6 +9,7 @@ if __name__ == '__main__':
     parser.add_argument('configsuite', type=str)
 
     parser.add_argument('--force', action='store_true')
+    parser.add_argument('--recover', action='store_true')
 
     parser.add_argument('--filesplit', type=int, default=1, required=False)
     parser.add_argument('--filebatch', type=int, default=1, required=False)
@@ -61,8 +62,6 @@ if __name__ == '__main__':
     from processing.EECProcessor import EECProcessor
     from processing.scaleout import setup_cluster_on_submit, setup_local_cluster
 
-    from reading.files import get_rootfiles
-
     from RecursiveNamespace import RecursiveNamespace
 
     from coffea.nanoevents import NanoAODSchema, NanoEventsFactory, BaseSchema
@@ -91,28 +90,80 @@ if __name__ == '__main__':
 
     #dask.config.set({'distributed.nanny.pre-spawn-environ.MALLOC_TRIM_THRESHOLD_': '0'})
 
-    ################### INPUT ###################
+    ################### INPUT/OUTPUT ###################
     if args.local:
         files = [args.sample]
     else:
         sample = SAMPLE_LIST.lookup(args.sample)
-        files = sample.get_files()
+        files = sample.get_files(exclude_dropped = args.binningtype != 'Count')
         if args.nfiles is not None:
             files = files[args.startfile:args.nfiles+args.startfile]
 
     import numpy as np
-    np.random.shuffle(files)
+
+    out_fname = 'hists'
+    out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
+
+    if args.noRoccoR:
+        out_fname += '_noRoccoR'
+    if args.noJER:
+        out_fname += '_noJER'
+    if args.noJEC:
+        out_fname += '_noJEC'
+    if args.noJUNC:
+        out_fname += '_noJUNC'
+    if args.noPUweight:
+        out_fname += '_noPUweight'
+    if args.noPrefireSF:
+        out_fname += '_noPrefireSF'
+    if args.noIDsfs:
+        out_fname += '_noIDsfs'
+    if args.noIsosfs:
+        out_fname += '_noIsosfs'
+    if args.noTriggersfs:
+        out_fname += '_noTriggersfs'
+    if args.noBtagSF:
+        out_fname += '_noBtagSF'
+    if args.Zreweight:
+        out_fname += '_Zreweight'
+    if args.noBkgVeto:
+        out_fname += '_noBkgVeto'
+
+    if args.extra_tags is not None:
+        for tag in args.extra_tags:
+            out_fname += '_%s'%tag
+
+    out_fname += '_%s'%args.configsuite
+
+    if args.local:
+        destination = 'testlocal'
+    else:
+        destination = "/ceph/submit/data/group/cms/store/user/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.binningtype)
+        if os.path.exists(os.path.join(destination, out_fname)) and not (args.force or args.recover):
+            raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
+
+    if args.verbose:
+        print("Outputting to %s"%os.path.join(destination, out_fname))
+
+    os.makedirs(destination, exist_ok=True)
+
+    if args.recover:
+        import pickle
+        with open(os.path.join(destination, out_fname+"_%s.pickle"%args.syst), 'rb') as f:
+            prev = pickle.load(f)
+        
+        files = prev['errd']
 
     if args.verbose:
         print("Processing %d files"%len(files))
         print(files[0])
 
+    np.random.shuffle(files)
     ##############################################
 
     ################### PROCESSOR ###################
     with open("configs/suites/%s.json"%args.configsuite, 'r') as f:
         configsuite = RecursiveNamespace(**json.load(f))
-
 
     config = RecursiveNamespace()
     for configname in configsuite.configs:
@@ -156,6 +207,7 @@ if __name__ == '__main__':
         'noBkgVeto' : args.noBkgVeto,
         'verbose' : args.verbose,
         'syst' : args.syst,
+        'basepath' : os.path.join(destination, out_fname)
     }
 
     if args.verbose:
@@ -207,57 +259,6 @@ if __name__ == '__main__':
                     iadd(final_result, nextresult)
         return final_result
     
-    ##################################################
-
-    ################### OUTPUT ###################
-    out_fname = 'hists'
-    out_fname += '_file%dto%d'%(args.startfile, args.startfile+len(files))
-
-    if args.noRoccoR:
-        out_fname += '_noRoccoR'
-    if args.noJER:
-        out_fname += '_noJER'
-    if args.noJEC:
-        out_fname += '_noJEC'
-    if args.noJUNC:
-        out_fname += '_noJUNC'
-    if args.noPUweight:
-        out_fname += '_noPUweight'
-    if args.noPrefireSF:
-        out_fname += '_noPrefireSF'
-    if args.noIDsfs:
-        out_fname += '_noIDsfs'
-    if args.noIsosfs:
-        out_fname += '_noIsosfs'
-    if args.noTriggersfs:
-        out_fname += '_noTriggersfs'
-    if args.noBtagSF:
-        out_fname += '_noBtagSF'
-    if args.Zreweight:
-        out_fname += '_Zreweight'
-    if args.noBkgVeto:
-        out_fname += '_noBkgVeto'
-
-    if args.extra_tags is not None:
-        for tag in args.extra_tags:
-            out_fname += '_%s'%tag
-
-    out_fname += '_%s'%args.configsuite
-
-    #out_fname += '.pkl'
-
-    if args.local:
-        destination = 'testlocal'
-    else:
-        destination = "/ceph/submit/data/user/s/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.binningtype)
-        if os.path.exists(os.path.join(destination, out_fname)) and not args.force:
-            raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
-
-    if args.verbose:
-        print("Outputting to %s"%os.path.join(destination, out_fname))
-
-    os.makedirs(destination, exist_ok=True)
-    argsdict['basepath'] = os.path.join(destination, out_fname)
     ##################################################
 
     ################### EXECUTION ###################
@@ -385,6 +386,17 @@ if __name__ == '__main__':
     #    p.join()
 
     #final_ans = result_futures.result()
+
+    print("Done processing.")
+    if 'errd' in final_ans:
+        print("\t%d jobs failed"%len(final_ans['errd']))
+    else:
+        print("\tAll jobs computed successfully")
+
+    if args.recover:
+        for key in final_ans.keys():
+            if key not in ['errd', 'config'] and key in prev.keys():
+                iadd(final_ans[key], prev[key])
 
     with open(os.path.join(destination,out_fname+"_%s.pickle"%args.syst), 'wb') as fout:
         import pickle

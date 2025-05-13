@@ -2,178 +2,238 @@ import hist
 import awkward as ak
 import numpy as np
 from .util import squash
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+import os.path
 
 class KinematicsBinner:
     def __init__(self, config, *args, **kwargs):
         self.config = config
 
-    def makeGenHTHist(self, readers, evtMask, wt):
-        H = hist.Hist(
-            hist.axis.Regular(*self.config.binning.bins.HT,
-                              name='HT', label='Gen HT'),
-            storage=hist.storage.Double()
-        )
+    def eventLevel(self, readers, evtMask, jetMask, wtVars, outpath):
+        thevals = {}
 
-        if readers.LHE is not None:
-            H.fill(
-                HT = squash(readers.LHE.HT)
-            )
+        if self.isMC:
+            if readers.LHE is not None:
+                thevals['genHT'] = readers.LHE.HT[evtMask]
+            thevals['nTrueInt'] = ak.values_astype(readers.nTrueInt[evtMask], np.int32)
 
-        return H
+        if hasattr(readers, '_rho'):
+            thevals['rho'] = readers.rho[evtMask]
 
-    def makePUHist(self, readers, evtMask, wt):
-        H = hist.Hist(
-            hist.axis.Integer(0, self.config.binning.bins.nTrueInt,
-                             name='nTrueInt', 
-                             label='Number of true interactions'),
-            hist.axis.Regular(*self.config.binning.bins.rho,
-                              name='rho', label='rho'),
-            storage=hist.storage.Weight()
-        )
+        if hasattr(readers, 'METpt'):
+            thevals['MET'] = readers.METpt[evtMask]
 
-        if readers.nTrueInt is not None:
-            H.fill(
-                nTrueInt = squash(readers.nTrueInt[evtMask]).astype(np.int32),
-                rho      = squash(readers.rho[evtMask]),
-                weight   = squash(wt[evtMask])
-            )
-        else:
-            H.fill(
-                nTrueInt = np.zeros_like(evtMask).astype(np.int32)[evtMask],
-                rho      = squash(readers.rho[evtMask]),
-                weight   = squash(wt[evtMask])
-            )
+        thevals['numLooseB'] = ak.sum(readers.rRecoJet.jets.passLooseB[jetMask], axis=-1)[evtMask]
+        thevals['numMediumB'] = ak.sum(readers.rRecoJet.jets.passMediumB[jetMask], axis=-1)[evtMask]
+        thevals['numTightB'] = ak.sum(readers.rRecoJet.jets.passTightB[jetMask], axis=-1)[evtMask]
 
-        return H
+        thevals['numJets'] = ak.num(readers.rRecoJet.jets[jetMask], axis=-1)[evtMask]
+
+        thevals['Zpt'] = readers.rMu.Zs.pt[evtMask]
+        thevals['Zy'] = readers.rMu.Zs.rapidity[evtMask]
+        thevals['Zmass'] = readers.rMu.Zs.mass[evtMask]
+
+        thevals['leadMuPt'] = readers.rMu.muons[:,0].pt[evtMask]
+        thevals['leadMuEta'] = readers.rMu.muons[:,0].eta[evtMask]
+        thevals['leadMuCharge'] = readers.rMu.muons[:,0].charge[evtMask]
         
+        #if np.min(thevals['leadMuPt']) < 0:
+        #    print("Uhhhhhhh negative lead pT??")
+        #    print(thevals['leadMuPt'])
+        #    print("max:", np.max(readers.rMu.muons[:,0].pt[evtMask]))
+        #    print("min:", np.min(readers.rMu.muons[:,0].pt[evtMask]))
+        #    argmin = np.argmin(readers.rMu.muons[:,0].pt[evtMask])
+        #    print("argmin:", argmin)
+        #    print("The bad muon is:")
+        #    print("\tpt:", readers.rMu.muons[:,0].pt[evtMask][argmin])
+        #    print("\teta:", readers.rMu.muons[:,0].eta[evtMask][argmin])
+        #    print("\tphi:", readers.rMu.muons[:,0].phi[evtMask][argmin])
+        #    print("\tcharge:", readers.rMu.muons[:,0].charge[evtMask][argmin])
+        #    print("\trawpt:", readers.rMu.muons[:,0].rawPt[evtMask][argmin])
+        #    print('\tRoccoR:', readers.rMu.muons[:,0].RoccoR[evtMask][argmin])
+        #    print()
 
-    def makeSelvarHist(self, readers, evtMask, wt):
-        H = hist.Hist(
-            hist.axis.Regular(*self.config.binning.bins.MET,
-                              name='MET', label='MET pT'),
-            hist.axis.Integer(0, 3,
-                              name='numLooseB', 
-                              label='Number of b-tagged jets'),
-            hist.axis.Integer(0, 3,
-                              name='numMediumB', 
-                              label='Number of b-tagged jets'),
-            hist.axis.Integer(0, 3,
-                              name='numTightB', 
-                              label='Number of b-tagged jets'),
-            storage=hist.storage.Weight()
-        )
+        thevals['subMuPt'] = readers.rMu.muons[:,1].pt[evtMask]
+        thevals['subMuEta'] = readers.rMu.muons[:,1].eta[evtMask]
+        thevals['subMuCharge'] = readers.rMu.muons[:,1].charge[evtMask]
 
-        numLooseB = ak.sum(readers.rRecoJet.jets.passLooseB, axis=-1)
-        numMediumB = ak.sum(readers.rRecoJet.jets.passMediumB, axis=-1)
-        numTightB = ak.sum(readers.rRecoJet.jets.passTightB, axis=-1)
+        for variation in wtVars:
+            thewt = wtVars[variation]
+            thevals[variation] = thewt[evtMask]
 
-        H.fill(
-            MET        = squash(readers.METpt[evtMask]),
-            numLooseB  = squash(numLooseB[evtMask]),
-            numMediumB = squash(numMediumB[evtMask]),
-            numTightB  = squash(numTightB[evtMask]),
-            weight     = squash(wt[evtMask])
-        )
+        for key in thevals.keys():
+            thevals[key] = squash(thevals[key])
 
-        return H
+        table = pa.Table.from_pandas(pd.DataFrame(thevals),
+                                     preserve_index=False)
 
-    def makeJetHist(self, readers, jetMask, wt):
-        H = hist.Hist(
-            hist.axis.Variable(self.config.binning.bins.Jpt,
-                               name='pt', label='Jet pT'),
-            hist.axis.Regular(*self.config.binning.bins.Jeta,
-                              name='eta', label='Jet eta'),
-            hist.axis.Integer(0, 2, 
-                              name='passTightB', label='Pass tight b-tag'),
-            hist.axis.Integer(0, 2, 
-                              name='passMediumB', label='Pass medium b-tag'),
-            hist.axis.Integer(0, 2, 
-                              name='passLooseB', label='Pass loose b-tag'),
-            storage=hist.storage.Weight()
-        )
+        filekey = readers.rMu._x.behavior['__events_factory__']._partition_key
+        filekey = filekey.replace('/','_')
+        os.makedirs(outpath, exist_ok=True)
+        destination = os.path.join(outpath, filekey + '.parquet')
+        pq.write_table(table, destination)
 
-        wt_b, _ = ak.broadcast_arrays(wt, readers.rRecoJet.jets.pt)
+        return ak.sum(thevals['evtwt_nominal'])
 
-        H.fill(
-            pt     = squash(readers.rRecoJet.jets.pt[jetMask]),
-            eta    = np.abs(squash(readers.rRecoJet.jets.eta[jetMask])),
-            passLooseB  = squash(readers.rRecoJet.jets.passLooseB[jetMask]),
-            passMediumB  = squash(readers.rRecoJet.jets.passMediumB[jetMask]),
-            passTightB  = squash(readers.rRecoJet.jets.passTightB[jetMask]),
-            weight = squash(wt_b[jetMask])
-        )
+    def jetLevel(self, readers, jetMask, wtVars, outpath):
+        thevals = {}
 
-        return H
+        thevals['pt'] = readers.rRecoJet.jets.corrpt[jetMask]
+        thevals['eta'] = readers.rRecoJet.jets.eta[jetMask]
+        thevals['phi'] = readers.rRecoJet.jets.phi[jetMask]
 
+        thevals['passLooseB'] = readers.rRecoJet.jets.passLooseB[jetMask]
+        thevals['passMediumB'] = readers.rRecoJet.jets.passMediumB[jetMask]
+        thevals['passTightB'] = readers.rRecoJet.jets.passTightB[jetMask]
 
-    def getMuonHist(self):
-        return hist.Hist(
-            hist.axis.Variable(self.config.binning.bins.MUpt,
-                               name='pt', label='Muon pT'),
-            hist.axis.Regular(*self.config.binning.bins.MUeta,
-                              name='eta', label='Muon eta'),
-            storage=hist.storage.Weight()
-        )
+        if self.isMC:
+            pflav = readers.rRecoJet.jets.partonFlavour[jetMask]
+            hflav = readers.rRecoJet.jets.hadronFlavour[jetMask]
+            thevals['flav'] = ak.where((pflav == 21) & (hflav == 0), 21, hflav)
 
-    def makeZHist(self, readers, evtMask, wt):
-        H = hist.Hist(
-            hist.axis.Variable(self.config.binning.bins.Zpt,
-                               name='pt', label='Z pt'),
-            hist.axis.Regular(*self.config.binning.bins.Zy,
-                              name='y', label='Z y'),
-            hist.axis.Regular(*self.config.binning.bins.Zmass,
-                              name='mass', label='Z mass'),
-            storage=hist.storage.Weight() 
-        )
-
-        Z = readers.rMu.Zs
-        H.fill(
-            pt     = squash(Z.pt[evtMask]),
-            y      = np.abs(squash(Z.rapidity[evtMask])),
-            mass   = squash(Z.mass[evtMask]),
-            weight = squash(wt[evtMask])
-        )
-
-        return H
-
-    def makeMuonHists(self, readers, evtMask, wt):
-        Hlead = self.getMuonHist()
-        Hsub = self.getMuonHist()
-
-        mu0 = readers.rMu.muons[:,0]
-        mu1 = readers.rMu.muons[:,1]
-
-        leadmu = ak.where(mu0.pt > mu1.pt, mu0, mu1)
-        submu = ak.where(mu0.pt > mu1.pt, mu1, mu0)
-
-        Hlead.fill(
-            pt     = squash(leadmu.pt[evtMask]), 
-            eta    = np.abs(squash(leadmu.eta[evtMask])), 
-            weight = squash(wt[evtMask])
-        )
-
-        Hsub.fill(
-            pt     = squash(submu.pt[evtMask]),
-            eta    = np.abs(squash(submu.eta[evtMask])),
-            weight = squash(wt[evtMask])
-        )
-
-        return Hlead, Hsub
+        thevals['nConstituents'] = readers.rRecoJet.jets.nConstituents[jetMask]
+        thevals['nPassingParts'] = readers.rRecoJet.simonjets.nPart[jetMask]
         
-    def binAll(self, readers, mask, evtMask, wt):
-        HleadMu, HsubMu = self.makeMuonHists(readers, evtMask, wt)
-        HZ = self.makeZHist(readers, evtMask, wt)
-        HHT = self.makeGenHTHist(readers, evtMask, wt)
-        HPU = self.makePUHist(readers, evtMask, wt)
-        Hselvar = self.makeSelvarHist(readers, evtMask, wt)
-        Hjet = self.makeJetHist(readers, mask, wt)
+        if hasattr(readers.rRecoJet.simonjets, 'CHSpt'):
+            thevals['nCHS'] = readers.rRecoJet.simonjets.nCHS[jetMask]
+            thevals['CHSpt'] = readers.rRecoJet.simonjets.CHSpt[jetMask]
+            thevals['CHSeta'] = readers.rRecoJet.simonjets.CHSeta[jetMask]
+            thevals['CHSphi'] = readers.rRecoJet.simonjets.CHSphi[jetMask]
+
+        if self.isMC:
+            thevals['matchPt'] = readers.rRecoJet.simonjets.jetMatchPt[jetMask]
+            thevals['matchEta'] = readers.rRecoJet.simonjets.jetMatchEta[jetMask]
+            thevals['matchPhi'] = readers.rRecoJet.simonjets.jetMatchPhi[jetMask]
+            thevals['matched'] = readers.rRecoJet.simonjets.jetMatched[jetMask]
+    
+        for variation in wtVars:
+            thewt = wtVars[variation]
+            thewt_b, _ = ak.broadcast_arrays(thewt, thevals['pt'])
+            thevals[variation] = thewt_b
+
+        for key in thevals.keys():
+            thevals[key] = squash(thevals[key])
+
+        table = pa.Table.from_pandas(pd.DataFrame(thevals),
+                                     preserve_index=False)
+        filekey = readers.rRecoJet._x.behavior['__events_factory__']._partition_key
+        filekey = filekey.replace('/','_')
+        os.makedirs(outpath, exist_ok=True)
+        destination = os.path.join(outpath, filekey + '.parquet')
+        pq.write_table(table, destination)
+
+        return ak.sum(thevals['evtwt_nominal'])
+
+    def CHSJetLevel(self, readers, evtMask, wtVars, outpath):
+        if not hasattr(readers.rRecoJet.simonjets, 'CHSpt'):
+            return 0
+
+        thevals = {}
+
+        thevals['pt'] = readers.rRecoJet.matchedCHSjets.pt[evtMask]
+        thevals['eta'] = readers.rRecoJet.matchedCHSjets.eta[evtMask]
+        thevals['phi'] = readers.rRecoJet.matchedCHSjets.phi[evtMask]
+        
+        thevals['passLooseB'] = readers.rRecoJet.matchedCHSjets.passLooseB[evtMask]
+        thevals['passMediumB'] = readers.rRecoJet.matchedCHSjets.passMediumB[evtMask]
+        thevals['passTightB'] = readers.rRecoJet.matchedCHSjets.passTightB[evtMask]
+    
+        if self.isMC:
+            pflav = readers.rRecoJet.matchedCHSjets.partonFlavour[evtMask]
+            hflav = readers.rRecoJet.matchedCHSjets.hadronFlavour[evtMask]
+            thevals['flav'] = ak.where((pflav == 21) & (hflav == 0), 21, hflav)
+
+        for variation in wtVars:
+            thewt = wtVars[variation][evtMask]
+            thewt_b, _ = ak.broadcast_arrays(thewt, thevals['pt'])
+            thevals[variation] = thewt_b
+
+        for key in thevals.keys():
+            thevals[key] = squash(thevals[key])
+
+        table = pa.Table.from_pandas(pd.DataFrame(thevals),
+                                     preserve_index=False)
+
+        filekey = readers.rRecoJet._x.behavior['__events_factory__']._partition_key
+        filekey = filekey.replace('/','_')
+        os.makedirs(outpath, exist_ok=True)
+        destination = os.path.join(outpath, filekey + '.parquet')
+        pq.write_table(table, destination)
+
+        return ak.sum(thevals['evtwt_nominal'])
+
+    def particleLevel(self, readers, mask, wtVars, outpath):
+        thevals = {}
+
+        thevals['pt'] = readers.rRecoJet.parts.pt[mask]
+        thevals['eta'] = readers.rRecoJet.parts.eta[mask]
+        thevals['phi'] = readers.rRecoJet.parts.phi[mask]
+        thevals['pdgid'] = readers.rRecoJet.parts.pdgid[mask]
+        thevals['charge'] = readers.rRecoJet.parts.charge[mask]
+
+        thevals['dxy'] = readers.rRecoJet.parts.dxy[mask]
+        thevals['dz'] = readers.rRecoJet.parts.dz[mask]
+        thevals['puppiWeight'] = readers.rRecoJet.parts.puppiWeight[mask]
+        thevals['fromPV'] = readers.rRecoJet.parts.fromPV[mask]
+
+        if self.isMC:
+            thevals['matchPt'] = readers.rRecoJet.parts.matchPt[mask]
+            thevals['matchEta'] = readers.rRecoJet.parts.matchEta[mask]
+            thevals['matchPhi'] = readers.rRecoJet.parts.matchPhi[mask]
+            thevals['matchCharge'] = readers.rRecoJet.parts.matchCharge[mask]
+            thevals['nMatches'] = readers.rRecoJet.parts.nMatches[mask]
+            thevals['matchTypes'] = readers.rRecoJet.parts.matchTypes[mask]
+
+        thevals['jetPt'] = readers.rRecoJet.jets.corrpt[mask]
+        thevals['jetEta'] = readers.rRecoJet.jets.eta[mask]
+        thevals['jetPhi'] = readers.rRecoJet.jets.phi[mask]
+
+        thevals['jetPt'], thevals['jetEta'], thevals['jetPhi'], _ = ak.broadcast_arrays(
+            thevals['jetPt'], thevals['jetEta'], thevals['jetPhi'],
+            thevals['pt']
+        )
+
+        for variation in wtVars:
+            thewt = wtVars[variation]
+            thewt_b, _ = ak.broadcast_arrays(thewt, thevals['pt'])
+            thevals[variation] = thewt_b
+
+        for key in thevals.keys():
+            thevals[key] = squash(thevals[key])
+
+        table = pa.Table.from_pandas(pd.DataFrame(thevals),
+                                     preserve_index=False)
+        filekey = readers.rRecoJet._x.behavior['__events_factory__']._partition_key
+        filekey = filekey.replace('/','_')
+        os.makedirs(outpath, exist_ok=True)
+        destination = os.path.join(outpath, filekey + '.parquet')
+        pq.write_table(table, destination)
+
+        return ak.sum(thevals['evtwt_nominal'])
+
+    def binAll(self, readers, mask, evtMask, wtVars, basepath):
+        Hevt = self.eventLevel(
+            readers, evtMask, mask, wtVars,
+            os.path.join(basepath, 'event')
+        )
+        Hjet = self.jetLevel(
+            readers, mask, wtVars,
+            os.path.join(basepath, 'jet')
+        )
+        HjetCHS = self.CHSJetLevel(
+            readers, evtMask, wtVars,
+            os.path.join(basepath, 'jetCHS')
+        )
+        Hpart = self.particleLevel(
+            readers, mask, wtVars,
+            os.path.join(basepath, 'part')
+        )
 
         return {
-            'leadMu': HleadMu,
-            'subMu': HsubMu,
-            'Z': HZ,
-            'jets': Hjet,
-            'HT': HHT,
-            'PU': HPU,
-            'selvar': Hselvar,
+            'Hevt': Hevt,
+            'Hjet': Hjet,
+            'HjetCHS': HjetCHS,
+            'Hpart': Hpart,
         }

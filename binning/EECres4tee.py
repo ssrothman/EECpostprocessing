@@ -76,7 +76,6 @@ class EECres4teeBinner(EECgenericBinner):
 
             result['transfer'] = self.binTransfer(
                 readers.rTransfer.res4tee,
-                readers.rTransfer.shape_res4tee,
                 readers.rTransfer.ptDenomReco,
                 readers.rTransfer.ptDenomGen,
                 4,
