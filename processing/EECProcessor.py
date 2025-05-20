@@ -21,11 +21,9 @@ from binning.Res import ResBinner
 from binning.Beff import BeffBinner
 from binning.Btag import BtagBinner
 from binning.EECproj import EECprojBinner
-from binning.EECres3 import EECres3Binner
 from binning.EECres4dipole import EECres4dipoleBinner
 from binning.EECres4tee import EECres4teeBinner
 from binning.EECres4triangle import EECres4triangleBinner
-from binning.EECres4minR import EECres4minRBinner
 
 #from binning.EECgeneric import EECgenericBinner
 
@@ -37,11 +35,9 @@ BINNERS = {
     'BEFF' : BeffBinner,
     'BTAG' : BtagBinner,
     'EECPROJ' : EECprojBinner,
-    "EECRES3" : EECres3Binner,
     "EECRES4DIPOLE" : EECres4dipoleBinner,
     "EECRES4TEE" : EECres4teeBinner,
     'EECRES4TRIANGLE' : EECres4triangleBinner,
-    'EECRES4MINR' : EECres4minRBinner,
 }
 
 class EECProcessor(processor.ProcessorABC):

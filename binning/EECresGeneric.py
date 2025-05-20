@@ -76,10 +76,10 @@ class EECgenericBinner:
         }
 
         if isRes:
-            fillvals['r_reco']=  squash(vals.r_reco),
-            fillvals['c_reco']=  squash(vals.c_reco),
-            fillvals['r_gen'] = squash(vals.r_gen),
-            fillvals['c_gen'] = squash(vals.c_gen),
+            fillvals['r_reco'] =   squash(vals.r_reco),
+            fillvals['c_reco'] =   squash(vals.c_reco),
+            fillvals['r_gen'] =    squash(vals.r_gen),
+            fillvals['c_gen'] =    squash(vals.c_gen),
 
         for variation in wtVars:
             thewt = wtVars[variation]
@@ -117,7 +117,7 @@ class EECgenericBinner:
                     jetMask, 
                     wtVars,
                     outpath,
-                    isRes=False):
+                    isRes=True):
 
         iReco = ak.values_astype(iReco, np.int32)
         iJet = ak.values_astype(iJet, np.int32)
@@ -152,10 +152,11 @@ class EECgenericBinner:
             'btag' : squash(btag_b),
             'flav' : squash(flav_b),
         }
-
+        
         if isRes:
-            fillvals['r']= squash(vals.r),
-            fillvals['c']= squash(vals.c),
+            fillvals['r'] = squash(vals.r),
+            fillvals['c'] = squash(vals.c),
+
 
         for variation in wtVars:
             thewt = wtVars[variation]

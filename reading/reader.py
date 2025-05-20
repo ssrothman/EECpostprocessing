@@ -12,14 +12,8 @@ class EECreader:
     def proj(self, order):
         if order not in self._proj:
             self._proj[order] = reading.readEEC.getProj(
-                    self._x, self._name, 'value%d'%order)
+                    self._x, self._name, 'Order%d'%order)
         return self._proj[order]
-
-    @property
-    def allproj(self):
-        if not hasattr(self, '_allproj'):
-            self._allproj = reading.readEEC.getAllProj(self._x, self._name)
-        return self._allproj
 
     @property
     def res4dipole(self):
@@ -39,12 +33,6 @@ class EECreader:
             self._res4triangle = reading.readEEC.getRes4triangle(self._x, self._name)
         return self._res4triangle
     
-    @property
-    def res4minR(self):
-        if not hasattr(self, '_res4minR'):
-            self._res4minR = reading.readEEC.getRes4minR(self._x, self._name)
-        return self._res4minR
-
     @property
     def res3(self):
         if not hasattr(self, '_res3'):
@@ -86,8 +74,8 @@ class transferreader:
     '''
     def proj(self, order):
         if order not in self._proj:
-            self._proj[order] = reading.readEEC.getTransferP(
-                self._x, self._name, 'value%d'%order)
+            self._proj[order] = reading.readEEC.getTransferProj(
+                self._x, self._name, 'Order%d'%order)
         return self._proj[order]
 
     @property

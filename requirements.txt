@@ -1,0 +1,12 @@
+more_itertools
+loky
+dask_jobqueue
+dask
+coffea==0.7.26
+fsspec-xrootd
+awkward
+scipy
+hist
+pandas
+pyarrow
+dask[distributed]

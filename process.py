@@ -71,6 +71,8 @@ if __name__ == '__main__':
     import json
 
     import samples
+    if not args.local:
+        SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
 
     import dask
     dask.config.set({'distributed.client.heartbeat': '120s'})
@@ -93,7 +95,6 @@ if __name__ == '__main__':
     if args.local:
         files = [args.sample]
     else:
-        SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
         sample = SAMPLE_LIST.lookup(args.sample)
         files = sample.get_files(exclude_dropped = args.binningtype != 'Count')
         if args.nfiles is not None:
@@ -169,9 +170,6 @@ if __name__ == '__main__':
     for configname in configsuite.configs:
         with open(configname, 'r') as f:
             config.update(json.load(f))
-
-    with open("configs/binning/%s.json"%args.binningtype, 'r') as f:
-        config.update(json.load(f))
 
     if args.verbose:
         print("config suite", args.configsuite)
