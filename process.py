@@ -71,7 +71,6 @@ if __name__ == '__main__':
     import json
 
     import samples
-    SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
 
     import dask
     dask.config.set({'distributed.client.heartbeat': '120s'})
@@ -94,6 +93,7 @@ if __name__ == '__main__':
     if args.local:
         files = [args.sample]
     else:
+        SAMPLE_LIST = samples.samplelists[args.samplelist].SAMPLE_LIST
         sample = SAMPLE_LIST.lookup(args.sample)
         files = sample.get_files(exclude_dropped = args.binningtype != 'Count')
         if args.nfiles is not None:

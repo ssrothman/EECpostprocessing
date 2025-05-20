@@ -59,7 +59,7 @@ class Sample:
                 rootpath = '/scratch/submit/cms/srothman/%s'%t
             elif self.location == 'test':
                 hostid = None
-                rootpath = '/work/submit/srothman/EEC/CMSSW_10_6_26/src/SRothman/%s'%t
+                rootpath = '/afs/cern.ch/work/j/jroloff/eecs/src/SRothman/%s'%t
             result += get_rootfiles(hostid, rootpath, exclude_dropped=exclude_dropped)
         return result
 
