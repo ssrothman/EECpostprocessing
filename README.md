@@ -6,6 +6,17 @@ The postprocessing is split into two (or arguably three) steps:
 2. fill histograms from the parquet datasets. Some of the plotting routines can run directly off of the parquet files, but others require this step
 3. (?) make plots. This is actually handled by a different repo
 
+# Setting up with a virtual environment
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Ever subsequent time that you run the code, you only need to run the activation step.
+
+
 # Skimming to parquet
 
 the command looks like
