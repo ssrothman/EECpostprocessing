@@ -8,6 +8,9 @@ parser.add_argument('Hist', type=str, help='Histogram Name')
 parser.add_argument('Objsyst', type=str, help='Object Systematic')
 parser.add_argument('Wtsyst', type=str, help='Weight Systematic')
 parser.add_argument("--nboot", type=int, default=100, help="Number of bootstrap samples")
+parser.add_argument('--skipNominal', action='store_true', help="Skip nominal weight")
+parser.add_argument("--prebinned", action='store_true', help="Data is pre-binned")
+parser.add_argument("--nbatch", type=int, default=-1, help="Number of batches to process")
 parser.add_argument("--rng", type=int, default=0, help="Random number generator seed offset")
 
 args = parser.parse_args()
@@ -59,11 +62,28 @@ elif args.Hist == 'wtratio':
     H = fill_wtratiohist_from_parquet(thepath, args.Wtsyst)
 else:
     H = fill_hist_from_parquet(thepath, args.nboot, 
-                               args.Wtsyst, args.rng)
+                               args.Wtsyst, args.rng,
+                               prebinned = args.prebinned,
+                               nbatch = args.nbatch,
+                               skipNominal = args.skipNominal)
 print("Done.\n")
 
+
+outfile = outpath
+outfile += '_%s_%s' % (args.Objsyst, args.Wtsyst)
+if args.nboot > 0:
+    outfile += '_boot%d' % args.nboot
+    outfile += '_rng%d' % args.rng
+if args.skipNominal:
+    outfile += '_skipNominal'
+if args.nbatch > 0:
+    outfile += '_first%d' % args.nbatch
+
+outfile += '.pkl'
+
 print("Saving result...")
+print("Output file: %s" % outfile)
 import pickle
-with open(outpath + '_%s_%s.pkl'%(args.Objsyst, args.Wtsyst), 'wb') as f:
+with open(outfile, 'wb') as f:
     pickle.dump(H, f)
 print("Done.\n")

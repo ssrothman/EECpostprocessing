@@ -13,6 +13,26 @@ Rbins = [0.3, 0.4, 0.5, 0.6]
 rbins = np.linspace(0, 1, 16)
 cbins = np.linspace(0, np.pi/2, 16)
 
+prebinned_bins = {
+    'R' : [0.0, 0.1, 0.2, 0.3, 0.4,
+           0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+    'r' : [0.0  , 0.025, 0.05 , 0.075, 
+           0.1  , 0.125, 0.15 , 0.175, 0.2  ,
+           0.225, 0.25 , 0.275, 0.3  , 0.325,
+           0.35 , 0.375, 0.4  , 0.425,
+           0.45 , 0.475, 0.5  , 0.525, 0.55 , 
+           0.575, 0.6  , 0.625, 0.65 ,
+           0.675, 0.7  , 0.725, 0.75 , 0.775, 
+           0.8  , 0.825, 0.85 , 0.875,
+           0.9  , 0.925, 0.95 , 0.975, 1.0  ],
+    'c' : [0.0       , 0.10471976, 0.20943951, 
+           0.31415927, 0.41887902,
+           0.52359878, 0.62831853, 0.73303829, 
+           0.83775804, 0.9424778 ,
+           1.04719755, 1.15191731, 1.25663706, 
+           1.36135682, 1.46607657, 1.57079633]
+}
+
 class sm64_rng:
     def __init__(self, seedarr, repeats):
         self.repeats = repeats
@@ -59,35 +79,97 @@ class sm64_rng:
             k[mask] += 1
         return np.repeat(k - 1, self.repeats) #unpack the run lengths
 
-def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0):
+def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
+                           prebinned = False, nbatch=-1, skipNominal=False):
 
     dataset = ds.dataset(basepath, format="parquet")
 
     the_evtwt = 'evtwt_%s'%systwt
 
-    H = hist.Hist(
-        hist.axis.Integer(0, bootstrap+1,
-                          name='bootstrap', label='bootstrap',
-                          underflow=True, overflow=True),
-        hist.axis.Variable(ptbins,
-                           name='pt', label='$p_{T}$ [GeV]',
-                           underflow=True, overflow=True),
-        hist.axis.Variable(Rbins,
-                          name="R", label = '$R$',
-                          underflow=True, overflow=True),
-        hist.axis.Variable(rbins,
-                          name="r", label = '$r$',
-                          underflow=False, overflow=False),
-        hist.axis.Variable(cbins,
-                          name="c", label = '$c$',
-                          underflow=False, overflow=False),
-        storage=hist.storage.Double()
-    )
+    if skipNominal: 
+        minboot = 1
+    else:
+        minboot = 0
+
+    if prebinned:
+        H_target = hist.Hist(
+            hist.axis.Integer(minboot, bootstrap+1,
+                              name='bootstrap', label='bootstrap',
+                              underflow=True, overflow=True),
+            hist.axis.Variable(ptbins,
+                               name='pt', label='$p_{T}$ [GeV]',
+                               underflow=True, overflow=True),
+            hist.axis.Variable(prebinned_bins['R'],
+                              name="R", label = '$R$',
+                              underflow=True, overflow=True),
+            hist.axis.Variable(prebinned_bins['r'],
+                              name="r", label = '$r$',
+                              underflow=False, overflow=False),
+            hist.axis.Variable(prebinned_bins['c'],
+                              name="c", label = '$c$',
+                              underflow=False, overflow=False),
+            storage=hist.storage.Double()
+        )
+        H = hist.Hist(
+            hist.axis.Integer(minboot, bootstrap+1,
+                              name='bootstrap', label='bootstrap',
+                              underflow=True, overflow=True),
+            hist.axis.Variable(ptbins,
+                               name='pt', label='$p_{T}$ [GeV]',
+                               underflow=True, overflow=True),
+            hist.axis.Integer(1, len(prebinned_bins['R']),
+                              name="R", label = '$R$',
+                              underflow=True, overflow=True),
+            hist.axis.Integer(1, len(prebinned_bins['r']),
+                              name="r", label = '$r$',
+                              underflow=False, overflow=False),
+            hist.axis.Integer(1, len(prebinned_bins['c']),
+                              name="c", label = '$c$',
+                              underflow=False, overflow=False),
+            storage=hist.storage.Double()
+        )
+    else:
+        H = hist.Hist(
+            hist.axis.Integer(minboot, bootstrap+1,
+                              name='bootstrap', label='bootstrap',
+                              underflow=True, overflow=True),
+            hist.axis.Variable(ptbins,
+                               name='pt', label='$p_{T}$ [GeV]',
+                               underflow=True, overflow=True),
+            hist.axis.Variable(Rbins,
+                              name="R", label = '$R$',
+                              underflow=True, overflow=True),
+            hist.axis.Variable(rbins,
+                              name="r", label = '$r$',
+                              underflow=False, overflow=False),
+            hist.axis.Variable(cbins,
+                              name="c", label = '$c$',
+                              underflow=False, overflow=False),
+            storage=hist.storage.Double()
+        )
+
+
+    if nbatch > 0:
+        ibatch = 0
+
+    time_tonpy = 0
+    time_fillnom = 0
+    time_fillboot = 0
+    time_bootwt = 0
 
     for batch in tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
                                                   'pt', 'wt', 
                                                   the_evtwt, 'eventhash'],
-                                         batch_size=1000000000)):
+                                         batch_size=1000000000,
+                                         batch_readahead=16,
+                                         fragment_readahead=16,
+                                         use_threads=True)):
+        if nbatch > 0:
+            if ibatch >= nbatch:
+                break
+            ibatch += 1
+
+        t0 = time()
         R = batch['R'].to_numpy()
         r = batch['r'].to_numpy()
         try:
@@ -101,21 +183,39 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0):
         evtwt = batch[the_evtwt].to_numpy()
         wt = batch['wt'].to_numpy()
         evthash = batch['eventhash'].to_numpy()
+        time_tonpy += time() - t0
 
-        H.fill(
-            R=R,
-            r=r,
-            c=c,
-            pt=pt,
-            bootstrap = 0,
-            weight=evtwt*wt,
-        )
+        if prebinned:
+            if np.min(r) < 1:
+                print("WARNING: r < 1")
+            if np.min(c) < 1:
+                print("WARNING: c < 1")
+
+            if np.max(r) >= len(prebinned_bins['r']):
+                print("WARNING: r >= %d" % len(prebinned_bins['r']))
+            if np.max(c) >= len(prebinned_bins['c']):
+                print("WARNING: c >= %d" % len(prebinned_bins['c']))
+
+        if not skipNominal:
+            t0 = time()
+            H.fill(
+                R=R,
+                r=r,
+                c=c,
+                pt=pt,
+                bootstrap = 0,
+                weight=evtwt*wt,
+            )
+            time_fillnom += time() - t0
 
         repeats = ak.to_numpy(ak.run_lengths(evthash))
         rng = sm64_rng(evthash + random_seed, repeats)
 
         for i in range(bootstrap):
+            t0 = time()
             boot = rng.next_poisson(1.0)
+            time_bootwt += time() - t0
+            t0 = time()
             H.fill(
                 R=R,
                 r=r,
@@ -124,6 +224,18 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0):
                 bootstrap = i+1,
                 weight=evtwt*wt*boot,
             )
+            time_fillboot += time() - t0
+
+
+    print("Time to numpy: %.2f" % time_tonpy)
+    print("Time to fill nominal: %.2f" % time_fillnom)
+    print("Time to fill bootstrap: %.2f" % time_fillboot)
+    print("Time to bootstrap weight: %.2f" % time_bootwt)
+    print("Total time: %.2f" % (time_fillnom + time_fillboot + time_tonpy))
+
+    if prebinned:
+        H_target += H.values(flow=True)
+        return H_target
 
     return H
 
