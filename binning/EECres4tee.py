@@ -21,7 +21,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rRecoEEC.iReco,
                 readers.eventIdx,
                 mask, wtVars,
-                os.path.join(basepath, 'reco'))
+                os.path.join(basepath, 'reco'),
+                isRes=True)
         
         if self.isMC:
             result['gen'] = self.binObserved(
@@ -32,7 +33,8 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.rGenEEC.iReco,
                     readers.eventIdx,
                     mask, wtVars,
-                    os.path.join(basepath, 'gen'))
+                    os.path.join(basepath, 'gen'),
+                    isRes=True)
 
             result['unmatchedReco'] = self.binObserved(
                     readers.rUnmatchedRecoEEC.res4tee,
@@ -42,7 +44,8 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.rUnmatchedRecoEEC.iReco,
                     readers.eventIdx,
                     mask, wtVars,
-                    os.path.join(basepath, 'unmatchedReco'))
+                    os.path.join(basepath, 'unmatchedReco'),
+                    isRes=True)
 
             result['unmatchedGen'] = self.binObserved(
                     readers.rUnmatchedGenEEC.res4tee,
@@ -52,7 +55,8 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.rUnmatchedGenEEC.iReco,
                     readers.eventIdx,
                     mask, wtVars,
-                    os.path.join(basepath, 'unmatchedGen'))
+                    os.path.join(basepath, 'unmatchedGen'),
+                    isRes=True)
 
             result['untransferedReco'] = self.binObserved(
                     readers.rUntransferedRecoEEC.res4tee,
@@ -62,7 +66,8 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.rUntransferedRecoEEC.iReco,
                     readers.eventIdx,
                     mask, wtVars,
-                    os.path.join(basepath, 'untransferedReco'))
+                    os.path.join(basepath, 'untransferedReco'),
+                    isRes=True)
 
             result['untransferedGen'] = self.binObserved(
                     readers.rUntransferedGenEEC.res4tee,
@@ -72,7 +77,8 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.rUntransferedGenEEC.iReco,
                     readers.eventIdx,
                     mask, wtVars,
-                    os.path.join(basepath, 'untransferedGen'))
+                    os.path.join(basepath, 'untransferedGen'),
+                    isRes=True)
 
             result['transfer'] = self.binTransfer(
                 readers.rTransfer.res4tee,
@@ -85,7 +91,8 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.rTransfer.iReco,
                 readers.eventIdx,
                 mask, wtVars,
-                os.path.join(basepath, 'transfer')
+                os.path.join(basepath, 'transfer'),
+                isRes=True
             )
 
         return result
