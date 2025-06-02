@@ -95,6 +95,19 @@ class EECgenericBinner:
         fillvals['flav_reco'] = squash(flav_reco_b)
         fillvals['flav_gen'] = squash(flav_gen_b)
 
+        #use some arbitrary large primes to "hash" the (run, lumi, event) into a unique-ish number
+        #the actual requirement is that subsequent events must have different codes
+        #and that a given (run, lumi, event) always has the same code
+        #this satisfies that requirement with very high probability
+        run = rRecoJet._x.run
+        event = rRecoJet._x.event
+        lumi = rRecoJet._x.luminosityBlock
+
+        eventhash = event + lumi*1299827 + run*2038074743 
+
+        eventhash_b, _ = ak.broadcast_arrays(eventhash, vals.R_reco)
+        fillvals['eventhash'] = squash(eventhash_b)
+
         table = pa.Table.from_pandas(pd.DataFrame(fillvals),
                                      preserve_index=False)
          
