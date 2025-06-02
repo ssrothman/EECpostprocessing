@@ -92,7 +92,9 @@ class EECProcessor(processor.ProcessorABC):
         binningtype= binningtype.strip().upper()
 
         if binningtype == 'COUNT':
-            self.binner = None
+            self.binner = 'COUNT'
+        elif binningtype == 'CUTFLOW':
+            self.binner = 'CUTFLOW'
         else:
             self.binner = BINNERS[binningtype](config)
 
@@ -134,14 +136,14 @@ class EECProcessor(processor.ProcessorABC):
         jetMask = jetSel.all(*jetSel.names)
         evtMask = evtSel.all(*evtSel.names)
         nomweight = evtWeight.weight()
-        if np.any(nomweight > 1e2):
+        if np.any(nomweight > 1e3):
             print("WARNING: large weights found")
             print("setting to 1")
-            nomweight[nomweight > 1e2] = 1
-        if np.any(nomweight < 1e-2):
+            nomweight[nomweight > 1e3] = 1
+        if np.any(nomweight < 1e-3):
             print("WARNING: small weights found")
             print("setting to 1")
-            nomweight[nomweight < 1e-2] = 1
+            nomweight[nomweight < 1e-3] = 1
 
         weightvariations = {'evtwt_nominal' : nomweight}
         if self.config.isMC and self.syst == 'nominal':
@@ -174,6 +176,39 @@ class EECProcessor(processor.ProcessorABC):
                 for wt in evtWeight.variations:
                     print("\t", wt)
 
+        if type(self.binner) is str and self.binner == 'CUTFLOW':
+            flow_evt = {}
+
+            flow_evt['none'] = ak.sum(nomweight, axis=None)
+            cuts_so_far = []
+            evtsel_cuts = list(evtSel.names)
+            evtsel_cuts.remove('METpt')
+            evtsel_cuts.append('METpt')
+            evtsel_cuts.remove('nbtag')
+            evtsel_cuts.append('nbtag')
+            for name in evtsel_cuts:
+                cuts_so_far.append(name)
+                flow_evt[name] = ak.sum(evtSel.all(*cuts_so_far) * nomweight, axis=None)
+
+            flow_jet = {}
+
+            flow_jet['none'] = ak.sum(jetSel.all() * nomweight, axis=None)
+            cuts_so_far = []
+            jetsel_cuts = list(jetSel.names)
+            jetsel_cuts.remove('METpt')
+            jetsel_cuts.append('METpt')
+            jetsel_cuts.remove('nbtag')
+            jetsel_cuts.append('nbtag')
+            for name in jetsel_cuts:
+                cuts_so_far.append(name)
+                flow_jet[name] = ak.sum(jetSel.all(*cuts_so_far) * nomweight, axis=None)
+
+            resultdict[self.syst] = {
+                'evt' : flow_evt,
+                'jet' : flow_jet
+            }
+            return
+
         thepath = os.path.join(self.basepath, self.syst)
         nominal = self.binner.binAll(readers, 
                                      jetMask, evtMask,
@@ -189,16 +224,19 @@ class EECProcessor(processor.ProcessorABC):
         #setup inputs
         t0 = time()
 
-        if(len(events) == 0):
-            return {}
+        #if(len(events) == 0):
+        #    print("SKIPPING FILE")
+        #    return {}
 
-        if self.binner is None:
+        if type(self.binner) is str and self.binner == 'COUNT':
             if self.isMC:
                 return {'num_evt': np.sum(events.genWeight)}
             else:
                 return {'num_evt': len(events)}
 
-        self.binner.isMC = self.isMC
+        if type(self.binner) is not str:
+            self.binner.isMC = self.isMC
+
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,
                              self.noJER, self.noJEC, self.noJUNC,
@@ -212,7 +250,7 @@ class EECProcessor(processor.ProcessorABC):
         self.actually_process(events, readers, 
                               result)
 
-        if self.verbose:
+        if self.verbose and type(self.binner) is not str:
             for key in result.keys():
                 print("SUMWT", result[key]['sumwt'])
                 print("SUMWT_PASS", result[key]['sumwt_pass'])

@@ -6,7 +6,7 @@ def get_rootfiles(hostid, path, exclude_dropped=True):
         from fsspec.implementations.local import LocalFileSystem
         fs = LocalFileSystem()
     else:
-        fs = xrdfs.XRootDFileSystem(hostid = hostid, timeout=60)
+        fs = xrdfs.XRootDFileSystem(hostid = hostid, timeout=120)
 
     if exclude_dropped:
         allowed = lambda f : f.endswith(".root") and not os.path.basename(f).startswith('NANO_dropped')

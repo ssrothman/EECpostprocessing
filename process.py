@@ -22,7 +22,10 @@ if __name__ == '__main__':
                         choices=['nominal', 'JES_UP', 'JES_DN',
                                  'JER_UP', 'JER_DN',
                                  'UNCLUSTERED_UP',
-                                 'UNCLUSTERED_DN'])
+                                 'UNCLUSTERED_DN',
+                                 "CH_UP",
+                                 "CH_DN",
+                                 "TRK_EFF"])
 
     parser.add_argument('--noBkgVeto', action='store_true')
     parser.add_argument('--noRoccoR', action='store_true')
@@ -96,7 +99,9 @@ if __name__ == '__main__':
         files = [args.sample]
     else:
         sample = SAMPLE_LIST.lookup(args.sample)
-        files = sample.get_files(exclude_dropped = args.binningtype != 'Count')
+        bt = args.binningtype.strip().upper()
+        print("Exclude dropped?", bt != 'COUNT')
+        files = sample.get_files(exclude_dropped = bt != 'COUNT')
         if args.nfiles is not None:
             files = files[args.startfile:args.nfiles+args.startfile]
 
@@ -140,8 +145,8 @@ if __name__ == '__main__':
         destination = 'testlocal'
     else:
         destination = "/ceph/submit/data/group/cms/store/user/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.binningtype)
-        if os.path.exists(os.path.join(destination, out_fname)) and not (args.force or args.recover):
-            raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname))
+        if os.path.exists(os.path.join(destination, out_fname, args.syst)) and not (args.force or args.recover):
+            raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname, args.syst))
 
     if args.verbose:
         print("Outputting to %s"%os.path.join(destination, out_fname))
@@ -242,7 +247,12 @@ if __name__ == '__main__':
                         inputfile, 
                         entry_start=start,
                         entry_stop=end,
-                        schemaclass = schema
+                        schemaclass = schema,
+                        uproot_options = {
+                            'timeout' : 30,
+                            'use_threads' : False,
+                            #'num_workers' : 4,
+                        }
                     ).events()
 
                     nextresult = processor_instance.process(events)
@@ -275,7 +285,7 @@ if __name__ == '__main__':
     elif args.scale == 'local':
         if args.verbose:
             print("Running locally")
-        cluster, client = setup_local_cluster(32)
+        cluster, client = setup_local_cluster(16)
     elif args.scale == 'local_debug':
         if args.verbose:
             print("Running locally in debug mode")

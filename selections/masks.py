@@ -160,12 +160,17 @@ def addEventSelections(selection, readers, config, noBkgVeto, verbose):
         if config.maxNumBtag >= 0:
             if verbose:
                 print("\tRequiring at most %d %s b tags"%(config.maxNumBtag, config.maxNumBtag_level))
+            
+            checkjets = readers.rRecoJet.CHSjets
+            checkjets = checkjets[checkjets.pt > 30]
+            checkjets = checkjets[checkjets.jetId == 6]
+
             if config.maxNumBtag_level == 'loose':
-                nPassB = ak.sum(readers.rRecoJet.CHSjets.passLooseB, axis=-1)
+                nPassB = ak.sum(checkjets.passLooseB, axis=-1)
             elif config.maxNumBtag_level == 'medium':
-                nPassB = ak.sum(readers.rRecoJet.CHSjets.passMediumB, axis=-1)
+                nPassB = ak.sum(checkjets.passMediumB, axis=-1)
             elif config.maxNumBtag_level == 'tight':
-                nPassB = ak.sum(readers.rRecoJet.CHSjets.passTightB, axis=-1)
+                nPassB = ak.sum(checkjets.passTightB, axis=-1)
             else:
                 raise ValueError("Invalid btag level: %s"%(config.maxNumBtag_level))
             selection.add("nbtag", nPassB <= config.maxNumBtag)

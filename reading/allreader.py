@@ -2,7 +2,7 @@ from .reader import *
 from .JERC import JERC_handler
 
 JETMET_SYSTS = [
-    'JER_UP', 'JER_UN',
+    'JER_UP', 'JER_DN',
     'JES_UP', 'JES_DN',
     'UNCLUSTERED_UP', 'UNCLUSTERED_DN'
 ]
@@ -30,33 +30,38 @@ class AllReaders:
         if hasattr(x, "L1PreFiringWeight"):
             self._PrefireWeight = x.L1PreFiringWeight
 
+        if syst == 'nominal' or syst in JETMET_SYSTS:
+            simonnames = config.names
+        else:
+            simonnames = getattr(config.systNames, syst)
+
         self._rRecoJet = jetreader(x, 
             config.names.puppijets, 
-            config.names.SimonJets,
+            simonnames.SimonJets,
             config.names.CHSjets)
 
         if self.isMC:
             self._rGenJet = jetreader(x,
                 config.names.genjets,
-                config.names.GenSimonJets,
+                simonnames.GenSimonJets,
                 None)
             self._rGenEEC = EECreader(x,
-                'Gen' + config.names.EECs)
+                'Gen' + simonnames.EECs)
             self._rUnmatchedGenEEC = EECreader(x,
-                'UnmatchedGen' + config.names.EECs)
+                'UnmatchedGen' + simonnames.EECs)
             self._rUntransferedGenEEC = EECreader(x,
-                'UntransferedGen' + config.names.EECs)
+                'UntransferedGen' + simonnames.EECs)
             self._rTransfer = transferreader(x,
-                config.names.EECs + 'Transfer')
-            self._rMatch = matchreader(x, config.names.Matches)
+                simonnames.EECs + 'Transfer')
+            self._rMatch = matchreader(x, simonnames.Matches)
 
             self._rUnmatchedRecoEEC = EECreader(x,
-                'UnmatchedReco' + config.names.EECs)
+                'UnmatchedReco' + simonnames.EECs)
             self._rUntransferedRecoEEC = EECreader(x,
-                'UntransferedReco' + config.names.EECs)
+                'UntransferedReco' + simonnames.EECs)
 
         self._rRecoEEC = EECreader(x,
-            'Reco' + config.names.EECs)
+            'Reco' + simonnames.EECs)
 
         self._rMu = muonreader(x, config.names.muons, noRoccoR or not config.muons.applyRoccoR)
 

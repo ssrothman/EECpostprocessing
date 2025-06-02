@@ -15,5 +15,25 @@
         "ControlJets" : "ChargedRandomConeJets",
         "ControlEECs" : "ChargedRandomConeEECs",
         "EECs" : "ChargedEECsNOM"
+    },
+    "systNames" : {
+        "CH_UP": {
+            "Matches" : "ChargedGenMatchCHUP",
+            "SimonJets" : "ChargedSimonJetsCHUP",
+            "GenSimonJets" : "GenChargedSimonJetsCHUP",
+            "EECs" : "ChargedEECsCHUP"
+        },
+        "CH_DN" : {
+            "Matches" : "ChargedGenMatchCHDN",
+            "SimonJets" : "ChargedSimonJetsCHDN",
+            "GenSimonJets" : "GenChargedSimonJetsCHDN",
+            "EECs" : "ChargedEECsCHUP"
+        },
+        "TRK_EFF" : {
+            "Matches" : "ChargedGenMatchTRKEFF",
+            "SimonJets" : "ChargedSimonJetsTRKEFF",
+            "GenSimonJets" : "GenChargedSimonJetsTRKEFF",
+            "EECs" : "ChargedEECsTRKEFF"
+        }
     }
 }

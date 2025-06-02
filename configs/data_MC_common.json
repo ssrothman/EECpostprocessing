@@ -5,7 +5,7 @@
         "MinNumJets" : 0,
         "MaxNumJets" : -1,
         "maxMETpt" : 50,
-        "maxNumBtag" : 0,
+        "maxNumBtag" : 1,
         "maxNumBtag_level" : "loose",
         "noiseFilters" : [
             "goodVertices",
