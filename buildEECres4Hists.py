@@ -4,6 +4,7 @@ import hist
 import awkward as ak
 
 import pyarrow.dataset as ds
+import pyarrow.compute as pc
 
 from tqdm import tqdm
 
@@ -32,6 +33,11 @@ prebinned_bins = {
            1.04719755, 1.15191731, 1.25663706, 
            1.36135682, 1.46607657, 1.57079633]
 }
+
+def pa_mod(val, divisor):
+    quotient = pc.floor(pc.divide(val, divisor))
+    remainder = pc.subtract(val, pc.multiply(quotient, divisor))
+    return remainder
 
 class sm64_rng:
     def __init__(self, seedarr, repeats):
@@ -80,7 +86,8 @@ class sm64_rng:
         return np.repeat(k - 1, self.repeats) #unpack the run lengths
 
 def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
-                           prebinned = False, nbatch=-1, skipNominal=False):
+                           prebinned = False, nbatch=-1, skipNominal=False,
+                           statN=-1, statK=-1):
 
     dataset = ds.dataset(basepath, format="parquet")
 
@@ -95,7 +102,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
         H_target = hist.Hist(
             hist.axis.Integer(minboot, bootstrap+1,
                               name='bootstrap', label='bootstrap',
-                              underflow=True, overflow=True),
+                              underflow=False, overflow=False),
             hist.axis.Variable(ptbins,
                                name='pt', label='$p_{T}$ [GeV]',
                                underflow=True, overflow=True),
@@ -113,7 +120,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
         H = hist.Hist(
             hist.axis.Integer(minboot, bootstrap+1,
                               name='bootstrap', label='bootstrap',
-                              underflow=True, overflow=True),
+                              underflow=False, overflow=False),
             hist.axis.Variable(ptbins,
                                name='pt', label='$p_{T}$ [GeV]',
                                underflow=True, overflow=True),
@@ -132,7 +139,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
         H = hist.Hist(
             hist.axis.Integer(minboot, bootstrap+1,
                               name='bootstrap', label='bootstrap',
-                              underflow=True, overflow=True),
+                              underflow=False, overflow=False),
             hist.axis.Variable(ptbins,
                                name='pt', label='$p_{T}$ [GeV]',
                                underflow=True, overflow=True),
@@ -157,13 +164,19 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
     time_fillboot = 0
     time_bootwt = 0
 
+    if statN > 0:
+        thefilter = pa_mod(ds.field('eventhash'), statN) == statK
+    else:
+        thefilter = None
+
     for batch in tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
                                                   'pt', 'wt', 
                                                   the_evtwt, 'eventhash'],
                                          batch_size=1000000000,
                                          batch_readahead=16,
                                          fragment_readahead=16,
-                                         use_threads=True)):
+                                         use_threads=True,
+                                         filter = thefilter)):
         if nbatch > 0:
             if ibatch >= nbatch:
                 break
@@ -239,13 +252,24 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
 
     return H
 
-def fill_transferhist_from_parquet(basepath, systwt):
+def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
+                                   random_seed = 0, skipNominal=False,
+                                   statN=-1, statK=-1):
 
     dataset = ds.dataset(basepath, format="parquet")
 
     the_evtwt = 'evtwt_%s'%systwt
+    
+    if skipNominal:
+        minboot = 1
+    else:
+        minboot = 0
+
 
     H = hist.Hist(
+        hist.axis.Integer(minboot, bootstrap+1, 
+                          name='bootstrap', label='bootstrap',
+                          underflow=False, overflow=False),
         hist.axis.Variable(ptbins,
                            name='pt_reco', label='$p_{T,reco}$ [GeV]',
                            underflow=True, overflow=True),
@@ -273,29 +297,68 @@ def fill_transferhist_from_parquet(basepath, systwt):
         storage=hist.storage.Double()
     )
 
+
+    if statN > 0:
+        thefilter = pa_mod(ds.field('eventhash'), statN) == statK
+    else:
+        thefilter = None
+
     for batch in tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco', 
                                                   'r_reco', 'c_reco',
                                                   'pt_gen', 'R_gen',
                                                   'r_gen', 'c_gen',
                                                   'wt_reco', 'wt_gen',
-                                                  the_evtwt])):
+                                                  'eventhash', the_evtwt],
+                                         filter = thefilter)):
         
-        H.fill(
-            R_reco=batch['R_reco'].to_numpy(),
-            R_gen=batch['R_gen'].to_numpy(),
-            r_reco=batch['r_reco'].to_numpy(),
-            r_gen=batch['r_gen'].to_numpy(),
-            c_reco=batch['c_reco'].to_numpy(),
-            c_gen=batch['c_gen'].to_numpy(),
-            pt_reco=batch['pt_reco'].to_numpy(),
-            pt_gen=batch['pt_gen'].to_numpy(),
-            weight=batch[the_evtwt].to_numpy()*batch['wt_reco'].to_numpy(),
-        )
+        R_reco=batch['R_reco'].to_numpy()
+        R_gen=batch['R_gen'].to_numpy()
+        r_reco=batch['r_reco'].to_numpy()
+        r_gen=batch['r_gen'].to_numpy()
+        c_reco=batch['c_reco'].to_numpy()
+        c_gen=batch['c_gen'].to_numpy()
+        pt_reco=batch['pt_reco'].to_numpy()
+        pt_gen=batch['pt_gen'].to_numpy()
+        weight=batch[the_evtwt].to_numpy()*batch['wt_reco'].to_numpy()
+
+        evthash = batch['eventhash'].to_numpy()
+
+        if not skipNominal:
+            H.fill(
+                R_reco  = R_reco,
+                R_gen   = R_gen,
+                r_reco  = r_reco,
+                r_gen   = r_gen,
+                c_reco  = c_reco,
+                c_gen   = c_gen,
+                pt_reco = pt_reco,
+                pt_gen  = pt_gen,
+                weight  = weight,
+                bootstrap = 0
+            )
+        
+        repeats = ak.to_numpy(ak.run_lengths(evthash))
+        rng = sm64_rng(evthash + random_seed, repeats)
+
+        for i in range(bootstrap):
+            boot = rng.next_poisson(1.0)
+            H.fill(
+                R_reco  = R_reco,
+                R_gen   = R_gen,
+                r_reco  = r_reco,
+                r_gen   = r_gen,
+                c_reco  = c_reco,
+                c_gen   = c_gen,
+                pt_reco = pt_reco,
+                pt_gen  = pt_gen,
+                weight  = weight*boot,
+                bootstrap = i+1
+            )
 
     return H
 
-
-def fill_wtratiohist_from_parquet(basepath, systwt):
+def fill_wtratiohist_from_parquet(basepath, systwt,
+                                  statN, statK):
 
     dataset = ds.dataset(basepath, format="parquet")
 
@@ -332,12 +395,19 @@ def fill_wtratiohist_from_parquet(basepath, systwt):
         storage=hist.storage.Double()
     )
 
+
+    if statN > 0:
+        thefilter = pa_mod(ds.field('eventhash'), statN) == statK
+    else:
+        thefilter = None
+
     for batch in tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco',
                                                   'r_reco', 'c_reco',
                                                   'pt_gen', 'R_gen',
                                                   'r_gen', 'c_gen',
                                                   'wt_reco', 'wt_gen',
-                                                  the_evtwt])):
+                                                  the_evtwt],
+                                         filter = thefilter)):
         H_wtgen.fill(
             R_gen=batch['R_gen'].to_numpy(),
             r_gen=batch['r_gen'].to_numpy(),
