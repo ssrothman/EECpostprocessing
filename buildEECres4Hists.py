@@ -39,57 +39,94 @@ def pa_mod(val, divisor):
     remainder = pc.subtract(val, pc.multiply(quotient, divisor))
     return remainder
 
-class sm64_rng:
-    def __init__(self, seedarr, repeats):
-        self.repeats = repeats
-        cumsum = np.cumsum(self.repeats) - 1
-        self.state = seedarr[cumsum] # only unique values
+class RNG:
+    '''
+    This implements a vectorized random nunmber generator, 
+    not in the sense that the production of random numbers
+    from a given seed is vectorized, but in the sense that
+    this class generates a vector of random numbers from 
+    a vector of seeds. Ie this is under the hood a vector of 
+    random number /generators/.
 
-    def next_uint64(self):
-        self.state += 0x9e3779b97f4a7c15;
-        z = self.state
-        z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-        z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-        z = (z ^ (z >> 31))
-        return z
+    This is desirable because it allows us to generate random numbers
+    deterministically from each event's (run, event, lumi) value. This
+    is useful for bootstrapping :)
 
-    def next_uint64_masked(self, mask):
-        self.state[mask] += 0x9e3779b97f4a7c15
-        z = self.state[mask]
-        z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
-        z = (z ^ (z >> 27)) * 0x94d049bb133111eb
-        z = (z ^ (z >> 31))
-        return z
+    The actually RNG implementation is the implementation from 
+    Numerical Recipes 3rd edition page 342 (366 in the pdf).
+    This is basically a convlution of two xors and a linear shift
+    Should be more than good enough :)
+    '''
+    def __init__(self, seeds):
+        self.N = len(seeds)
 
-    def next_float(self):
-        return self.next_uint64().astype(np.float64) / (1<<64)
+        self.v = np.ones(self.N, dtype=np.uint64)*4101842887655102017
+        self.w = np.ones(self.N, dtype=np.uint64)
 
-    def next_float_masked(self, mask):
-        return self.next_uint64_masked(mask) / (1<<64)
+        self.u = np.bitwise_xor(seeds.astype(np.uint64), self.v)
+        self.next_int64()
 
-    def next_poisson(self, lam):
-        # Poisson RNG using the rejection method
-        if lam < 0:
-            raise ValueError("Lambda must be non-negative")
-        elif lam == 0:
-            return 0
+        self.v = self.u.copy();
+        self.next_int64()
 
-        L = np.exp(-lam)
-        p = self.next_float()
-        k = np.ones_like(p, dtype=np.int64)
-        while True:
-            mask = p > L
-            if (not np.any(mask)):
-                break
-            p[mask] = p[mask] * self.next_float_masked(mask)
+        self.w = self.v.copy()
+        self.next_int64()
+
+        # For some random number generators [not sure about this one]
+        # if you initialize with simialar seeds (ie differing by +-1) you
+        # get strongly correlated numbers for the first few calls
+        # I often initialize with seeds that differ by only +-1 
+        # I'm not sure if this is genuinely a problem
+        # But out of an abundance of caution, we'll just throw away
+        # the first 8 random numbers
+        # the overhead from doing this is negligible anyway
+        # is it's no cost for maybe a small gain :)
+        for i in range(8):
+            self.next_int64()
+
+    def next_int64(self, mask=slice(None)):
+        self.u[mask] = self.u[mask] * 2862933555777941757 + 7046029254386353087
+
+        self.v[mask] = np.bitwise_xor(self.v[mask], self.v[mask] >> 17)
+        self.v[mask] = np.bitwise_xor(self.v[mask], self.v[mask] << 31)
+        self.v[mask] = np.bitwise_xor(self.v[mask], self.v[mask] >> 8)
+
+        self.w[mask] = 4294957665 * (np.bitwise_and(self.w[mask], 0xffffffff)) + (self.w[mask] >> 32)
+
+        x = np.bitwise_xor(self.u[mask], self.u[mask] << 21)
+        x = np.bitwise_xor(x, x >> 35)
+        x = np.bitwise_xor(x, x << 4)
+        result = np.bitwise_xor(x + self.v[mask], self.w[mask])
+        return result
+
+    def next_int32(self):
+        return self.next_int64() & 0xffffffff
+
+    def next_float64(self, mask=slice(None)):
+        # get uniform random number on range [0, 1) from unsigned int64
+        # for reasons beyond my comprehension, I don't actually get 64 bits
+        # from next_int64(), but rather 57 bits
+        return self.next_int64(mask) / ((1 << 64) )
+
+    def next_poisson(self, lamexp=np.exp(-1.0)):
+        k = np.zeros(self.N, dtype=np.int32)
+        t = self.next_float64()
+        
+        mask = t > lamexp
+        while np.any(mask):
             k[mask] += 1
-        return np.repeat(k - 1, self.repeats) #unpack the run lengths
+            t[mask] *= self.next_float64(mask)
+            mask = t > lamexp
+
+        return k
 
 def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
                            prebinned = False, nbatch=-1, skipNominal=False,
-                           statN=-1, statK=-1):
+                           statN=-1, statK=-1,
+                           ptreweight_func=None,
+                           fs=None):
 
-    dataset = ds.dataset(basepath, format="parquet")
+    dataset = ds.dataset(basepath, format="parquet", filesystem=fs)
 
     the_evtwt = 'evtwt_%s'%systwt
 
@@ -169,14 +206,22 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
     else:
         thefilter = None
 
-    for batch in tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
+    iterator = tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
                                                   'pt', 'wt', 
                                                   the_evtwt, 'eventhash'],
-                                         batch_size=1000000000,
-                                         batch_readahead=16,
-                                         fragment_readahead=16,
-                                         use_threads=True,
-                                         filter = thefilter)):
+                                         batch_readahead=2,
+                                         fragment_readahead=2,
+                                         use_threads=False,
+                                         batch_size = 1<<20,
+                                         filter = thefilter))
+
+    total_rows = dataset.count_rows()
+    rows_so_far = 0
+    
+    for batch in iterator:
+        rows_so_far += batch.num_rows
+        iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
+
         if nbatch > 0:
             if ibatch >= nbatch:
                 break
@@ -197,6 +242,9 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
         wt = batch['wt'].to_numpy()
         evthash = batch['eventhash'].to_numpy()
         time_tonpy += time() - t0
+
+        if ptreweight_func is not None:
+            wt = wt * ptreweight_func(pt)
 
         if prebinned:
             if np.min(r) < 1:
@@ -222,11 +270,14 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
             time_fillnom += time() - t0
 
         repeats = ak.to_numpy(ak.run_lengths(evthash))
-        rng = sm64_rng(evthash + random_seed, repeats)
+        cumsum = np.cumsum(repeats) - 1
+        seeds = evthash[cumsum] + random_seed
+        rng = RNG(seeds)
 
         for i in range(bootstrap):
             t0 = time()
-            boot = rng.next_poisson(1.0)
+            boot = rng.next_poisson()
+            boot = np.repeat(boot, repeats)
             time_bootwt += time() - t0
             t0 = time()
             H.fill(
@@ -254,9 +305,11 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
 
 def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
                                    random_seed = 0, skipNominal=False,
-                                   statN=-1, statK=-1):
+                                   statN=-1, statK=-1,
+                                   ptreweight_func=None,
+                                   fs=None):
 
-    dataset = ds.dataset(basepath, format="parquet")
+    dataset = ds.dataset(basepath, format="parquet", filesystem=fs)
 
     the_evtwt = 'evtwt_%s'%systwt
     
@@ -309,6 +362,10 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
                                                   'r_gen', 'c_gen',
                                                   'wt_reco', 'wt_gen',
                                                   'eventhash', the_evtwt],
+                                         batch_readahead=2,
+                                         fragment_readahead=2,
+                                         use_threads=False,
+                                         batch_size = 1<<20,
                                          filter = thefilter)):
         
         R_reco=batch['R_reco'].to_numpy()
@@ -320,6 +377,9 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
         pt_reco=batch['pt_reco'].to_numpy()
         pt_gen=batch['pt_gen'].to_numpy()
         weight=batch[the_evtwt].to_numpy()*batch['wt_reco'].to_numpy()
+
+        if ptreweight_func is not None:
+            weight = weight * ptreweight_func(pt_reco)
 
         evthash = batch['eventhash'].to_numpy()
 
@@ -338,10 +398,13 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
             )
         
         repeats = ak.to_numpy(ak.run_lengths(evthash))
-        rng = sm64_rng(evthash + random_seed, repeats)
+        cumsum = np.cumsum(repeats) - 1
+        seeds = evthash[cumsum] + random_seed
+        rng = RNG(seeds)
 
         for i in range(bootstrap):
             boot = rng.next_poisson(1.0)
+            boot = np.repeat(boot, repeats)
             H.fill(
                 R_reco  = R_reco,
                 R_gen   = R_gen,
@@ -356,74 +419,3 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
             )
 
     return H
-
-def fill_wtratiohist_from_parquet(basepath, systwt,
-                                  statN, statK):
-
-    dataset = ds.dataset(basepath, format="parquet")
-
-    the_evtwt = 'evtwt_%s'%systwt
-
-    H_wtgen = hist.Hist(
-        hist.axis.Variable(ptbins,
-                           name='pt_gen', label='$p_{T,gen}$ [GeV]',
-                           underflow=True, overflow=True),
-        hist.axis.Variable(Rbins,
-                          name="R_gen", label = '$R_{gen}$',
-                          underflow=True, overflow=True),
-        hist.axis.Variable(rbins,
-                          name="r_gen", label = '$r_{gen}$',
-                          underflow=False, overflow=False),
-        hist.axis.Variable(cbins,
-                          name="c_gen", label = '$c_{gen}$',
-                          underflow=False, overflow=False),
-        storage=hist.storage.Double()
-    )
-    H_wtreco = hist.Hist(
-        hist.axis.Variable(ptbins,
-                           name='pt_gen', label='$p_{T,gen}$ [GeV]',
-                           underflow=True, overflow=True),
-        hist.axis.Variable(Rbins,
-                          name="R_gen", label = '$R_{gen}$',
-                          underflow=True, overflow=True),
-        hist.axis.Variable(rbins,
-                          name="r_gen", label = '$r_{gen}$',
-                          underflow=False, overflow=False),
-        hist.axis.Variable(cbins,
-                          name="c_gen", label = '$c_{gen}$',
-                          underflow=False, overflow=False),
-        storage=hist.storage.Double()
-    )
-
-
-    if statN > 0:
-        thefilter = pa_mod(ds.field('eventhash'), statN) == statK
-    else:
-        thefilter = None
-
-    for batch in tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco',
-                                                  'r_reco', 'c_reco',
-                                                  'pt_gen', 'R_gen',
-                                                  'r_gen', 'c_gen',
-                                                  'wt_reco', 'wt_gen',
-                                                  the_evtwt],
-                                         filter = thefilter)):
-        H_wtgen.fill(
-            R_gen=batch['R_gen'].to_numpy(),
-            r_gen=batch['r_gen'].to_numpy(),
-            c_gen=batch['c_gen'].to_numpy(),
-            pt_gen=batch['pt_gen'].to_numpy(),
-            weight=batch[the_evtwt].to_numpy()*batch['wt_gen'].to_numpy(),
-        )
-        H_wtreco.fill(
-            R_gen=batch['R_gen'].to_numpy(),
-            r_gen=batch['r_gen'].to_numpy(),
-            c_gen=batch['c_gen'].to_numpy(),
-            pt_gen=batch['pt_gen'].to_numpy(),
-            weight=batch[the_evtwt].to_numpy()*batch['wt_reco'].to_numpy(),
-        )
-
-    Hresult = H_wtgen.copy().reset()
-    Hresult += H_wtreco.values(flow=True)/H_wtgen.values(flow=True)
-
-    return Hresult, H_wtgen, H_wtreco
