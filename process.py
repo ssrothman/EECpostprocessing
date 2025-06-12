@@ -249,7 +249,7 @@ if __name__ == '__main__':
                         entry_stop=end,
                         schemaclass = schema,
                         uproot_options = {
-                            'timeout' : 30,
+                            'timeout' : 120,
                             'use_threads' : False,
                             #'num_workers' : 4,
                         }
