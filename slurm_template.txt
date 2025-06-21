@@ -2,7 +2,7 @@
 
 #SBATCH --time=24:00:00
 #SBATCH --ntasks=1
-#SBATCH --mem=2g
+#SBATCH --mem=MEM
 #SBATCH --partition=submit
 #SBATCH --job-name=UUID
 #SBATCH --output=slurm/UUID.out

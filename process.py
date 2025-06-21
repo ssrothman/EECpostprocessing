@@ -5,7 +5,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Produce histograms off of NanoAOD files')
 
     parser.add_argument("sample", type=str)
-    parser.add_argument("binningtype", type=str)
+    parser.add_argument("skimmingtype", type=str)
     parser.add_argument('configsuite', type=str)
 
     parser.add_argument('--force', action='store_true')
@@ -99,7 +99,7 @@ if __name__ == '__main__':
         files = [args.sample]
     else:
         sample = SAMPLE_LIST.lookup(args.sample)
-        bt = args.binningtype.strip().upper()
+        bt = args.skimmingtype.strip().upper()
         print("Exclude dropped?", bt != 'COUNT')
         files = sample.get_files(exclude_dropped = bt != 'COUNT')
         if args.nfiles is not None:
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     if args.local:
         destination = 'testlocal'
     else:
-        destination = "/ceph/submit/data/group/cms/store/user/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.binningtype)
+        destination = "/ceph/submit/data/group/cms/store/user/srothman/EEC/%s/%s/%s"%(SAMPLE_LIST.tag, sample.name, args.skimmingtype)
         if os.path.exists(os.path.join(destination, out_fname, args.syst)) and not (args.force or args.recover):
             raise ValueError("Destination %s already exists"%os.path.join(destination, out_fname, args.syst))
 
@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
     if args.verbose:
         print("config suite", args.configsuite)
-        print("binning type", args.binningtype)
+        print("skimming type", args.skimmingtype)
         print()
         configstr = json.dumps(config.to_dict(), indent=4)
         print(configstr)
@@ -193,7 +193,7 @@ if __name__ == '__main__':
         JECera = args.JECera
 
     argsdict = {
-        'binningtype' : args.binningtype,
+        'skimmingtype' : args.skimmingtype,
         'era' : JECera,
         'flags' : None if args.local else sample.flags,
         'noRoccoR' : args.noRoccoR,

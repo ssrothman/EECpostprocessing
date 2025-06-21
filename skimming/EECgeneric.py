@@ -10,13 +10,13 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import os.path
 
-class EECgenericBinner:
+class EECgenericSkimmer:
     def __init__(self, 
                  config,
                  **kwargs):
         self.config = config
 
-    def binTransfer(self, 
+    def skimTransfer(self, 
                     transfervals,
                     ptDenomReco, ptDenomGen,
                     order,
@@ -25,6 +25,7 @@ class EECgenericBinner:
                     evtIdx, jetMask, 
                     wtVars,
                     outpath,
+                    rMu,
                     isRes=True):
 
         iReco = ak.values_astype(iReco, np.int32)
@@ -76,10 +77,10 @@ class EECgenericBinner:
         }
 
         if isRes:
-            fillvals['r_reco'] =   squash(vals.r_reco),
-            fillvals['c_reco'] =   squash(vals.c_reco),
-            fillvals['r_gen'] =    squash(vals.r_gen),
-            fillvals['c_gen'] =    squash(vals.c_gen),
+            fillvals['r_reco']=  squash(vals.r_reco)
+            fillvals['c_reco']=  squash(vals.c_reco)
+            fillvals['r_gen'] = squash(vals.r_gen)
+            fillvals['c_gen'] = squash(vals.c_gen)
 
         for variation in wtVars:
             thewt = wtVars[variation]
@@ -95,6 +96,23 @@ class EECgenericBinner:
         fillvals['flav_reco'] = squash(flav_reco_b)
         fillvals['flav_gen'] = squash(flav_gen_b)
 
+        run = rRecoJet._x.run
+        lumi = rRecoJet._x.luminosityBlock
+        event = rRecoJet._x.event
+
+        run_b, lumi_b, event_b, _ = ak.broadcast_arrays(run, lumi, event, vals.R_reco)
+        fillvals['run'] = squash(run_b)
+        fillvals['lumi'] = squash(lumi_b)
+        fillvals['event'] = squash(event_b)
+
+        Zpt = rMu.Zs.pt
+        Zy = rMu.Zs.rapidity
+        Zmass = rMu.Zs.mass
+        Zpt_b, Zy_b, Zmass_b, _ = ak.broadcast_arrays(Zpt, Zy, Zmass, vals.R_reco)
+        fillvals['Zpt'] = squash(Zpt_b)
+        fillvals['Zy'] = squash(Zy_b)
+        fillvals['Zmass'] = squash(Zmass_b)
+
         table = pa.Table.from_pandas(pd.DataFrame(fillvals),
                                      preserve_index=False)
          
@@ -107,7 +125,7 @@ class EECgenericBinner:
         return ak.sum(vals.wt_reco)
         #return df
 
-    def binObserved(self, 
+    def skimObserved(self, 
                     EECvals, 
                     ptDenom, 
                     order,
@@ -117,6 +135,7 @@ class EECgenericBinner:
                     jetMask, 
                     wtVars,
                     outpath,
+                    rMu,
                     isRes=True):
 
         iReco = ak.values_astype(iReco, np.int32)
@@ -152,11 +171,10 @@ class EECgenericBinner:
             'btag' : squash(btag_b),
             'flav' : squash(flav_b),
         }
-        
-        if isRes:
-            fillvals['r'] = squash(vals.r),
-            fillvals['c'] = squash(vals.c),
 
+        if isRes:
+            fillvals['r']= squash(vals.r)
+            fillvals['c']= squash(vals.c)
 
         for variation in wtVars:
             thewt = wtVars[variation]
@@ -167,14 +185,18 @@ class EECgenericBinner:
         event = rJet._x.event
         lumi = rJet._x.luminosityBlock
 
-        #use some arbitrary large primes to "hash" the (run, lumi, event) into a unique-ish number
-        #the actual requirement is that subsequent events must have different codes
-        #and that a given (run, lumi, event) always has the same code
-        #this satisfies that requirement with very high probability
-        eventhash = event + lumi*1299827 + run*2038074743 
+        run_b, event_b, lumi_b, _ = ak.broadcast_arrays(run, event, lumi, vals.R)
+        fillvals['run'] = squash(run_b)
+        fillvals['event'] = squash(event_b)
+        fillvals['lumi'] = squash(lumi_b)
 
-        eventhash_b, _ = ak.broadcast_arrays(eventhash, vals.R)
-        fillvals['eventhash'] = squash(eventhash_b)
+        Zpt = rMu.Zs.pt
+        Zy = rMu.Zs.rapidity
+        Zmass = rMu.Zs.mass
+        Zpt_b, Zy_b, Zmass_b, _ = ak.broadcast_arrays(Zpt, Zy, Zmass, vals.R)
+        fillvals['Zpt'] = squash(Zpt_b)
+        fillvals['Zy'] = squash(Zy_b)
+        fillvals['Zmass'] = squash(Zmass_b)
 
         table = pa.Table.from_pandas(pd.DataFrame(fillvals),
                                      preserve_index=False)

@@ -27,7 +27,7 @@ python process.py <dataset name> <skimmer name> <config name> --samplelist <name
 
 The dataset name is a lookup into the samplelist from samples/. When you make a new samplelist make sure to import it into samples/\_\_init\_\_.py. The identifier passed to the --samplelist option is the name assigned to that samplelist in the \_\_init\_\_.py file. 
 
-The skimmer name is the name of the skimmer you want to use. For annoying historical reasons these are in the folder binning/. If you make a new one be sure to import it and add it to the dictionary in processing/EECProcessor.py. This is where the skimmer name you pass will be looked up. Currently available and not-obselete skimmers are:
+The skimmer name is the name of the skimmer you want to use. For annoying historical reasons these are in the folder skimming/. If you make a new one be sure to import it and add it to the dictionary in processing/EECProcessor.py. This is where the skimmer name you pass will be looked up. Currently available and not-obselete skimmers are:
  - Kinematics: dumps various kinematic variables. Creates datasets for event-level qauntities (eg rho, Zmass, ...), jet-level quantities (eg pt, eta, ...), and particle-level quantities (eg pt, pdgid, ...).
  - EECres4\*: dumps the res4\* entries. 
  - EECproj: dumps the projected EEC entries.

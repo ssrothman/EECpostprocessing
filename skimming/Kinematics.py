@@ -7,7 +7,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import os.path
 
-class KinematicsBinner:
+class KinematicsSkimmer:
     def __init__(self, config, *args, **kwargs):
         self.config = config
 
@@ -213,7 +213,7 @@ class KinematicsBinner:
 
         return ak.sum(thevals['evtwt_nominal'])
 
-    def binAll(self, readers, mask, evtMask, wtVars, basepath):
+    def skimAll(self, readers, mask, evtMask, wtVars, basepath):
         Hevt = self.eventLevel(
             readers, evtMask, mask, wtVars,
             os.path.join(basepath, 'event')

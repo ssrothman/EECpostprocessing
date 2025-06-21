@@ -25,12 +25,19 @@ parser.add_argument("--nbatch", type=int, default=-1, help="Number of batches to
 parser.add_argument('--statN', type=int, default=-1, help="Number of statistically-independent splits to create")
 parser.add_argument('--statK', type=int, default=-1, help="Which statistical split we are processing (k in [0, statN-1])")
 
-parser.add_argument('--ptreweight_func', type=str, default=None)
-parser.add_argument('--ptreweight_data', type=str, default=None)
+parser.add_argument('--kinreweight_path', type=str, default=None, help="Path to kinreweight correctionlib json")
+parser.add_argument('--kinreweight_key', type=str, default=None, help="Key in kinreweight correctionlib json")
 
 parser.add_argument("--slurm", action='store_true')
 
 args = parser.parse_args()
+
+import sys
+from shlex import quote
+print(' '.join(quote(s) for s in sys.argv))
+if args.Hist == 'transfer' and args.nboot > 0:
+    print("\tno transfer bootstrap")
+    sys.exit(0)
 
 if args.usexrootd and args.thepath is None:
     raise ValueError("If using xrootd, you must specify the path with --thepath")
@@ -65,20 +72,23 @@ else:
     
 if args.thepath is None:
     basepath = f'/ceph/submit/data/group/cms/store/user/srothman/EEC/{args.Runtag}/{args.Sample}/{args.Binner}'
-    print(f"Basepath: {basepath}")
+    #print(f"Basepath: {basepath}")
     subpaths = os.scandir(basepath)
 
     options = []
     for subpath in subpaths:
         if not (subpath.is_dir()):
             continue
+        if not (subpath.name.startswith('hists')):
+            continue
+
         options.append(subpath.name)
 
     if (len(options) == 1):
-        print()
-        print("Only one option found: %s" % options[0])
-        print("No user input needed :D")
-        print()
+        #print()
+        #print("Only one option found: %s" % options[0])
+        #print("No user input needed :D")
+        #print()
         thepath = os.path.join(basepath, options[0])
     else:
         print()
@@ -92,9 +102,16 @@ if args.thepath is None:
 
     thepath = os.path.join(thepath, args.Objsyst, args.Hist)
 
-    print("The path is: %s" % thepath)
+    #print("The path is: %s" % thepath)
 else:
     thepath = args.thepath
+
+
+import hashlib
+pathhash = hashlib.md5(basepath.encode())
+#first 32 bits as int
+pathhash = np.uint32(int(pathhash.hexdigest()[:8], 16))
+args.rng = args.rng + pathhash
 
 if args.outfile is None:
     outfile = thepath
@@ -108,15 +125,15 @@ if args.outfile is None:
         outfile += '_first%d' % args.nbatch
     if args.statN > 0:
         outfile += '_%dstat%d' % (args.statN, args.statK)
-    if args.ptreweight_func is not None:
-        outfile += '_ptreweight'
+    if args.kinreweight_path is not None:
+        outfile += '_kinreweight'
 
     outfile += '.pkl'
 else:
     outfile = args.outfile
 
 if (args.usexrootd and fs.exists(outfile)) or (not args.usexrootd and os.path.exists(outfile)):
-    print("destination already exists! skipping")
+    #print("destination already exists! skipping")
     import sys
     sys.exit(1)
 else:
@@ -144,6 +161,9 @@ if args.slurm:
 
     slurm_script = slurm_script.replace("UUID", uuidstr)
 
+    desired_mem = '8g' if args.Hist == 'transfer' else '8g'
+    slurm_script = slurm_script.replace('MEM', desired_mem)
+
     with open("slurm/submit_%s.sh" % uuidstr, 'w') as f:
         f.write(slurm_script)
     print("Submitting job to SLURM...")
@@ -152,22 +172,16 @@ if args.slurm:
     print("Job submitted with UUID:", uuidstr)
     print("Exiting.")
     import time
-    time.sleep(1)
     sys.exit(0)
 
 from buildEECres4Hists import fill_hist_from_parquet, fill_transferhist_from_parquet
 
-if args.ptreweight_func is not None:
-    import runpy
-    func = runpy.run_path(args.ptreweight_func)['THESF']
-
-    import dill as pickle
-    with open(args.ptreweight_data, 'rb') as f:
-        data = pickle.load(f)
-
-    ptreweight_func = lambda pt : func.evaluate(pt, data)
+if args.kinreweight_path is not None:
+    from correctionlib import CorrectionSet
+    cset = CorrectionSet.from_file(args.kinreweight_path)
+    kinreweight_func = cset[args.kinreweight_key].evaluate
 else:
-    ptreweight_func = None
+    kinreweight_func = None
 
 print("\nBuilding hist...")
 if args.Hist == 'transfer':
@@ -179,7 +193,7 @@ if args.Hist == 'transfer':
                                        skipNominal = args.skipNominal,
                                        statN = args.statN,
                                        statK = args.statK,
-                                       ptreweight_func = ptreweight_func,
+                                       kinreweight = kinreweight_func,
                                        fs = fs)
 else:
     H = fill_hist_from_parquet(thepath, args.nboot, 
@@ -189,7 +203,7 @@ else:
                                skipNominal = args.skipNominal,
                                statN = args.statN,
                                statK = args.statK,
-                               ptreweight_func = ptreweight_func,
+                               kinreweight = kinreweight_func,
                                fs = fs)
 print("Done.\n")
 

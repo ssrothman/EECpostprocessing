@@ -1,19 +1,19 @@
 import numpy as np
 import awkward as ak
 import hist
-from binning.util import *
+from skimming.util import *
 from time import time
 import os.path
 
-from .EECgeneric import EECgenericBinner
+from .EECgeneric import EECgenericSkimmer
 
-class EECres4teeBinner(EECgenericBinner):
+class EECres4teeSkimmer(EECgenericSkimmer):
     def __init__(self, *args, **kwargs):
-        super(EECres4teeBinner, self).__init__(*args, **kwargs)
+        super(EECres4teeSkimmer, self).__init__(*args, **kwargs)
 
-    def binAll(self, readers, mask, evtMask, wtVars, basepath):
+    def skimAll(self, readers, mask, evtMask, wtVars, basepath):
         result = {}
-        result['reco'] = self.binObserved(
+        result['reco'] = self.skimObserved(
                 readers.rRecoEEC.res4tee,
                 readers.rRecoEEC.ptDenom, 4,
                 readers.rRecoJet,
@@ -22,10 +22,11 @@ class EECres4teeBinner(EECgenericBinner):
                 readers.eventIdx,
                 mask, wtVars,
                 os.path.join(basepath, 'reco'),
+                rMu = readers.rMu,
                 isRes=True)
         
         if self.isMC:
-            result['gen'] = self.binObserved(
+            result['gen'] = self.skimObserved(
                     readers.rGenEEC.res4tee,
                     readers.rGenEEC.ptDenom, 4,
                     readers.rGenJet,
@@ -34,9 +35,10 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'gen'),
+                    rMu = readers.rMu,
                     isRes=True)
 
-            result['unmatchedReco'] = self.binObserved(
+            result['unmatchedReco'] = self.skimObserved(
                     readers.rUnmatchedRecoEEC.res4tee,
                     readers.rUnmatchedRecoEEC.ptDenom, 4,
                     readers.rRecoJet,
@@ -45,9 +47,10 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'unmatchedReco'),
+                    rMu = readers.rMu,
                     isRes=True)
 
-            result['unmatchedGen'] = self.binObserved(
+            result['unmatchedGen'] = self.skimObserved(
                     readers.rUnmatchedGenEEC.res4tee,
                     readers.rUnmatchedGenEEC.ptDenom, 4,
                     readers.rGenJet,
@@ -56,9 +59,10 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'unmatchedGen'),
+                    rMu = readers.rMu,
                     isRes=True)
 
-            result['untransferedReco'] = self.binObserved(
+            result['untransferedReco'] = self.skimObserved(
                     readers.rUntransferedRecoEEC.res4tee,
                     readers.rUntransferedRecoEEC.ptDenom, 4,
                     readers.rRecoJet,
@@ -67,9 +71,10 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'untransferedReco'),
+                    rMu = readers.rMu,
                     isRes=True)
 
-            result['untransferedGen'] = self.binObserved(
+            result['untransferedGen'] = self.skimObserved(
                     readers.rUntransferedGenEEC.res4tee,
                     readers.rUntransferedGenEEC.ptDenom, 4,
                     readers.rGenJet,
@@ -78,21 +83,23 @@ class EECres4teeBinner(EECgenericBinner):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'untransferedGen'),
+                    rMu = readers.rMu,
                     isRes=True)
 
-            result['transfer'] = self.binTransfer(
-                readers.rTransfer.res4tee,
-                readers.rTransfer.ptDenomReco,
-                readers.rTransfer.ptDenomGen,
-                4,
-                readers.rGenJet,
-                readers.rRecoJet,
-                readers.rTransfer.iGen,
-                readers.rTransfer.iReco,
-                readers.eventIdx,
-                mask, wtVars,
-                os.path.join(basepath, 'transfer'),
-                isRes=True
+            result['transfer'] = self.skimTransfer(
+                    readers.rTransfer.res4tee,
+                    readers.rTransfer.ptDenomReco,
+                    readers.rTransfer.ptDenomGen,
+                    4,
+                    readers.rGenJet,
+                    readers.rRecoJet,
+                    readers.rTransfer.iGen,
+                    readers.rTransfer.iReco,
+                    readers.eventIdx,
+                    mask, wtVars,
+                    os.path.join(basepath, 'transfer'),
+                    rMu = readers.rMu,
+                    isRes=True
             )
 
         return result

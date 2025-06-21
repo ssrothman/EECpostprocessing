@@ -14,37 +14,29 @@ import os
 import os.path
 from time import time
 
-from binning.dummy import DummyBinner
-from binning.Kinematics import KinematicsBinner
-from binning.Match import MatchBinner
-from binning.Res import ResBinner
-from binning.Beff import BeffBinner
-from binning.Btag import BtagBinner
-from binning.EECproj import EECprojBinner
-from binning.EECres4dipole import EECres4dipoleBinner
-from binning.EECres4tee import EECres4teeBinner
-from binning.EECres4triangle import EECres4triangleBinner
+from skimming.dummy import DummySkimmer
+from skimming.Kinematics import KinematicsSkimmer
+from skimming.EECproj import EECprojSkimmer
+from skimming.EECres4dipole import EECres4dipoleSkimmer
+from skimming.EECres4tee import EECres4teeSkimmer
+from skimming.EECres4triangle import EECres4triangleSkimmer
 
-#from binning.EECgeneric import EECgenericBinner
+#from skimming.EECgeneric import EECgenericSkimmer
 
-BINNERS = {
-    'DUMMY' : DummyBinner,
-    'KINEMATICS' : KinematicsBinner,
-    'MATCH' : MatchBinner,
-    "RES" : ResBinner,
-    'BEFF' : BeffBinner,
-    'BTAG' : BtagBinner,
-    'EECPROJ' : EECprojBinner,
-    "EECRES4DIPOLE" : EECres4dipoleBinner,
-    "EECRES4TEE" : EECres4teeBinner,
-    'EECRES4TRIANGLE' : EECres4triangleBinner,
+SKIMMERS = {
+    'DUMMY' : DummySkimmer,
+    'KINEMATICS' : KinematicsSkimmer,
+    'EECPROJ' : EECprojSkimmer,
+    "EECRES4DIPOLE" : EECres4dipoleSkimmer,
+    "EECRES4TEE" : EECres4teeSkimmer,
+    'EECRES4TRIANGLE' : EECres4triangleSkimmer,
 }
 
 class EECProcessor(processor.ProcessorABC):
     def __init__(self, 
                  config,
                  basepath, 
-                 binningtype,
+                 skimmingtype,
                  era,
                  flags,
                  noRoccoR,
@@ -68,7 +60,7 @@ class EECProcessor(processor.ProcessorABC):
         self.verbose = verbose
 
         self.config = config
-        self.binningtype = binningtype
+        self.skimmingtype = skimmingtype
         self.era = era
         self.flags = flags
 
@@ -89,14 +81,14 @@ class EECProcessor(processor.ProcessorABC):
 
         self.Zreweight = Zreweight
     
-        binningtype= binningtype.strip().upper()
+        skimmingtype= skimmingtype.strip().upper()
 
-        if binningtype == 'COUNT':
-            self.binner = 'COUNT'
-        elif binningtype == 'CUTFLOW':
-            self.binner = 'CUTFLOW'
+        if skimmingtype == 'COUNT':
+            self.skimmer = 'COUNT'
+        elif skimmingtype == 'CUTFLOW':
+            self.skimmer = 'CUTFLOW'
         else:
-            self.binner = BINNERS[binningtype](config)
+            self.skimmer = SKIMMERS[skimmingtype](config)
 
     def postprocess(self, accumulator):
         pass
@@ -176,7 +168,7 @@ class EECProcessor(processor.ProcessorABC):
                 for wt in evtWeight.variations:
                     print("\t", wt)
 
-        if type(self.binner) is str and self.binner == 'CUTFLOW':
+        if type(self.skimmer) is str and self.skimmer == 'CUTFLOW':
             flow_evt = {}
 
             flow_evt['none'] = ak.sum(nomweight, axis=None)
@@ -210,7 +202,7 @@ class EECProcessor(processor.ProcessorABC):
             return
 
         thepath = os.path.join(self.basepath, self.syst)
-        nominal = self.binner.binAll(readers, 
+        nominal = self.skimmer.skimAll(readers, 
                                      jetMask, evtMask,
                                         weightvariations,
                                      thepath)
@@ -228,14 +220,14 @@ class EECProcessor(processor.ProcessorABC):
         #    print("SKIPPING FILE")
         #    return {}
 
-        if type(self.binner) is str and self.binner == 'COUNT':
+        if type(self.skimmer) is str and self.skimmer == 'COUNT':
             if self.isMC:
                 return {'num_evt': np.sum(events.genWeight)}
             else:
                 return {'num_evt': len(events)}
 
-        if type(self.binner) is not str:
-            self.binner.isMC = self.isMC
+        if type(self.skimmer) is not str:
+            self.skimmer.isMC = self.isMC
 
         readers = AllReaders(events, self.config, 
                              self.noRoccoR,
@@ -250,7 +242,7 @@ class EECProcessor(processor.ProcessorABC):
         self.actually_process(events, readers, 
                               result)
 
-        if self.verbose and type(self.binner) is not str:
+        if self.verbose and type(self.skimmer) is not str:
             for key in result.keys():
                 print("SUMWT", result[key]['sumwt'])
                 print("SUMWT_PASS", result[key]['sumwt_pass'])

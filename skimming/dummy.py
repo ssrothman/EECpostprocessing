@@ -1,7 +1,7 @@
 
-class DummyBinner:
+class DummySkimmer:
     def __init__(self, *args, **kwargs):
         pass
 
-    def binAll(self, readers, mask, evtMask, wt):
+    def skimAll(self, readers, mask, evtMask, wt):
         return {}

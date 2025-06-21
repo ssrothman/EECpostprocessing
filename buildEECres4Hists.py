@@ -8,6 +8,8 @@ import pyarrow.compute as pc
 
 from tqdm import tqdm
 
+from pyrandom123 import get_poisson1_philox2x32
+
 ptbins = [50, 88, 150, 254, 408, 1500]
 Rbins = [0.3, 0.4, 0.5, 0.6]
 #ptbins = [150, 300, 600, 1200, 2400]
@@ -39,91 +41,10 @@ def pa_mod(val, divisor):
     remainder = pc.subtract(val, pc.multiply(quotient, divisor))
     return remainder
 
-class RNG:
-    '''
-    This implements a vectorized random nunmber generator, 
-    not in the sense that the production of random numbers
-    from a given seed is vectorized, but in the sense that
-    this class generates a vector of random numbers from 
-    a vector of seeds. Ie this is under the hood a vector of 
-    random number /generators/.
-
-    This is desirable because it allows us to generate random numbers
-    deterministically from each event's (run, event, lumi) value. This
-    is useful for bootstrapping :)
-
-    The actually RNG implementation is the implementation from 
-    Numerical Recipes 3rd edition page 342 (366 in the pdf).
-    This is basically a convlution of two xors and a linear shift
-    Should be more than good enough :)
-    '''
-    def __init__(self, seeds):
-        self.N = len(seeds)
-
-        self.v = np.ones(self.N, dtype=np.uint64)*4101842887655102017
-        self.w = np.ones(self.N, dtype=np.uint64)
-
-        self.u = np.bitwise_xor(seeds.astype(np.uint64), self.v)
-        self.next_int64()
-
-        self.v = self.u.copy();
-        self.next_int64()
-
-        self.w = self.v.copy()
-        self.next_int64()
-
-        # For some random number generators [not sure about this one]
-        # if you initialize with simialar seeds (ie differing by +-1) you
-        # get strongly correlated numbers for the first few calls
-        # I often initialize with seeds that differ by only +-1 
-        # I'm not sure if this is genuinely a problem
-        # But out of an abundance of caution, we'll just throw away
-        # the first 8 random numbers
-        # the overhead from doing this is negligible anyway
-        # is it's no cost for maybe a small gain :)
-        for i in range(8):
-            self.next_int64()
-
-    def next_int64(self, mask=slice(None)):
-        self.u[mask] = self.u[mask] * 2862933555777941757 + 7046029254386353087
-
-        self.v[mask] = np.bitwise_xor(self.v[mask], self.v[mask] >> 17)
-        self.v[mask] = np.bitwise_xor(self.v[mask], self.v[mask] << 31)
-        self.v[mask] = np.bitwise_xor(self.v[mask], self.v[mask] >> 8)
-
-        self.w[mask] = 4294957665 * (np.bitwise_and(self.w[mask], 0xffffffff)) + (self.w[mask] >> 32)
-
-        x = np.bitwise_xor(self.u[mask], self.u[mask] << 21)
-        x = np.bitwise_xor(x, x >> 35)
-        x = np.bitwise_xor(x, x << 4)
-        result = np.bitwise_xor(x + self.v[mask], self.w[mask])
-        return result
-
-    def next_int32(self):
-        return self.next_int64() & 0xffffffff
-
-    def next_float64(self, mask=slice(None)):
-        # get uniform random number on range [0, 1) from unsigned int64
-        # for reasons beyond my comprehension, I don't actually get 64 bits
-        # from next_int64(), but rather 57 bits
-        return self.next_int64(mask) / ((1 << 64) )
-
-    def next_poisson(self, lamexp=np.exp(-1.0)):
-        k = np.zeros(self.N, dtype=np.int32)
-        t = self.next_float64()
-        
-        mask = t > lamexp
-        while np.any(mask):
-            k[mask] += 1
-            t[mask] *= self.next_float64(mask)
-            mask = t > lamexp
-
-        return k
-
 def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
                            prebinned = False, nbatch=-1, skipNominal=False,
                            statN=-1, statK=-1,
-                           ptreweight_func=None,
+                           kinreweight=None,
                            fs=None):
 
     dataset = ds.dataset(basepath, format="parquet", filesystem=fs)
@@ -202,13 +123,22 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
     time_bootwt = 0
 
     if statN > 0:
-        thefilter = pa_mod(ds.field('eventhash'), statN) == statK
+        thefilter = pa_mod(ds.field('event'), statN) == statK
     else:
         thefilter = None
 
+    if kinreweight is not None:
+        reweightvars = ['Zpt', 'Zy']
+    else:
+        reweightvars = []
+
     iterator = tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
                                                   'pt', 'wt', 
-                                                  the_evtwt, 'eventhash'],
+                                                  the_evtwt, 
+                                                'event',
+                                                'run',
+                                                'lumi',
+                                                *reweightvars],
                                          batch_readahead=2,
                                          fragment_readahead=2,
                                          use_threads=False,
@@ -218,6 +148,11 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
     total_rows = dataset.count_rows()
     rows_so_far = 0
     
+    #all_poisson = np.zeros((bootstrap, 0), dtype=np.uint32)
+    #all_keys = np.zeros((bootstrap, 0), dtype=np.uint32)
+    #all_counters = np.zeros((bootstrap, 0), dtype=np.uint64)
+    #edges = []
+
     for batch in iterator:
         rows_so_far += batch.num_rows
         iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
@@ -228,23 +163,26 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
             ibatch += 1
 
         t0 = time()
-        R = batch['R'].to_numpy()
-        r = batch['r'].to_numpy()
-        try:
-            c = batch['c'].to_numpy()
-        except:
-            print("error")
-            print(c)
-            c = batch['c'].to_numpy(zero_copy_only=False)
+        R = batch['R'].to_numpy(zero_copy_only=False)
+        r = batch['r'].to_numpy(zero_copy_only=False)
+        c = batch['c'].to_numpy(zero_copy_only=False)
 
-        pt = batch['pt'].to_numpy()
-        evtwt = batch[the_evtwt].to_numpy()
-        wt = batch['wt'].to_numpy()
-        evthash = batch['eventhash'].to_numpy()
+        pt = batch['pt'].to_numpy(zero_copy_only=False)
+        evtwt = batch[the_evtwt].to_numpy(zero_copy_only=False)
+        wt = batch['wt'].to_numpy(zero_copy_only=False)
+
+        if kinreweight is not None:
+            Zpt = batch['Zpt'].to_numpy(zero_copy_only=False)
+            Zy = batch['Zy'].to_numpy(zero_copy_only=False)
+            kinwt = kinreweight(Zpt, Zy)
+            evtwt = evtwt * kinwt
+
+        run = batch['run'].to_numpy(zero_copy_only=False).astype(np.uint64)
+        lumi = batch['lumi'].to_numpy(zero_copy_only=False).astype(np.uint64)
+        event = batch['event'].to_numpy(zero_copy_only=False).astype(np.uint64) 
+        evthash = ((run << 48) + (lumi << 32) + event).astype(np.uint64);
+
         time_tonpy += time() - t0
-
-        if ptreweight_func is not None:
-            wt = wt * ptreweight_func(pt)
 
         if prebinned:
             if np.min(r) < 1:
@@ -269,16 +207,33 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
             )
             time_fillnom += time() - t0
 
+        t0 = time()
         repeats = ak.to_numpy(ak.run_lengths(evthash))
         cumsum = np.cumsum(repeats) - 1
-        seeds = evthash[cumsum] + random_seed
-        rng = RNG(seeds)
+        unique_hashes = evthash[cumsum]
 
+        keys = (np.arange(bootstrap, dtype=np.uint32) + np.uint32(random_seed*bootstrap))[:, None]
+        counters = unique_hashes[None, :].astype(np.uint64)
+
+        boots = get_poisson1_philox2x32(counters, keys)
+
+        #all_poisson = np.concatenate((all_poisson, boots), axis=1)
+        #keys_b, counters_b = np.broadcast_arrays(keys, counters)
+        #all_keys = np.concatenate((all_keys, keys_b), axis=1)
+        #all_counters = np.concatenate((all_counters, counters_b), axis=1)
+        #edges.append(all_counters.shape[1])
+
+        time_bootwt += time() - t0
+
+        #TEST
+        #print()
+        #print("counters", counters)
+        #print("\t", counters.dtype, counters.shape)
+        #print("keys", keys)
+        #print("\t", keys.dtype, keys.shape)
+        #print()
+    
         for i in range(bootstrap):
-            t0 = time()
-            boot = rng.next_poisson()
-            boot = np.repeat(boot, repeats)
-            time_bootwt += time() - t0
             t0 = time()
             H.fill(
                 R=R,
@@ -286,7 +241,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
                 c=c,
                 pt=pt,
                 bootstrap = i+1,
-                weight=evtwt*wt*boot,
+                weight=evtwt*wt*np.repeat(boots[i], repeats),
             )
             time_fillboot += time() - t0
 
@@ -301,12 +256,12 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
         H_target += H.values(flow=True)
         return H_target
 
-    return H
+    return H, None #, all_poisson, all_keys, all_counters, edges
 
 def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
                                    random_seed = 0, skipNominal=False,
                                    statN=-1, statK=-1,
-                                   ptreweight_func=None,
+                                   kinreweight=None,
                                    fs=None):
 
     dataset = ds.dataset(basepath, format="parquet", filesystem=fs)
@@ -352,36 +307,44 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
 
 
     if statN > 0:
-        thefilter = pa_mod(ds.field('eventhash'), statN) == statK
+        thefilter = pa_mod(ds.field('event'), statN) == statK
     else:
         thefilter = None
+
+    if kinreweight is not None:
+        reweightvars = ['Zpt', 'Zy']
+    else:
+        reweightvars = []
 
     for batch in tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco', 
                                                   'r_reco', 'c_reco',
                                                   'pt_gen', 'R_gen',
                                                   'r_gen', 'c_gen',
                                                   'wt_reco', 'wt_gen',
-                                                  'eventhash', the_evtwt],
+                                                  'event', the_evtwt,
+                                                  'run', 'lumi',
+                                                  *reweightvars],
                                          batch_readahead=2,
                                          fragment_readahead=2,
                                          use_threads=False,
                                          batch_size = 1<<20,
                                          filter = thefilter)):
         
-        R_reco=batch['R_reco'].to_numpy()
-        R_gen=batch['R_gen'].to_numpy()
-        r_reco=batch['r_reco'].to_numpy()
-        r_gen=batch['r_gen'].to_numpy()
-        c_reco=batch['c_reco'].to_numpy()
-        c_gen=batch['c_gen'].to_numpy()
-        pt_reco=batch['pt_reco'].to_numpy()
-        pt_gen=batch['pt_gen'].to_numpy()
-        weight=batch[the_evtwt].to_numpy()*batch['wt_reco'].to_numpy()
+        R_reco=batch['R_reco'].to_numpy(zero_copy_only=False)
+        R_gen=batch['R_gen'].to_numpy(zero_copy_only=False)
+        r_reco=batch['r_reco'].to_numpy(zero_copy_only=False)
+        r_gen=batch['r_gen'].to_numpy(zero_copy_only=False)
+        c_reco=batch['c_reco'].to_numpy(zero_copy_only=False)
+        c_gen=batch['c_gen'].to_numpy(zero_copy_only=False)
+        pt_reco=batch['pt_reco'].to_numpy(zero_copy_only=False)
+        pt_gen=batch['pt_gen'].to_numpy(zero_copy_only=False)
+        weight=batch[the_evtwt].to_numpy(zero_copy_only=False)*batch['wt_reco'].to_numpy(zero_copy_only=False)
 
-        if ptreweight_func is not None:
-            weight = weight * ptreweight_func(pt_reco)
-
-        evthash = batch['eventhash'].to_numpy()
+        if kinreweight is not None:
+            Zpt = batch['Zpt'].to_numpy(zero_copy_only=False)
+            Zy = batch['Zy'].to_numpy(zero_copy_only=False)
+            kinwt = kinreweight(Zpt, Zy)
+            weight = weight * kinwt
 
         if not skipNominal:
             H.fill(
@@ -397,13 +360,23 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
                 bootstrap = 0
             )
         
+
+        run = batch['run'].to_numpy(zero_copy_only=False).astype(np.uint64)
+        lumi = batch['lumi'].to_numpy(zero_copy_only=False).astype(np.uint64)
+        event = batch['event'].to_numpy(zero_copy_only=False).astype(np.uint64) 
+        evthash = ((run << 32) + (lumi << 16) + event).astype(np.uint64);
+
         repeats = ak.to_numpy(ak.run_lengths(evthash))
         cumsum = np.cumsum(repeats) - 1
-        seeds = evthash[cumsum] + random_seed
-        rng = RNG(seeds)
+        unique_hashes = evthash[cumsum]
+
+        keys = (np.arange(bootstrap, dtype=np.uint32) + np.uint32(random_seed*bootstrap))[:, None]
+        counters = unique_hashes[None, :].astype(np.uint64)
+
+        boots = get_poisson1_philox2x32(counters, keys)
 
         for i in range(bootstrap):
-            boot = rng.next_poisson(1.0)
+            boot = boots[i]
             boot = np.repeat(boot, repeats)
             H.fill(
                 R_reco  = R_reco,

@@ -2,19 +2,19 @@ import numpy as np
 import os
 import awkward as ak
 import hist
-from binning.util import *
+from skimming.util import *
 from time import time
 
-from .EECgeneric import EECgenericBinner
+from .EECgeneric import EECgenericSkimmer
 
-class EECprojBinner(EECgenericBinner):
+class EECprojSkimmer(EECgenericSkimmer):
     def __init__(self, *args, **kwargs):
-        super(EECprojBinner, self).__init__(*args, **kwargs)
+        super(EECprojSkimmer, self).__init__(*args, **kwargs)
 
-    def binAll(self, readers, mask, evtMask, wtVars, basepath):
+    def skimAll(self, readers, mask, evtMask, wtVars, basepath):
         result = {}
         for order in range(2, 7):
-            result['reco%d'%order] = self.binObserved(
+            result['reco%d'%order] = self.skimObserved(
                 readers.rRecoEEC.proj(order),
                 readers.rRecoEEC.ptDenom, order,
                 readers.rRecoJet, 
@@ -27,7 +27,7 @@ class EECprojBinner(EECgenericBinner):
             )
 
             if self.isMC:
-                result['gen%d'%order] = self.binObserved(
+                result['gen%d'%order] = self.skimObserved(
                     readers.rGenEEC.proj(order),
                     readers.rGenEEC.ptDenom, order,
                     readers.rGenJet,
@@ -39,7 +39,7 @@ class EECprojBinner(EECgenericBinner):
                     isRes=False
                 )
 
-                result['unmatchedReco%d'%order] = self.binObserved(
+                result['unmatchedReco%d'%order] = self.skimObserved(
                     readers.rUnmatchedRecoEEC.proj(order),
                     readers.rUnmatchedRecoEEC.ptDenom, order,
                     readers.rRecoJet,
@@ -51,7 +51,7 @@ class EECprojBinner(EECgenericBinner):
                     isRes=False
                 )
 
-                result['unmatchedGen%d'%order] = self.binObserved(
+                result['unmatchedGen%d'%order] = self.skimObserved(
                     readers.rUnmatchedGenEEC.proj(order),
                     readers.rUnmatchedGenEEC.ptDenom, order,
                     readers.rGenJet,
@@ -63,7 +63,7 @@ class EECprojBinner(EECgenericBinner):
                     isRes=False
                 )
 
-                result['transfer%d'%order] = self.binTransfer(
+                result['transfer%d'%order] = self.skimTransfer(
                     readers.rTransfer.proj(order),
                     readers.rTransfer.ptDenomReco,
                     readers.rTransfer.ptDenomGen,
