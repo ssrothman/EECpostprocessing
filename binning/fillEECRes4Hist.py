@@ -22,6 +22,13 @@ parser.add_argument("--prebinned", action='store_true', help="Data is pre-binned
 
 parser.add_argument("--nbatch", type=int, default=-1, help="Number of batches to process")
 
+parser.add_argument('--r123type', type=str, default='philox', 
+                    choices=['philox', 'threefry'], 
+                    help="Type of random number generator to use")
+
+parser.add_argument('--collect_debug_info', action='store_true', 
+                    help="Collect debug information for bootstrap weights")
+
 parser.add_argument('--statN', type=int, default=-1, help="Number of statistically-independent splits to create")
 parser.add_argument('--statK', type=int, default=-1, help="Which statistical split we are processing (k in [0, statN-1])")
 
@@ -111,7 +118,7 @@ import hashlib
 pathhash = hashlib.md5(basepath.encode())
 #first 32 bits as int
 pathhash = np.uint32(int(pathhash.hexdigest()[:8], 16))
-args.rng = args.rng + pathhash
+args.rng = args.nboot * args.rng + pathhash
 
 if args.outfile is None:
     outfile = thepath
@@ -126,7 +133,14 @@ if args.outfile is None:
     if args.statN > 0:
         outfile += '_%dstat%d' % (args.statN, args.statK)
     if args.kinreweight_path is not None:
-        outfile += '_kinreweight'
+        outfile += '_%s' % args.kinreweight_key
+    if args.prebinned:
+        outfile += '_prebinned'
+    if args.nbatch > 0:
+        outfile += '_nbatch%d' % args.nbatch
+    outfile += '_%s' % args.r123type
+    if args.collect_debug_info:
+        outfile += '_debug'
 
     outfile += '.pkl'
 else:
@@ -187,24 +201,25 @@ print("\nBuilding hist...")
 if args.Hist == 'transfer':
     print("Clipping bootstrap -> 0")
     H = fill_transferhist_from_parquet(thepath, 
-                                       bootstrap = 0, 
+                                       Nboot = 0, 
                                        systwt = args.Wtsyst, 
-                                       random_seed = args.rng,
+                                       rng_offset = args.rng,
                                        skipNominal = args.skipNominal,
                                        statN = args.statN,
                                        statK = args.statK,
                                        kinreweight = kinreweight_func,
                                        fs = fs)
 else:
-    H = fill_hist_from_parquet(thepath, args.nboot, 
-                               args.Wtsyst, args.rng,
+    H = fill_hist_from_parquet(thepath, args.nboot, args.Wtsyst, 
+                               args.rng, args.r123type,
                                prebinned = args.prebinned,
                                nbatch = args.nbatch,
                                skipNominal = args.skipNominal,
                                statN = args.statN,
                                statK = args.statK,
                                kinreweight = kinreweight_func,
-                               fs = fs)
+                               fs = fs, 
+                               collect_debug_info = args.collect_debug_info)
 print("Done.\n")
 
 

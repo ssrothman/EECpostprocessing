@@ -8,11 +8,10 @@ import pyarrow.compute as pc
 
 from tqdm import tqdm
 
-from pyrandom123 import get_poisson1_philox2x32
+from util import pa_mod, fill_bootstrapped
 
 ptbins = [50, 88, 150, 254, 408, 1500]
 Rbins = [0.3, 0.4, 0.5, 0.6]
-#ptbins = [150, 300, 600, 1200, 2400]
 rbins = np.linspace(0, 1, 16)
 cbins = np.linspace(0, np.pi/2, 16)
 
@@ -36,16 +35,13 @@ prebinned_bins = {
            1.36135682, 1.46607657, 1.57079633]
 }
 
-def pa_mod(val, divisor):
-    quotient = pc.floor(pc.divide(val, divisor))
-    remainder = pc.subtract(val, pc.multiply(quotient, divisor))
-    return remainder
-
-def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
-                           prebinned = False, nbatch=-1, skipNominal=False,
-                           statN=-1, statK=-1,
-                           kinreweight=None,
-                           fs=None):
+def fill_hist_from_parquet(basepath, Nboot, systwt, 
+                           rng_offset, r123type,
+                           prebinned, nbatch, skipNominal,
+                           statN, statK,
+                           kinreweight,
+                           fs,
+                           collect_debug_info):
 
     dataset = ds.dataset(basepath, format="parquet", filesystem=fs)
 
@@ -58,7 +54,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
 
     if prebinned:
         H_target = hist.Hist(
-            hist.axis.Integer(minboot, bootstrap+1,
+            hist.axis.Integer(minboot, Nboot+1,
                               name='bootstrap', label='bootstrap',
                               underflow=False, overflow=False),
             hist.axis.Variable(ptbins,
@@ -76,7 +72,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
             storage=hist.storage.Double()
         )
         H = hist.Hist(
-            hist.axis.Integer(minboot, bootstrap+1,
+            hist.axis.Integer(minboot, Nboot+1,
                               name='bootstrap', label='bootstrap',
                               underflow=False, overflow=False),
             hist.axis.Variable(ptbins,
@@ -95,7 +91,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
         )
     else:
         H = hist.Hist(
-            hist.axis.Integer(minboot, bootstrap+1,
+            hist.axis.Integer(minboot, Nboot+1,
                               name='bootstrap', label='bootstrap',
                               underflow=False, overflow=False),
             hist.axis.Variable(ptbins,
@@ -118,9 +114,7 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
         ibatch = 0
 
     time_tonpy = 0
-    time_fillnom = 0
-    time_fillboot = 0
-    time_bootwt = 0
+    time_fill = 0
 
     if statN > 0:
         thefilter = pa_mod(ds.field('event'), statN) == statK
@@ -148,10 +142,14 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
     total_rows = dataset.count_rows()
     rows_so_far = 0
     
-    #all_poisson = np.zeros((bootstrap, 0), dtype=np.uint32)
-    #all_keys = np.zeros((bootstrap, 0), dtype=np.uint32)
-    #all_counters = np.zeros((bootstrap, 0), dtype=np.uint64)
-    #edges = []
+    if collect_debug_info:
+        all_counters = np.empty(0, dtype=np.uint64) 
+        if r123type == 'philox':
+            all_keys = np.empty(0, dtype=np.uint32)
+        elif r123type == 'threefry':
+            all_keys = np.empty(0, dtype=np.uint64)
+
+        all_poisson1 = np.empty((Nboot, 0), dtype=np.uint64)
 
     for batch in iterator:
         rows_so_far += batch.num_rows
@@ -163,24 +161,21 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
             ibatch += 1
 
         t0 = time()
-        R = batch['R'].to_numpy(zero_copy_only=False)
-        r = batch['r'].to_numpy(zero_copy_only=False)
-        c = batch['c'].to_numpy(zero_copy_only=False)
+        filldict = {}
 
-        pt = batch['pt'].to_numpy(zero_copy_only=False)
-        evtwt = batch[the_evtwt].to_numpy(zero_copy_only=False)
-        wt = batch['wt'].to_numpy(zero_copy_only=False)
+        filldict['R'] = batch['R'].to_numpy(zero_copy_only=False)
+        filldict['r'] = batch['r'].to_numpy(zero_copy_only=False)
+        filldict['c'] = batch['c'].to_numpy(zero_copy_only=False)
+        filldict['pt'] = batch['pt'].to_numpy(zero_copy_only=False)
+
+        weight = batch[the_evtwt].to_numpy(zero_copy_only=False) 
+        weight = weight * batch['wt'].to_numpy(zero_copy_only=False)
 
         if kinreweight is not None:
             Zpt = batch['Zpt'].to_numpy(zero_copy_only=False)
             Zy = batch['Zy'].to_numpy(zero_copy_only=False)
             kinwt = kinreweight(Zpt, Zy)
-            evtwt = evtwt * kinwt
-
-        run = batch['run'].to_numpy(zero_copy_only=False).astype(np.uint64)
-        lumi = batch['lumi'].to_numpy(zero_copy_only=False).astype(np.uint64)
-        event = batch['event'].to_numpy(zero_copy_only=False).astype(np.uint64) 
-        evthash = ((run << 48) + (lumi << 32) + event).astype(np.uint64);
+            weight = weight * kinwt
 
         time_tonpy += time() - t0
 
@@ -195,71 +190,34 @@ def fill_hist_from_parquet(basepath, bootstrap, systwt, random_seed=0,
             if np.max(c) >= len(prebinned_bins['c']):
                 print("WARNING: c >= %d" % len(prebinned_bins['c']))
 
-        if not skipNominal:
-            t0 = time()
-            H.fill(
-                R=R,
-                r=r,
-                c=c,
-                pt=pt,
-                bootstrap = 0,
-                weight=evtwt*wt,
-            )
-            time_fillnom += time() - t0
-
         t0 = time()
-        repeats = ak.to_numpy(ak.run_lengths(evthash))
-        cumsum = np.cumsum(repeats) - 1
-        unique_hashes = evthash[cumsum]
+        debug = fill_bootstrapped(H, filldict, weight, 
+                                  r123type, Nboot, rng_offset, batch, 
+                                  skipNominal, collect_debug_info)
+        time_fill += time() - t0
 
-        keys = (np.arange(bootstrap, dtype=np.uint32) + np.uint32(random_seed*bootstrap))[:, None]
-        counters = unique_hashes[None, :].astype(np.uint64)
-
-        boots = get_poisson1_philox2x32(counters, keys)
-
-        #all_poisson = np.concatenate((all_poisson, boots), axis=1)
-        #keys_b, counters_b = np.broadcast_arrays(keys, counters)
-        #all_keys = np.concatenate((all_keys, keys_b), axis=1)
-        #all_counters = np.concatenate((all_counters, counters_b), axis=1)
-        #edges.append(all_counters.shape[1])
-
-        time_bootwt += time() - t0
-
-        #TEST
-        #print()
-        #print("counters", counters)
-        #print("\t", counters.dtype, counters.shape)
-        #print("keys", keys)
-        #print("\t", keys.dtype, keys.shape)
-        #print()
-    
-        for i in range(bootstrap):
-            t0 = time()
-            H.fill(
-                R=R,
-                r=r,
-                c=c,
-                pt=pt,
-                bootstrap = i+1,
-                weight=evtwt*wt*np.repeat(boots[i], repeats),
-            )
-            time_fillboot += time() - t0
-
+        if collect_debug_info:
+            boots, repeats, counters, keys = debug
+            all_poisson1 = np.concatenate((all_poisson1, boots), axis=1)
+            all_counters = np.concatenate((all_counters, counters))
+            all_keys = np.concatenate((all_keys, keys))
 
     print("Time to numpy: %.2f" % time_tonpy)
-    print("Time to fill nominal: %.2f" % time_fillnom)
-    print("Time to fill bootstrap: %.2f" % time_fillboot)
-    print("Time to bootstrap weight: %.2f" % time_bootwt)
-    print("Total time: %.2f" % (time_fillnom + time_fillboot + time_tonpy))
+    print("Time to fill: %.2f" % time_fill)
+    print("Total time: %.2f" % (time_fill + time_tonpy))
 
     if prebinned:
         H_target += H.values(flow=True)
         return H_target
 
-    return H, None #, all_poisson, all_keys, all_counters, edges
+    if collect_debug_info: 
+        return H, all_poisson1, all_counters, all_keys
+    else:
+        return H
 
-def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
-                                   random_seed = 0, skipNominal=False,
+def fill_transferhist_from_parquet(basepath, Nboot, systwt,
+                                   rng_offset = 0, skipNominal=False,
+                                   r123type='philox',
                                    statN=-1, statK=-1,
                                    kinreweight=None,
                                    fs=None):
@@ -275,7 +233,7 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
 
 
     H = hist.Hist(
-        hist.axis.Integer(minboot, bootstrap+1, 
+        hist.axis.Integer(minboot, Nboot+1, 
                           name='bootstrap', label='bootstrap',
                           underflow=False, overflow=False),
         hist.axis.Variable(ptbins,
@@ -330,15 +288,18 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
                                          batch_size = 1<<20,
                                          filter = thefilter)):
         
-        R_reco=batch['R_reco'].to_numpy(zero_copy_only=False)
-        R_gen=batch['R_gen'].to_numpy(zero_copy_only=False)
-        r_reco=batch['r_reco'].to_numpy(zero_copy_only=False)
-        r_gen=batch['r_gen'].to_numpy(zero_copy_only=False)
-        c_reco=batch['c_reco'].to_numpy(zero_copy_only=False)
-        c_gen=batch['c_gen'].to_numpy(zero_copy_only=False)
-        pt_reco=batch['pt_reco'].to_numpy(zero_copy_only=False)
-        pt_gen=batch['pt_gen'].to_numpy(zero_copy_only=False)
-        weight=batch[the_evtwt].to_numpy(zero_copy_only=False)*batch['wt_reco'].to_numpy(zero_copy_only=False)
+        filldict = {}
+        filldict['R_reco']   =batch['R_reco'].to_numpy(zero_copy_only=False)
+        filldict['R_gen']    =batch['R_gen'].to_numpy(zero_copy_only=False)
+        filldict['r_reco']   =batch['r_reco'].to_numpy(zero_copy_only=False)
+        filldict['r_gen']    =batch['r_gen'].to_numpy(zero_copy_only=False)
+        filldict['c_reco']   =batch['c_reco'].to_numpy(zero_copy_only=False)
+        filldict['c_gen']    =batch['c_gen'].to_numpy(zero_copy_only=False)
+        filldict['pt_reco']  =batch['pt_reco'].to_numpy(zero_copy_only=False)
+        filldict['pt_gen']   =batch['pt_gen'].to_numpy(zero_copy_only=False)
+
+        weight=batch[the_evtwt].to_numpy(zero_copy_only=False)
+        weight=weight*batch['wt_reco'].to_numpy(zero_copy_only=False)
 
         if kinreweight is not None:
             Zpt = batch['Zpt'].to_numpy(zero_copy_only=False)
@@ -346,49 +307,9 @@ def fill_transferhist_from_parquet(basepath, bootstrap, systwt,
             kinwt = kinreweight(Zpt, Zy)
             weight = weight * kinwt
 
-        if not skipNominal:
-            H.fill(
-                R_reco  = R_reco,
-                R_gen   = R_gen,
-                r_reco  = r_reco,
-                r_gen   = r_gen,
-                c_reco  = c_reco,
-                c_gen   = c_gen,
-                pt_reco = pt_reco,
-                pt_gen  = pt_gen,
-                weight  = weight,
-                bootstrap = 0
-            )
-        
 
-        run = batch['run'].to_numpy(zero_copy_only=False).astype(np.uint64)
-        lumi = batch['lumi'].to_numpy(zero_copy_only=False).astype(np.uint64)
-        event = batch['event'].to_numpy(zero_copy_only=False).astype(np.uint64) 
-        evthash = ((run << 32) + (lumi << 16) + event).astype(np.uint64);
-
-        repeats = ak.to_numpy(ak.run_lengths(evthash))
-        cumsum = np.cumsum(repeats) - 1
-        unique_hashes = evthash[cumsum]
-
-        keys = (np.arange(bootstrap, dtype=np.uint32) + np.uint32(random_seed*bootstrap))[:, None]
-        counters = unique_hashes[None, :].astype(np.uint64)
-
-        boots = get_poisson1_philox2x32(counters, keys)
-
-        for i in range(bootstrap):
-            boot = boots[i]
-            boot = np.repeat(boot, repeats)
-            H.fill(
-                R_reco  = R_reco,
-                R_gen   = R_gen,
-                r_reco  = r_reco,
-                r_gen   = r_gen,
-                c_reco  = c_reco,
-                c_gen   = c_gen,
-                pt_reco = pt_reco,
-                pt_gen  = pt_gen,
-                weight  = weight*boot,
-                bootstrap = i+1
-            )
+        fill_bootstrapped(H, filldict, weight, 
+                          r123type, Nboot, rng_offset, batch,
+                          skipNominal)
 
     return H
