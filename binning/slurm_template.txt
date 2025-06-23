@@ -1,0 +1,23 @@
+#!/bin/bash -l
+
+#SBATCH --time=24:00:00
+#SBATCH --ntasks=1
+#SBATCH --mem=MEM
+#SBATCH --partition=submit
+#SBATCH --job-name=UUID
+#SBATCH --output=slurm/UUID.out
+#SBATCH --error=slurm/UUID.err
+
+echo "SLURM JOB ID IS $SLURM_JOB_ID"
+echo "SLURM CLUSTER IS $SLURM_CLUSTER_NAME"
+echo "SLURM NAME IS $SLURM_JOB_NAME"
+echo "SLURM NODELIST IS $SLURM_JOB_NODELIST"
+echo "SLURM PARTITION IS $SLURM_JOB_PARTITION"
+echo "SLURM NODENAME IS $SLURMD_NODENAME"
+
+cd 
+cd work/EEC/postprocessing/binning
+
+export PYTHONUNBUFFERED=1
+
+COMMAND

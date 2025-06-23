@@ -1,4 +1,5 @@
 import argparse
+import os
 import numpy as np
 
 parser = argparse.ArgumentParser(description="Fill EEC Res4 Histograms")
@@ -68,7 +69,6 @@ if args.passedwtsyst is not None:
 if args.Wtsyst is None:
     raise ValueError("You must specify Wtsyst, either positionally or with --passedwtsyst")
 
-import os
 
 if args.usexrootd:
     from fsspec_xrootd import XRootDFileSystem
@@ -175,9 +175,10 @@ if args.slurm:
 
     slurm_script = slurm_script.replace("UUID", uuidstr)
 
-    desired_mem = '8g' if args.Hist == 'transfer' else '8g'
+    desired_mem = '4g' if args.Hist == 'transfer' else '8g'
     slurm_script = slurm_script.replace('MEM', desired_mem)
 
+    os.makedirs('slurm', exist_ok=True)
     with open("slurm/submit_%s.sh" % uuidstr, 'w') as f:
         f.write(slurm_script)
     print("Submitting job to SLURM...")
