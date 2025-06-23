@@ -216,11 +216,11 @@ def fill_hist_from_parquet(basepath, Nboot, systwt,
         return H
 
 def fill_transferhist_from_parquet(basepath, Nboot, systwt,
-                                   rng_offset = 0, skipNominal=False,
-                                   r123type='philox',
-                                   statN=-1, statK=-1,
-                                   kinreweight=None,
-                                   fs=None):
+                                   rng_offset, skipNominal,
+                                   r123type,
+                                   statN, statK,
+                                   kinreweight,
+                                   fs):
 
     dataset = ds.dataset(basepath, format="parquet", filesystem=fs)
 
