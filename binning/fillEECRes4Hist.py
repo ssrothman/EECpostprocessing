@@ -33,7 +33,11 @@ parser.add_argument('--statK', type=int, default=-1, help="Which statistical spl
 parser.add_argument('--kinreweight_path', type=str, default=None, help="Path to kinreweight correctionlib json")
 parser.add_argument('--kinreweight_key', type=str, default=None, help="Key in kinreweight correctionlib json")
 
-parser.add_argument("--slurm", action='store_true')
+exec_group = parser.add_mutually_exclusive_group(required=False)
+exec_group.add_argument("--slurm", action='store_true')
+exec_group.add_argument("--condor", action='store_true')
+
+parser.add_argument('--force', action='store_true')
 
 args = parser.parse_args()
 
@@ -47,7 +51,7 @@ if args.Hist == 'transfer' and args.nboot > 0:
 if args.usexrootd:
     from fsspec_xrootd import XRootDFileSystem
     fs = XRootDFileSystem(hostid='submit55.mit.edu', 
-                          timeout=30)
+                          timeout=120)
 else:
     from pyarrow.fs import LocalFileSystem
     from fsspec.implementations.arrow import ArrowFSWrapper
@@ -118,56 +122,91 @@ if args.kinreweight_path is not None:
     outfile += '_%s' % args.kinreweight_key
 if args.prebinned:
     outfile += '_prebinned'
-if args.nbatch > 0:
-    outfile += '_nbatch%d' % args.nbatch
 outfile += '_%s' % args.r123type
 if args.collect_debug_info:
     outfile += '_debug'
 
 outfile += '.pkl'
 
-if fs.exists(outfile):
+if fs.stat(outfile)['size'] == 0:
+    fs.rm_file(outfile)
+
+if fs.exists(outfile) and not args.force:
     #print("destination already exists! skipping")
     import sys
     sys.exit(1)
 else:
     print("Trying to produce output file: %s" % outfile)
 
-if args.slurm:
+if args.slurm or args.condor:
     import subprocess
     import sys
     from shlex import quote
-    
-    with open("slurm_template.txt", 'r') as f:
-        slurm_script = f.read()
-
     command = ' '.join(quote(s) for s in sys.argv)
-    command = command.replace('--slurm', '')
     #pipe stderr to stdout
     command += ' 2>&1'
-    slurm_script = slurm_script.replace("COMMAND", "python " + command)
-    print(slurm_script)
 
     import random
     uuid = random.getrandbits(64)
     uuidstr = '%016x' % uuid
     uuidstr = "%s_%s_%s_"%(args.Sample, args.Hist, args.Wtsyst) + uuidstr
 
-    slurm_script = slurm_script.replace("UUID", uuidstr)
+    if args.slurm:
+        with open("templates/slurm_template.txt", 'r') as f:
+            slurm_script = f.read()
 
-    desired_mem = '8g' if args.Hist == 'transfer' else '4g'
-    slurm_script = slurm_script.replace('MEM', desired_mem)
+        command = command.replace('--slurm', '')
+        slurm_script = slurm_script.replace("COMMAND", "python " + command)
+        print(slurm_script)
 
-    os.makedirs('slurm', exist_ok=True)
-    with open("slurm/submit_%s.sh" % uuidstr, 'w') as f:
-        f.write(slurm_script)
-    print("Submitting job to SLURM...")
-    q = subprocess.run(['sbatch', 'slurm/submit_%s.sh' % uuidstr])
-    print(q)
-    print("Job submitted with UUID:", uuidstr)
-    print("Exiting.")
-    import time
-    sys.exit(0)
+        slurm_script = slurm_script.replace("UUID", uuidstr)
+
+        desired_mem = '8g' if args.Hist == 'transfer' else '4g'
+        slurm_script = slurm_script.replace('MEM', desired_mem)
+
+        os.makedirs('slurm', exist_ok=True)
+        with open("slurm/submit_%s.sh" % uuidstr, 'w') as f:
+            f.write(slurm_script)
+        print("Submitting job to SLURM...")
+        q = subprocess.run(['sbatch', 'slurm/submit_%s.sh' % uuidstr])
+        print(q)
+        print("Job submitted with UUID:", uuidstr)
+        print("Exiting.")
+        sys.exit(0)
+    elif args.condor:
+        with open("templates/condor_exec_template.sh", 'r') as f:
+            condor_exec_script = f.read()
+
+        command = command.replace('--condor', '--usexrootd')
+        condor_exec_script = condor_exec_script.replace("COMMAND", "python " + command)
+        print(condor_exec_script)
+
+        os.makedirs('condor', exist_ok=True)
+        with open("condor/exec_%s.sh" % uuidstr, 'w') as f:
+            f.write(condor_exec_script)
+
+        with open("templates/condor_sub_template.sh", 'r') as f:
+            condor_sub_script = f.read()
+
+        condor_sub_script = condor_sub_script.replace("EXEC_PATH", "condor/exec_%s.sh" % uuidstr)
+        condor_sub_script = condor_sub_script.replace("UUID", uuidstr)
+
+        #desired_mem = '8GB' if args.Hist == 'transfer' else '4GB'
+        #desired_cpu = '4' if args.Hist == 'transfer' else '2'
+        desired_mem = "8GB"
+        desired_cpu = "4"
+        condor_sub_script = condor_sub_script.replace('REQMEM', desired_mem)
+        condor_sub_script = condor_sub_script.replace('REQCPU', desired_cpu)
+
+        with open("condor/submit_%s.sh" % uuidstr, 'w') as f:
+            f.write(condor_sub_script)
+
+        print("Submitting job to HTCondor...")
+        q = subprocess.run(['condor_submit', 'condor/submit_%s.sh' % uuidstr])
+        print(q)
+        print("Job submitted with UUID:", uuidstr)
+        print("Exiting.")
+        sys.exit(0)
 
 from buildEECres4Hists import fill_hist_from_parquet, fill_transferhist_from_parquet
 
@@ -186,6 +225,7 @@ if args.Hist == 'transfer':
                                        systwt = args.Wtsyst, 
                                        rng_offset = args.rng,
                                        skipNominal = args.skipNominal,
+                                       r123type = args.r123type,
                                        statN = args.statN,
                                        statK = args.statK,
                                        kinreweight = kinreweight_func,
