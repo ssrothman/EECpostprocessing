@@ -1,0 +1,3 @@
+[submodule "binning/pyrandom123"]
+	path = binning/pyrandom123
+	url = git@github.com:ssrothman/pyrandom123.git
