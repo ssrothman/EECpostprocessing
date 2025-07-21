@@ -27,7 +27,7 @@
             "Matches" : "ChargedGenMatchCHDN",
             "SimonJets" : "ChargedSimonJetsCHDN",
             "GenSimonJets" : "GenChargedSimonJetsCHDN",
-            "EECs" : "ChargedEECsCHUP"
+            "EECs" : "ChargedEECsCHDN"
         },
         "TRK_EFF" : {
             "Matches" : "ChargedGenMatchTRKEFF",
