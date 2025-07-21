@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from time import time
 import hist
 import awkward as ak
@@ -8,12 +9,17 @@ import pyarrow.compute as pc
 
 from tqdm import tqdm
 
-from util import pa_mod, fill_bootstrapped
+from util import pa_mod, fill_bootstrapped, get_evthash
 
-ptbins = [50, 88, 150, 254, 408, 1500]
-Rbins = [0.3, 0.4, 0.5, 0.6]
-rbins = np.linspace(0, 1, 16)
-cbins = np.linspace(0, np.pi/2, 16)
+ptbins_gen = [50, 88, 150, 254, 408]
+Rbins_gen = [0.3, 0.4, 0.5, 0.6]
+rbins_gen = np.linspace(0, 1, 11)
+cbins_gen = np.linspace(0, np.pi/2, 11)
+
+ptbins_reco = [50, 65, 88, 120, 150, 186, 254, 326, 408, 1500]
+Rbins_reco = [0.3, 0.4, 0.5, 0.6]
+rbins_reco = np.linspace(0, 1, 11)
+cbins_reco = np.linspace(0, np.pi/2, 11)
 
 prebinned_bins = {
     'R' : [0.0, 0.1, 0.2, 0.3, 0.4,
@@ -90,6 +96,19 @@ def fill_hist_from_parquet(basepath, Nboot, systwt,
             storage=hist.storage.Double()
         )
     else:
+        if 'gen' in basepath or 'Gen' in basepath:
+            print("Using gen-level bins")
+            ptbins = ptbins_gen
+            Rbins = Rbins_gen
+            rbins = rbins_gen
+            cbins = cbins_gen
+        else:
+            print("Using reco-level bins")
+            ptbins = ptbins_reco
+            Rbins = Rbins_reco
+            rbins = rbins_reco
+            cbins = cbins_reco
+
         H = hist.Hist(
             hist.axis.Integer(minboot, Nboot+1,
                               name='bootstrap', label='bootstrap',
@@ -215,6 +234,140 @@ def fill_hist_from_parquet(basepath, Nboot, systwt,
     else:
         return H
 
+def fill_direct_covariance_type1(basepath, Nboot, systwt, 
+                                 nbatch, statN, statK, 
+                                 kinreweight, fs):
+    dataset = ds.dataset(basepath, format="parquet", filesystem=fs)
+
+    the_evtwt = 'evtwt_%s'%systwt
+
+    if 'gen' in basepath or 'Gen' in basepath:    
+        print("Using gen-level bins")
+        ptbins = ptbins_gen
+        Rbins = Rbins_gen
+        rbins = rbins_gen
+        cbins = cbins_gen
+    else:
+        print("Using reco-level bins")
+        ptbins = ptbins_reco
+        Rbins = Rbins_reco
+        rbins = rbins_reco
+        cbins = cbins_reco
+
+    axes = {
+        'pt' : hist.axis.Variable(ptbins,
+                           name='pt', label='$p_{T}$ [GeV]',
+                           underflow=True, overflow=True),
+        'R' : hist.axis.Variable(Rbins,
+                          name="R", label = '$R$',
+                          underflow=True, overflow=True),
+        'r' : hist.axis.Variable(rbins,
+                          name="r", label = '$r$',
+                          underflow=False, overflow=False),
+        'c' : hist.axis.Variable(cbins,
+                          name="c", label = '$c$',
+                          underflow=False, overflow=False),
+    }
+    shape = (axes['pt'].extent, 
+             axes['R'].extent, 
+             axes['r'].extent, 
+             axes['c'].extent)
+
+    if statN > 0:   
+        thefilter = pa_mod(ds.field('event'), statN) == statK
+    else:
+        thefilter = None
+
+    if nbatch > 0:
+        ibatch = 0
+
+    if kinreweight is not None:
+        reweightvars = ['Zpt', 'Zy']
+    else:
+        reweightvars = []
+
+    import directcov
+    cov = directcov.DirectCov(shape, 1)
+
+    iterator = tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
+                                                  'pt', 'wt', 
+                                                  the_evtwt, 
+                                                'event',
+                                                'run',
+                                                'lumi',
+                                                *reweightvars],
+                                         batch_readahead=2,
+                                         fragment_readahead=2,
+                                         use_threads=False,
+                                         batch_size = 1<<20,
+                                         filter = thefilter),
+                    disable=True)
+
+    total_rows = dataset.count_rows()
+    rows_so_far = 0
+
+    for batch in iterator:
+        rows_so_far += batch.num_rows
+        #print to stderr
+        print("Rows so far: %g%%" % (rows_so_far / total_rows * 100), file=sys.stderr)
+        iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
+
+        if nbatch > 0:
+            if ibatch >= nbatch:
+                break
+            ibatch += 1
+
+        R = batch['R'].to_numpy(zero_copy_only=False)
+        if len(R) == 0:
+            continue
+        r = batch['r'].to_numpy(zero_copy_only=False)
+        c = batch['c'].to_numpy(zero_copy_only=False)
+        pt = batch['pt'].to_numpy(zero_copy_only=False)
+    
+        evthash = get_evthash(batch)
+
+        weight = batch[the_evtwt].to_numpy(zero_copy_only=False) 
+        weight = weight * batch['wt'].to_numpy(zero_copy_only=False)
+
+        if kinreweight is not None:
+            Zpt = batch['Zpt'].to_numpy(zero_copy_only=False)
+            Zy = batch['Zy'].to_numpy(zero_copy_only=False)
+            kinwt = kinreweight(Zpt, Zy)
+            weight = weight * kinwt
+
+        indices = np.stack((
+            axes['pt'].index(pt),
+            axes['R'].index(R),
+            axes['r'].index(r),
+            axes['c'].index(c)
+        ), axis=1)
+
+        if axes['pt'].traits.underflow:
+            indices[:, 0] += 1
+        if axes['R'].traits.underflow:
+            indices[:, 1] += 1
+        if axes['r'].traits.underflow:
+            indices[:, 2] += 1
+        if axes['c'].traits.underflow:
+            indices[:, 3] += 1
+
+        badmask = np.zeros(indices.shape[0], dtype=bool)
+        badmask |= np.any(indices < 0, axis=1)
+        badmask |= indices[:, 0] >= axes['pt'].extent
+        badmask |= indices[:, 1] >= axes['R'].extent
+        badmask |= indices[:, 2] >= axes['r'].extent
+        badmask |= indices[:, 3] >= axes['c'].extent
+        print("Rejecting %d rows due to bad indices" % np.sum(badmask))
+        indices = indices[~badmask, :]
+        weight = weight[~badmask]
+        evthash = evthash[~badmask]
+
+        cov.fillEvents(indices, weight, evthash)
+
+    cov.finalize()
+
+    return np.array(cov, copy=True)
+
 def fill_transferhist_from_parquet(basepath, Nboot, systwt,
                                    rng_offset, skipNominal,
                                    r123type,
@@ -236,28 +389,28 @@ def fill_transferhist_from_parquet(basepath, Nboot, systwt,
         hist.axis.Integer(minboot, Nboot+1, 
                           name='bootstrap', label='bootstrap',
                           underflow=False, overflow=False),
-        hist.axis.Variable(ptbins,
+        hist.axis.Variable(ptbins_reco,
                            name='pt_reco', label='$p_{T,reco}$ [GeV]',
                            underflow=True, overflow=True),
-        hist.axis.Variable(Rbins,
+        hist.axis.Variable(Rbins_reco,
                           name="R_reco", label = '$R_{reco}$',
                           underflow=True, overflow=True),
-        hist.axis.Variable(rbins,
+        hist.axis.Variable(rbins_reco,
                           name="r_reco", label = '$r_{reco}$',
                           underflow=False, overflow=False),
-        hist.axis.Variable(cbins,
+        hist.axis.Variable(cbins_reco,
                           name="c_reco", label = '$c_{reco}$',
                           underflow=False, overflow=False),
-        hist.axis.Variable(ptbins,
+        hist.axis.Variable(ptbins_gen,
                            name='pt_gen', label='$p_{T,gen}$ [GeV]',
                            underflow=True, overflow=True),
-        hist.axis.Variable(Rbins,
+        hist.axis.Variable(Rbins_gen,
                           name="R_gen", label = '$R_{gen}$',
                           underflow=True, overflow=True),
-        hist.axis.Variable(rbins,
+        hist.axis.Variable(rbins_gen,
                           name="r_gen", label = '$r_{gen}$',
                           underflow=False, overflow=False),
-        hist.axis.Variable(cbins,
+        hist.axis.Variable(cbins_gen,
                           name="c_gen", label = '$c_{gen}$',
                           underflow=False, overflow=False),
         storage=hist.storage.Double()
@@ -274,7 +427,7 @@ def fill_transferhist_from_parquet(basepath, Nboot, systwt,
     else:
         reweightvars = []
 
-    for batch in tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco', 
+    iterator = tqdm(dataset.to_batches(columns=['pt_reco', 'R_reco', 
                                                   'r_reco', 'c_reco',
                                                   'pt_gen', 'R_gen',
                                                   'r_gen', 'c_gen',
@@ -286,7 +439,14 @@ def fill_transferhist_from_parquet(basepath, Nboot, systwt,
                                          fragment_readahead=2,
                                          use_threads=False,
                                          batch_size = 1<<20,
-                                         filter = thefilter)):
+                                         filter = thefilter))
+
+    total_rows = dataset.count_rows()
+    rows_so_far = 0
+
+    for batch in iterator:
+        rows_so_far += batch.num_rows
+        iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
         
         filldict = {}
         filldict['R_reco']   =batch['R_reco'].to_numpy(zero_copy_only=False)
