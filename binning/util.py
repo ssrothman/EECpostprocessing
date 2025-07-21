@@ -68,3 +68,42 @@ def fill_bootstrapped(H, filldict, weight,
 
     if collect_debug_info:
         return boots, repeats, counters, keys
+
+def fill_bootstrapped_fast(H, filldict, weight,
+                           r123type, Nboot, rng_offset, table, 
+                           skipNominal, collect_debug_info=False):
+    axnames = H.axes[1:].name
+
+    indices = [H.axes[name].index(filldict[name]) for name in axnames]
+    mask = np.ones(indices[0].shape, dtype=bool)
+    for i, name in enumerate(axnames):
+        if H.axes[name].traits.underflow:
+            indices[i] += 1
+        else:
+            mask &= indices[i] >= 0
+
+        if not H.axes[name].traits.overflow:
+            mask &= indices[i] < H.axes[name].size
+
+    indices = tuple(indices[i][mask] for i in range(len(indices)))
+
+    if not skipNominal:
+        np.add.at(H.view(flow=True)[0], 
+                  indices,
+                  weight)
+
+    if collect_debug_info:
+        boots, repeats, counters, keys = get_boot_wts(r123type, table, 
+                                                      Nboot, rng_offset, 
+                                                      True)
+    else:
+        boots, repeats = get_boot_wts(r123type, table, Nboot, rng_offset, False)
+
+    for i in range(Nboot):
+        boot = np.repeat(boots[i], repeats)
+        np.add.at(H.view(flow=True)[i+1], 
+                  indices,
+                  weight*boot)
+
+    if collect_debug_info:
+        return boots, repeats, counters, keys

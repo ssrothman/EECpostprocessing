@@ -17,4 +17,7 @@ source myenv/bin/activate
 
 pip install --user ./pyrandom123
 
+export PATH=$PATH:$PWD
+export PYTHONPATH=$PWD
+
 COMMAND
