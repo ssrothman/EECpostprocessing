@@ -12,7 +12,7 @@ parser.add_argument('Wtsyst', type=str, help='Weight Systematic', nargs='?')
 
 parser.add_argument('--usexrootd', action='store_true')
 
-parser.add_argument("--nboot", type=int, default=100, help="Number of bootstrap samples")
+parser.add_argument("--nboot", type=int, default=0, help="Number of bootstrap samples")
 parser.add_argument("--rng", type=int, default=0, help="Random number generator seed offset")
 parser.add_argument('--skipNominal', action='store_true', help="Skip nominal weight")
 
@@ -39,13 +39,29 @@ exec_group.add_argument("--condor", action='store_true')
 
 parser.add_argument('--force', action='store_true')
 
+parser.add_argument("--mute", action='store_true',)
+
 args = parser.parse_args()
+
+if args.kinreweight_key == 'None':
+    args.kinreweight_key = None
+if args.kinreweight_path == 'None':
+    args.kinreweight_path = None
+
+if args.mute:
+    import os
+    import sys
+    sys.stdout = open(os.devnull, 'w')
 
 import sys
 from shlex import quote
 print(' '.join(quote(s) for s in sys.argv))
 if args.Hist == 'transfer' and args.nboot > 0:
     print("\tno transfer bootstrap")
+    sys.exit(0)
+
+if args.Hist.startswith('directcov') and args.nboot > 0:
+    print("\tno directcov bootstrap")
     sys.exit(0)
 
 if args.usexrootd:
@@ -97,7 +113,11 @@ else:
     thepath = os.path.join(basepath, options[choice])
     print()
 
-thepath = os.path.join(thepath, args.Objsyst, args.Hist)
+if args.Hist.startswith('directcov'):
+    whathist = args.Hist.split('_')[1]
+    thepath = os.path.join(thepath, args.Objsyst, whathist)
+else:
+    thepath = os.path.join(thepath, args.Objsyst, args.Hist)
 
 #print("The path is: %s" % thepath)
 
@@ -108,6 +128,9 @@ pathhash = np.uint32(int(pathhash.hexdigest()[:8], 16))
 args.rng = args.nboot * args.rng + pathhash
 
 outfile = thepath
+if args.Hist.startswith('directcov'):
+    outfile = os.path.join(os.path.dirname(outfile), 
+                           'directcov_' + os.path.basename(outfile))
 outfile += '_%s_%s' % (args.Objsyst, args.Wtsyst)
 if args.nboot > 0:
     outfile += '_boot%d' % args.nboot
@@ -128,13 +151,14 @@ if args.collect_debug_info:
 
 outfile += '.pkl'
 
-if fs.stat(outfile)['size'] == 0:
+if fs.exists(outfile) and fs.stat(outfile)['size'] == 0:
     fs.rm_file(outfile)
 
 if fs.exists(outfile) and not args.force:
-    #print("destination already exists! skipping")
+    print("destination already exists! skipping")
+    print(outfile)
     import sys
-    sys.exit(1)
+    sys.exit(0)
 else:
     print("Trying to produce output file: %s" % outfile)
 
@@ -149,7 +173,7 @@ if args.slurm or args.condor:
     import random
     uuid = random.getrandbits(64)
     uuidstr = '%016x' % uuid
-    uuidstr = "%s_%s_%s_"%(args.Sample, args.Hist, args.Wtsyst) + uuidstr
+    uuidstr = "%s_%s_%s_%s_boot%d_rng%d_%dstat%d_"%(args.Sample, args.Hist, args.Objsyst, args.Wtsyst, args.nboot, args.rng, args.statN, args.statK) + uuidstr
 
     if args.slurm:
         with open("templates/slurm_template.txt", 'r') as f:
@@ -161,7 +185,7 @@ if args.slurm or args.condor:
 
         slurm_script = slurm_script.replace("UUID", uuidstr)
 
-        desired_mem = '8g' if args.Hist == 'transfer' else '4g'
+        desired_mem = '8g' if args.Hist == 'transfer' or 'directcov' in args.Hist else '4g'
         slurm_script = slurm_script.replace('MEM', desired_mem)
 
         os.makedirs('slurm', exist_ok=True)
@@ -191,10 +215,10 @@ if args.slurm or args.condor:
         condor_sub_script = condor_sub_script.replace("EXEC_PATH", "condor/exec_%s.sh" % uuidstr)
         condor_sub_script = condor_sub_script.replace("UUID", uuidstr)
 
-        #desired_mem = '8GB' if args.Hist == 'transfer' else '4GB'
-        #desired_cpu = '4' if args.Hist == 'transfer' else '2'
-        desired_mem = "8GB"
-        desired_cpu = "4"
+        desired_mem = '8GB' if args.Hist == 'transfer' else '4GB'
+        desired_cpu = '4' if args.Hist == 'transfer' else '2'
+        #desired_mem = "8GB"
+        #desired_cpu = "4"
         condor_sub_script = condor_sub_script.replace('REQMEM', desired_mem)
         condor_sub_script = condor_sub_script.replace('REQCPU', desired_cpu)
 
@@ -208,7 +232,7 @@ if args.slurm or args.condor:
         print("Exiting.")
         sys.exit(0)
 
-from buildEECres4Hists import fill_hist_from_parquet, fill_transferhist_from_parquet
+from buildEECres4Hists import fill_hist_from_parquet, fill_transferhist_from_parquet, fill_direct_covariance_type1
 
 if args.kinreweight_path is not None:
     from correctionlib import CorrectionSet
@@ -218,7 +242,15 @@ else:
     kinreweight_func = None
 
 print("\nBuilding hist...")
-if args.Hist == 'transfer':
+if args.Hist.startswith('directcov'):
+    H = fill_direct_covariance_type1(thepath, Nboot=0, 
+                                     systwt=args.Wtsyst,
+                                     nbatch=args.nbatch,
+                                     statN=args.statN,
+                                     statK=args.statK,
+                                     kinreweight=kinreweight_func,
+                                     fs=fs)
+elif args.Hist == 'transfer':
     print("Clipping bootstrap -> 0")
     H = fill_transferhist_from_parquet(thepath, 
                                        Nboot = 0, 
