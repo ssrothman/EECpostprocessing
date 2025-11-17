@@ -54,7 +54,7 @@ There are various other options that can be passed to the process.py script. Ths
 
 # Filling histograms
 
-This has so far only been implemented for the res4tee skimmer. This is called with fillEECRes4Hist.py, with the implementation in buildEECres4Hists.py. It should be reasoably easy to port this for other observables
+see the README in binning/
 
 # Plotting
 

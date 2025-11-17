@@ -1,3 +1,9 @@
+try:
+    import directcov
+except ImportError:
+    pass
+finally:
+    pass
 import argparse
 import os
 import numpy as np
@@ -185,8 +191,17 @@ if args.slurm or args.condor:
 
         slurm_script = slurm_script.replace("UUID", uuidstr)
 
-        desired_mem = '8g' if args.Hist == 'transfer' or 'directcov' in args.Hist else '4g'
+        if args.Hist == 'transfer':
+            desired_mem='8g'
+            desired_cpu='1'
+        elif 'directcov' in args.Hist:
+            desired_mem='16g'
+            desired_cpu='4'
+        else:
+            desired_mem='8g'
+            desired_cpu='2'
         slurm_script = slurm_script.replace('MEM', desired_mem)
+        slurm_script = slurm_script.replace('CPU', desired_cpu)
 
         os.makedirs('slurm', exist_ok=True)
         with open("slurm/submit_%s.sh" % uuidstr, 'w') as f:

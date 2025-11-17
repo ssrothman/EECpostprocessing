@@ -1,3 +1,9 @@
+try:
+    import directcov
+except ImportError:
+    pass
+finally:
+    pass
 import argparse
 import numpy as np
 
@@ -8,16 +14,16 @@ parser.add_argument("Binner", type=str)
 #which samples to run over
 parser.add_argument("--samples", type=str, nargs='+',
                     default=[#"Pythia_inclusive",
-                             "Pythia_HT-0to70",
-                             "Pythia_HT-70to100",
-                             "Pythia_HT-100to200",
-                             "Pythia_HT-200to400",
-                             "Pythia_HT-400to600",
-                             "Pythia_HT-600to800",
-                             "Pythia_HT-800to1200",
-                             "Pythia_HT-1200to2500",
-                             "Pythia_HT-2500toInf"])
-                             #"Herwig_inclusive"])
+                             #"Pythia_HT-0to70",
+                             #"Pythia_HT-70to100",
+                             #"Pythia_HT-100to200",
+                             #"Pythia_HT-200to400",
+                             #"Pythia_HT-400to600",
+                             #"Pythia_HT-600to800",
+                             #"Pythia_HT-800to1200",
+                             #"Pythia_HT-1200to2500",
+                             #"Pythia_HT-2500toInf",])
+                             "Herwig_inclusive"])
 #which hists to make
 parser.add_argument("--hists", type=str, nargs='+',
                     default=['reco', 'unmatchedReco', 'untransferedReco', 
@@ -30,13 +36,14 @@ parser.add_argument('--objsysts', type=str, nargs='*',
                              'JER_UP', 'JER_DN', 
                              'UNCLUSTERED_UP', 'UNCLUSTERED_DN',
                              'TRK_EFF',
-                             'CH_UP', 'CH_DN'])
+                             'CH_UP', 'CH_DN'
+                             ])
 parser.add_argument('--wtsysts', type=str, nargs='*', 
-                    default=['idsfUp', 'idsfDown', 
-                             'aSUp', 'aSDown',
-                             'isosfUp', 'isosfDown', 
-                             'triggersfUp', 'triggersfDown',
-                             'prefireUp', 'prefireDown',
+                    default=[#'idsfUp', 'idsfDown', 
+                             #'aSUp', 'aSDown',
+                             #'isosfUp', 'isosfDown', 
+                             #'triggersfUp', 'triggersfDown',
+                             #'prefireUp', 'prefireDown',
                              'PDFaSUp', 'PDFaSDown',
                              'scaleUp', 'scaleDown',
                              'PUUp', 'PUDown', 
@@ -119,7 +126,7 @@ def make_command(sample, hist, objsyst, wtsyst, statN, statK, boot, rng):
     return command
 
 def run_command(command):
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=False)
 
 if __name__ == "__main__":
     commands = []

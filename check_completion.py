@@ -23,6 +23,7 @@ for subpath in subpaths:
 
 if len(options) != 1:
     print("ERROR: SHOULD ONLY BE ONE SUBPATH")
+    print(options)
     import sys
     sys.exit(1)
 

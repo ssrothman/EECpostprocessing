@@ -22,6 +22,7 @@ class EECres4triangleSkimmer(EECgenericSkimmer):
                 readers.eventIdx,
                 mask, wtVars,
                 os.path.join(basepath, 'reco'),
+                rMu = readers.rMu,
                 isRes=True)
         
         if self.isMC:
@@ -34,6 +35,7 @@ class EECres4triangleSkimmer(EECgenericSkimmer):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'gen'),
+                    rMu = readers.rMu,
                     isRes=True)
 
             result['unmatchedReco'] = self.skimObserved(
@@ -45,6 +47,7 @@ class EECres4triangleSkimmer(EECgenericSkimmer):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'unmatchedReco'),
+                    rMu = readers.rMu,
                     isRes=True)
 
             result['unmatchedGen'] = self.skimObserved(
@@ -56,6 +59,7 @@ class EECres4triangleSkimmer(EECgenericSkimmer):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'unmatchedGen'),
+                    rMu = readers.rMu,
                     isRes=True)
 
             result['untransferedReco'] = self.skimObserved(
@@ -67,6 +71,7 @@ class EECres4triangleSkimmer(EECgenericSkimmer):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'untransferedReco'),
+                    rMu = readers.rMu,
                     isRes=True)
 
             result['untransferedGen'] = self.skimObserved(
@@ -78,6 +83,7 @@ class EECres4triangleSkimmer(EECgenericSkimmer):
                     readers.eventIdx,
                     mask, wtVars,
                     os.path.join(basepath, 'untransferedGen'),
+                    rMu = readers.rMu,
                     isRes=True)
 
             result['transfer'] = self.skimTransfer(
@@ -92,6 +98,7 @@ class EECres4triangleSkimmer(EECgenericSkimmer):
                 readers.eventIdx,
                 mask, wtVars,
                 os.path.join(basepath, 'transfer'),
+                rMu = readers.rMu,
                 isRes=True
             )
 

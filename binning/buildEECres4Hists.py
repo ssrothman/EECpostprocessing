@@ -1,3 +1,10 @@
+try:
+    import directcov
+except ImportError:
+    print("directcov not found. rip")
+    pass
+finally:
+    pass
 import numpy as np
 import sys
 from time import time
@@ -20,6 +27,14 @@ ptbins_reco = [50, 65, 88, 120, 150, 186, 254, 326, 408, 1500]
 Rbins_reco = [0.3, 0.4, 0.5, 0.6]
 rbins_reco = np.linspace(0, 1, 11)
 cbins_reco = np.linspace(0, np.pi/2, 11)
+
+ptbins_reco_triangle = [50, 88, 150, 254, 408]
+rbins_reco_triangle = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 2.0, np.inf]
+cbins_reco_triangle = np.linspace(-np.pi, np.pi, 31)
+
+ptbins_gen_triangle = [50, 88, 150, 254, 408]
+rbins_gen_triangle = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.7, 2.0, np.inf]
+cbins_gen_triangle = np.linspace(-np.pi, np.pi, 31)
 
 prebinned_bins = {
     'R' : [0.0, 0.1, 0.2, 0.3, 0.4,
@@ -98,16 +113,26 @@ def fill_hist_from_parquet(basepath, Nboot, systwt,
     else:
         if 'gen' in basepath or 'Gen' in basepath:
             print("Using gen-level bins")
-            ptbins = ptbins_gen
             Rbins = Rbins_gen
-            rbins = rbins_gen
-            cbins = cbins_gen
+            if 'EECres4triangle' in basepath:
+                rbins = rbins_gen_triangle
+                cbins = cbins_gen_triangle
+                ptbins = ptbins_gen_triangle
+            else:
+                ptbins = ptbins_gen
+                rbins = rbins_gen
+                cbins = cbins_gen
         else:
             print("Using reco-level bins")
-            ptbins = ptbins_reco
             Rbins = Rbins_reco
-            rbins = rbins_reco
-            cbins = cbins_reco
+            if 'EECres4triangle' in basepath:
+                rbins = rbins_reco_triangle
+                cbins = cbins_reco_triangle
+                ptbins = ptbins_reco_triangle
+            else:
+                rbins = rbins_reco
+                cbins = cbins_reco
+                ptbins = ptbins_reco
 
         H = hist.Hist(
             hist.axis.Integer(minboot, Nboot+1,
@@ -243,16 +268,26 @@ def fill_direct_covariance_type1(basepath, Nboot, systwt,
 
     if 'gen' in basepath or 'Gen' in basepath:    
         print("Using gen-level bins")
-        ptbins = ptbins_gen
         Rbins = Rbins_gen
-        rbins = rbins_gen
-        cbins = cbins_gen
+        if 'EECres4triangle' in basepath:
+            rbins = rbins_gen_triangle
+            cbins = cbins_gen_triangle
+            ptbins = ptbins_gen_triangle
+        else:
+            rbins = rbins_gen
+            cbins = cbins_gen
+            ptbins = ptbins_gen
     else:
         print("Using reco-level bins")
-        ptbins = ptbins_reco
         Rbins = Rbins_reco
-        rbins = rbins_reco
-        cbins = cbins_reco
+        if 'EECres4triangle' in basepath:
+            rbins = rbins_reco_triangle
+            cbins = cbins_reco_triangle
+            ptbins = ptbins_reco_triangle
+        else:
+            rbins = rbins_reco
+            cbins = cbins_reco
+            ptbins = ptbins_reco
 
     axes = {
         'pt' : hist.axis.Variable(ptbins,
@@ -286,7 +321,6 @@ def fill_direct_covariance_type1(basepath, Nboot, systwt,
     else:
         reweightvars = []
 
-    import directcov
     cov = directcov.DirectCov(shape, 1)
 
     iterator = tqdm(dataset.to_batches(columns=['R', 'r', 'c', 
@@ -353,11 +387,19 @@ def fill_direct_covariance_type1(basepath, Nboot, systwt,
 
         badmask = np.zeros(indices.shape[0], dtype=bool)
         badmask |= np.any(indices < 0, axis=1)
+        print("<0?", np.sum(badmask))
         badmask |= indices[:, 0] >= axes['pt'].extent
+        print(">pt extent?", np.sum(badmask))
         badmask |= indices[:, 1] >= axes['R'].extent
+        print(">R extent?", np.sum(badmask))
         badmask |= indices[:, 2] >= axes['r'].extent
+        print(">r extent?", np.sum(badmask))
         badmask |= indices[:, 3] >= axes['c'].extent
+        print(">c extent?", np.sum(badmask))
         print("Rejecting %d rows due to bad indices" % np.sum(badmask))
+        if np.sum(badmask) > 0:
+            raise ValueError("Bad indices found in dataset. ")
+
         indices = indices[~badmask, :]
         weight = weight[~badmask]
         evthash = evthash[~badmask]
@@ -384,33 +426,47 @@ def fill_transferhist_from_parquet(basepath, Nboot, systwt,
     else:
         minboot = 0
 
+    if 'EECres4triangle' in basepath:
+        the_rbins_reco = rbins_reco_triangle
+        the_rbins_gen = rbins_gen_triangle
+        the_cbins_reco = cbins_reco_triangle
+        the_cbins_gen = cbins_gen_triangle
+        the_ptbins_reco = ptbins_reco_triangle
+        the_ptbins_gen = ptbins_gen_triangle
+    else:
+        the_rbins_reco = rbins_reco
+        the_rbins_gen = rbins_gen
+        the_cbins_reco = cbins_reco
+        the_cbins_gen = cbins_gen
+        the_ptbins_reco = ptbins_reco
+        the_ptbins_gen = ptbins_gen
 
     H = hist.Hist(
         hist.axis.Integer(minboot, Nboot+1, 
                           name='bootstrap', label='bootstrap',
                           underflow=False, overflow=False),
-        hist.axis.Variable(ptbins_reco,
+        hist.axis.Variable(the_ptbins_reco,
                            name='pt_reco', label='$p_{T,reco}$ [GeV]',
                            underflow=True, overflow=True),
         hist.axis.Variable(Rbins_reco,
                           name="R_reco", label = '$R_{reco}$',
                           underflow=True, overflow=True),
-        hist.axis.Variable(rbins_reco,
+        hist.axis.Variable(the_rbins_reco,
                           name="r_reco", label = '$r_{reco}$',
                           underflow=False, overflow=False),
-        hist.axis.Variable(cbins_reco,
+        hist.axis.Variable(the_cbins_reco,
                           name="c_reco", label = '$c_{reco}$',
                           underflow=False, overflow=False),
-        hist.axis.Variable(ptbins_gen,
+        hist.axis.Variable(the_ptbins_gen,
                            name='pt_gen', label='$p_{T,gen}$ [GeV]',
                            underflow=True, overflow=True),
         hist.axis.Variable(Rbins_gen,
                           name="R_gen", label = '$R_{gen}$',
                           underflow=True, overflow=True),
-        hist.axis.Variable(rbins_gen,
+        hist.axis.Variable(the_rbins_gen,
                           name="r_gen", label = '$r_{gen}$',
                           underflow=False, overflow=False),
-        hist.axis.Variable(cbins_gen,
+        hist.axis.Variable(the_cbins_gen,
                           name="c_gen", label = '$c_{gen}$',
                           underflow=False, overflow=False),
         storage=hist.storage.Double()
