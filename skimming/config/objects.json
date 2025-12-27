@@ -1,0 +1,30 @@
+{
+    "objects" : {
+        "Muons" : {
+            "class" : "Muons",
+            "params" : {
+                "name" : "Muon",
+                "padTo" : 2,
+                "roccor" : true,
+                "roccorThreshold" : 200.0
+            }
+        },
+        "Jets" : {
+            "class" : "Jets",
+            "params" : {
+                "jetsname" : "FatJet",
+                "simonjetsname" : "SimonJets",
+                "CHSjetsname" : "Jet"
+            }
+        },
+        "Generics" : {
+            "class" : "GenericObjectContainer",
+            "params" : {
+                "nametable" : {
+                    "Flag" : "Flag",
+                    "PrefireWeight" : "L1PreFiringWeight"
+                }
+            }
+        }
+    }
+}

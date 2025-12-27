@@ -13,7 +13,7 @@ def unflatRecursive(arr, shape, nrepeat=1):
         nrepeat = ak.flatten(shape[0]) * nrepeat
         return unflatRecursive(arr, shape[1:], nrepeat=nrepeat)
 
-def unflatMatrix(arr, nrows, ncols):
+def unflatMatrix(arr : ak.Array, nrows : ak.Array, ncols : ak.Array) -> ak.Array:
     nrows = ak.flatten(nrows, axis=None)
     ncols = ak.flatten(ncols, axis=None)
     ntot = nrows*ncols
@@ -23,7 +23,7 @@ def unflatMatrix(arr, nrows, ncols):
 
     return ans
 
-def unflatVector(arr, ncols):
+def unflatVector(arr : ak.Array, ncols : ak.Array) -> ak.Array:
     ncols = ak.flatten(ncols, axis=None)
     ans = ak.unflatten(arr, ncols, axis=-1)
     return ans
