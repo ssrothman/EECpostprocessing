@@ -1,5 +1,6 @@
 {
     "objects" : {
+        "JECTARGET" : "Jets",
         "Muons" : {
             "class" : "Muons",
             "params" : {
@@ -12,17 +13,65 @@
         "Jets" : {
             "class" : "Jets",
             "params" : {
-                "jetsname" : "FatJet",
-                "simonjetsname" : "SimonJets",
-                "CHSjetsname" : "Jet"
+                "jetsname" : "finalSelectedJetsAK8",
+                "simonjetsname" : "ChargedSimonJetsNOM",
+                "CHSjetsname" : "Jet",
+                "skipJEC" : false,
+                "skipJER" : false,
+                "skipJUNC" : false,
+                "skipJES" : false
+            }
+        },
+        "MET" : {
+            "class" : "MET",
+            "params" : {
+                "name" : "PuppiMET",
+                "paramsuffix"  : ""
+            },
+            "params-JER_UP" : {
+                "name" : "PuppiMET",
+                "paramsuffix"  : "JERUp"
+            },
+            "params-JER_DN" : {
+                "name" : "PuppiMET",
+                "paramsuffix"  : "JERDown"
+            },
+            "params-JES_UP" : {
+                "name" : "PuppiMET",
+                "paramsuffix"  : "JESUp"
+            },
+            "params-JES_DN" : {
+                "name" : "PuppiMET",
+                "paramsuffix"  : "JESDown"
+            },
+            "params-UNCLUSTERED_UP" : {
+                "name" : "PuppiMET",
+                "paramsuffix"  : "UnclusteredUp"
+            },
+            "params-UNCLUSTERED_DN" : {
+                "name" : "PuppiMET",
+                "paramsuffix"  : "UnclusteredDown"
             }
         },
         "Generics" : {
             "class" : "GenericObjectContainer",
             "params" : {
-                "nametable" : {
+                "mandatory_names" : {
                     "Flag" : "Flag",
-                    "PrefireWeight" : "L1PreFiringWeight"
+                    "PrefireWeight" : "L1PreFiringWeight",
+                    "rho" : "fixedGridRhoFastjetAll",
+                    "event" : "event",
+                    "run" : "run",
+                    "lumi" : "luminosityBlock",
+                    "HLT" : "HLT"
+                },
+                "optional_names" : {
+                    "PileupInfo" : "Pileup",
+                    "LHE" : "LHE",
+                    "genWeight" : "genWeight",
+                    "PSWeight" : "PSWeight",
+                    "LHEScaleWeight" : "LHEScaleWeight",
+                    "LHEPdfWeight" : "LHEPdfWeight"
                 }
             }
         }

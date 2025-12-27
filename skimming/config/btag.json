@@ -1,0 +1,10 @@
+{
+    "btagging" : {
+        "btagger" : "btagDeepFlavB",
+        "wps" : {
+            "Loose" :  0.0490,
+            "Medium" : 0.2783,
+            "Tight" : 0.7100
+        }
+    }
+}
