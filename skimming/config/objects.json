@@ -1,6 +1,6 @@
 {
     "objects" : {
-        "JECTARGET" : "Jets",
+        "JECTARGET" : "RecoJets",
         "Muons" : {
             "class" : "Muons",
             "params" : {
@@ -10,8 +10,8 @@
                 "roccorThreshold" : 200.0
             }
         },
-        "Jets" : {
-            "class" : "Jets",
+        "RecoJets" : {
+            "class" : "SimonJets",
             "params" : {
                 "jetsname" : "finalSelectedJetsAK8",
                 "simonjetsname" : "ChargedSimonJetsNOM",
@@ -19,7 +19,40 @@
                 "skipJEC" : false,
                 "skipJER" : false,
                 "skipJUNC" : false,
-                "skipJES" : false
+                "skipJES" : false,
+                "CHS_ptthreshold" : 30.0,
+                "CHS_etathreshold" : 2.4,
+                "CHS_minJetID" : 6,
+                "CHS_minPUID" : 6,
+                "CHS_PUID_ptthreshold" : 50.0
+            }
+        },
+        "GenJets" : {
+            "class" : "SimonJets",
+            "params" : {
+                "jetsname" : "arbitratedGenJetsAK8",
+                "simonjetsname" : "GenChargedSimonJetsNOM",
+                "CHSjetsname" : "",
+                "skipJEC" : true,
+                "skipJER" : true,
+                "skipJUNC" : true,
+                "skipJES" : true,
+                "CHS_ptthreshold" : -1,
+                "CHS_etathreshold" : -1,
+                "CHS_minJetID" : -1,
+                "CHS_minPUID" : -1,
+                "CHS_PUID_ptthreshold" : -1
+            }            
+        },
+        "AK4Jets" : {
+            "class" : "SimpleJets",
+            "params" : {
+                "name" : "Jet",
+                "minpt" : 30.0,
+                "maxeta" : 2.4,
+                "minJetID" : 6,
+                "minPUID" : 5,
+                "PUID_ptthreshold" : 60.0
             }
         },
         "MET" : {

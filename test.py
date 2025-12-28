@@ -18,7 +18,12 @@ with open("skimming/config/btag.json") as f:
     btagcfg = json.load(f)
 with open("skimming/config/JERC.json") as f:
     JECcfg = json.load(f)
+with open("skimming/config/eventsel.json") as f:
+    evtselcfg = json.load(f)
+with open("skimming/config/jetsel.json") as f:
+    jetselcfg = json.load(f)
 
+from skimming.objects import jets
 from skimming.objects.AllObjects import AllObjects
 allobjs = AllObjects(
     events,
@@ -27,4 +32,17 @@ allobjs = AllObjects(
     btagcfg['btagging'],
     JECcfg['JERC'],
     objsyst="nominal"
+)
+
+from skimming.selections.factories import runEventSelection, runJetSelection
+eventselection = runEventSelection(
+    evtselcfg['eventsel'],
+    allobjs,
+    flags={}
+)
+jetselection = runJetSelection(
+    jetselcfg['jetsel'],   
+    allobjs,
+    eventselection, 
+    flags={}
 )

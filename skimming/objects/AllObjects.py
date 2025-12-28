@@ -1,6 +1,6 @@
 import awkward as ak
 from vector import obj
-from .jets import Jets
+from .jets import SimonJets, SimpleJets
 from .muons import Muons
 from .met import MET
 from .generics import GenericObjectContainer
@@ -11,7 +11,8 @@ import numpy as np
 from typing import Any, Mapping
 
 objclasses = {
-    "Jets" : Jets,
+    "SimonJets" : SimonJets,
+    "SimpleJets" : SimpleJets,
     "Muons" : Muons,
     "MET" : MET,
     "GenericObjectContainer" : GenericObjectContainer

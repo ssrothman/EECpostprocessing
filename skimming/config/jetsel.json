@@ -1,0 +1,18 @@
+{
+    "jetsel" : {
+        "class" : "StandardJetSelector",
+        "params" : {
+            "minpt" : 30.0,
+            "maxeta" : 2.4,
+            "jetID" : "tightLepVeto",
+            "puJetID" : "none",
+            "muonOverlapDR" : 0.8,
+            "useVetoMap" : false,
+            "jetvetomap" : {
+                "path" : "TBD",
+                "name" : "TBD",
+                "whichmap" : "TBD"
+            }
+        }
+    }
+}

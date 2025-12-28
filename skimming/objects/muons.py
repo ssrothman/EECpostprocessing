@@ -54,7 +54,7 @@ class Muons:
         PT = self._Zs.pt
         numerator = np.sqrt(M*M + np.square(PT*cosh)) + PT*sinh
         denominator = np.sqrt(M*M + np.square(PT))
-        self._Zs['y'] = np.log(numerator/denominator)
+        self._Zs['rapidity'] = np.log(numerator/denominator)
 
     @property
     def muons(self) -> ak.Array:
