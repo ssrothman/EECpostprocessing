@@ -83,7 +83,7 @@ class StandardWeights:
         isosfname = sfconfig['isosfnames'][whichIso][whichID]
         triggersfname = sfconfig['triggersfnames'][whichTrg]
 
-        if not self._cfg['skipIDsf']:
+        if not sfconfig['skipIDsf']:
             idsf_lead, idsf_lead_up, idsf_lead_dn = getMuonSF(
                 cset, 
                 idsfname, 
@@ -105,7 +105,7 @@ class StandardWeights:
                 idsf_lead_dn*idsf_sub_dn
             )
             
-        if not self._cfg['skipIsosf']:
+        if not sfconfig['skipIsosf']:
             isosf_lead, isosf_lead_up, isosf_lead_dn = getMuonSF(
                 cset, 
                 isosfname, 
@@ -127,7 +127,7 @@ class StandardWeights:
                 isosf_lead_dn*isosf_sub_dn
             )
             
-        if not self._cfg['skipTriggersf']:
+        if not sfconfig['skipTriggersf']:
             triggersf, triggersf_up, triggersf_dn = getMuonSF(cset, 
                                                         triggersfname, 
                                                         leadeta, 
@@ -151,7 +151,7 @@ class StandardWeights:
         cset = CorrectionSet.from_file(PUcfg['path'])
         ev = cset[PUcfg['name']]
 
-        nTruePU = allobjects.Pileup.nTrueInt
+        nTruePU = allobjects.PileupInfo.nTrueInt
 
         nom = ev.evaluate(
             nTruePU,

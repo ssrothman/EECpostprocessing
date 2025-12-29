@@ -50,5 +50,5 @@ jetselection = runJetSelection(
     eventselection, 
     flags={}
 )
-stdwts = StandardWeights(weightscfg['eventweight']['params'], evtselcfg['eventsel'])
+stdwts = StandardWeights(weightscfg['eventweight']['params'], evtselcfg['eventsel']['params'])
 weights = stdwts.get_weights(allobjs)
