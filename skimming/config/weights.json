@@ -1,0 +1,44 @@
+{
+    "eventweight" : {
+        "class" : "StandardWeights",
+        "params" : {
+            "muonSFs" : {
+                "skipPrefireSF" : false,
+                "skipIDsf" : true,
+                "skipIsosf" : true,
+                "skipTriggersf" : true,
+                "path" : "",
+                "idsfnames" : {
+
+                },
+                "isosfnames" : {
+
+                },
+                "triggersfnames" : {
+
+                }
+            },
+            "PUreweight" : {
+                "skip" : false,
+                "path" : "",
+                "name" : ""
+            },
+            "Zreweight" : {
+                "skip" : true,
+                "path" : "",
+                "name" : ""
+            },
+            "btagSF" : {
+                "skip" : true,
+                "sfpath" : "",
+                "effpath" : ""
+            },
+            "flavorWeights" : {
+                "uds" : 0,
+                "c" : 0,
+                "b" : 0,
+                "g" : 0
+            }
+        }
+    }
+}

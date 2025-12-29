@@ -1,9 +1,11 @@
+import warnings
 import awkward as ak
 import numpy as np
 from coffea.analysis_tools import Weights
+from skimming.objects.AllObjects import AllObjects
 from correctionlib import CorrectionSet
 
-def getScaleWts7pt(weights, readers):
+def getScaleWts7pt(weights : Weights, objs : AllObjects):
     '''
     LHE scale variation weights (w_var / w_nominal); 
     [0] is MUF="0.5" MUR="0.5"; 
@@ -16,10 +18,11 @@ def getScaleWts7pt(weights, readers):
     [7] is MUF="1.0" MUR="2.0"; 
     [8] is MUF="2.0" MUR="2.0"
     '''
-    if readers.scalewt is None:
+    if not hasattr(objs, 'LHEScaleWeight'):
+        warnings.warn("No LHEScaleWeight found in objects; skipping scale weights") 
         return
 
-    var_weights = readers.scalewt
+    var_weights = objs.LHEScaleWeight
 
     nweights = len(weights.weight())
 
@@ -41,13 +44,14 @@ def getScaleWts7pt(weights, readers):
                               var_weights[:,7],
                               var_weights[:,8]])
 
-    weights.add('wt_scale', nom, up, down)
+    weights.add('wt_scale_7pt', nom, up, down)
 
-def getScaleWts3pt(weights, readers):
-    if readers.scalewt is None:
+def getScaleWts3pt(weights : Weights, objs : AllObjects):
+    if not hasattr(objs, 'LHEScaleWeight'):
+        warnings.warn("No LHEScaleWeight found in objects; skipping scale weights")
         return
 
-    var_weights = readers.scalewt
+    var_weights = objs.LHEScaleWeight
 
     nweights = len(weights.weight())
 
@@ -60,13 +64,20 @@ def getScaleWts3pt(weights, readers):
 
     weights.add('wt_scale_3pt', nom, up, down)
 
-def getPSWts(weights, readers):
-    if readers.psweight is None:
+def getPSWts(weights : Weights, objs : AllObjects):
+    if not hasattr(objs, 'PSWeight'):
+        warnings.warn("No PSWeight found in objects; skipping PS weights")
         return
 
-    ps_weights = readers.psweight
-    if ak.num(ps_weights)[0] < 4:
-        return
+    ps_weights = objs.PSWeight
+
+    # not sure when this would happen
+    # commenting out for now,
+    # if I find a cause, can re-enable
+    # and add an appropriate warning message
+
+    #if ak.num(ps_weights)[0] < 4:
+    #    return
 
     nweights = len(weights.weight())
 
@@ -87,12 +98,12 @@ def getPSWts(weights, readers):
     weights.add('wt_ISR', nom, up_isr, down_isr)
     weights.add('wt_FSR', nom, up_fsr, down_fsr)
 
-def getPDFweights(weights, readers):
-    if readers.pdfwt is None:
+def getPDFweights(weights : Weights, objs : AllObjects):
+    if not hasattr(objs, 'LHEPdfWeight'):
         return
 
     nweights = len(weights.weight())
-    pdf_weights = readers.pdfwt
+    pdf_weights = objs.LHEPdfWeight
 
     nom   = np.ones(nweights)
 
@@ -114,12 +125,4 @@ def getPDFweights(weights, readers):
     pdfas_unc = np.sqrt( np.square(pdf_unc) + np.square(as_unc) )
     weights.add('wt_PDFaS', nom, pdfas_unc + nom, nom - pdfas_unc) 
 
-
-def getAllTheorySFs(weights, readers):
-    weights.add('generator', readers.genwt)
-
-    getScaleWts7pt(weights, readers)
-    getScaleWts3pt(weights, readers)
-    getPDFweights(weights, readers)
-    getPSWts(weights, readers)
 

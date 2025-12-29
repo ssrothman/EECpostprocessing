@@ -22,6 +22,8 @@ with open("skimming/config/eventsel.json") as f:
     evtselcfg = json.load(f)
 with open("skimming/config/jetsel.json") as f:
     jetselcfg = json.load(f)
+with open("skimming/config/weights.json") as f:
+    weightscfg = json.load(f)
 
 from skimming.objects import jets
 from skimming.objects.AllObjects import AllObjects
@@ -35,6 +37,8 @@ allobjs = AllObjects(
 )
 
 from skimming.selections.factories import runEventSelection, runJetSelection
+from skimming.weights.StandardWeights import StandardWeights
+
 eventselection = runEventSelection(
     evtselcfg['eventsel'],
     allobjs,
@@ -46,3 +50,5 @@ jetselection = runJetSelection(
     eventselection, 
     flags={}
 )
+stdwts = StandardWeights(weightscfg['eventweight']['params'], evtselcfg['eventsel'])
+weights = stdwts.get_weights(allobjs)
