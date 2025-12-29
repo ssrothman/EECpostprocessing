@@ -7,7 +7,7 @@
                 "skipIDsf" : false,
                 "skipIsosf" : false,
                 "skipTriggersf" : false,
-                "path" : "skimming/data/muon_Z.json.gz",
+                "path" : "skimming/data/weights/muon_Z.json.gz",
                 "idsfnames" : {
                     "loose": "NUM_LooseID_DEN_genTracks",
                     "medium": "NUM_MediumID_DEN_genTracks",
@@ -30,7 +30,7 @@
             },
             "PUreweight" : {
                 "skip" : false,
-                "path" : "skimming/data/puWeights.json.gz",
+                "path" : "skimming/data/weights/puWeights.json.gz",
                 "name" : "Collisions18_UltraLegacy_goldenJSON"
             },
             "Zreweight" : {
