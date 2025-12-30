@@ -36,6 +36,8 @@ class AllObjects:
         self._check_btags(btagcfg)
         self._run_JEC(JECera, JECcfg)
 
+        self._JECtarget = None
+
     @classmethod
     def get_uniqueid(cls, events : ak.Array) -> str:
         uniqueid = events._attrs['@events_factory']._partition_key # pyright: ignore[reportOptionalSubscript]
@@ -54,22 +56,35 @@ class AllObjects:
 
         for objname, objcfg in objcfg.items():
             if objname == 'JECTARGET': # not actually an object
+                if self._JECtarget is not None:
+                    raise RuntimeError("Multiple JECTARGETs specified in object config!")
+                
                 self._JECtarget = objcfg
                 continue
+            
+            if not self.isMC and objcfg['MConly']:
+                continue #skip MC-only objects
 
             clsname = objcfg['class']
             cls = objclasses[clsname]
 
-            if 'params-%s' in objcfg:
-                paramskey = 'params-%s'%objsyst
-            else:
-                paramskey = 'params'
+            thecfg = {}
+            #first load "common" params
+            if 'params-common' in objcfg:
+                thecfg.update(objcfg['params-common'])
+            
+            #then if syst-specific config exists, use that
+            if 'params-%s'%objsyst in objcfg:
+                thecfg.update(objcfg['params-%s'%objsyst])
+            else: #else use default config
+                thecfg.update(objcfg['params'])
 
             nextobj = cls(
                 events,
-                **objcfg[paramskey]
+                **thecfg
             )
 
+            #export all sub-objects from `GenericObjectContainer`s
             if clsname == 'GenericObjectContainer':
                 for subname in objcfg['params']['mandatory_names'].keys():
                     self._objects[subname] = getattr(nextobj, subname)
@@ -98,6 +113,7 @@ class AllObjects:
     def __dir__(self) -> list[str]:
         return self.objlist
     
+    # propagate b-tagging to subobjects
     def _check_btags(self, btagcfg : dict) -> None:
         for obj in self._objects.values():
             if hasattr(obj, 'check_btags'):
@@ -106,8 +122,9 @@ class AllObjects:
                     wps = btagcfg['wps']
                 )
     
+    # run JEC on _JECtarget
     def _run_JEC(self, era : str, JECcfg : dict) -> None:
-        if not hasattr(self, '_JECtarget'):
+        if not hasattr(self, '_JECtarget') or self._JECtarget is None:
             raise RuntimeError("No JECTARGET specified in object config, cannot run JEC!")
         
         if era == 'skip':

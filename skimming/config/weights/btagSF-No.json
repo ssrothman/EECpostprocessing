@@ -1,0 +1,11 @@
+{
+    "eventweight" : {
+        "params" : {
+            "btagSF" : {
+                "skip" : true,
+                "sfpath" : "",
+                "effpath" : ""
+            }
+        }
+    }
+}

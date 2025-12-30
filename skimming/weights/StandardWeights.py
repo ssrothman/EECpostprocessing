@@ -214,6 +214,9 @@ class StandardWeights:
         if btagcfg['skip']:
             return
          
+        if self._evtselcfg['global']['maxNumBtag'] < 0:
+            return
+
         sfpath= btagcfg['sfpath']
         if not sfpath.startswith('/'):
             sfpath = os.path.join(os.path.dirname(__file__), '..', '..', sfpath)

@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 import awkward as ak
 import warnings
@@ -66,8 +67,8 @@ def addMuonSelections(selection, readers, config, verbose):
 
     mu0, mu1 = getSelectedMuons(readers, config, verbose)
 
-    leadmu = ak.where(mu0.pt > mu1.pt, mu0, mu1)
-    submu = ak.where(mu0.pt > mu1.pt, mu1, mu0)
+    leadmu : Any = ak.where(mu0.pt > mu1.pt, mu0, mu1)
+    submu : Any = ak.where(mu0.pt > mu1.pt, mu1, mu0)
 
     if verbose:
         print("\tRequiring two muons")

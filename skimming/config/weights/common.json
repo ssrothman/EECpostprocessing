@@ -33,16 +33,6 @@
                 "path" : "skimming/data/weights/puWeights.json.gz",
                 "name" : "Collisions18_UltraLegacy_goldenJSON"
             },
-            "Zreweight" : {
-                "skip" : true,
-                "path" : "",
-                "name" : ""
-            },
-            "btagSF" : {
-                "skip" : true,
-                "sfpath" : "",
-                "effpath" : ""
-            },
             "flavorWeights" : {
                 "uds" : 0,
                 "c" : 0,

@@ -21,9 +21,6 @@
             },
             "global" : {
                 "trigger" : "IsoMu24",
-                "maxMETpt" : 50.0,
-                "maxNumBtag" : 1,
-                "maxNumBtag_level" : "Loose",
                 "noiseFilters" : [
                     "goodVertices",
                     "globalSuperTightHalo2016Filter",

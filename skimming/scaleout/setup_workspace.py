@@ -1,5 +1,6 @@
 
 from skimming.datasets.datasets import get_JERC_era, get_flags
+from skimming.fsutil.location_lookup import location_lookup
 
 
 def setup_skim_workspace(working_dir, 
@@ -27,7 +28,7 @@ def setup_skim_workspace(working_dir,
 
     config['output_location'] = output_location
     config['output_path'] = os.path.join(
-        runtag, dataset, objsyst
+        config['configsuite_name'], runtag, dataset, objsyst
     )
     config['objsyst'] = objsyst
     config['tables'] = tables
@@ -39,6 +40,27 @@ def setup_skim_workspace(working_dir,
     with open(os.path.join(working_dir, 'config.json'), 'w') as f:
         json.dump(config, f, indent=4)
 
+    #also write config into output destination for record-keeping purposes
+    output_fs, output_basepath = location_lookup(output_location)
+    output_cfg_path = os.path.join(
+        config['output_path'], 'config.json'
+    )
+
+    if output_fs.exists(output_cfg_path):
+        with output_fs.open(output_cfg_path, 'r') as f:
+            existing_cfg = json.load(f)
+        
+        prev_to_check = existing_cfg.copy()
+        del prev_to_check['tables']
+        curr_to_check = config.copy()
+        del curr_to_check['tables']
+        if prev_to_check != curr_to_check:
+            raise ValueError("Configuration at output location differs from current configuration!")
+
+    output_fs.makedirs(os.path.dirname(os.path.join(output_basepath, output_cfg_path)), exist_ok=True)
+    with output_fs.open(os.path.join(output_basepath, output_cfg_path), 'w') as f:
+        json.dump(config, f, indent=4)
+        
     #copy skimscript
     import shutil
     shutil.copyfile(os.path.join(os.path.dirname(__file__), 'skimscript.py'),

@@ -1,0 +1,15 @@
+{
+    "configs" : [
+        "objects/BasicObjects.json",
+        "eventselection/ZMuMu-common.json",
+        "eventselection/BkgVeto-Yes.json",
+        "jetselection/StandardJetSelection.json",
+        "corrections/btag.json",
+        "corrections/JERC.json",
+        "weights/common.json",
+        "weights/btagSF-Yes.json",
+        "weights/Zreweight-Yes.json"
+    ],
+    "configsuite_name" : "FullConfig",
+    "configsuite_comments" : "Default Z->mumu skimming configuration, with everything turned on"
+}

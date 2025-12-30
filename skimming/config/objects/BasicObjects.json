@@ -7,25 +7,56 @@
                 "name" : "Muon",
                 "padTo" : 2,
                 "roccor" : true,
-                "roccorThreshold" : 200.0
-            }
+                "roccorThreshold" : 150.0
+            },
+            "MConly" : false
         },
         "RecoJets" : {
             "class" : "SimonJets",
-            "params" : {
+            "params-common" : {
                 "jetsname" : "finalSelectedJetsAK8",
-                "simonjetsname" : "ChargedSimonJetsNOM",
                 "CHSjetsname" : "Jet",
                 "skipJEC" : false,
                 "skipJER" : false,
                 "skipJUNC" : false,
                 "skipJES" : false,
-                "CHS_ptthreshold" : 30.0,
+                "CHS_ptthreshold" : 15.0,
                 "CHS_etathreshold" : 2.4,
                 "CHS_minJetID" : 6,
                 "CHS_minPUID" : 6,
                 "CHS_PUID_ptthreshold" : 50.0
-            }
+            },
+            "params" : {
+                "simonjetsname" : "ChargedSimonJetsNOM"
+            },
+            "params-CHUP" : {
+                "simonjetsname" : "ChargedSimonJetsCHUP"
+            },
+            "params-CHDN" : {
+                "simonjetsname" : "ChargedSimonJetsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "simonjetsname" : "ChargedSimonJetsTRKEFF"
+            },
+            "MConly" : false
+        },
+        "GenJets" : {
+            "class" : "SimonJets",
+            "params" : {
+                "jetsname" : "arbitratedGenJetsAK8",
+                "simonjetsname" : "GenChargedSimonJetsNOM",
+                "CHSjetsname" : "",
+                "skipJEC" : true,
+                "skipJER" : true,
+                "skipJUNC" : true,
+                "skipJES" : true,
+                "CHS_ptthreshold" : -1,
+                "CHS_etathreshold" : -1,
+                "CHS_minJetID" : -1,
+                "CHS_minPUID" : -1,
+                "CHS_PUID_ptthreshold" : -1
+            },
+            "MConly" : true
         },
         "AK4Jets" : {
             "class" : "SimpleJets",
@@ -36,38 +67,36 @@
                 "minJetID" : 6,
                 "minPUID" : 5,
                 "PUID_ptthreshold" : 60.0
-            }
+            },
+            "MConly" : false
         },
         "MET" : {
             "class" : "MET",
+            "params-common" : {
+                "name" : "PuppiMET"
+            },
             "params" : {
-                "name" : "PuppiMET",
                 "paramsuffix"  : ""
             },
             "params-JER_UP" : {
-                "name" : "PuppiMET",
                 "paramsuffix"  : "JERUp"
             },
             "params-JER_DN" : {
-                "name" : "PuppiMET",
                 "paramsuffix"  : "JERDown"
             },
             "params-JES_UP" : {
-                "name" : "PuppiMET",
                 "paramsuffix"  : "JESUp"
             },
             "params-JES_DN" : {
-                "name" : "PuppiMET",
                 "paramsuffix"  : "JESDown"
             },
             "params-UNCLUSTERED_UP" : {
-                "name" : "PuppiMET",
                 "paramsuffix"  : "UnclusteredUp"
             },
             "params-UNCLUSTERED_DN" : {
-                "name" : "PuppiMET",
                 "paramsuffix"  : "UnclusteredDown"
-            }
+            },
+            "MConly" : false
         },
         "CommonGenerics" : {
             "class" : "GenericObjectContainer",
@@ -82,7 +111,26 @@
                 },
                 "optional_names" : {
                 }
-            }
+            },
+            "MConly" : false
+        },
+        "MCGenerics" : {
+            "class" : "GenericObjectContainer",
+            "params" : {
+                "mandatory_names" : {
+                    "PrefireWeight" : "L1PreFiringWeight"
+                },
+                "optional_names" : {
+                    "PileupInfo" : "Pileup",
+                    "LHE" : "LHE",
+                    "genWeight" : "genWeight",
+                    "PSWeight" : "PSWeight",
+                    "LHEScaleWeight" : "LHEScaleWeight",
+                    "LHEPdfWeight" : "LHEPdfWeight"
+                }
+            },
+            "MConly" : true
         }
+
     }
 }
