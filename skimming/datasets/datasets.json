@@ -1,0 +1,48 @@
+{
+    "Apr_23_2025" : {
+        "base" : "crab/crab_Apr_23_2025/2018/",
+        "DATA_2018A" : { 
+            "tag" : [
+                "SingleMuon/SingleMuon/2018A",
+                "SingleMuon/SingleMuon/2018A_recovery",
+                "SingleMuon/SingleMuon/2018A_recovery2",
+                "SingleMuon/SingleMuon/2018A_recovery3"
+            ],
+            "location" : "simon-LPC",
+            "era" : "DATA_2018A",
+            "flags" : {}
+        },
+        "DATA_2018B" : {
+            "tag" : [
+                "SingleMuon/SingleMuon/2018B"
+            ],
+            "location" : "simon-LPC",
+            "era" : "DATA_2018B",
+            "flags" : {}
+        },
+        "DATA_2018C" : {
+            "tag" : [
+                "SingleMuon/SingleMuon/2018C_2",
+                "SingleMuon/SingleMuon/2018C_recovery",
+                "SingleMuon/SingleMuon/2018C_recovery2"
+            ],
+            "location" : "simon-LPC",
+            "era" : "DATA_2018C",
+            "flags" : {}
+        },
+        "DATA_2018D" : {
+            "tag" : [
+                "SingleMuon/SingleMuon/2018D"
+            ],
+            "location" : "simon-LPC",
+            "era" : "DATA_2018D",
+            "flags" : {}
+        },
+        "Pythia_inclusive" : {
+            "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Pythia_inclusive",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        }
+    }
+}
