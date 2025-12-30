@@ -9,6 +9,8 @@ with open("skimming/datasets/location_lookup.json") as f:
     location_lookup = json.load(f)
 
 def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
+    base = cfg[runtag]['base']
+
     dsetcfg = cfg[runtag][dataset]
 
     tag = dsetcfg['tag']
@@ -21,9 +23,9 @@ def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
     allfiles = []
 
     for t in tag:
-        rootpath = os.path.join(rootpath, t)
+        root = os.path.join(rootpath, base, t)
         allfiles += get_rootfiles(
-            hostid, rootpath, 
+            hostid, root, 
             exclude_dropped=exclude_dropped
         )
     
