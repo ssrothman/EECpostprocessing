@@ -27,23 +27,6 @@
                 "CHS_PUID_ptthreshold" : 50.0
             }
         },
-        "GenJets" : {
-            "class" : "SimonJets",
-            "params" : {
-                "jetsname" : "arbitratedGenJetsAK8",
-                "simonjetsname" : "GenChargedSimonJetsNOM",
-                "CHSjetsname" : "",
-                "skipJEC" : true,
-                "skipJER" : true,
-                "skipJUNC" : true,
-                "skipJES" : true,
-                "CHS_ptthreshold" : -1,
-                "CHS_etathreshold" : -1,
-                "CHS_minJetID" : -1,
-                "CHS_minPUID" : -1,
-                "CHS_PUID_ptthreshold" : -1
-            }            
-        },
         "AK4Jets" : {
             "class" : "SimpleJets",
             "params" : {
@@ -86,12 +69,11 @@
                 "paramsuffix"  : "UnclusteredDown"
             }
         },
-        "Generics" : {
+        "CommonGenerics" : {
             "class" : "GenericObjectContainer",
             "params" : {
                 "mandatory_names" : {
                     "Flag" : "Flag",
-                    "PrefireWeight" : "L1PreFiringWeight",
                     "rho" : "fixedGridRhoFastjetAll",
                     "event" : "event",
                     "run" : "run",
@@ -99,12 +81,6 @@
                     "HLT" : "HLT"
                 },
                 "optional_names" : {
-                    "PileupInfo" : "Pileup",
-                    "LHE" : "LHE",
-                    "genWeight" : "genWeight",
-                    "PSWeight" : "PSWeight",
-                    "LHEScaleWeight" : "LHEScaleWeight",
-                    "LHEPdfWeight" : "LHEPdfWeight"
                 }
             }
         }

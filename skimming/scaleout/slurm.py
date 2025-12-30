@@ -1,6 +1,3 @@
-
-
-
 def stage_via_slurm(working_dir, name):
     import os
     import subprocess

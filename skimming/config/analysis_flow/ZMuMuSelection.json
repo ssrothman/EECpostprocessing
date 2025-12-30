@@ -3,11 +3,11 @@
         "class" : "ZMuMuEventSelector",
         "params" : {
             "muons" : {
-                "leadpt" : 30.0,
-                "subpt" : 10.0,
+                "leadpt" : 26.0,
+                "subpt" : 15.0,
                 "leadeta" : 2.4,
                 "subeta" : 2.4,
-                "ID" : "loose",
+                "ID" : "medium",
                 "iso" : "loose",
                 "dxy" : 0.05,
                 "dz" : 0.1,
@@ -25,11 +25,15 @@
                 "maxNumBtag" : 1,
                 "maxNumBtag_level" : "Loose",
                 "noiseFilters" : [
+                    "goodVertices",
+                    "globalSuperTightHalo2016Filter",
                     "HBHENoiseFilter",
                     "HBHENoiseIsoFilter",
                     "EcalDeadCellTriggerPrimitiveFilter",
+                    "BadPFMuonFilter",
+                    "BadPFMuonDzFilter",
                     "eeBadScFilter",
-                    "globalTightHalo2016Filter"
+                    "ecalBadCalibFilter"
                 ]
             }
         }

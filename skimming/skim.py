@@ -27,22 +27,22 @@ def skim(events : ak.Array, config : dict, output_path : str, fs : Any, tables):
     else:
         objs = AllObjects(
             events,
-            "MC",
+            config['era'],
             config['objects'], 
             config['btagging'],
             config['JERC'],
-            objsyst="nominal"
+            objsyst=config['objsyst']
         )
         eventselection = runEventSelection(
             config['eventsel'],
             objs,
-            flags={}
+            flags=config['flags']
         )
         jetselection = runJetSelection(
             config['jetsel'],   
             objs,
             eventselection, 
-            flags={}
+            flags=config['flags']
         )
         weights = runWeightsFactory(
             config['eventweight'], 
@@ -58,7 +58,7 @@ def skim(events : ak.Array, config : dict, output_path : str, fs : Any, tables):
                 'EventKinematicsTable',
                 'SimonJetKinematicsTable'
             ],
-            'test_output',
+            output_path,
             fs
         )
         driver.run_tables(

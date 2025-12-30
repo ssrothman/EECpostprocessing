@@ -1,8 +1,12 @@
 
-def make_skimscript(working_dir, 
-                    runtag, dataset, 
-                    config, tables,
-                    output_location):
+from skimming.datasets.datasets import get_JERC_era, get_flags
+
+
+def setup_skim_workspace(working_dir, 
+                        runtag, dataset, 
+                        objsyst,
+                        config, tables,
+                        output_location):
     from skimming.datasets.datasets import get_target_files
     import os.path
     import json
@@ -23,10 +27,14 @@ def make_skimscript(working_dir,
 
     config['output_location'] = output_location
     config['output_path'] = os.path.join(
-        runtag, dataset
+        runtag, dataset, objsyst
     )
+    config['objsyst'] = objsyst
     config['tables'] = tables
     config['input_location'] = location
+
+    config['era'] = get_JERC_era(runtag, dataset)
+    config['flags'] = get_flags(runtag, dataset)
 
     with open(os.path.join(working_dir, 'config.json'), 'w') as f:
         json.dump(config, f, indent=4)

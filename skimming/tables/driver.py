@@ -43,7 +43,8 @@ class TableDriver:
             objs.uniqueid
         )
         self._fs.makedirs(os.path.dirname(destination), exist_ok=True)
-        
+        print("\tOutput path:", destination)
+
         result = table_obj.run_table(
             objs, evtsel, jetsel, weights
         )

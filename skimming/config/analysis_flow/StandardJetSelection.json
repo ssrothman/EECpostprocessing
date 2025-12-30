@@ -3,15 +3,15 @@
         "class" : "StandardJetSelector",
         "params" : {
             "minpt" : 30.0,
-            "maxeta" : 2.4,
+            "maxeta" : 1.7,
             "jetID" : "tightLepVeto",
             "puJetID" : "none",
             "muonOverlapDR" : 0.8,
-            "useVetoMap" : false,
+            "useVetoMap" : true,
             "jetvetomap" : {
-                "path" : "TBD",
-                "name" : "TBD",
-                "whichmap" : "TBD"
+                "path" : "skimming/data/JME/jetvetomaps.json.gz",
+                "name" : "Summer19UL18_V1",
+                "whichmap" : "jetvetomap"
             }
         }
     }
