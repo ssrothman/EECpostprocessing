@@ -10,3 +10,4 @@ __pycache__/*
 slurm/
 testlocal/
 .vscode/*
+test_output/*

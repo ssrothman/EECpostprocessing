@@ -37,7 +37,7 @@ allobjs = AllObjects(
 )
 
 from skimming.selections.factories import runEventSelection, runJetSelection
-from skimming.weights.StandardWeights import StandardWeights
+from skimming.weights.factory import runWeightsFactory
 
 eventselection = runEventSelection(
     evtselcfg['eventsel'],
@@ -50,5 +50,23 @@ jetselection = runJetSelection(
     eventselection, 
     flags={}
 )
-stdwts = StandardWeights(weightscfg['eventweight']['params'], evtselcfg['eventsel']['params'])
-weights = stdwts.get_weights(allobjs)
+weights = runWeightsFactory(weightscfg['eventweight'], evtselcfg['eventsel'], allobjs)
+
+
+from skimming.tables.driver import TableDriver
+driver = TableDriver(
+    [
+        'AK4JetKinematicsTable',
+        'ConstituentKinematicsTable',
+        'CutflowTable',
+        'EventKinematicsTable',
+        'SimonJetKinematicsTable'
+    ],
+    'test_output'
+)
+driver.run_tables(
+    allobjs,
+    eventselection,
+    jetselection,
+    weights
+)

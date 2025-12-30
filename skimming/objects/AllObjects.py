@@ -27,6 +27,11 @@ class AllObjects:
                 JECcfg : dict,
                 objsyst : str):
        
+        #hack that uses private API 
+        #to get unique file + event range hash
+        self._uniqueid = events._attrs['@events_factory']._partition_key # pyright: ignore[reportOptionalSubscript]
+        self._uniqueid = self._uniqueid.replace('/', '_')
+        
         self._setup_objects(events, objcfg, objsyst)
         self._check_btags(btagcfg)
         self._run_JEC(JECera, JECcfg)
@@ -78,6 +83,10 @@ class AllObjects:
     @property
     def objlist(self) -> list[str]:
         return list(self._objects.keys())
+
+    @property
+    def uniqueid(self) -> str:
+        return self._uniqueid
 
     #autocomplete support :)    
     def __dir__(self) -> list[str]:

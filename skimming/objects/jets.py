@@ -154,10 +154,7 @@ class SimonJets:
                     matchedBtag,
                     False
                 )
-                self.simonjets['pass%sB' % (wp_name)] = ak.max(
-                    self.matchedCHSjets['pass%sB' % (wp_name)],
-                    axis=-1
-                )
+                self.simonjets['pass%sB' % (wp_name)] = matchedBtag
                 
         
         #add gluon flavour to light hadron-flavour jets
