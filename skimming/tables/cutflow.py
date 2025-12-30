@@ -37,6 +37,11 @@ class CutflowTable:
         nomwt : Any = weights.weight()
 
         cuts_so_far = []
+
+        # Special field for raw event count
+        cutflow['evtflow']['names'].append('raw')
+        cutflow['evtflow']['counts'].append(float(len(objs.event)))
+
         for name in evtsel.names:
             cuts_so_far.append(name)
             mask = evtsel.all(*cuts_so_far)
