@@ -154,9 +154,11 @@ class SimonJets:
                     matchedBtag,
                     False
                 )
-                self.simonjets['pass%sB' % (wp_name)] = matchedBtag
-                
-        
+                self.simonjets['pass%sB' % (wp_name)] = ak.max(
+                    matchedBtag,
+                    axis=-1,
+                )
+                        
         #add gluon flavour to light hadron-flavour jets
         if hasattr(self.jets, 'partonFlavour'):
             self.jets['hadronFlavour'] = ak.where(
