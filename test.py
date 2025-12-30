@@ -26,6 +26,18 @@ make_skimscript(
     runtag="Apr_23_2025",
     dataset="Pythia_inclusive",
     config=thecfg,
+    tables=["AK4JetKinematicsTable", 
+            "EventKinematicsTable",
+            "ConstituentKinematicsTable",
+            "CutflowTable",
+            "SimonJetKinematicsTable"],
+    output_location="local-submit",
+)
+make_skimscript(
+    working_dir="test_skimscript2",
+    runtag="Apr_23_2025",
+    dataset="Pythia_inclusive",
+    config=thecfg,
     tables=["count"],
     output_location="local-submit",
 )
