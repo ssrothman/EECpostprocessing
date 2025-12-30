@@ -1,0 +1,14 @@
+{
+    "simon-LPC" : [
+        "cmseos.fnal.gov",
+        "/store/group/lpcpfnano/srothman/"
+    ],
+    "local-submit" : [
+        "local",
+        "/ceph/submit/data/group/cms/store/user/srothman/EEC_v2"
+    ],
+    "xrootd-submit" : [
+        "root://submit55.mit.edu",
+        "/store/user/srothman/EEC_v2"
+    ]
+}

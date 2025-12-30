@@ -1,16 +1,4 @@
-from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 import json
-import awkward as ak
-
-NanoAODSchema.warn_missing_crossrefs = False
-
-events = NanoEventsFactory.from_root(
-    "NANO_selected.root:Events",
-    mode='virtual'
-).events()
-
-if not isinstance(events, ak.Array):
-    raise RuntimeError("Failed to load events as an awkward array!")
 
 with open("skimming/config/objects.json") as f:
     objcfg = json.load(f)
@@ -32,28 +20,12 @@ thecfg.update(evtselcfg)
 thecfg.update(jetselcfg)
 thecfg.update(weightscfg)
 
-from skimming.skim import skim
-from pyarrow.fs import LocalFileSystem
-from fsspec.implementations.arrow import ArrowFSWrapper 
-
-localfs = ArrowFSWrapper(LocalFileSystem())
-skim(
-    events,
-    thecfg,
-    "test_output",
-    localfs,
-    ['count'],
-)
-skim(
-    events,
-    thecfg,
-    "test_output",
-    localfs,
-    [
-        'AK4JetKinematicsTable',
-        'ConstituentKinematicsTable',
-        'CutflowTable',
-        'EventKinematicsTable',
-        'SimonJetKinematicsTable'
-    ]
+from skimming.scaleout.make_skimscript import make_skimscript
+make_skimscript(
+    working_dir="test_skimscript",
+    runtag="Apr_23_2025",
+    dataset="Pythia_inclusive",
+    config=thecfg,
+    tables=["count"],
+    output_location="local-submit",
 )

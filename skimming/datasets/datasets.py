@@ -1,12 +1,10 @@
 import json
 import os
-from skimming.files import get_rootfiles
+from skimming.fsutil.files import get_rootfiles
+from skimming.fsutil.location_lookup import location_lookup
 
-with open("skimming/datasets/datasets.json") as f:
+with open(os.path.join(os.path.dirname(__file__), 'datasets.json')) as f:
     cfg = json.load(f)
-
-with open("skimming/datasets/location_lookup.json") as f:
-    location_lookup = json.load(f)
 
 def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
     base = cfg[runtag]['base']
@@ -16,7 +14,7 @@ def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
     tag = dsetcfg['tag']
     location = dsetcfg['location']
 
-    hostid, rootpath = location_lookup[location]
+    fs, rootpath = location_lookup(location)
     if type(tag) not in [list, tuple]:
         tag = [tag]
 
@@ -25,8 +23,8 @@ def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
     for t in tag:
         root = os.path.join(rootpath, base, t)
         allfiles += get_rootfiles(
-            hostid, root, 
+            fs, root, 
             exclude_dropped=exclude_dropped
         )
     
-    return allfiles
+    return allfiles, location
