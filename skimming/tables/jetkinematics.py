@@ -74,4 +74,5 @@ class SimonJetKinematicsTable:
         )
         shape_target = thevals['Jpt']
         broadcast_all(thevals, shape_target)
+
         return to_pa_table(thevals)

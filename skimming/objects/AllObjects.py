@@ -1,3 +1,4 @@
+import os
 import awkward as ak
 from vector import obj
 from .jets import SimonJets, SimpleJets
@@ -135,6 +136,13 @@ class AllObjects:
         #then, build the JEC stack
         stacknames = []
         files = JECcfg['files'][era]
+        for i in range(len(files)):
+            file = files[i]
+            if not file.startswith('/'):
+                #make path absolute
+                #referenced with respect to the path to the top of the module
+                files[i] = os.path.join(os.path.dirname(__file__), '..', '..',  file)
+                
         if not targetobj.skipJES:
             stacknames += JECcfg['JESstacks'][era]
         if self.isMC and not targetobj.skipJER:

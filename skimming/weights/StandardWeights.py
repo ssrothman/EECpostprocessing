@@ -1,3 +1,4 @@
+import os
 from typing import Any
 import awkward as ak
 from correctionlib import CorrectionSet
@@ -53,7 +54,10 @@ class StandardWeights:
 
         muons = allobjects.Muons.muons
 
-        cset = CorrectionSet.from_file(sfconfig['path'])
+        csetpath = sfconfig['path']
+        if not csetpath.startswith('/'):
+            csetpath = os.path.join(os.path.dirname(__file__), '..', '..', csetpath)
+        cset = CorrectionSet.from_file(csetpath)
 
         mu0 = muons[:,0]
         mu1 = muons[:,1]
@@ -148,7 +152,10 @@ class StandardWeights:
         if PUcfg['skip']:
             return
         
-        cset = CorrectionSet.from_file(PUcfg['path'])
+        csetpath = PUcfg['path']
+        if not csetpath.startswith('/'):
+            csetpath = os.path.join(os.path.dirname(__file__), '..', '..', csetpath)
+        cset = CorrectionSet.from_file(csetpath)
         ev = cset[PUcfg['name']]
 
         nTruePU = allobjects.PileupInfo.nTrueInt
@@ -178,7 +185,10 @@ class StandardWeights:
         if Zcfg['skip']:
             return
         
-        cset = CorrectionSet.from_file(Zcfg['path'])
+        csetpath = Zcfg['path']
+        if not csetpath.startswith('/'):
+            csetpath = os.path.join(os.path.dirname(__file__), '..', '..', csetpath)
+        cset = CorrectionSet.from_file(csetpath)
 
         Zs = allobjects.Zs.Zs
 
@@ -204,8 +214,14 @@ class StandardWeights:
         if btagcfg['skip']:
             return
          
-        cset_sf = CorrectionSet.from_file(btagcfg['sfpath'])
-        cset_eff = CorrectionSet.from_file(btagcfg['effpath'])
+        sfpath= btagcfg['sfpath']
+        if not sfpath.startswith('/'):
+            sfpath = os.path.join(os.path.dirname(__file__), '..', '..', sfpath)
+        efpath= btagcfg['effpath']
+        if not efpath.startswith('/'):
+            efpath = os.path.join(os.path.dirname(__file__), '..', '..', efpath)
+        cset_sf = CorrectionSet.from_file(sfpath)
+        cset_eff = CorrectionSet.from_file(efpath)
         
         jets = allobjects.AK4Jets.jets
         
