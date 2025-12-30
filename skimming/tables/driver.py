@@ -3,7 +3,6 @@ from .eventkinematics import EventKinematicsTable
 from .constituentkinematics import ConstituentKinematicsTable
 from .cutflow import CutflowTable
 from .jetkinematics import SimonJetKinematicsTable
-from .count import CountTable
 
 from coffea.analysis_tools import Weights, PackedSelection
 from skimming.objects.AllObjects import AllObjects
@@ -18,7 +17,6 @@ table_classes = {
     "ConstituentKinematicsTable": ConstituentKinematicsTable,
     "CutflowTable": CutflowTable,
     "SimonJetKinematicsTable": SimonJetKinematicsTable,
-    "CountTable": CountTable,
 }
 
 class TableDriver:
