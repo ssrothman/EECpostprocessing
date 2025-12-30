@@ -25,48 +25,29 @@ with open("skimming/config/jetsel.json") as f:
 with open("skimming/config/weights.json") as f:
     weightscfg = json.load(f)
 
-from skimming.objects import jets
-from skimming.objects.AllObjects import AllObjects
-allobjs = AllObjects(
+thecfg = objcfg
+thecfg.update(btagcfg)
+thecfg.update(JECcfg)
+thecfg.update(evtselcfg)
+thecfg.update(jetselcfg)
+thecfg.update(weightscfg)
+
+from skimming.skim import skim
+skim(
     events,
-    "MC",
-    objcfg['objects'], 
-    btagcfg['btagging'],
-    JECcfg['JERC'],
-    objsyst="nominal"
+    thecfg,
+    "test_output",
+    ['count']
 )
-
-from skimming.selections.factories import runEventSelection, runJetSelection
-from skimming.weights.factory import runWeightsFactory
-
-eventselection = runEventSelection(
-    evtselcfg['eventsel'],
-    allobjs,
-    flags={}
-)
-jetselection = runJetSelection(
-    jetselcfg['jetsel'],   
-    allobjs,
-    eventselection, 
-    flags={}
-)
-weights = runWeightsFactory(weightscfg['eventweight'], evtselcfg['eventsel'], allobjs)
-
-
-from skimming.tables.driver import TableDriver
-driver = TableDriver(
+skim(
+    events,
+    thecfg,
+    "test_output",
     [
         'AK4JetKinematicsTable',
         'ConstituentKinematicsTable',
         'CutflowTable',
         'EventKinematicsTable',
         'SimonJetKinematicsTable'
-    ],
-    'test_output'
-)
-driver.run_tables(
-    allobjs,
-    eventselection,
-    jetselection,
-    weights
+    ]
 )

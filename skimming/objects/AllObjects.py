@@ -29,12 +29,17 @@ class AllObjects:
        
         #hack that uses private API 
         #to get unique file + event range hash
-        self._uniqueid = events._attrs['@events_factory']._partition_key # pyright: ignore[reportOptionalSubscript]
-        self._uniqueid = self._uniqueid.replace('/', '_')
+        self._uniqueid = self.get_uniqueid(events)
         
         self._setup_objects(events, objcfg, objsyst)
         self._check_btags(btagcfg)
         self._run_JEC(JECera, JECcfg)
+
+    @classmethod
+    def get_uniqueid(cls, events : ak.Array) -> str:
+        uniqueid = events._attrs['@events_factory']._partition_key # pyright: ignore[reportOptionalSubscript]
+        uniqueid = uniqueid.replace('/', '_')
+        return uniqueid
 
     def _setup_objects(self, events : ak.Array,
                        objcfg : dict, 
