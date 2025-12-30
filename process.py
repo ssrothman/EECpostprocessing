@@ -285,7 +285,7 @@ if __name__ == '__main__':
     elif args.scale == 'local':
         if args.verbose:
             print("Running locally")
-        cluster, client = setup_local_cluster(16)
+        cluster, client = setup_local_cluster(8)
     elif args.scale == 'local_debug':
         if args.verbose:
             print("Running locally in debug mode")

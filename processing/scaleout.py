@@ -31,7 +31,7 @@ def setup_cluster_on_submit(minjobs, maxjobs, path=None):
     cluster = SLURMCluster(queue = 'submit',
                            cores=1,
                            processes=1,
-                           memory='4GB',
+                           memory='8GB',
                            walltime='1:00:00',
                            log_directory=log_directory,
                            worker_extra_args=[
