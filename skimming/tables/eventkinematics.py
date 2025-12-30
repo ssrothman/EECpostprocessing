@@ -7,7 +7,7 @@ from skimming.selections.PackedJetSelection import PackedJetSelection
 from typing import Any
 import pyarrow as pa
 
-from skimming.tables.common import add_weight_variations, to_pa_table
+from skimming.tables.common import add_event_id, add_weight_variations, to_pa_table
 
 class EventKinematicsTable:
     def __init__(self):
@@ -78,4 +78,11 @@ class EventKinematicsTable:
         thevals['subleadingMuCharge'] = subleadmu.charge
 
         add_weight_variations(thevals, weights, evtmask)
+        add_event_id(
+            thevals,
+            objs.event,
+            objs.lumi,
+            objs.run,
+            evtmask
+        )
         return to_pa_table(thevals)

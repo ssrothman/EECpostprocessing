@@ -33,7 +33,8 @@ class TableDriver:
                        jetsel : PackedJetSelection, 
                        weights : Weights):
 
-       
+        print("Running table:", table_obj.name)
+
         destination = os.path.join(
             self._basepath,
             table_obj.name,

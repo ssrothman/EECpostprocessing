@@ -7,7 +7,7 @@ from skimming.selections.PackedJetSelection import PackedJetSelection
 from typing import Any
 import pyarrow as pa
 
-from skimming.tables.common import add_common_vars, add_weight_variations, broadcast_all, to_pa_table
+from skimming.tables.common import add_common_vars, add_event_id, add_weight_variations, broadcast_all, to_pa_table
 
 class AK4JetKinematicsTable:
     def __init__(self):
@@ -50,7 +50,13 @@ class AK4JetKinematicsTable:
         thevals['nConstituents'] = jets.nConstituents[evtmask]
 
         add_weight_variations(thevals, weights, evtmask)
-        
+        add_event_id(
+            thevals,
+            objs.event,
+            objs.lumi,
+            objs.run,
+            evtmask
+        )
         shape_target = thevals['Jpt']
         broadcast_all(thevals, shape_target)
         return to_pa_table(thevals)
