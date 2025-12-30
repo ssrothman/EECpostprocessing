@@ -22,10 +22,12 @@ table_classes = {
 class TableDriver:
     def __init__(self, 
                  tables : list[str], 
-                 basepath : str):
+                 basepath : str,
+                 fs : Any):
         self._tables = [table_classes[t]() for t in tables]
         self._basepath = basepath
-
+        self._fs = fs
+        
     def _run_one_table(self, 
                        table_obj : Any,
                        objs : AllObjects, 
@@ -40,18 +42,18 @@ class TableDriver:
             table_obj.name,
             objs.uniqueid
         )
-        os.makedirs(os.path.dirname(destination), exist_ok=True)
+        self._fs.makedirs(os.path.dirname(destination), exist_ok=True)
         
         result = table_obj.run_table(
             objs, evtsel, jetsel, weights
         )
         if isinstance(result, dict):
             import json
-            with open(destination + ".json", "w") as f:
+            with self._fs.open(destination + ".json", "w") as f:
                 json.dump(result, f, indent=4)
         else:
             import pyarrow.parquet as pq
-            pq.write_table(result, destination + ".parquet")
+            pq.write_table(result, destination + ".parquet", filesystem=self._fs)
 
     def run_tables(self,
                    objs,

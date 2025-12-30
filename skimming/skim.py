@@ -1,10 +1,11 @@
+from typing import Any
 from skimming.objects.AllObjects import AllObjects
 from skimming.selections.factories import runEventSelection, runJetSelection
 from skimming.weights.factory import runWeightsFactory
 from skimming.tables.driver import TableDriver
 import awkward as ak
 
-def skim(events : ak.Array, config : dict, output_path : str, tables):
+def skim(events : ak.Array, config : dict, output_path : str, fs : Any, tables):
     if 'count' in tables and len(tables) != 1:
         raise RuntimeError("When 'count' table is requested, it must be the only table (uses different short-circuit logic).")
     elif 'count' in tables:
@@ -19,8 +20,8 @@ def skim(events : ak.Array, config : dict, output_path : str, tables):
             "count",
             uniqueid + ".json"
         )
-        os.makedirs(os.path.dirname(destination), exist_ok=True)
-        with open(destination, 'w') as f:
+        fs.makedirs(os.path.dirname(destination), exist_ok=True)
+        with fs.open(destination, 'w') as f:
             json.dump({"n_events": n_events}, f, indent=4)
         print(f"Wrote count table with {n_events} events to {destination}")
     else:
@@ -57,7 +58,8 @@ def skim(events : ak.Array, config : dict, output_path : str, tables):
                 'EventKinematicsTable',
                 'SimonJetKinematicsTable'
             ],
-            'test_output'
+            'test_output',
+            fs
         )
         driver.run_tables(
             objs,

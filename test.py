@@ -33,16 +33,22 @@ thecfg.update(jetselcfg)
 thecfg.update(weightscfg)
 
 from skimming.skim import skim
+from pyarrow.fs import LocalFileSystem
+from fsspec.implementations.arrow import ArrowFSWrapper 
+
+localfs = ArrowFSWrapper(LocalFileSystem())
 skim(
     events,
     thecfg,
     "test_output",
-    ['count']
+    localfs,
+    ['count'],
 )
 skim(
     events,
     thecfg,
     "test_output",
+    localfs,
     [
         'AK4JetKinematicsTable',
         'ConstituentKinematicsTable',
