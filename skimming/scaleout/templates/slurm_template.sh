@@ -18,4 +18,12 @@ export PYTHONUNBUFFERED=1
 echo "Starting job $SLURM_ARRAY_TASK_ID"
 echo "Running on host $(hostname)"
 
-python skimscript.py $SLURM_ARRAY_TASK_ID
+for i in $(seq 0 $((FILES_PER_JOB - 1))); do
+    index=$((FILES_PER_JOB * SLURM_ARRAY_TASK_ID + i))
+    echo "Processing file with index $index"
+    if [ $index -ge NFILES ]; then
+        echo "Index $index exceeds total files NFILES, skipping."
+        continue
+    fi
+    python skimscript.py $index
+done
