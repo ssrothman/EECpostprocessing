@@ -1,3 +1,4 @@
+import os
 from correctionlib import CorrectionSet
 from .PackedJetSelection import PackedJetSelection
 from coffea.analysis_tools import PackedSelection
@@ -88,9 +89,14 @@ class StandardJetSelector:
             )
 
         if self._cfg['useVetoMap']:      
-            vetocfg = self._cfg['jetvetomap']      
+            vetocfg = self._cfg['jetvetomap']    
+            vetmappath = vetocfg['path']
+            if not vetmappath.startswith('/'):
+                vetmappath = os.path.join(
+                    os.path.dirname(__file__), '..', '..', vetmappath
+                )  
             vetomap_cset = CorrectionSet.from_file(
-                vetocfg['path']
+                vetmappath
             )
             vetomap = vetomap_cset[vetocfg['name']]
 
