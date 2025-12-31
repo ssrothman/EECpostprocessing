@@ -19,24 +19,22 @@ if len(arrayids) == 0:
     raise RuntimeError("No slurm logs found in workspace")
 elif len(arrayids) > 1:
     import warnings
-    warnings.warn("Multiple array IDs found in slurm logs. Using most recent (ie largest job number).")
+    print("WARNING: Multiple array IDs found in slurm logs. Using most recent (ie largest job number).")
     arrayid = max(arrayids)
 else:
     arrayid = arrayids.pop()
 
 #then, use some bash commands to find which jobs failed
 import subprocess
-cmd = "sacct -j SLURM_JOB_ID --format=JobId%50,State --noheader | grep FAILED | grep -v batch | awk '{print $1}' | awk -F_ '{print $2}'".replace("SLURM_JOB_ID", str(arrayid))
+cmd = "sacct -j SLURM_JOB_ID --format=JobId%50,State --noheader | grep -v COMPLETED | grep -v batch | grep -v extern | awk '{print $1}' | awk -F_ '{print $2}'".replace("SLURM_JOB_ID", str(arrayid))
 result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True, cwd=args.where)
 failed_jobs = [int(x) for x in result.stdout.split("\n") if x.strip() != ""]
 
 #then, sort the failed jobs into ranges for resubmission
 failed_jobs = sorted(failed_jobs)
-
-failed_jobs.pop(10)
-failed_jobs.pop(11)
-failed_jobs.pop(20)
-failed_jobs.pop(-2)
+if len(failed_jobs) == 0:
+    print("All jobs succeeded! Nothing to resubmit.")
+    exit(0)
 
 resubmit_ranges = []
 start=0
