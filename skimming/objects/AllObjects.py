@@ -56,7 +56,7 @@ class AllObjects:
 
         for objname, objcfg in objcfg.items():
             if objname == 'JECTARGET': # not actually an object
-                if self._JECtarget is not None:
+                if hasattr(self, '_JECtarget') and self._JECtarget is not None:
                     raise RuntimeError("Multiple JECTARGETs specified in object config!")
                 
                 self._JECtarget = objcfg
