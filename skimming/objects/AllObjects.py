@@ -27,12 +27,16 @@ class AllObjects:
                 btagcfg : dict,
                 JECcfg : dict,
                 objsyst : str):
-       
+
         #hack that uses private API 
         #to get unique file + event range hash
         self._uniqueid = self.get_uniqueid(events)
         
         self._setup_objects(events, objcfg, objsyst)
+
+        if (not self.isMC) and objsyst != 'DATA':
+            raise RuntimeError("Data events cannot be processed with systematic variations other than 'DATA'!")
+
         self._check_btags(btagcfg)
         self._run_JEC(JECera, JECcfg)
 

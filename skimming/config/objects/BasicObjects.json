@@ -38,6 +38,9 @@
             "params-TRK_EFF" : {
                 "simonjetsname" : "ChargedSimonJetsTRKEFF"
             },
+            "params-DATA" : {
+                "simonjetsname" : "ChargedSimonJets"
+            },
             "MConly" : false
         },
         "GenJets" : {
