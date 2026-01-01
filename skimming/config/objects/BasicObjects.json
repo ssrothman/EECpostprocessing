@@ -29,10 +29,10 @@
             "params" : {
                 "simonjetsname" : "ChargedSimonJetsNOM"
             },
-            "params-CHUP" : {
+            "params-CH_UP" : {
                 "simonjetsname" : "ChargedSimonJetsCHUP"
             },
-            "params-CHDN" : {
+            "params-CH_DN" : {
                 "simonjetsname" : "ChargedSimonJetsCHDN"
             },
             "params-TRK_EFF" : {
