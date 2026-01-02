@@ -14,7 +14,7 @@ def location_lookup(location : str):
         fs = fsspec.filesystem('file')
     else:
         from fsspec_xrootd import XRootDFileSystem
-        fs = XRootDFileSystem(hostid)
+        fs = XRootDFileSystem(hostid, timeout=120)
     
     return fs, rootpath
 
