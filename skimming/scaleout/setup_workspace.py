@@ -2,6 +2,7 @@
 from skimming.datasets.datasets import get_JERC_era, get_flags
 from skimming.fsutil.location_lookup import location_lookup
 
+from skimming.tables.driver import table_classes
 
 def setup_skim_workspace(working_dir, 
                         runtag, dataset, 
@@ -13,7 +14,6 @@ def setup_skim_workspace(working_dir,
     import json
     import os
 
-    os.makedirs(working_dir, exist_ok=True)
 
     if len(tables) == 1 and tables[0] == 'count':
         exclude_dropped = False
@@ -21,10 +21,6 @@ def setup_skim_workspace(working_dir,
         exclude_dropped = True
 
     target_files, location = get_target_files(runtag, dataset, exclude_dropped=exclude_dropped)
-
-    with open(os.path.join(working_dir, 'target_files.txt'), 'w') as f:
-        for tf in target_files:
-            f.write(f"{tf}\n")
 
     config['output_location'] = output_location
     config['output_path'] = os.path.join(
@@ -34,6 +30,44 @@ def setup_skim_workspace(working_dir,
     config['tables'] = tables
     config['input_location'] = location
 
+    output_fs, output_basepath = location_lookup(output_location)
+
+    n_targets = len(target_files)
+    if n_targets == 0:
+        raise RuntimeError(f"No target files found for dataset {dataset} with runtag {runtag}")
+    
+    # check if all the outputs already exist
+    any_need = False
+    for table in tables:
+        if table == 'count':
+            tablename = 'count'
+        else:
+            tablename = table_classes[table].name
+
+        tpath = os.path.join(
+            output_basepath,
+            config['output_path'],
+            tablename
+        )
+        if output_fs.exists(tpath):
+
+            existing_pq = output_fs.glob(os.path.join(tpath, '*.parquet'))
+            existing_json = output_fs.glob(os.path.join(tpath, '*.json'))
+            if len(existing_pq) != n_targets and len(existing_json) != n_targets:
+                any_need = True
+                break
+
+    if not any_need:
+        print("All outputs for [dataset %s, objsyst %s, tables %s] already exist, skipping workspace setup." % (dataset, objsyst, tables))
+        return
+
+    os.makedirs(working_dir, exist_ok=True)
+
+    with open(os.path.join(working_dir, 'target_files.txt'), 'w') as f:
+        for tf in target_files:
+            f.write(f"{tf}\n")
+
+
     config['era'] = get_JERC_era(runtag, dataset)
     config['flags'] = get_flags(runtag, dataset)
 
@@ -41,7 +75,6 @@ def setup_skim_workspace(working_dir,
         json.dump(config, f, indent=4)
 
     #also write config into output destination for record-keeping purposes
-    output_fs, output_basepath = location_lookup(output_location)
     output_cfg_path = os.path.join(
         config['output_path'], 'config.json'
     )
