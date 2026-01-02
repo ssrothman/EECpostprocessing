@@ -13,8 +13,9 @@ class SimonJetKinematicsTable:
     def __init__(self):
         pass
 
+    @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return "jets"
 
     def run_table(self, 

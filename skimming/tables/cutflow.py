@@ -10,8 +10,9 @@ class CutflowTable:
     def __init__(self):
         pass
 
+    @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return "cutflow"
 
     def run_table(self, 

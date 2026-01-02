@@ -13,8 +13,9 @@ class ConstituentKinematicsTable:
     def __init__(self):
         pass
 
+    @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return "parts"
     
     def run_table(self, 

@@ -13,8 +13,9 @@ class EventKinematicsTable:
     def __init__(self):
         pass
 
+    @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return "events"
     
     def run_table(self, 

@@ -13,8 +13,9 @@ class AK4JetKinematicsTable:
     def __init__(self):
         pass
 
+    @classmethod
     @property
-    def name(self) -> str:
+    def name(cls) -> str:
         return "ak4jets"
     
     def run_table(self, 
