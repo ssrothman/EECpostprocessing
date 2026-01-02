@@ -4,6 +4,7 @@ from vector import obj
 from .jets import SimonJets, SimpleJets
 from .muons import Muons
 from .met import MET
+from .EEC import EECproj, EECres3, EECres4
 from .generics import GenericObjectContainer
 from coffea.lookup_tools import extractor
 from coffea.jetmet_tools import FactorizedJetCorrector, JECStack, CorrectedJetsFactory
@@ -16,7 +17,10 @@ objclasses = {
     "SimpleJets" : SimpleJets,
     "Muons" : Muons,
     "MET" : MET,
-    "GenericObjectContainer" : GenericObjectContainer
+    "GenericObjectContainer" : GenericObjectContainer,
+    "EECproj" : EECproj,
+    "EECres3" : EECres3,
+    "EECres4" : EECres4
 }
 
 class AllObjects:
