@@ -38,6 +38,11 @@ if config['input_location'] != 'local':
     input_file = 'root://' + hostid + '//' + input_file
     
 events = NanoEventsFactory.from_root(input_file+":Events", schemaclass=NanoAODSchema).events()
+
+if len(events) == 0:
+    print(f"No events found in file {input_file}, skipping skim.")
+    exit(0)
+
 skim(
     events,  # pyright: ignore[reportArgumentType]
     config,
