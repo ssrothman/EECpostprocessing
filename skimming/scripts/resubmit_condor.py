@@ -96,7 +96,7 @@ if len(held_jobs) > 0:
 #transfering jobs are probably ok, do NOT resubmit
 
 if len(suspended_jobs) > 0:
-    failed_jobs.update(suspended_jobs.keys())
+    failed_jobs.update(suspended_jobs)
     print("Also resubmitting suspended jobs: ", suspended_jobs)
 
 #now, sort the failed jobs into ranges for resubmission
