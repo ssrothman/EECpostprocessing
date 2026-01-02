@@ -38,6 +38,7 @@ class SimonJetKinematicsTable:
         thevals['Jpt'] = jets.jets.pt[jetmask][evtmask]
         thevals['Jeta'] = jets.jets.eta[jetmask][evtmask]
         thevals['Jphi'] = jets.jets.phi[jetmask][evtmask]
+        thevals['Jpt_cmssw'] = jets.jets.pt_cmssw[jetmask][evtmask]
         
         #flavor info
         thevals['passLooseB'] = jets.simonjets.passLooseB[jetmask][evtmask]
