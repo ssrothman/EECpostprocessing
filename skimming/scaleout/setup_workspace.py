@@ -2,7 +2,7 @@
 from skimming.datasets.datasets import get_JERC_era, get_flags
 from skimming.fsutil.location_lookup import location_lookup
 
-from skimming.tables.driver import table_classes
+from skimming.tables.driver import construct_table_from_string
 
 def setup_skim_workspace(working_dir, 
                         runtag, dataset, 
@@ -42,13 +42,14 @@ def setup_skim_workspace(working_dir,
         if table == 'count':
             tablename = 'count'
         else:
-            tablename = table_classes[table].name
+            tablename = construct_table_from_string(table).name
 
         tpath = os.path.join(
             output_basepath,
             config['output_path'],
             tablename
         )
+
         if output_fs.exists(tpath):
 
             existing_pq = output_fs.glob(os.path.join(tpath, '*.parquet'))
@@ -56,6 +57,9 @@ def setup_skim_workspace(working_dir,
             if len(existing_pq) != n_targets and len(existing_json) != n_targets:
                 any_need = True
                 break
+        else:
+            any_need = True
+            break
 
     if not any_need:
         print("All outputs for [dataset %s, objsyst %s, tables %s] already exist, skipping workspace setup." % (dataset, objsyst, tables))

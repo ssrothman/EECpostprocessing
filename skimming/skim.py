@@ -51,13 +51,7 @@ def skim(events : ak.Array, config : dict, output_path : str, fs : Any, tables):
         )
 
         driver = TableDriver(
-            [
-                'AK4JetKinematicsTable',
-                'ConstituentKinematicsTable',
-                'CutflowTable',
-                'EventKinematicsTable',
-                'SimonJetKinematicsTable'
-            ],
+            tables,
             output_path,
             fs
         )

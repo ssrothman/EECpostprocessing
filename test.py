@@ -11,19 +11,10 @@ setup_skim_workspace(
     dataset="Pythia_inclusive",
     objsyst='nominal',
     config=thecfg,
-    tables=["AK4JetKinematicsTable", 
-            "EventKinematicsTable",
-            "ConstituentKinematicsTable",
-            "CutflowTable",
-            "SimonJetKinematicsTable"],
-    output_location="local-submit",
-)
-setup_skim_workspace(
-    working_dir="test_skimscript2",
-    runtag="Apr_23_2025",
-    dataset="Pythia_inclusive",
-    objsyst='nominal',
-    config=thecfg,
-    tables=["count"],
+    tables=[
+        "EECres4Obs:True,tee",
+        "EECres4Obs:False,tee",
+        "EECres4Transfer:tee",
+    ],
     output_location="local-submit",
 )

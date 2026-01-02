@@ -62,7 +62,7 @@ class EECgeneric:
     @property
     def jetidx_gen(self):
         return ak.materialize(
-            self._events[self._name + 'BK'].iJet_gen
+            self._events[self._name + 'BK'].iGen
         )
     
     @property
@@ -74,7 +74,7 @@ class EECgeneric:
     @property
     def jetidx_reco(self):
         return ak.materialize(
-            self._events[self._name + 'BK'].iJet_reco
+            self._events[self._name + 'BK'].iReco
         )
 
 class EECproj(EECgeneric):

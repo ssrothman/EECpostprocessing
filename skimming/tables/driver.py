@@ -3,6 +3,7 @@ from .eventkinematics import EventKinematicsTable
 from .constituentkinematics import ConstituentKinematicsTable
 from .cutflow import CutflowTable
 from .jetkinematics import SimonJetKinematicsTable
+from .EEC import EECres4ObsTable, EECres4TransferTable
 
 from coffea.analysis_tools import Weights, PackedSelection
 from skimming.objects.AllObjects import AllObjects
@@ -17,14 +18,48 @@ table_classes = {
     "ConstituentKinematicsTable": ConstituentKinematicsTable,
     "CutflowTable": CutflowTable,
     "SimonJetKinematicsTable": SimonJetKinematicsTable,
+    "EECres4Obs": EECres4ObsTable,
+    "EECres4Transfer": EECres4TransferTable,
 }
+
+def construct_table_from_string(table_str : str) -> Any:
+    if ':' in table_str:
+        tablename, options_str = table_str.split(':')
+        options : list[Any] = options_str.split(',')
+    else:
+        tablename = table_str
+        options : list[Any]= []
+
+    #coerce datatypes
+    for i in range(len(options)):
+        opt = options[i].strip()
+        if opt.lower() == 'true':
+            opt = True
+        elif opt.lower() == 'false':
+            opt = False
+        else:
+            try:
+                opt = int(opt)
+            except ValueError:
+                try:
+                    opt = float(opt)
+                except ValueError:
+                    pass
+        
+        options[i] = opt
+
+    if tablename not in table_classes:
+        raise ValueError(f"Unknown table class '{tablename}'")
+    
+    table_class = table_classes[tablename]
+    return table_class(*options)
 
 class TableDriver:
     def __init__(self, 
                  tables : list[str], 
                  basepath : str,
                  fs : Any):
-        self._tables = [table_classes[t]() for t in tables]
+        self._tables = [construct_table_from_string(t) for t in tables]
         self._basepath = basepath
         self._fs = fs
         
