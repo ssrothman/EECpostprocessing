@@ -101,6 +101,51 @@
             },
             "MConly" : false
         },
+        "RecoEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "RecoChargedEECsNOM"
+            },
+            "params-CH_UP" : {
+                "name" : "RecoChargedEECsCHUP"
+            },
+            "params-CH_DN" : {
+                "name" : "RecoChargedEECsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "name" : "RecoChargedEECsTRKEFF"
+            },
+            "params-DATA" : {
+                "name" : "RecoChargedEECs"
+            },
+            "MConly" : false
+        },
+        "GenEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "GenChargedEECsNOM"
+            },
+            "MConly" : true
+        },
+        "EECtransfer" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "ChargedEECsNOMTransfer"
+            },
+            "params-CH_UP" : {
+                "name" : "ChargedEECsCHUPTransfer"
+            },
+            "params-CH_DN" : {
+                "name" : "ChargedEECsCHDNTransfer"
+            },
+            "params-TRK_EFF" : {
+                "name" : "ChargedEECsTRKEFFTransfer"
+            },
+            "params-DATA" : {
+                "name" : "ChargedEECsTransfer"
+            },
+            "MConly" : true
+        },
         "CommonGenerics" : {
             "class" : "GenericObjectContainer",
             "params" : {
