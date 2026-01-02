@@ -43,6 +43,114 @@
             "location" : "simon-LPC",
             "era" : "MC",
             "flags" : {}
+        },
+        "Herwig_inclusive" : {
+            "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/Herwig_inclusive_2",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-0to70" : {
+            "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/Pythia_inclusive",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : { "genHT" : 70 }
+        },
+        "Pythia_HT-70to100" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-70to100",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-100to200" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-100to200",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-200to400" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-200to400",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-400to600" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-400to600",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-600to800" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-600to800",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-800to1200" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-800to1200",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-1200to2500" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-1200to2500",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "Pythia_HT-2500toInf" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-2500toInf",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "WW" : {
+            "tag" : "WW/WW_TuneCP5_13TeV-pythia8/WW",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "WZ" : {
+            "tag" : "WZ/WZ_TuneCP5_13TeV-pythia8/WZ",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "ZZ" : {
+            "tag" : "ZZ/ZZ_TuneCP5_13TeV-pythia8/ZZ",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "TT" : {
+            "tag" : "TT/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/TTTo2L2Nu",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "ST_t" : {
+            "tag" : "ST/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/ST_t_5f",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "ST_t_anti" : {
+            "tag" : "ST/ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/ST_t_anti_5f",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "ST_tW" : {
+            "tag" : "ST/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/ST_tW_5f",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
+        },
+        "ST_tW_anti" : {
+            "tag" : "ST/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/ST_tW_anti_5f",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {}
         }
     }
 }
