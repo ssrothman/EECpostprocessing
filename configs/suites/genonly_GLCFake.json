@@ -1,6 +1,0 @@
-{
-    "doc" : "configuration to run on GEN from Phil's custom generation, with 'Uniform fake' jets",
-    "configs" : [
-        "configs/genonly_GLCFake_main.json"
-    ]
-}

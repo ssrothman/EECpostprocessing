@@ -10,6 +10,7 @@
 #SBATCH --array=0-NJOBS
 #SBATCH --output=slurm/NAME_%A_%a.out
 #SBATCH --error=slurm/NAME_%A_%a.err
+#SBATCH --exclude=submit80,submit81-1
 
 cd WORKINGDIR
 

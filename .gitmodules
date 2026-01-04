@@ -1,0 +1,6 @@
+[submodule "simonpy"]
+	path = simonpy
+	url = git@github.com:ssrothman/simonpy.git
+[submodule "simonplot"]
+	path = simonplot
+	url = git@github.com:ssrothman/simonplot.git

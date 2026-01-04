@@ -1,6 +1,0 @@
-{
-    "doc" : "configuration to run on GEN from Phil's custom generation, with 'unform gaussian' jets",
-    "configs" : [
-        "configs/genonly_UG_main.json"
-    ]
-}
