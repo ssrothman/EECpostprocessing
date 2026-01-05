@@ -11,3 +11,4 @@ slurm/
 testlocal/
 .vscode/*
 test_output/*
+*.pdf
