@@ -1,5 +1,17 @@
 {
     "stacks" : {
+        "allMC" : {
+            "dsets" : [
+                "ZZ",
+                "WW",
+                "WZ"
+            ],
+            "stacks" : [
+                "Pythia_HTsum"
+            ],
+            "color" : "darkred",
+            "label" : "MC signal+background"
+        },
         "Pythia_HTsum" : {
             "dsets" : [
                 "Pythia_HT-0to70",

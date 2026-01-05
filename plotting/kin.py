@@ -3,6 +3,14 @@ import simonplot as splt
 from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack
 import pyarrow.dataset as ds
 
+evtds_allMC = build_pq_dataset_stack(
+    'BasicConfig',
+    'Apr_23_2025',
+    'allMC',
+    'nominal',
+    'events'
+)
+
 evtds_htsum = build_pq_dataset_stack(
     'BasicConfig',
     'Apr_23_2025',
@@ -38,9 +46,9 @@ for var in evtvars:
         var,
         cut,
         weight,
-        [  
-            evtds_data,
-            evtds_htsum
+        [
+            evtds_allMC,
+            evtds_data
         ],
         binning,
         output_folder='testplots/kin',
