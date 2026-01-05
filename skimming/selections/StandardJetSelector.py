@@ -17,6 +17,26 @@ class StandardJetSelector:
         selection = PackedJetSelection(evtsel)
         jets = allobjects.RecoJets.jets
 
+        if self._cfg['muonOverlapDR'] >= 0:
+            muons = allobjects.Muons.muons
+            jets = allobjects.RecoJets.jets
+
+            deta0 = jets.eta - ak.fill_none(muons[:,0].eta, 999)
+            deta1 = jets.eta - ak.fill_none(muons[:,1].eta, 999)
+            dphi0 = jets.phi - ak.fill_none(muons[:,0].phi, 999)
+            dphi1 = jets.phi - ak.fill_none(muons[:,1].phi, 999)
+            dphi0 = np.where(dphi0 > np.pi, dphi0 - 2*np.pi, dphi0)
+            dphi0 = np.where(dphi0 < -np.pi, dphi0 + 2*np.pi, dphi0)
+            dphi1 = np.where(dphi1 > np.pi, dphi1 - 2*np.pi, dphi1)
+            dphi1 = np.where(dphi1 < -np.pi, dphi1 + 2*np.pi, dphi1)
+            dR0 = np.sqrt(deta0*deta0 + dphi0*dphi0)
+            dR1 = np.sqrt(deta1*deta1 + dphi1*dphi1)
+            selection.add(
+                "muVeto",
+                (dR0 > self._cfg['muonOverlapDR'])
+                & (dR1 > self._cfg['muonOverlapDR'])
+            )
+
         if self._cfg['minpt'] >= 0:
             selection.add(
                 "jetpt",
@@ -67,26 +87,6 @@ class StandardJetSelector:
             pass
         else:
             raise ValueError("Invalid jet puID: {}".format(self._cfg['puJetID']))
-
-        if self._cfg['muonOverlapDR'] >= 0:
-            muons = allobjects.Muons.muons
-            jets = allobjects.RecoJets.jets
-
-            deta0 = jets.eta - ak.fill_none(muons[:,0].eta, 999)
-            deta1 = jets.eta - ak.fill_none(muons[:,1].eta, 999)
-            dphi0 = jets.phi - ak.fill_none(muons[:,0].phi, 999)
-            dphi1 = jets.phi - ak.fill_none(muons[:,1].phi, 999)
-            dphi0 = np.where(dphi0 > np.pi, dphi0 - 2*np.pi, dphi0)
-            dphi0 = np.where(dphi0 < -np.pi, dphi0 + 2*np.pi, dphi0)
-            dphi1 = np.where(dphi1 > np.pi, dphi1 - 2*np.pi, dphi1)
-            dphi1 = np.where(dphi1 < -np.pi, dphi1 + 2*np.pi, dphi1)
-            dR0 = np.sqrt(deta0*deta0 + dphi0*dphi0)
-            dR1 = np.sqrt(deta1*deta1 + dphi1*dphi1)
-            selection.add(
-                "muVeto",
-                (dR0 > self._cfg['muonOverlapDR'])
-                & (dR1 > self._cfg['muonOverlapDR'])
-            )
 
         if self._cfg['useVetoMap']:      
             vetocfg = self._cfg['jetvetomap']    
