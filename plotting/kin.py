@@ -17,11 +17,19 @@ evtds_incl = build_pq_dataset(
     'nominal',
     'events'
 )
+evtds_data = build_pq_dataset_stack(
+    'BasicConfig',
+    'Apr_23_2025',
+    'DATA',
+    'DATA',
+    'events'
+)
 
 
-evtvars = [splt.variable.BasicVariable(name) for name in evtds_incl.schema.names if 'wt_' not in name and name != 'event_id']
+evtvars = [splt.variable.BasicVariable(name) for name in evtds_data._datasets[0].schema.names if 'wt_' not in name and name != 'event_id']
 cut = splt.cut.NoCut()
-weight = splt.variable.BasicVariable('wt_ISRDown')
+#weight = splt.variable.BasicVariable('wt_ISRDown')
+weight = splt.variable.ConstantVariable(1.0)
 binning = splt.binning.AutoBinning()
 
 for var in evtvars:
@@ -31,10 +39,11 @@ for var in evtvars:
         cut,
         weight,
         [  
-            evtds_incl,
+            evtds_data,
             evtds_htsum
         ],
         binning,
         output_folder='testplots/kin',
         output_prefix='evt',
     )
+    faslkjafsdlkj
