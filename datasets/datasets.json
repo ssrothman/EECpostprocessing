@@ -13,8 +13,8 @@
                 "Pythia_HT-2500toInf"
             ],
             "stacks" : [],
-            "color" : "cyan",
-            "label" : "Pythia $Z\\rightarrow\\ell\\ell$ HT-binned"
+            "color" : "darkblue",
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-binned"
         },
         "DATA" : {
             "dsets" : [
@@ -84,8 +84,8 @@
             "location" : "simon-LPC",
             "era" : "MC",
             "flags" : {},
-            "label" : "Pythia $Z\\rightarrow\\ell\\ell$",
-            "color" : "cyan",
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; Inclusive",
+            "color" : "darkblue",
             "xsec" : 6077.22
         },
         "Herwig_inclusive" : {
