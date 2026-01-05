@@ -24,6 +24,7 @@ def add_common_vars(thevals : dict[str, Any],
 def add_weight_variations(thevals : dict[str, Any],
                           weights : Weights,
                           evtmask : ak.Array):
+    thevals['wt_nominal'] = weights.weight()[evtmask] # pyright: ignore[reportOptionalSubscript]
     for variation in weights.variations:
         thevals[variation] = weights.weight(variation)[evtmask] # pyright: ignore[reportOptionalSubscript]
 

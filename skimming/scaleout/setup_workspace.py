@@ -1,6 +1,6 @@
 
-from skimming.datasets.datasets import get_JERC_era, get_flags
-from skimming.fsutil.location_lookup import location_lookup
+from datasets.datasets import get_JERC_era, get_flags
+from fslookup.location_lookup import location_lookup
 
 from skimming.tables.driver import construct_table_from_string
 
@@ -9,7 +9,7 @@ def setup_skim_workspace(working_dir,
                         objsyst,
                         config, tables,
                         output_location):
-    from skimming.datasets.datasets import get_target_files
+    from datasets.datasets import get_target_files
     import os.path
     import json
     import os

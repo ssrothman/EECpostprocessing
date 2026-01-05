@@ -1,10 +1,13 @@
 import json
 import os
-from skimming.fsutil.files import get_rootfiles
-from skimming.fsutil.location_lookup import location_lookup
+from fslookup.files import get_rootfiles
+from fslookup.location_lookup import location_lookup
 
 with open(os.path.join(os.path.dirname(__file__), 'datasets.json')) as f:
     cfg = json.load(f)
+
+def lookup_dataset(runtag : str, dataset : str) -> dict:
+    return cfg[runtag][dataset]
 
 def get_JERC_era(runtag : str, dataset : str) -> str:
     dsetcfg = cfg[runtag][dataset]

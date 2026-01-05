@@ -1,0 +1,32 @@
+{
+    "axis_labels": {
+        "genHT" : "$H_{T}^{gen}$ [GeV]",
+        "genVpt" : "$p_{T,Z}^{gen}$ [GeV]",
+        "nTrueInt" : "Number of True Interactions",
+        "rho" : "Event transverse energy density $\\rho$",
+        "MET" : "Missing $E_{T}$ [GeV]",
+        "MET_phi" : "Missing $E_{T}$ $\\phi$",
+        "numLooseB" : "Number of Loose b-jets",
+        "numMediumB" : "Number of Medium b-jets",
+        "numTightB" : "Number of Tight b-jets",
+        "numJets" : "Number of Jets",
+        "Zpt" : "$p_{T,Z}$ [GeV]",
+        "Zmass" : "$m_{Z}$ [GeV]",
+        "Zphi" : "$\\phi_{Z}$",
+        "Zy" : "$y_{Z}$",
+        "leadingMuPt" : "Leading Muon $p_{T}$ [GeV]",
+        "subleadingMuPt" : "Subleading Muon $p_{T}$ [GeV]",
+        "leadingMuRawPt" : "Leading Muon Raw $p_{T}$ [GeV]",
+        "subleadingMuRawPt" : "Subleading Muon Raw $p_{T}$ [GeV]",
+        "leadingMuEta" : "Leading Muon $\\eta$",
+        "subleadingMuEta" : "Subleading Muon $\\eta$",
+        "leadingMuPhi" : "Leading Muon $\\phi$",
+        "subleadingMuPhi" : "Subleading Muon $\\phi$",
+        "leadingMuDxy" : "Leading Muon $d_{xy}$ [cm]",
+        "subleadingMuDxy" : "Subleading Muon $d_{xy}$ [cm]",
+        "leadingMuDz" : "Leading Muon $d_{z}$ [cm]",
+        "subleadingMuDz" : "Subleading Muon $d_{z}$ [cm]",
+        "leadingMuCharge" : "Leading Muon Charge",
+        "subleadingMuCharge" : "Subleading Muon Charge"
+    }
+}
