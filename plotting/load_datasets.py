@@ -3,6 +3,8 @@ from datasets.datasets import lookup_dataset, cfg
 from fslookup.skim_path import lookup_skim_path
 from simonplot.plottables import ParquetDataset
 from simonplot.plottables.Datasets import DatasetStack
+import os
+import json
 
 def build_pq_dataset_stack(configsuite : str,
                            runtag : str,
@@ -63,6 +65,20 @@ def build_pq_dataset(configsuite : str,
         path = tablepath,
         filesystem=fs,
     )
+
+    countfs, countpath = lookup_skim_path(
+        location,
+        configsuite,
+        runtag,
+        dataset,
+        objsyst,
+        'count'
+    )
+
+    with countfs.open(os.path.join(countpath, 'merged.json'), 'r') as f:
+        countdict = json.load(f)
+
+    pqds.override_num_events(countdict['n_events'])
 
     if 'lumi' in dsetcfg:
         pqds.set_lumi(dsetcfg['lumi'])
