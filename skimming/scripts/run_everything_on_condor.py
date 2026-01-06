@@ -53,7 +53,7 @@ parser.add_argument('--objsysts', type=str, nargs='+', help="List of object syst
 parser.add_argument('--tables', type=str, nargs='+', help="List of table variations to process",
                     default=['all', 'count'])
 parser.add_argument('--files_per_job', type=int, help="Number of input files per job",
-                     default=10)
+                     default=5)
 parser.add_argument('--runtag', type=str, help="Datasets runtag",
                     default='Apr_23_2025')
 args = parser.parse_args()
