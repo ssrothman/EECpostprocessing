@@ -1,5 +1,7 @@
 from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack
 import simonplot as splt
+import json
+import os
 
 def parse_var(varname):
     if '::' in varname:
@@ -46,6 +48,14 @@ def run_plots(cfg):
 
     if cfg['binning'] == 'auto':
         binning = splt.binning.AutoBinning()
+    elif cfg['binning'].startswith('autoint:'):
+        labelkey = cfg['binning'].split(':')[1]
+        with open(os.path.join(os.path.dirname(__file__), 'autoint_lookups.json'), 'r') as f:
+            label_lookup = json.load(f)
+    
+        binning = splt.binning.AutoIntCategoryBinning(
+            label_lookup=label_lookup.get(labelkey, {})
+        )
     else:
         raise NotImplementedError("Only 'auto' binning is implemented so far in this driver script")
     
