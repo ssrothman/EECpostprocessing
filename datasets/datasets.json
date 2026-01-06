@@ -4,13 +4,26 @@
             "dsets" : [
                 "ZZ",
                 "WW",
-                "WZ"
+                "WZ",
+                "TT"
             ],
             "stacks" : [
-                "Pythia_HTsum"
+                "Pythia_HTsum",
+                "ST"
             ],
             "color" : "darkred",
             "label" : "MC signal+background"
+        },
+        "ST" : {
+            "dsets" : [
+                "ST_t",
+                "ST_t_anti",
+                "ST_tW",
+                "ST_tW_anti"
+            ],
+            "stacks" : [],
+            "color" : "darkgreen",
+            "label" : "Single Top"
         },
         "Pythia_HTsum" : {
             "dsets" : [
