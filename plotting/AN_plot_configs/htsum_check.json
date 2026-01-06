@@ -25,12 +25,13 @@
                 "Zpt"
             ],
             "weights" : [
-                "splt::ConstantVariable(1.0)"
+                "var::ConstantVariable(1.0)"
             ],
             "cut" : [],
             "binning" : "auto",
             "plotspath" : "ANplots/htsum_check/",
-            "plotsprefix" : ""
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
         },
         {
             "datasets" : [
@@ -55,12 +56,13 @@
                 "Jpt"
             ],
             "weights" : [
-                "splt::ConstantVariable(1.0)"
+                "var::ConstantVariable(1.0)"
             ],
             "binning" : "auto",
             "cut" : [],
             "plotspath" : "ANplots/htsum_check/",
-            "plotsprefix" : ""
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
         }
     ]
 }
