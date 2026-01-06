@@ -9,8 +9,8 @@
                 "subeta" : 2.4,
                 "ID" : "medium",
                 "iso" : "loose",
-                "dxy" : 0.05,
-                "dz" : 0.1,
+                "dxy" : 0.2,
+                "dz" : 0.5,
                 "oppsign" : true
             },
             "Zs" : {
