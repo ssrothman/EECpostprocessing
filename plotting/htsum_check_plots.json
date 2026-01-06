@@ -1,0 +1,66 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_HTsum",
+                    "objsyst" : "nominal",
+                    "table" : "events",
+                    "isstack" : true
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_inclusive",
+                    "objsyst" : "nominal",
+                    "table" : "events",
+                    "isstack" : false
+                }
+            ],
+            "variables" : [
+                "genHT",
+                "genVpt",
+                "Zpt"
+            ],
+            "weights" : [
+                "splt::ConstantVariable(1.0)"
+            ],
+            "cut" : [],
+            "binning" : "auto",
+            "plotspath" : "ANplots/htsum_check/",
+            "plotsprefix" : ""
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_HTsum",
+                    "objsyst" : "nominal",
+                    "table" : "jets",
+                    "isstack" : true
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_inclusive",
+                    "objsyst" : "nominal",
+                    "table" : "jets",
+                    "isstack" : false
+                }
+            ],
+            "variables" : [
+                "Jpt"
+            ],
+            "weights" : [
+                "splt::ConstantVariable(1.0)"
+            ],
+            "binning" : "auto",
+            "cut" : [],
+            "plotspath" : "ANplots/htsum_check/",
+            "plotsprefix" : ""
+        }
+    ]
+}
