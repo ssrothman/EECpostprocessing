@@ -12,73 +12,12 @@
                 }
             ],
             "variables" : [
-                "Zpt",
-                "MET",
-                "numLooseB",
-                "numTightB",
-                "numMediumB",
-                "numJets",
                 "Zmass",
-                "Zy"
-            ],
-            "weights" : [
-                "var::ConstantVariable(1.0)"
-            ],
-            "cut" : [],
-            "binning" : "auto",
-            "plotspath" : "ANplots/bkg_veto/",
-            "plotsprefix" : "",
-            "driver" : "plot_histogram"
-        },
-        {
-            "datasets" : [
-                {
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Apr_23_2025",
-                    "name" : "allMC",
-                    "objsyst" : "nominal",
-                    "table" : "jets",
-                    "isstack" : true
-                }
-            ],
-            "variables" : [
-                "Jpt",
-                "passLooseB",
-                "passMediumB",
-                "passTightB",
-                "nConstituents",
-                "nPassingConstituents",
-                "flav"
-            ],
-            "weights" : [
-                "var::ConstantVariable(1.0)"
-            ],
-            "binning" : "auto",
-            "cut" : [],
-            "plotspath" : "ANplots/bkg_veto/",
-            "plotsprefix" : "",
-            "driver" : "plot_histogram"
-        },
-        {
-            "datasets" : [
-                {
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Apr_23_2025",
-                    "name" : "allMC",
-                    "objsyst" : "nominal",
-                    "table" : "events",
-                    "isstack" : true
-                }
-            ],
-            "variables" : [
                 "Zpt",
-                "MET",
                 "numLooseB",
-                "numTightB",
                 "numMediumB",
-                "numJets",
-                "Zmass",
-                "Zy"
+                "numTightB",
+                "MET"
             ],
             "weights" : [
                 "var::ConstantVariable(1.0)"
@@ -103,20 +42,66 @@
                 }
             ],
             "variables" : [
-                "Jpt",
-                "passLooseB",
-                "passMediumB",
-                "passTightB",
-                "nConstituents",
-                "nPassingConstituents",
-                "flav"
+                "Jpt"
             ],
             "weights" : [
                 "var::ConstantVariable(1.0)"
             ],
             "binning" : "auto",
             "cut" : [
-                "cut::LessThanCut(var::BasicVariable(\"passLooseB\"), 0.5)"
+                "cut::LessThanCut(var::BasicVariable(\"numLooseB\"), 1.0)"
+            ],
+            "plotspath" : "ANplots/bkg_veto/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "allMC",
+                    "objsyst" : "nominal",
+                    "table" : "jets",
+                    "isstack" : true
+                }
+            ],
+            "variables" : [
+                "flav"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "binning" : "autoint:jetflav",
+            "cut" : [
+                "cut::LessThanCut(var::BasicVariable(\"numLooseB\"), 1.0)"
+            ],
+            "plotspath" : "ANplots/bkg_veto/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "allMC",
+                    "objsyst" : "nominal",
+                    "table" : "jets",
+                    "isstack" : true
+                }
+            ],
+            "variables" : [
+                "passLooseB",
+                "passMediumB",
+                "passTightB"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "binning" : "autoint:passfail",
+            "cut" : [
+                "cut::LessThanCut(var::BasicVariable(\"numLooseB\"), 1.0)"
             ],
             "plotspath" : "ANplots/bkg_veto/",
             "plotsprefix" : "",
