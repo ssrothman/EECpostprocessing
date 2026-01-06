@@ -1,7 +1,5 @@
-from torch import dsmm
 import simonplot as splt
 from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack
-import pyarrow.dataset as ds
 
 evtds_allMC = build_pq_dataset_stack(
     'BasicConfig',
