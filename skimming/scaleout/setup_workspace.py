@@ -8,7 +8,8 @@ def setup_skim_workspace(working_dir,
                         runtag, dataset, 
                         objsyst,
                         config, tables,
-                        output_location):
+                        output_location,
+                        nocheck=False):
     from datasets.datasets import get_target_files
     import os.path
     import json
@@ -38,29 +39,32 @@ def setup_skim_workspace(working_dir,
     
     # check if all the outputs already exist
     any_need = False
-    for table in tables:
-        if table == 'count':
-            tablename = 'count'
-        else:
-            tablename = construct_table_from_string(table).name
+    if not nocheck:
+        for table in tables:
+            if table == 'count':
+                tablename = 'count'
+            else:
+                tablename = construct_table_from_string(table).name
 
-        tpath = os.path.join(
-            output_basepath,
-            config['output_path'],
-            tablename
-        )
+            tpath = os.path.join(
+                output_basepath,
+                config['output_path'],
+                tablename
+            )
 
-        if output_fs.exists(tpath):
+            if output_fs.exists(tpath):
 
-            existing_pq = output_fs.glob(os.path.join(tpath, '*.parquet'))
-            existing_json = output_fs.glob(os.path.join(tpath, '*.json'))
-            if len(existing_pq) != n_targets and len(existing_json) != n_targets:
+                existing_pq = output_fs.glob(os.path.join(tpath, '*.parquet'))
+                existing_json = output_fs.glob(os.path.join(tpath, '*.json'))
+                if len(existing_pq) != n_targets and len(existing_json) != n_targets:
+                    any_need = True
+                    break
+            else:
                 any_need = True
                 break
-        else:
-            any_need = True
-            break
-
+    else:
+        any_need = True
+        
     if not any_need:
         print("All outputs for [dataset %s, objsyst %s, tables %s] already exist, skipping workspace setup." % (dataset, objsyst, tables))
         return

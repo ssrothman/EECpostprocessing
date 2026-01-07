@@ -56,6 +56,7 @@ parser.add_argument('--files_per_job', type=int, help="Number of input files per
                      default=5)
 parser.add_argument('--runtag', type=str, help="Datasets runtag",
                     default='Apr_23_2025')
+parser.add_argument('--nocheck', action='store_true', help="Skip checking for existing outputs before setting up workspaces")
 args = parser.parse_args()
 
 import os
@@ -72,6 +73,8 @@ def setup_and_stage(dset, objsyst, table):
         table,
         args.config_suite
     )
+    if args.nocheck:
+        cmd += ' --nocheck'
     output = subprocess.run(cmd, shell=True, capture_output=True)
     print(output.stdout.decode())
     if output.returncode != 0:

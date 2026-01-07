@@ -13,6 +13,7 @@ parser.add_argument("--output-location", type=str, required=True,
                     help="Location to write output to")
 parser.add_argument("--config-suite", type=str, required=True,
                     help="Configuration suite to use for skimming")
+parser.add_argument("--nocheck", action='store_true', help="Skip checking for existing outputs before setting up workspace")
 args = parser.parse_args()
 
 _ALL_TABLES = [
@@ -38,4 +39,5 @@ setup_skim_workspace(
     config=thecfg,
     tables=args.tables,
     output_location=args.output_location,
+    nocheck=args.nocheck
 )

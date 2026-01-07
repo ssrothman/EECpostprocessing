@@ -5,6 +5,8 @@ parser = argparse.ArgumentParser(description="Resubmit failed HTCONDOR jobs for 
 parser.add_argument("where", type=str, help="Directory of workspace to resubmit")
 parser.add_argument('--resub-idle', action='store_true', help="Also resubmit idle jobs")
 parser.add_argument('--no-resub-running', action='store_true', help="Do not resubmit running jobs")
+parser.add_argument('--exec', action='store_true', help="Directly execute condor_submit command after preparing resubmission scripts")
+parser.add_argument('--skip-still-running', action='store_true', help="Skip workspaces that still have running jobs")
 args = parser.parse_args()
 
 #first, discover the condor cluster id 
@@ -77,6 +79,17 @@ for line in lines:
     else:
         print("Unknown job status %d for job %d"%(jobstatus, procid))
 
+if len(idle_jobs) + len(running_jobs) + len(transfering_jobs) + len(held_jobs) + len(suspended_jobs) > 0:
+    print("There are still jobs in the condor queue:")
+    print("  Idle jobs: ", idle_jobs)
+    print("  Running jobs: ", running_jobs)
+    print("  Transfering jobs: ", transfering_jobs)
+    print("  Held jobs: ", held_jobs)
+    print("  Suspended jobs: ", suspended_jobs)
+    if args.skip_still_running:
+        print("Skipping resubmission since some jobs are still running.")
+        exit(0)
+
 #only resubmit idle jobs if requested
 if args.resub_idle and len(idle_jobs) > 0:
     failed_jobs.update(idle_jobs)
@@ -148,6 +161,14 @@ sed_command = "sed -i 's/queue .*/queue index from %s /g' %s" % (
 )
 subprocess.run(sed_command, shell=True, check=True)
 
-print("Resubmission script created.")
-print("Submit with: ")
-print("  condor_submit %s"%new_template)
+if args.exec:
+    cmd = "condor_submit %s" % os.path.basename(new_template)
+    output = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=args.where)
+    print(output.stdout)
+    if output.returncode != 0:
+        print(output.stderr)
+        raise RuntimeError("Condor submission failed")
+else:
+    print("Resubmission script created.")
+    print("Submit with: ")
+    print("  condor_submit %s"%new_template)
