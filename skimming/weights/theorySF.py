@@ -71,13 +71,9 @@ def getPSWts(weights : Weights, objs : AllObjects):
 
     ps_weights = objs.PSWeight
 
-    # not sure when this would happen
-    # commenting out for now,
-    # if I find a cause, can re-enable
-    # and add an appropriate warning message
-
-    #if ak.num(ps_weights)[0] < 4:
-    #    return
+    # in the herwig samples, PS weights are not available
+    if ak.num(ps_weights)[0] < 4:
+        return
 
     nweights = len(weights.weight())
 
