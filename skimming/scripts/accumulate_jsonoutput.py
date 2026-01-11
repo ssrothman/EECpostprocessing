@@ -2,7 +2,7 @@
 
 import argparse
 
-from fslookup.skim_path import lookup_skim_path
+from general.fslookup.skim_path import lookup_skim_path
 from simonpy.dictmerge import accumulate_dict
 
 parser = argparse.ArgumentParser("accumulate json output from a skimmer")

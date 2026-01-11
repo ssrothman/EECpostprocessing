@@ -32,7 +32,7 @@ evtds_data = build_pq_dataset_stack(
 )
 
 
-evtvars = [splt.variable.BasicVariable(name) for name in evtds_data._datasets[0].schema.names if 'wt_' not in name and name != 'event_id']
+evtvars = [splt.variable.BasicVariable(name) for name in evtds_data._datasets[0].schema.names if 'wt_' not in name and name != 'event_id'] # type: ignore
 cut = splt.cut.NoCut()
 #weight = splt.variable.BasicVariable('wt_ISRDown')
 weight = splt.variable.ConstantVariable(1.0)
@@ -52,4 +52,3 @@ for var in evtvars:
         output_folder='testplots/kin',
         output_prefix='evt',
     )
-    faslkjafsdlkj

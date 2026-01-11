@@ -1,6 +1,6 @@
-from datasets import datasets
-from datasets.datasets import lookup_dataset, cfg
-from fslookup.skim_path import lookup_skim_path
+from general.datasets import datasets
+from general.datasets.datasets import lookup_dataset, cfg
+from general.fslookup.skim_path import lookup_skim_path
 from simonplot.plottables import ParquetDataset
 from simonplot.plottables.Datasets import DatasetStack
 import os

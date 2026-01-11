@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from fslookup.location_lookup import lookup_hostid
+from general.fslookup.location_lookup import lookup_hostid
 
 parser = argparse.ArgumentParser(description="Skim script for scaleout processing.")
 
@@ -12,7 +12,7 @@ args = parser.parse_args()
 import json
 from skimming.skim import skim
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
-from datasets.datasets import location_lookup
+from general.datasets.datasets import location_lookup
 from fsspec_xrootd import XRootDFileSystem
 NanoAODSchema.warn_missing_crossrefs = False
 

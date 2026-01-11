@@ -3,7 +3,7 @@ import warnings
 import awkward as ak
 import numpy as np
 
-from util.util import unflatVector
+from simonpy.akutil import unflatVector
 
 class SimpleJets:
     '''
