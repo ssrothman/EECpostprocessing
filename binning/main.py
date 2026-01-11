@@ -5,6 +5,7 @@ import numpy as np
 import directcov
 import pyarrow.dataset as ds
 import pyarrow.compute as pc
+from correctionlib import Correction 
 
 def build_transfer_hist(gencfg, recocfg):
     axes = []
@@ -84,11 +85,15 @@ def build_iterator(dset : ds.Dataset,
                     names : Sequence[str], 
                     weightname: str, itemwt: str | None,
                     statN : int,
-                    statK : int):
+                    statK : int,
+                    reweight : Correction | None = None):
     columns = list(names) + [weightname, 'event_id']
     if itemwt is not None:
         columns.append(itemwt)
-
+    if reweight is not None:
+        for input in reweight.inputs:
+            columns.append(input.name)
+            
     thefilter = statsplit_filter(statN, statK)
 
     return tqdm(dset.to_batches(
@@ -116,12 +121,14 @@ def fill_cov(H, dset : ds.Dataset,
              weightname: str,
              itemwt: str | None = None,
              statN : int = -1,
-             statK : int = -1) -> np.ndarray:
+             statK : int = -1,
+             reweight : Correction | None = None) -> np.ndarray:
     
     iterator = build_iterator(
         dset, H.axes.name,
         weightname, itemwt,
-        statN, statK
+        statN, statK,
+        reweight
     )
     total_rows = dset.count_rows()
     rows_so_far = 0
@@ -143,6 +150,14 @@ def fill_cov(H, dset : ds.Dataset,
                 indices[:,i] += 1
 
         weight = get(batch, weightname)
+        if itemwt is not None:
+            weight = weight * get(batch, itemwt)
+        if reweight is not None:
+            rwin = {}
+            for i, input in enumerate(reweight.inputs):
+                rwin[input] = get(batch, input.name)
+            weight = weight * reweight.evaluate(**rwin)
+
         evtid = get(batch, 'event_id')
 
         cov.fillEvents(indices, weight, evtid)
@@ -156,12 +171,14 @@ def fill_hist(H : hist.Hist,
               weightname : str,
               itemwt : str | None = None,
               statN : int = -1,
-              statK : int = -1) -> hist.Hist:
+              statK : int = -1,
+              reweight : Correction | None = None) -> hist.Hist:
     
     iterator = build_iterator(
         dset, H.axes.name, 
         weightname, itemwt,
-        statN, statK
+        statN, statK,
+        reweight
     )
     
     total_rows = dset.count_rows()
@@ -171,9 +188,18 @@ def fill_hist(H : hist.Hist,
         rows_so_far += batch.num_rows
         iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
 
+        weight = get(batch, weightname)
+        if itemwt is not None:
+            weight = weight * get(batch, itemwt)
+        if reweight is not None:
+            rwin = {}
+            for i, input in enumerate(reweight.inputs):
+                rwin[input] = get(batch, input.name)
+            weight = weight * reweight.evaluate(**rwin)
+
         H.fill(
             **{name: get(batch, name) for name in H.axes.name},
-            weight = get(batch, weightname)
+            weight=weight
         )
 
     return H
