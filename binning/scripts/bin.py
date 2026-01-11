@@ -40,7 +40,7 @@ from general.fslookup.skim_path import lookup_skim_path
 import os.path
 import pyarrow.dataset as ds
 import numpy as np
-from simonpy.AbitraryBinning import ArbitraryBinning
+from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 
 if args.bincfg is None:
     args.bincfg = '_'.join(args.table.split('_')[:-1])
@@ -81,7 +81,13 @@ dataset = ds.dataset(skimpath, format='parquet', filesystem=fs)
 
 if args.table.endswith('transfer'):
     itemwt = 'wt_reco'
-    ab = ArbitraryBinning()
+    ab = ArbitraryGenRecoBinning()
+    Hreco = build_hist(bincfg['reco'])
+    Hgen = build_hist(bincfg['gen'])
+    ab.setup_from_histograms(
+        Hreco,
+        Hgen
+    )
 else:
     itemwt = 'wt'
     ab = ArbitraryBinning()
@@ -131,7 +137,8 @@ bincfg_path = os.path.join(
 )
 
 if fs.exists(bincfg_path):
-    oldbinning = ArbitraryBinning()
+    oldbinning = type(ab)() # use same type as ab [either ArbitraryBinning or ArbitraryGenRecoBinning]
+
     with fs.open(bincfg_path, 'r') as f:
         oldbinning.from_dict(json.load(f))
     
