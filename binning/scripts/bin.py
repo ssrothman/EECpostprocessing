@@ -40,6 +40,7 @@ from general.fslookup.skim_path import lookup_skim_path
 import os.path
 import pyarrow.dataset as ds
 import numpy as np
+from simonpy.AbitraryBinning import ArbitraryBinning
 
 if args.bincfg is None:
     args.bincfg = '_'.join(args.table.split('_')[:-1])
@@ -56,16 +57,13 @@ with open(bincfgpath + '.json') as f:
 
 if args.table.endswith('reco'):
     thebinning = bincfg['reco']
-    itemwt = 'wt'
 elif args.table.endswith('gen'):
     thebinning = bincfg['gen']
-    itemwt = 'wt'
 elif args.table.endswith('transfer'):
     thebinning = build_transfer_config(
         bincfg['gen'],
         bincfg['reco']
     )
-    itemwt = 'wt_reco'
 else:
     raise NotImplementedError("Only gen, reco, transfer can be pre-binned!")
 
@@ -80,6 +78,14 @@ fs, skimpath = lookup_skim_path(
 
 H = build_hist(thebinning)
 dataset = ds.dataset(skimpath, format='parquet', filesystem=fs)
+
+if args.table.endswith('transfer'):
+    itemwt = 'wt_reco'
+    ab = ArbitraryBinning()
+else:
+    itemwt = 'wt'
+    ab = ArbitraryBinning()
+    ab.setup_from_histogram(H)
 
 if args.cov:
     thefun = fill_cov
@@ -118,3 +124,20 @@ else:
 print("Writing result to", outpath)
 with fs.open(outpath + '.npy', 'wb') as f:
     np.save(f, result)
+
+bincfg_path = os.path.join(
+    os.path.dirname(skimpath),
+    '%s_bincfg.json' % args.table
+)
+
+if fs.exists(bincfg_path):
+    oldbinning = ArbitraryBinning()
+    with fs.open(bincfg_path, 'r') as f:
+        oldbinning.from_dict(json.load(f))
+    
+    if oldbinning != ab:
+        raise RuntimeError("Binning config mismatch for existing bincfg at %s" % bincfg_path)
+else:
+    print("Writing binning config to", bincfg_path)
+    with fs.open(bincfg_path, 'w') as f:
+        json.dump(ab.to_dict(), f, indent=4)
