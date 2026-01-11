@@ -1,5 +1,7 @@
 import hist
 from tqdm import tqdm
+import numpy as np
+import directcov
 
 def build_transfer_hist(gencfg, recocfg):
     axes = []
@@ -77,8 +79,8 @@ def build_hist(cfg):
 def get(batch, name):
     return batch[name].to_numpy(zero_copy_only=False)
 
-def fill_hist(H, names, ds, weightname):
-    iterator = tqdm(ds.to_batches(
+def build_iterator(ds, names, weightname):
+    return tqdm(ds.to_batches(
         columns = names + [weightname, 'event_id'],
         batch_readahead = 2,
         fragment_readahead = 2,
@@ -86,6 +88,41 @@ def fill_hist(H, names, ds, weightname):
         batch_size = 1<<20
     ))
 
+def fill_cov(H, names, ds, weightname):
+    iterator = build_iterator(ds, names, weightname)
+    total_rows = ds.count_rows()
+    rows_so_far = 0
+
+    shape = [ax.extent for ax in H.axes]
+    cov = directcov.DirectCov(shape, 1)
+
+    for batch in iterator:
+        rows_so_far += batch.num_rows
+        iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
+
+        indices = [
+            H.axes[name].index(get(batch, name)) for name in names
+        ]
+        indices = np.stack(indices, axis=1) # pyright: ignore[reportArgumentType, reportCallIssue]
+        
+        for i, name in enumerate(names):
+            if H.axes[name].traits.underflow:
+                indices[:,i] += 1
+
+        weight = get(batch, weightname)
+        evtid = get(batch, 'event_id')
+
+        cov.fillEvents(indices, weight, evtid)
+    
+        print("sumwt", np.sum(weight))
+        print("sumwt2", np.sum(np.square(weight)))
+        
+    cov.finalize()
+
+    return np.array(cov, copy=True)
+
+def fill_hist(H, names, ds, weightname):
+    iterator = build_iterator(ds, names, weightname)
     total_rows = ds.count_rows()
     rows_so_far = 0
 
