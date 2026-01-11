@@ -121,30 +121,30 @@ class EECgenericTable:
         recojets = objs.RecoJets
         genjets = objs.GenJets
 
-        thevals['ptGen'] = genjets.jets.pt[iGen][EECmask][evtmask]
-        thevals['etaGen'] = genjets.jets.eta[iGen][EECmask][evtmask]
+        thevals['Jpt_gen'] = genjets.jets.pt[iGen][EECmask][evtmask]
+        thevals['Jeta_gen'] = genjets.jets.eta[iGen][EECmask][evtmask]
 
-        thevals['ptReco'] = recojets.jets.pt[iReco][EECmask][evtmask]
-        thevals['etaReco'] = recojets.jets.eta[iReco][EECmask][evtmask]
+        thevals['Jpt_reco'] = recojets.jets.pt[iReco][EECmask][evtmask]
+        thevals['Jeta_reco'] = recojets.jets.eta[iReco][EECmask][evtmask]
 
         thevals['passLooseB'] = recojets.simonjets.passLooseB[iReco][EECmask][evtmask]
         thevals['passMediumB'] = recojets.simonjets.passMediumB[iReco][EECmask][evtmask]
         thevals['passTightB'] = recojets.simonjets.passTightB[iReco][EECmask][evtmask]
 
         if hasattr(recojets.jets, 'hadronFlavour'):
-            thevals['flavReco'] = recojets.jets.hadronFlavour[iReco][EECmask][evtmask]
+            thevals['flav_reco'] = recojets.jets.hadronFlavour[iReco][EECmask][evtmask]
         if hasattr(genjets.jets, 'hadronFlavour'):
-            thevals['flavGen'] = genjets.jets.hadronFlavour[iGen][EECmask][evtmask]
+            thevals['flav_gen'] = genjets.jets.hadronFlavour[iGen][EECmask][evtmask]
         
         thevals['ptdenom_reco'] = theEECs.ptdenom_reco[EECmask][evtmask]
         thevals['ptdenom_gen'] = theEECs.ptdenom_gen[EECmask][evtmask]
 
         correction_gen = np.power(
-            thevals['ptdenom_gen']/thevals['ptGen'], 
+            thevals['ptdenom_gen']/thevals['Jpt_gen'], 
             order
         )
         correction_reco = np.power(
-            thevals['ptdenom_reco']/thevals['ptReco'], 
+            thevals['ptdenom_reco']/thevals['Jpt_reco'], 
             order
         )
 
@@ -173,6 +173,7 @@ class EECres4ObsTable(EECgenericTable):
     def __init__(self, gen : bool, whichEEC : str):
         self._gen = gen
         self._whichEEC = whichEEC
+        print("Initialized EECres4ObsTable:", self.name)
 
     @property
     def name(self) -> str:

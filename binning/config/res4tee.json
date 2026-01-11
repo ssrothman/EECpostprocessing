@@ -1,0 +1,78 @@
+{
+    "gen" : [
+        {
+            "type" : "Variable",
+            "name" : "Jpt",
+            "edges" : [
+                30, 50, 88, 150, 300, 800, 1500
+            ],
+            "underflow" : true,
+            "overflow" : true
+        },
+        {
+            "type" : "Variable",
+            "name" : "R",
+            "edges" : [
+                0.4, 0.5
+            ],
+            "underflow" : true,
+            "overflow" : true
+        },
+        {
+            "type" : "Regular",
+            "name" : "r",
+            "start" : 0.0,
+            "stop" : 1.0,
+            "bins" : 10,
+            "underflow" : false,
+            "overflow" : false
+        },
+        {
+            "type" : "Regular",
+            "name" : "c",
+            "start" : 0.0,
+            "stop" : 1.5707963267948966,
+            "bins" : 10,
+            "underflow" : false,
+            "overflow" : false
+        }
+    ],
+    "reco" : [
+        {
+            "type" : "Variable",
+            "name" : "Jpt",
+            "edges" : [
+                30, 50, 88, 150, 300, 800, 1500
+            ],
+            "underflow" : true,
+            "overflow" : true
+        },
+        {
+            "type" : "Variable",
+            "name" : "R",
+            "edges" : [
+                0.4, 0.5
+            ],
+            "underflow" : true,
+            "overflow" : true
+        },
+        {
+            "type" : "Regular",
+            "name" : "r",
+            "start" : 0.0,
+            "stop" : 1.0,
+            "bins" : 10,
+            "underflow" : false,
+            "overflow" : false
+        },
+        {
+            "type" : "Regular",
+            "name" : "c",
+            "start" : 0.0,
+            "stop" : 1.5707963267948966,
+            "bins" : 10,
+            "underflow" : false,
+            "overflow" : false
+        }
+    ]
+}
