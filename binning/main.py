@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import List, Sequence
 import hist
 from tqdm import tqdm
 import numpy as np
@@ -7,52 +7,19 @@ import pyarrow.dataset as ds
 import pyarrow.compute as pc
 from correctionlib import Correction 
 
-def build_transfer_hist(gencfg, recocfg):
+def build_transfer_config(gencfg : List[dict], recocfg : List[dict]) -> List[dict]:
     axes = []
     for axis_cfg in gencfg:
-        if axis_cfg['type'] == 'Regular':
-            axes.append(hist.axis.Regular(
-                axis_cfg['bins'],
-                axis_cfg['start'],
-                axis_cfg['stop'],
-                name=axis_cfg['name']+"_gen",
-                transform=axis_cfg.get('transform', None),
-                underflow=axis_cfg.get('underflow', True),
-                overflow=axis_cfg.get('overflow', True)
-            ))
-        elif axis_cfg['type'] == 'Variable':
-            axes.append(hist.axis.Variable(
-                axis_cfg['edges'],
-                name=axis_cfg['name']+"_gen",
-                underflow=axis_cfg.get('underflow', True),
-                overflow=axis_cfg.get('overflow', True)
-            ))
-        else:
-            raise ValueError(f"Unknown axis type: {axis_cfg['type']}")
+        copycfg = axis_cfg.copy()
+        copycfg['name'] = axis_cfg['name'] + '_gen'
+        axes.append(copycfg)
     for axis_cfg in recocfg:
-        if axis_cfg['type'] == 'Regular':
-            axes.append(hist.axis.Regular(
-                axis_cfg['bins'],
-                axis_cfg['start'],
-                axis_cfg['stop'],
-                name=axis_cfg['name']+"_reco",
-                transform=axis_cfg.get('transform', None),
-                underflow=axis_cfg.get('underflow', True),
-                overflow=axis_cfg.get('overflow', True)
-            ))
-        elif axis_cfg['type'] == 'Variable':
-            axes.append(hist.axis.Variable(
-                axis_cfg['edges'],
-                name=axis_cfg['name']+"_reco",
-                underflow=axis_cfg.get('underflow', True),
-                overflow=axis_cfg.get('overflow', True)
-            ))
-        else:
-            raise ValueError(f"Unknown axis type: {axis_cfg['type']}") 
-    H = hist.Hist(*axes, storage=hist.storage.Weight())
-    return H
+        copycfg = axis_cfg.copy()
+        copycfg['name'] = axis_cfg['name'] + '_reco'
+        axes.append(copycfg)
+    return axes
 
-def build_hist(cfg):
+def build_hist(cfg : List[dict]):
     axes = []
     for axis_cfg in cfg:
         if axis_cfg['type'] == 'Regular':
@@ -78,7 +45,7 @@ def build_hist(cfg):
     H = hist.Hist(*axes, storage=hist.storage.Weight())
     return H
 
-def get(batch, name):
+def get(batch, name : str):
     return batch[name].to_numpy(zero_copy_only=False)
 
 def build_iterator(dset : ds.Dataset,
