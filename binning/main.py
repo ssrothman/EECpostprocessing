@@ -79,17 +79,21 @@ def build_hist(cfg):
 def get(batch, name):
     return batch[name].to_numpy(zero_copy_only=False)
 
-def build_iterator(ds, names, weightname):
+def build_iterator(ds, names, weightname, itemwt):
+    columns = names + [weightname, 'event_id']
+    if itemwt is not None:
+        columns.append(itemwt)
+
     return tqdm(ds.to_batches(
-        columns = names + [weightname, 'event_id'],
+        columns = columns,
         batch_readahead = 2,
         fragment_readahead = 2,
         use_threads = True,
         batch_size = 1<<20
     ))
 
-def fill_cov(H, names, ds, weightname):
-    iterator = build_iterator(ds, names, weightname)
+def fill_cov(H, names, ds, weightname, itemwt=None):
+    iterator = build_iterator(ds, names, weightname, itemwt)
     total_rows = ds.count_rows()
     rows_so_far = 0
 
@@ -113,16 +117,13 @@ def fill_cov(H, names, ds, weightname):
         evtid = get(batch, 'event_id')
 
         cov.fillEvents(indices, weight, evtid)
-    
-        print("sumwt", np.sum(weight))
-        print("sumwt2", np.sum(np.square(weight)))
-        
+            
     cov.finalize()
 
     return np.array(cov, copy=True)
 
-def fill_hist(H, names, ds, weightname):
-    iterator = build_iterator(ds, names, weightname)
+def fill_hist(H, names, ds, weightname, itemwt=None):
+    iterator = build_iterator(ds, names, weightname, itemwt)
     total_rows = ds.count_rows()
     rows_so_far = 0
 
