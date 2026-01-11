@@ -1,5 +1,5 @@
 from fsspec_xrootd.xrootd import XRootDFileSystem
-from fslookup.location_lookup import location_lookup
+from general.fslookup.location_lookup import location_lookup
 import os
 from typing import Any
 
