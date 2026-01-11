@@ -79,7 +79,7 @@ def pa_mod(val, divisor):
     return remainder
 
 def statsplit_filter(statN, statK):
-    if statN < 0:
+    if statN > 0:
         return pa_mod(ds.field('event_id'), statN) == statK
     else:
         return None
