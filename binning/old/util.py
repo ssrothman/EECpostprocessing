@@ -6,10 +6,6 @@ from pyrandom123 import util as r123util
 import numpy as np
 import awkward as ak
 
-def pa_mod(val, divisor):
-    quotient = pc.floor(pc.divide(val, divisor))
-    remainder = pc.subtract(val, pc.multiply(quotient, divisor))
-    return remainder
 
 def get_evthash(table):
     run = table['run'].to_numpy(zero_copy_only=False).astype(np.uint64)

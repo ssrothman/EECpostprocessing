@@ -4,6 +4,7 @@ from tqdm import tqdm
 import numpy as np
 import directcov
 import pyarrow.dataset as ds
+import pyarrow.compute as pc
 
 def build_transfer_hist(gencfg, recocfg):
     axes = []
@@ -79,21 +80,49 @@ def build_hist(cfg):
 def get(batch, name):
     return batch[name].to_numpy(zero_copy_only=False)
 
-def build_iterator(dset : ds.Dataset, names : Sequence[str], weightname: str, itemwt: str | None):
+def build_iterator(dset : ds.Dataset,
+                    names : Sequence[str], 
+                    weightname: str, itemwt: str | None,
+                    statN : int,
+                    statK : int):
     columns = list(names) + [weightname, 'event_id']
     if itemwt is not None:
         columns.append(itemwt)
+
+    thefilter = statsplit_filter(statN, statK)
 
     return tqdm(dset.to_batches(
         columns = columns,
         batch_readahead = 2,
         fragment_readahead = 2,
         use_threads = True,
-        batch_size = 1<<20
+        batch_size = 1<<20,
+        filter = thefilter
     ))
 
-def fill_cov(H, dset : ds.Dataset, weightname: str, itemwt: str | None = None):
-    iterator = build_iterator(dset, H.axes.name, weightname, itemwt)
+def pa_mod(val, divisor):
+    #pyarrow doesn't know about pyarrow.compute??
+    quotient = pc.floor(pc.divide(val, divisor)) # pyright: ignore[reportAttributeAccessIssue]
+    remainder = pc.subtract(val, pc.multiply(quotient, divisor)) # pyright: ignore[reportAttributeAccessIssue]
+    return remainder
+
+def statsplit_filter(statN, statK):
+    if statN < 0:
+        return pa_mod(ds.field('event_id'), statN) == statK
+    else:
+        return None
+    
+def fill_cov(H, dset : ds.Dataset,
+             weightname: str,
+             itemwt: str | None = None,
+             statN : int = -1,
+             statK : int = -1) -> np.ndarray:
+    
+    iterator = build_iterator(
+        dset, H.axes.name,
+        weightname, itemwt,
+        statN, statK
+    )
     total_rows = dset.count_rows()
     rows_so_far = 0
 
@@ -122,8 +151,19 @@ def fill_cov(H, dset : ds.Dataset, weightname: str, itemwt: str | None = None):
 
     return np.array(cov, copy=True)
 
-def fill_hist(H : hist.Hist, dset : ds.Dataset, weightname : str, itemwt : str | None = None):
-    iterator = build_iterator(dset, H.axes.name, weightname, itemwt)
+def fill_hist(H : hist.Hist,
+              dset : ds.Dataset, 
+              weightname : str,
+              itemwt : str | None = None,
+              statN : int = -1,
+              statK : int = -1) -> hist.Hist:
+    
+    iterator = build_iterator(
+        dset, H.axes.name, 
+        weightname, itemwt,
+        statN, statK
+    )
+    
     total_rows = dset.count_rows()
     rows_so_far = 0
 
