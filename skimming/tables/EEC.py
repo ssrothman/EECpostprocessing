@@ -5,12 +5,14 @@ from skimming.objects import EEC
 from skimming.objects.AllObjects import AllObjects
 from coffea.analysis_tools import PackedSelection
 from skimming.selections.PackedJetSelection import PackedJetSelection
-from typing import Any
+from typing import Any, Literal, assert_never
 import pyarrow as pa
 
 from skimming.tables.common import add_common_vars, add_event_id, add_weight_variations, broadcast_all, to_pa_table
 
 from typing import Sequence
+
+_EECobjs = Literal['total', 'unmatched', 'untransfered']
 
 class EECgenericTable:
     def __init__(self):
@@ -22,10 +24,15 @@ class EECgenericTable:
                        jetsel : PackedJetSelection, 
                        weights : Weights,
                        gen : bool,
-                       whichEEC : str,
+                       whichEECdistr : str,
+                       whichEECobj : _EECobjs,
                        binning_coords : Sequence[str],
                        order : int):
-        
+        '''
+        whichEECdistr: str is the name of the EEC distribution attribute in the EEC object
+            eg 'tee', 'triangle', 'dipole', 'proj', or 'res3'
+        whichEECobj: str is one of ['total', 'unmatched', 'untransfered']
+        '''
         thevals = {}
 
         evtmask = evtsel.all()
@@ -37,11 +44,27 @@ class EECgenericTable:
         add_common_vars(thevals, objs, evtmask)
 
         if gen:
-            theEECs = objs.GenEEC
+            if whichEECobj == 'total':
+                theEECs = objs.GenEEC
+            elif whichEECobj == 'unmatched':
+                theEECs = objs.unmatchedGenEEC
+            elif whichEECobj == 'untransfered':
+                theEECs = objs.untransferedGenEEC
+            else:
+                assert_never(whichEECobj)
+
             thejets = objs.GenJets
             iReco = objs.EECtransfer.jetidx_reco
         else:
-            theEECs = objs.RecoEEC
+            if whichEECobj == 'total':
+                theEECs = objs.RecoEEC
+            elif whichEECobj == 'unmatched':
+                theEECs = objs.unmatchedRecoEEC
+            elif whichEECobj == 'untransfered':
+                theEECs = objs.untransferedRecoEEC
+            else:
+                assert_never(whichEECobj)
+
             thejets = objs.RecoJets
             iReco = theEECs.jetidx_reco
 
@@ -69,7 +92,7 @@ class EECgenericTable:
         )
 
         # EEC values
-        EECvals = getattr(theEECs, whichEEC)
+        EECvals = getattr(theEECs, whichEECdistr)
         for coord in binning_coords:
             thevals[coord] = getattr(EECvals, coord)[EECmask][evtmask]
 
@@ -170,18 +193,19 @@ class EECgenericTable:
         return to_pa_table(thevals)
     
 class EECres4ObsTable(EECgenericTable):
-    def __init__(self, gen : bool, whichEEC : str):
+    def __init__(self, gen : bool, whichEECdistr : str, whichEECobj : _EECobjs):
         self._gen = gen
-        self._whichEEC = whichEEC
-        print("Initialized EECres4ObsTable:", self.name)
+        self._whichEECdistr = whichEECdistr
+        self._whichEECobj : _EECobjs = whichEECobj
 
     @property
     def name(self) -> str:
-        thename = 'res4%s' % self._whichEEC
+        thename = 'res4%s' % self._whichEECdistr
         if self._gen:
-            thename += '_gen'
+            thename += '_%sGen' % self._whichEECobj
         else:
-            thename += '_reco'
+            thename += '_%sReco' % self._whichEECobj
+
         return thename
 
     def run_table(self, 
@@ -197,18 +221,19 @@ class EECres4ObsTable(EECgenericTable):
             jetsel,
             weights,
             self._gen,
-            self._whichEEC,
+            self._whichEECdistr,
+            self._whichEECobj,
             binning_coords,
             order
         )
 
 class EECres4TransferTable(EECgenericTable):
-    def __init__(self, whichEEC : str):
-        self._whichEEC = whichEEC
+    def __init__(self, whichEECdistr : str):
+        self._whichEECdistr = whichEECdistr
 
     @property
     def name(self) -> str:
-        thename = 'res4%s_transfer' % self._whichEEC
+        thename = 'res4%s_transfer' % self._whichEECdistr
         return thename
 
     def run_table(self, 
@@ -223,7 +248,7 @@ class EECres4TransferTable(EECgenericTable):
             evtsel,
             jetsel,
             weights,
-            self._whichEEC,
+            self._whichEECdistr,
             binning_coords,
             order
         )

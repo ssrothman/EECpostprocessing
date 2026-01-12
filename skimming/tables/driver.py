@@ -33,7 +33,6 @@ def construct_table_from_string(table_str : str) -> Any:
     #coerce datatypes
     for i in range(len(options)):
         opt = options[i].strip()
-        print("parsing option:", opt)
         if opt.lower() == 'true':
             opt = True
         elif opt.lower() == 'false':
@@ -46,7 +45,6 @@ def construct_table_from_string(table_str : str) -> Any:
                     opt = float(opt)
                 except ValueError:
                     pass
-        print("  interpreted as:", opt)
         options[i] = opt
 
     if tablename not in table_classes:

@@ -120,10 +120,62 @@
             },
             "MConly" : false
         },
+        "UnmatchedRecoEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UnmatchedRecoChargedEECsNOM"
+            },
+            "params-CH_UP" : {
+                "name" : "UnmatchedRecoChargedEECsCHUP"
+            },
+            "params-CH_DN" : {
+                "name" : "UnmatchedRecoChargedEECsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "name" : "UnmatchedRecoChargedEECsTRKEFF"
+            },
+            "params-DATA" : {
+                "name" : "UnmatchedRecoChargedEECs"
+            },
+            "MConly" : true
+        },
+        "UntransferedRecoEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UntransferedRecoChargedEECsNOM"
+            },
+            "params-CH_UP" : {
+                "name" : "UntransferedRecoChargedEECsCHUP"
+            },
+            "params-CH_DN" : {
+                "name" : "UntransferedRecoChargedEECsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "name" : "UntransferedRecoChargedEECsTRKEFF"
+            },
+            "params-DATA" : {
+                "name" : "UntransferedRecoChargedEECs"
+            },
+            "MConly" : true
+        },
         "GenEEC" : {
             "class" : "EECres4",
             "params" : {
                 "name" : "GenChargedEECsNOM"
+            },
+            "MConly" : true
+        },
+        "UnmatchedGenEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UnmatchedGenChargedEECsNOM"
+            },
+            "MConly" : true
+        },
+        "UntransferedGenEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UntransferedGenChargedEECsNOM"
             },
             "MConly" : true
         },
