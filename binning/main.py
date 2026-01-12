@@ -9,13 +9,13 @@ from correctionlib import Correction
 
 def build_transfer_config(gencfg : List[dict], recocfg : List[dict]) -> List[dict]:
     axes = []
-    for axis_cfg in gencfg:
-        copycfg = axis_cfg.copy()
-        copycfg['name'] = axis_cfg['name'] + '_gen'
-        axes.append(copycfg)
     for axis_cfg in recocfg:
         copycfg = axis_cfg.copy()
         copycfg['name'] = axis_cfg['name'] + '_reco'
+        axes.append(copycfg)
+    for axis_cfg in gencfg:
+        copycfg = axis_cfg.copy()
+        copycfg['name'] = axis_cfg['name'] + '_gen'
         axes.append(copycfg)
     return axes
 
@@ -73,7 +73,7 @@ def build_iterator(dset : ds.Dataset,
     ))
 
 def pa_mod(val, divisor):
-    #pyarrow doesn't know about pyarrow.compute??
+    #pyright doesn't know about pyarrow.compute??
     quotient = pc.floor(pc.divide(val, divisor)) # pyright: ignore[reportAttributeAccessIssue]
     remainder = pc.subtract(val, pc.multiply(quotient, divisor)) # pyright: ignore[reportAttributeAccessIssue]
     return remainder
