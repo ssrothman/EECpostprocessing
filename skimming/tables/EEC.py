@@ -47,9 +47,9 @@ class EECgenericTable:
             if whichEECobj == 'total':
                 theEECs = objs.GenEEC
             elif whichEECobj == 'unmatched':
-                theEECs = objs.unmatchedGenEEC
+                theEECs = objs.UnmatchedGenEEC
             elif whichEECobj == 'untransfered':
-                theEECs = objs.untransferedGenEEC
+                theEECs = objs.UntransferedGenEEC
             else:
                 assert_never(whichEECobj)
 
@@ -59,9 +59,9 @@ class EECgenericTable:
             if whichEECobj == 'total':
                 theEECs = objs.RecoEEC
             elif whichEECobj == 'unmatched':
-                theEECs = objs.unmatchedRecoEEC
+                theEECs = objs.UnmatchedRecoEEC
             elif whichEECobj == 'untransfered':
-                theEECs = objs.untransferedRecoEEC
+                theEECs = objs.UntransferedRecoEEC
             else:
                 assert_never(whichEECobj)
 
