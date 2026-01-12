@@ -1,3 +1,5 @@
+from unfolding import detectormodel
+from unfolding.specs import detectormodelspec
 from unfolding.unfolding_workspace import dsspec, setup_unfolding_workspace
 
 pythia_inclusive : dsspec = {
@@ -8,11 +10,17 @@ pythia_inclusive : dsspec = {
     'isMC' : True
 }
 
+basicmodel : detectormodelspec = {
+    'objsyst' : [],
+    'wtsyst' : []
+}
+
 setup_unfolding_workspace(
     'test_unfold',
     pythia_inclusive,
     'nominal',
     'nominal',
     pythia_inclusive,
+    basicmodel,
     'res4tee'
 )

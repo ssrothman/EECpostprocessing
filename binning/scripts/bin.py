@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env -S python
 
 import argparse
 
@@ -123,13 +123,13 @@ if args.statN > 0:
 if args.cov:
     halfshape = result.shape[:len(result.shape)//2]
     thelen = np.prod(halfshape)
-    result = result.reshape((thelen, thelen)) # type: ignore
+    output = result.reshape((thelen, thelen)) # type: ignore
 else:
-    result = result.values(flow=True).ravel() # type: ignore
+    output = result.values(flow=True).ravel() # type: ignore
     
 print("Writing result to", outpath)
 with fs.open(outpath + '.npy', 'wb') as f:
-    np.save(f, result)
+    np.save(f, output)
 
 bincfg_path = os.path.join(
     os.path.dirname(skimpath),
