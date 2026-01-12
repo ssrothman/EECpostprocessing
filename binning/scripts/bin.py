@@ -55,9 +55,9 @@ bincfgpath = os.path.join(
 with open(bincfgpath + '.json') as f:
     bincfg = json.load(f)
 
-if args.table.endswith('reco'):
+if args.table.endswith('Reco'):
     thebinning = bincfg['reco']
-elif args.table.endswith('gen'):
+elif args.table.endswith('Gen'):
     thebinning = bincfg['gen']
 elif args.table.endswith('transfer'):
     thebinning = build_transfer_config(
