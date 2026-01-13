@@ -1,3 +1,4 @@
+import torch
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse
 from typing import TypedDict
@@ -13,22 +14,28 @@ class Histogram:
         self._covmat = covmat
         self._invcov = invcov
         self._binning = binning
+
+        self._device = 'numpy'
         
     @property
-    def values(self) -> np.ndarray:
+    def values(self) -> np.ndarray | torch.Tensor:
         return self._values 
     
     @property
-    def covmat(self) -> np.ndarray:
+    def covmat(self) -> np.ndarray | torch.Tensor:
         return self._covmat
     
     @property
-    def invcov(self) -> np.ndarray:
+    def invcov(self) -> np.ndarray | torch.Tensor:
         return self._invcov
     
     @property
     def binning(self) -> ArbitraryBinning:
         return self._binning
+
+    @property
+    def device(self) -> str:
+        return self._device
 
     @classmethod
     def from_dataset(cls, cfg: dsspec, what: str, wtsyst: str, objsyst: str) -> "Histogram":
@@ -85,3 +92,68 @@ class Histogram:
             np.save(f, self._invcov)
         with open(os.path.join(where, 'bincfg.json'), 'w') as f:
             json.dump(self._binning.to_dict(), f, indent=4)
+
+
+    def to_torch(self):
+        if self._device != 'numpy':
+            return self
+        
+        self._device = 'cpu'
+
+        assert isinstance(self._values, np.ndarray)
+        assert isinstance(self._covmat, np.ndarray)
+        assert isinstance(self._invcov, np.ndarray)
+
+        self._values =  torch.from_numpy(self._values)
+        self._covmat = torch.from_numpy(self._covmat)
+        self._invcov = torch.from_numpy(self._invcov)
+
+        return self
+
+    def to_numpy(self, *args, **kwargs):
+        if self._device == 'numpy':
+            return self
+        else:
+            self._device = 'numpy'
+
+            assert isinstance(self._values, torch.Tensor)
+            assert isinstance(self._covmat, torch.Tensor)
+            assert isinstance(self._invcov, torch.Tensor)
+
+            self._values = self._values.numpy(*args, **kwargs)
+            self._covmat = self._covmat.numpy(*args, **kwargs)
+            self._invcov = self._invcov.numpy(*args, **kwargs)
+
+            return self
+
+    def to(self, device, *args, **kwargs):
+        if device == 'numpy':
+            return self.to_numpy(*args, **kwargs)
+        else:
+            self.to_torch()
+
+            self._device = device
+
+            assert isinstance(self._values, torch.Tensor)
+            assert isinstance(self._covmat, torch.Tensor)
+            assert isinstance(self._invcov, torch.Tensor)
+
+            self._values = self._values.to(device, *args, **kwargs)
+            self._covmat = self._covmat.to(device, *args, **kwargs)
+            self._invcov = self._invcov.to(device, *args, **kwargs)
+
+            return self
+        
+    def detach(self):
+        if self._device == 'numpy':
+            return self
+        
+        assert isinstance(self._values, torch.Tensor)
+        assert isinstance(self._covmat, torch.Tensor)
+        assert isinstance(self._invcov, torch.Tensor)
+
+        self._values = self._values.detach()
+        self._covmat = self._covmat.detach()
+        self._invcov = self._invcov.detach()
+
+        return self

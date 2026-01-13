@@ -1,6 +1,9 @@
-from unfolding import detectormodel
-from unfolding.specs import detectormodelspec
-from unfolding.unfolding_workspace import dsspec, setup_unfolding_workspace
+import fasteigenpy # need to import first
+                   # so that later torch imports
+                   # don't break fasteigenpy
+
+from unfolding.specs import detectormodelspec, dsspec
+from unfolding.unfolding_workspace import setup_unfolding_workspace
 
 pythia_inclusive : dsspec = {
     'location' : 'local-submit',
@@ -11,8 +14,7 @@ pythia_inclusive : dsspec = {
 }
 
 basicmodel : detectormodelspec = {
-    'objsyst' : [],
-    'wtsyst' : []
+    'systematics' : []
 }
 
 setup_unfolding_workspace(

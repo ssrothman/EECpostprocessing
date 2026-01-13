@@ -1,8 +1,12 @@
-import unfolding.detectormodel
-import unfolding.histogram
+from unfolding.detectormodel import DetectorModel
+from unfolding.histogram import Histogram
+from unfolding.loss import Loss
+from unfolding.minimizer import Minimizer
 
 from unfolding.detectormodel import load_hist_from_dataset
 from unfolding.specs import dsspec
+
+import numpy as np
 
 pythia_inclusive : dsspec = {
     'location' : 'local-submit',
@@ -12,10 +16,10 @@ pythia_inclusive : dsspec = {
     'isMC' : True
 }
 
-gen = unfolding.histogram.Histogram.from_disk(
+gen = Histogram.from_disk(
     'test_unfold/gen'
 )
-reco = unfolding.histogram.Histogram.from_disk(
+reco = Histogram.from_disk(
     'test_unfold/reco'
 )
 
@@ -43,6 +47,34 @@ untransferedReco = load_hist_from_dataset(
 )
 bkgReco = unmatchedReco + untransferedReco
 
-model = unfolding.detectormodel.DetectorModel.from_disk(
+model = DetectorModel.from_disk(
     'test_unfold/detectormodel'
+)
+
+baseline = gen.values[:]
+baseline *= np.random.uniform(0.8, 1.2, size=baseline.shape)
+
+loss = Loss(
+    reco,
+    genbaseline = baseline,
+    model = model,
+    negativePenalty = 1e6
+)
+
+mincfg = {
+    'logpath' : 'test_unfold/minimization',
+    'method' : 'l-bfgs',
+    'cpt_interval' : 10,
+    'cpt_start' : 0,
+    'method_options' : {
+    }
+}
+
+
+minimizer = Minimizer(mincfg)
+
+minimizer(
+    loss,
+    x0 = None,
+    device = 'cpu',
 )

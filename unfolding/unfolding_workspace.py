@@ -1,5 +1,4 @@
 
-
 import os
 from unfolding.histogram import Histogram
 from unfolding.specs import dsspec, detectormodelspec
@@ -45,5 +44,5 @@ def setup_unfolding_workspace(
         gen.dump_to_disk(os.path.join(where, 'gen'))
 
 
-    dm = DetectorModel.from_dataset(MCcfg, modelcfg)
+    dm = DetectorModel.from_dataset(MCcfg, modelcfg, what)
     dm.dump_to_disk(os.path.join(where, 'detectormodel'))
