@@ -14,17 +14,17 @@ gencfg = binning_cfg['gen']
 recocfg = binning_cfg['reco']
 transfercfg = build_transfer_config(gencfg, recocfg)
 
-Hgen = build_hist(gencfg)
+Hgen, prebinned_gen = build_hist(gencfg)
 ds_gen = ds.dataset(dspath_gen, format="parquet")
-Hgen = fill_hist(Hgen, ds_gen, 'wt_nominal', 'wt')
+Hgen = fill_hist(Hgen, prebinned_gen, ds_gen, 'wt_nominal', 'wt')
 covgen = fill_cov(Hgen, ds_gen, 'wt_nominal', 'wt')
 
 
-Hreco = build_hist(recocfg)
+Hreco, prebinned_reco = build_hist(recocfg)
 ds_reco = ds.dataset(dspath_reco, format="parquet")
-Hreco = fill_hist(Hreco, ds_reco, 'wt_nominal', 'wt')
+Hreco = fill_hist(Hreco, prebinned_reco, ds_reco, 'wt_nominal', 'wt')
 covreco = fill_cov(Hreco, ds_reco, 'wt_nominal', 'wt')
 
-Htransfer = build_hist(transfercfg)
+Htransfer, prebinned_transfer = build_hist(transfercfg)
 ds_transfer = ds.dataset(dspath_transfer, format="parquet")
-Htransfer = fill_hist(Htransfer, ds_transfer, 'wt_nominal', 'wt_reco')
+Htransfer = fill_hist(Htransfer, prebinned_transfer, ds_transfer, 'wt_nominal', 'wt_reco')

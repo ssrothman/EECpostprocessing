@@ -76,14 +76,14 @@ fs, skimpath = lookup_skim_path(
     args.table
 )
 
-H = build_hist(thebinning)
+H, prebinned = build_hist(thebinning)
 dataset = ds.dataset(skimpath, format='parquet', filesystem=fs)
 
 if args.table.endswith('transfer'):
     itemwt = 'wt_reco'
     ab = ArbitraryGenRecoBinning()
-    Hreco = build_hist(bincfg['reco'])
-    Hgen = build_hist(bincfg['gen'])
+    Hreco, prebinned_reco = build_hist(bincfg['reco'])
+    Hgen, prebinned_gen = build_hist(bincfg['gen'])
     ab.setup_from_histograms(
         Hreco,
         Hgen
@@ -99,7 +99,8 @@ else:
     thefun = fill_hist
 
 result = thefun(
-    H, dataset,
+    H, prebinned,
+    dataset,
     'wt_%s' % args.evtwt,
     itemwt = itemwt,
     statN = args.statN,
