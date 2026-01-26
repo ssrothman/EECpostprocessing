@@ -17,7 +17,7 @@ parser.add_argument('--signal-mc', type=str, nargs='+', help="List of signal MC 
                         'Pythia_HT-1200to2500',
                         'Pythia_HT-2500toInf',
                     ])
-parser.add_argument('--background-mc', type=str, nargs='+', help="List of background MC datasets to process",
+parser.add_argument('--background-mc', type=str, nargs='*', help="List of background MC datasets to process",
                     default=[
                         'WW',
                          'WZ',
@@ -28,7 +28,7 @@ parser.add_argument('--background-mc', type=str, nargs='+', help="List of backgr
                          'ST_tW',
                          'ST_tW_anti'
                     ])
-parser.add_argument('--data', type=str, nargs='+', help="List of data datasets to process",
+parser.add_argument('--data', type=str, nargs='*', help="List of data datasets to process",
                     default=[
                         'DATA_2018A', 
                         'DATA_2018B', 
