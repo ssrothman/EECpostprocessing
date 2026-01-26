@@ -1,4 +1,4 @@
-{
+{   
     "stacks" : {
         "allMC" : {
             "dsets" : [
@@ -53,7 +53,7 @@
             "label" : "Data 2018"
         }
     },
-    "Apr_23_2025" : {
+   "Apr_23_2025" : {
         "base" : "crab/crab_Apr_23_2025/2018/",
         "DATA_2018A" : { 
             "tag" : [

@@ -41,8 +41,10 @@ class AllObjects:
         if (not self.isMC) and objsyst != 'DATA':
             raise RuntimeError("Data events cannot be processed with systematic variations other than 'DATA'!")
 
-        self._check_btags(btagcfg)
-        self._run_JEC(JECera, JECcfg)
+        if btagcfg:
+            self._check_btags(btagcfg)
+        if JECcfg:
+            self._run_JEC(JECera, JECcfg)
 
         self._JECtarget = None
 

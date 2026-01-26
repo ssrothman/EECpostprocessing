@@ -77,9 +77,12 @@ class EECgenericTable:
         thevals['Jeta'] = thejets.jets.eta[iJet][EECmask][evtmask]
         
         if not gen:
-            thevals['passLooseB'] = thejets.simonjets.passLooseB[iJet][EECmask][evtmask]
-            thevals['passMediumB'] = thejets.simonjets.passMediumB[iJet][EECmask][evtmask]
-            thevals['passTightB'] = thejets.simonjets.passTightB[iJet][EECmask][evtmask]
+            if hasattr(thejets.simonjets, 'passLooseB'):
+                thevals['passLooseB'] = thejets.simonjets.passLooseB[iJet][EECmask][evtmask]
+            if hasattr(thejets.simonjets, 'passMediumB'):
+                thevals['passMediumB'] = thejets.simonjets.passMediumB[iJet][EECmask][evtmask]
+            if hasattr(thejets.simonjets, 'passTightB'):
+                thevals['passTightB'] = thejets.simonjets.passTightB[iJet][EECmask][evtmask]
         
         if hasattr(thejets.jets, 'hadronFlavour'):
             thevals['flav'] = thejets.jets.hadronFlavour[iJet][EECmask][evtmask]
@@ -150,9 +153,12 @@ class EECgenericTable:
         thevals['Jpt_reco'] = recojets.jets.pt[iReco][EECmask][evtmask]
         thevals['Jeta_reco'] = recojets.jets.eta[iReco][EECmask][evtmask]
 
-        thevals['passLooseB'] = recojets.simonjets.passLooseB[iReco][EECmask][evtmask]
-        thevals['passMediumB'] = recojets.simonjets.passMediumB[iReco][EECmask][evtmask]
-        thevals['passTightB'] = recojets.simonjets.passTightB[iReco][EECmask][evtmask]
+        if hasattr(recojets.simonjets, 'passLooseB'):
+            thevals['passLooseB'] = recojets.simonjets.passLooseB[iReco][EECmask][evtmask]
+        if hasattr(recojets.simonjets, 'passMediumB'):  
+            thevals['passMediumB'] = recojets.simonjets.passMediumB[iReco][EECmask][evtmask]
+        if hasattr(recojets.simonjets, 'passTightB'):
+            thevals['passTightB'] = recojets.simonjets.passTightB[iReco][EECmask][evtmask]
 
         if hasattr(recojets.jets, 'hadronFlavour'):
             thevals['flav_reco'] = recojets.jets.hadronFlavour[iReco][EECmask][evtmask]

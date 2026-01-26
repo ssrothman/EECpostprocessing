@@ -1,0 +1,7 @@
+{
+    "eventweight" : {
+        "class" : "GenonlyWeights",
+        "params" : {
+        }
+    }
+}

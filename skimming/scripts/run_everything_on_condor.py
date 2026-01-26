@@ -51,7 +51,17 @@ parser.add_argument('--objsysts', type=str, nargs='+', help="List of object syst
                         'TRK_EFF'
                     ])
 parser.add_argument('--tables', type=str, nargs='+', help="List of table variations to process",
-                    default=['all', 'count'])
+                    default=[
+                        #'all', 
+                        #'count'
+                        "EECres4Transfer:tee",
+                        "EECres4Obs:True,tee,total",
+                        "EECres4Obs:False,tee,total",
+                        "EECres4Obs:True,tee,unmatched",
+                        "EECres4Obs:False,tee,unmatched",
+                        "EECres4Obs:True,tee,untransfered",
+                        "EECres4Obs:False,tee,untransfered"
+                    ])
 parser.add_argument('--files_per_job', type=int, help="Number of input files per job",
                      default=5)
 parser.add_argument('--runtag', type=str, help="Datasets runtag",

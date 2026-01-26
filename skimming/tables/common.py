@@ -16,10 +16,12 @@ def add_common_vars(thevals : dict[str, Any],
     thevals['Zpt'] = objs.Muons.Zs.pt[evtmask]
     thevals['Zmass'] = objs.Muons.Zs.mass[evtmask]
     thevals['Zy'] = objs.Muons.Zs.rapidity[evtmask]
-    thevals['MET'] = objs.MET.pt[evtmask]
-    thevals['numLooseB'] = ak.sum(objs.AK4Jets.jets.passLooseB[evtmask], axis=-1)
-    thevals['numMediumB'] = ak.sum(objs.AK4Jets.jets.passMediumB[evtmask], axis=-1)
-    thevals['numTightB'] = ak.sum(objs.AK4Jets.jets.passTightB[evtmask], axis=-1)
+    if hasattr(objs, 'MET'):
+        thevals['MET'] = objs.MET.pt[evtmask]
+    if hasattr(objs, 'AK4Jets'):
+        thevals['numLooseB'] = ak.sum(objs.AK4Jets.jets.passLooseB[evtmask], axis=-1)
+        thevals['numMediumB'] = ak.sum(objs.AK4Jets.jets.passMediumB[evtmask], axis=-1)
+        thevals['numTightB'] = ak.sum(objs.AK4Jets.jets.passTightB[evtmask], axis=-1)
 
 def add_weight_variations(thevals : dict[str, Any],
                           weights : Weights,

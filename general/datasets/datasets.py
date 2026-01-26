@@ -2,9 +2,15 @@ import json
 import os
 from general.fslookup.files import get_rootfiles
 from general.fslookup.location_lookup import location_lookup
+from simonpy.dictmerge import merge_dict
 
-with open(os.path.join(os.path.dirname(__file__), 'datasets.json')) as f:
-    cfg = json.load(f)
+all_files = os.listdir(os.path.dirname(__file__))
+jsons = filter(lambda x: x.endswith('.json'), all_files)
+
+cfg = {}
+for j in jsons:
+    with open(os.path.join(os.path.dirname(__file__), j)) as f:
+        cfg = merge_dict(cfg, json.load(f), allow_new_keys=True)
 
 def lookup_dataset(runtag : str, dataset : str) -> dict:
     return cfg[runtag][dataset]
