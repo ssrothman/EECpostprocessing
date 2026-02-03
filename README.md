@@ -97,6 +97,29 @@ The `general` subpackage provides common functionality needed by all four other 
 ```
 The `location` field should be a lookup into the locations lookup, as described below. The `flags` field is used to define any other needed information for skimming the datasets. This is currently only used to skim the `HT < 70 GeV` subset of the inclusive Pythia sample, with the flag `{"genHT" : 70}`.
 
+There is also a special tag for so-called "stacks", which are sets of datasets that should be added together (eg to plot all the MC channels at once, or combine the HT-binned datasets, etc). This should look like
+```json
+{
+    "stacks" : {
+        "stack name" : {
+            "dsets" : [
+                "dataset 1",
+                "dataset 2",
+                ...
+            ],
+            "stacks" : [
+                "stack 1",
+                "stack 2",
+                ...
+            ],
+            "color" : "color to put on plots",
+            "label" : "label to write on plots
+        }
+    }
+}
+```
+Note that stacks can consist of both other stacks and other datasets. It's up to you to not create any infinite loops :) 
+
 ### Filesystem lookups
 
 `general/fslookup` contains utility logic for looking up filesystem paths. 
