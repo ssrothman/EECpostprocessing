@@ -1,61 +1,164 @@
-# Summary
+# EEC postprocessing <!-- omit from toc -->
 
-The postprocessing is split into two (or arguably three) steps:
+This repo handles the python postprocessing for EEC analysis. This is split into four different pieces:
 
-1. skim the .root files into apache parquet datasets
-2. fill histograms from the parquet datasets. Some of the plotting routines can run directly off of the parquet files, but others require this step
-3. (?) make plots. This is actually handled by a different repo
+1. skimming the .root files into parquet datasets
+2. filling histograms from the parquet datasets
+3. making plots. This can be done either directly off the parquet datasets (eg for kinematics) or off the pre-binned histograms from step 2. 
+4. unfolding. This requires pre-binned histograms
 
-# Setting up with a virtual environment
 
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+## Table of contents <!-- omit from toc -->
+
+- [Dependencies](#dependencies)
+- [Package structure](#package-structure)
+- [General utilities](#general-utilities)
+  - [Datasets lists](#datasets-lists)
+  - [Filesystem lookups](#filesystem-lookups)
+    - [Storage locations](#storage-locations)
+    - [Paths](#paths)
+- [Skimming](#skimming)
+- [Binning](#binning)
+- [Plotting](#plotting)
+- [Unfolding](#unfolding)
+
+## Dependencies
+
+This package relies on two small c++ wrappers that I wrote:
+
+ - `fasteigenpy` ([here](https://github.com/ssrothman/fasteigenpy)) - optimized c++ eigen bindings. Used for matrix inverses, eigendecompositions, etc
+ - `directcov` ([here](https://github.com/ssrothman/directcov)) - computation of covariance matrices from correlated, binned data
+
+This package also relies on a number of external python packages:
+
+ - pyarrow 
+ - awkward
+ - numpy
+ - hist
+ - correctionlib
+ - fsspec-xrootd (not available via conda)
+ - matplotlib >= 3.10
+ - mplhep
+ - torch (for unfolding)
+ - pytorch-minimize (for unfolding)
+
+Additionally, two of my utility packages are distributed as submodules:
+
+ - `simonplot` - plotting utilities
+ - `simonpy` - general-purpose utilities
+
+After cloning, you need to run `git submodule update --init --recursive` to properly set these up. 
+
+## Package structure
+
+The basic structure of the package looks like:
+```
+general/ - common utilities needed for all three steps (skimming, binning, and plotting)
+skimming/ - routines for building parquet datasets from rootfiles 
+binning/ - routines for building histograms off parquet datasets
+plotting/ - routines for making plots
+unfolding/ - routines for running the unfolding
 ```
 
-Ever subsequent time that you run the code, you only need to run the activation step.
+In the top-level README here, I provide only documentation for the `general/` utilities. The subpackages for skimming, binning, plotting, and unfolding have their own READMEs.
 
+## General utilities
 
-# Skimming to parquet
+The `general` subpackage provides common functionality needed by all four other submodules. This primarily relates to filesystem lookups and dataset lists, so that everything can be looked up in the filesystem autoamtically, and naming conventions can be standardized in one place. 
 
-the command looks like
+### Datasets lists
 
-```bash
-python process.py <dataset name> <skimmer name> <config name> --samplelist <name>
+`general/datasets` contains dataset lists, centrally defining things like names, colors, cross-sections, etc. The logic in `general/datasets/datasets.py` reads ALL .json files in this directory into a big datasets configuration dictionary. Adding new datasets to the list is as easy as adding new .json files here. The expected json structure is:
+
+```json
+{
+    "runtag1" : {
+        "base" : "common basepath for all datasets with this runtag",
+        "dataset1" : {
+            "tag" : "str or List[str] with path(s) to folder(s) containing the .root files, relative to the basepath defined earlier",
+            "location" : "location name where the rootfiles live (see following section)",
+            "era" : "JEC era name",
+            "flags" : {
+                "flag1" : value,
+                "flag2" : value,
+                ...
+            },
+            "label" : "label to print on plots",
+            "lumi" : "luminosity value [should only be present for DATA datasets]",
+            "xsec" : "cross-section value [should only be present for MC datasets]",
+            "color" : "color to use on plots"
+        }
+    },
+    "runtag2" : {
+        ...
+    },
+    ...
+}
+```
+The `location` field should be a lookup into the locations lookup, as described below. The `flags` field is used to define any other needed information for skimming the datasets. This is currently only used to skim the `HT < 70 GeV` subset of the inclusive Pythia sample, with the flag `{"genHT" : 70}`.
+
+### Filesystem lookups
+
+`general/fslookup` contains utility logic for looking up filesystem paths. 
+
+#### Storage locations
+
+In order to provide a unified interface independent of where files are actually stored, the storage location is defined with a `location` string, which is used as a lookup in `general/fslookup/location_lookup.json`. The expected format is
+```json
+{
+    "location name" : [
+        "root redirector, or \"local\"",
+        "base path"
+    ]
+}
+```
+For example, I have defined 
+```json
+{
+    "simon-LPC" : [
+        "cmseos.fnal.gov",
+        "/store/group/lpcpfnano/srothman/"
+    ],
+    "local-submit" : [
+        "local",
+        "/ceph/submit/data/group/cms/store/user/srothman/EEC_v2"
+    ],
+    "xrootd-submit" : [
+        "submit55.mit.edu",
+        "/store/user/srothman/EEC_v2"
+    ]
+}
+```
+for my folder on LPC and access to my local files on the MIT cluster, either locally or through xrootd. If you have files stored on a different system, it should be as easy as adding the needed lines to the `location-lookups.json` for my code to find them. 
+
+#### Paths
+
+In addition to defining common logic for filesystem lookups, I also define common logic for paths in the filesystem. Skimmed datasets can be found with 
+```python
+from general.fslookup.skim_path import lookup_skim_path
+
+fs_object, path_string = lookup_skim_path(
+    location : str = "location string from location-lookups.json",
+    configsuite : str = "name of the config used for the skimming (defined in the skimming/ submodule)",
+    runtag : str = "runtag (from the datasets json)",
+    dataset : str = "name of the dataset (from the datasets json)",
+    objsyst : str = "name of the systematic variation on the objects (ie not just an event weight)",
+    table : str = " name of the skimmed table"
+)
 ```
 
-The dataset name is a lookup into the samplelist from samples/. When you make a new samplelist make sure to import it into samples/\_\_init\_\_.py. The identifier passed to the --samplelist option is the name assigned to that samplelist in the \_\_init\_\_.py file. 
+## Skimming
 
-The skimmer name is the name of the skimmer you want to use. For annoying historical reasons these are in the folder skimming/. If you make a new one be sure to import it and add it to the dictionary in processing/EECProcessor.py. This is where the skimmer name you pass will be looked up. Currently available and not-obselete skimmers are:
- - Kinematics: dumps various kinematic variables. Creates datasets for event-level qauntities (eg rho, Zmass, ...), jet-level quantities (eg pt, eta, ...), and particle-level quantities (eg pt, pdgid, ...).
- - EECres4\*: dumps the res4\* entries. 
- - EECproj: dumps the projected EEC entries.
+Documentation on the skimming submodule can be found in its own dedicated README [here](https://github.com/ssrothman/EECpostprocessing/tree/master/skimming/README.md)
 
-The config name is the name of the config you want to use. Config information lives in config/. The config name that you pass is the name of a "config suite", which identifies a collection of .json files that actually contain the configuration information. These live in configs/suites/, and hopefully the expected format is obvious just by looking at one. 
+## Binning
 
-There are various other options that can be passed to the process.py script. Thse include:
- - --force: run even if the target destintion already contains the results of a previous run
- - --recover: look at the list of errored files from a previous invocation of process.py and try to rerun only on them. --recover implies --force
- - --filesplit N: split each file into N chunks. This can be useful if worker nodes do not have enough memory to process an entire file in one go. If you run --recovery, you must pass the same filesplit value as was used in the previous run. This is not checked, but there is a chance of double-counting events otherwise. 
- - --filebatch N: batch N files into each skimming task. This can reduce the overhead on the dask scheduler, but it typically not needed
- - --extra-tags str: a string to append to the destination filename, can be used to distinguish subsequent runs tht would otherwise by default overwrite each other
- - --syst str: the name of one of the "object systematics" that actually change object properties (as opposed to event weights). Currently only the JETMET systematics are supported. 
- - --no\*: various options to disable event weights, corrections, or selections
- - --Zreweight: not up-to-date, used to reweight the Z kinematics
- - --local: used for testing. In --local mode, the <dataset_name> is instead interpreted as a file path. 
- - --nfiles N: used to run on only a subset of the files in the dataset.
- - --startfile N: used to identify which subset of the dataset to run on with --nfiles N
- - --use-slurm: run the skimming on slurm
- - --use-local: run the skimming in parallel on the local machine
- - --use-local-debug: run the skimming in one thread on the local machine
- - --JECera str: overwrite the default JECera (specified in the sample file) with the user-specified one. Useful for testing
- - --verbose N: 0 = no verbosity, 1 = verbose
+Documentation on the skimming submodule can be found in its own dedicated README [here](https://github.com/ssrothman/EECpostprocessing/tree/master/binning/README.md)
 
-# Filling histograms
+## Plotting
 
-see the README in binning/
+Documentation on the skimming submodule can be found in its own dedicated README [here](https://github.com/ssrothman/EECpostprocessing/tree/master/plotting/README.md)
 
-# Plotting
+## Unfolding
 
-This is handled in https://github.com/ssrothman/EECplotting
+Documentation on the skimming submodule can be found in its own dedicated README [here](https://github.com/ssrothman/EECpostprocessing/tree/master/unfolding/README.md)
