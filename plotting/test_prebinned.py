@@ -63,6 +63,14 @@ vars = [
     var_normr
 ]
 
+cut_basic = splt.cut.SliceOperation(
+    edges = {
+        'R' : [0.4, 0.5],
+        'r' : [0.0, 0.2]
+    },
+    clipemptyflow = []
+)
+
 cut = splt.cut.SliceOperation(
     edges = {
         'R' : [0.4, 0.5],
@@ -75,6 +83,17 @@ cut = splt.cut.SliceOperation(
 
 weight = splt.variable.ConstantVariable(1.0)
 binning = splt.binning.PrebinnedBinning()
+
+var_corr = splt.variable.CorrelationFromCovariance(var_basic)
+
+splt.draw_matrix(
+    var_corr,
+    cut_basic,
+    herwig_glu,
+    binning,
+    output_folder='testplots/prebinned',
+    output_prefix='evt_matrix_basic',
+)
 
 for var in vars:
     print(f"Plotting variable {var.key}")
