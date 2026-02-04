@@ -6,216 +6,216 @@
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu",
+            "label": "Herwig Z+glu; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "blue"
         },
         "herwig_glu_TeV": {
             "tag": "herwig_glu_TeV_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu, TeV",
+            "label": "Herwig Z[TeV]+glu; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "navy"
         },
         "herwig_glu_TeV_gg": {
             "tag": "herwig_glu_TeV_gg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu, TeV, gg",
+            "label": "Herwig Z[TeV]+glu; no glu->qq",
             "xsec": 1.0,
-            "color": "black"
+            "color": "darkgreen"
         },
         "herwig_glu_TeV_nospin": {
             "tag": "herwig_glu_TeV_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu, TeV, nospin",
+            "label": "Herwig Z[TeV]+glu; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "darkred"
         },
         "herwig_glu_TeV_nospin_gg": {
             "tag": "herwig_glu_TeV_nospin_gg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu, TeV, nospin, gg",
+            "label": "Herwig Z[TeV]+glu; no spin corr., no glu->qq",
             "xsec": 1.0,
-            "color": "black"
+            "color": "indigo"
         },
         "herwig_glu_gg": {
             "tag": "herwig_glu_gg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu, gg",
+            "label": "Herwig Z+glu; no glu->qq",
             "xsec": 1.0,
-            "color": "black"
+            "color": "green"
         },
         "herwig_glu_nospin": {
             "tag": "herwig_glu_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu, nospin",
+            "label": "Herwig Z+glu; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "red"
         },
         "herwig_glu_nospin_gg": {
             "tag": "herwig_glu_nospin_gg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, glu, nospin, gg",
+            "label": "Herwig Z+glu; no spin corr., no glu->qq",
             "xsec": 1.0,
-            "color": "black"
+            "color": "purple"
         },
         "herwig_q": {
             "tag": "herwig_q_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q",
+            "label": "Herwig Z+q; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "blue"
         },
         "herwig_q_TeV": {
             "tag": "herwig_q_TeV_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q, TeV",
+            "label": "Herwig Z[TeV]+q; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "navy"
         },
         "herwig_q_TeV_nogg": {
             "tag": "herwig_q_TeV_nogg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q, TeV, nogg",
+            "label": "Herwig Z[TeV]+q; no glu->gluglu",
             "xsec": 1.0,
-            "color": "black"
+            "color": "darkgreen"
         },
         "herwig_q_TeV_nospin": {
             "tag": "herwig_q_TeV_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q, TeV, nospin",
+            "label": "Herwig Z[TeV]+q; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "darkred"
         },
         "herwig_q_TeV_nospin_nogg": {
             "tag": "herwig_q_TeV_nospin_nogg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q, TeV, nospin, nogg",
+            "label": "Herwig Z[TeV]+q; no spin corr., no glu->gluglu",
             "xsec": 1.0,
-            "color": "black"
+            "color": "indigo"
         },
         "herwig_q_nogg": {
             "tag": "herwig_q_nogg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q, nogg",
+            "label": "Herwig Z+q; no glu->gluglu",
             "xsec": 1.0,
-            "color": "black"
+            "color": "green"
         },
         "herwig_q_nospin": {
             "tag": "herwig_q_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q, nospin",
+            "label": "Herwig Z+q; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "red"
         },
         "herwig_q_nospin_nogg": {
             "tag": "herwig_q_nospin_nogg_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "herwig, q, nospin, nogg",
+            "label": "Herwig Z+q; no spin corr., no glu->gluglu",
             "xsec": 1.0,
-            "color": "black"
+            "color": "purple"
         },
         "pythia_glu": {
             "tag": "pythia_glu_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, glu",
+            "label": "Pythia Z+glu; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "blue"
         },
         "pythia_glu_TeV": {
             "tag": "pythia_glu_TeV_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, glu, TeV",
+            "label": "Pythia Z[TeV]+glu; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "navy"
         },
         "pythia_glu_TeV_nospin": {
             "tag": "pythia_glu_TeV_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, glu, TeV, nospin",
+            "label": "Pythia Z[TeV]+glu; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "darkred"
         },
         "pythia_glu_nospin": {
             "tag": "pythia_glu_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, glu, nospin",
+            "label": "Pythia Z+glu; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "red"
         },
         "pythia_q": {
             "tag": "pythia_q_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, q",
+            "label": "Pythia Z+q; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "blue"
         },
         "pythia_q_TeV": {
             "tag": "pythia_q_TeV_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, q, TeV",
+            "label": "Pythia Z[TeV]+q; default",
             "xsec": 1.0,
-            "color": "black"
+            "color": "navy"
         },
         "pythia_q_TeV_nospin": {
             "tag": "pythia_q_TeV_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, q, TeV, nospin",
+            "label": "Pythia Z[TeV]+q; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "darkred"
         },
         "pythia_q_nospin": {
             "tag": "pythia_q_nospin_May_14_2025",
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "pythia, q, nospin",
+            "label": "Pythia Z+q; no spin corr.",
             "xsec": 1.0,
-            "color": "black"
+            "color": "red"
         }
     }
 }

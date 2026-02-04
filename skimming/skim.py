@@ -13,7 +13,11 @@ def skim(events : ak.Array, config : dict, output_path : str, fs : Any, tables):
         import json
 
         # Special short-circuit logic for count table - just count the number of events!
-        n_events = len(events)
+        if hasattr(events, 'genWeight'):
+            n_events = ak.sum(events.genWeight)
+        else:
+            n_events = len(events)
+            
         uniqueid = AllObjects.get_uniqueid(events)
         destination = os.path.join(
             output_path,
