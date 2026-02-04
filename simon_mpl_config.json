@@ -60,6 +60,9 @@
         "matchPhi" : "Matched gen particle $\\phi$",
         "matchCharge" : "Matched gen particle $Q$",
         "matchTypes" : "Matched gen particle type flag",
-        "nMatches" : "Number of matched gen particles"
+        "nMatches" : "Number of matched gen particles",
+        "c" : "$\\phi$",
+        "r" : "$r$",
+        "R" : "$R$"
     }
 }

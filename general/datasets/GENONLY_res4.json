@@ -8,7 +8,7 @@
             "flags": {},
             "label": "herwig, glu",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_glu_TeV": {
             "tag": "herwig_glu_TeV_May_14_2025",
@@ -17,7 +17,7 @@
             "flags": {},
             "label": "herwig, glu, TeV",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_glu_TeV_gg": {
             "tag": "herwig_glu_TeV_gg_May_14_2025",
@@ -26,7 +26,7 @@
             "flags": {},
             "label": "herwig, glu, TeV, gg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_glu_TeV_nospin": {
             "tag": "herwig_glu_TeV_nospin_May_14_2025",
@@ -35,7 +35,7 @@
             "flags": {},
             "label": "herwig, glu, TeV, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_glu_TeV_nospin_gg": {
             "tag": "herwig_glu_TeV_nospin_gg_May_14_2025",
@@ -44,7 +44,7 @@
             "flags": {},
             "label": "herwig, glu, TeV, nospin, gg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_glu_gg": {
             "tag": "herwig_glu_gg_May_14_2025",
@@ -53,7 +53,7 @@
             "flags": {},
             "label": "herwig, glu, gg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_glu_nospin": {
             "tag": "herwig_glu_nospin_May_14_2025",
@@ -62,7 +62,7 @@
             "flags": {},
             "label": "herwig, glu, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_glu_nospin_gg": {
             "tag": "herwig_glu_nospin_gg_May_14_2025",
@@ -71,7 +71,7 @@
             "flags": {},
             "label": "herwig, glu, nospin, gg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q": {
             "tag": "herwig_q_May_14_2025",
@@ -80,7 +80,7 @@
             "flags": {},
             "label": "herwig, q",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q_TeV": {
             "tag": "herwig_q_TeV_May_14_2025",
@@ -89,7 +89,7 @@
             "flags": {},
             "label": "herwig, q, TeV",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q_TeV_nogg": {
             "tag": "herwig_q_TeV_nogg_May_14_2025",
@@ -98,7 +98,7 @@
             "flags": {},
             "label": "herwig, q, TeV, nogg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q_TeV_nospin": {
             "tag": "herwig_q_TeV_nospin_May_14_2025",
@@ -107,7 +107,7 @@
             "flags": {},
             "label": "herwig, q, TeV, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q_TeV_nospin_nogg": {
             "tag": "herwig_q_TeV_nospin_nogg_May_14_2025",
@@ -116,7 +116,7 @@
             "flags": {},
             "label": "herwig, q, TeV, nospin, nogg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q_nogg": {
             "tag": "herwig_q_nogg_May_14_2025",
@@ -125,7 +125,7 @@
             "flags": {},
             "label": "herwig, q, nogg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q_nospin": {
             "tag": "herwig_q_nospin_May_14_2025",
@@ -134,7 +134,7 @@
             "flags": {},
             "label": "herwig, q, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "herwig_q_nospin_nogg": {
             "tag": "herwig_q_nospin_nogg_May_14_2025",
@@ -143,7 +143,7 @@
             "flags": {},
             "label": "herwig, q, nospin, nogg",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_glu": {
             "tag": "pythia_glu_May_14_2025",
@@ -152,7 +152,7 @@
             "flags": {},
             "label": "pythia, glu",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_glu_TeV": {
             "tag": "pythia_glu_TeV_May_14_2025",
@@ -161,7 +161,7 @@
             "flags": {},
             "label": "pythia, glu, TeV",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_glu_TeV_nospin": {
             "tag": "pythia_glu_TeV_nospin_May_14_2025",
@@ -170,7 +170,7 @@
             "flags": {},
             "label": "pythia, glu, TeV, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_glu_nospin": {
             "tag": "pythia_glu_nospin_May_14_2025",
@@ -179,7 +179,7 @@
             "flags": {},
             "label": "pythia, glu, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_q": {
             "tag": "pythia_q_May_14_2025",
@@ -188,7 +188,7 @@
             "flags": {},
             "label": "pythia, q",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_q_TeV": {
             "tag": "pythia_q_TeV_May_14_2025",
@@ -197,7 +197,7 @@
             "flags": {},
             "label": "pythia, q, TeV",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_q_TeV_nospin": {
             "tag": "pythia_q_TeV_nospin_May_14_2025",
@@ -206,7 +206,7 @@
             "flags": {},
             "label": "pythia, q, TeV, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         },
         "pythia_q_nospin": {
             "tag": "pythia_q_nospin_May_14_2025",
@@ -215,7 +215,7 @@
             "flags": {},
             "label": "pythia, q, nospin",
             "xsec": 1.0,
-            "color": ""
+            "color": "black"
         }
     }
 }

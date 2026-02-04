@@ -5,6 +5,10 @@ from simonplot.plottables import ParquetDataset
 from simonplot.plottables.Datasets import DatasetStack
 import os
 import json
+import numpy as np
+
+from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
+from simonpy.AbitraryBinning import ArbitraryBinning
 
 def build_pq_dataset_stack(configsuite : str,
                            runtag : str,
@@ -39,6 +43,54 @@ def build_pq_dataset_stack(configsuite : str,
         label = stackcfg['label'],
         datasets = dsets
     )
+
+def load_prebinned_dataset(configsuite : str,
+                           runtag : str,
+                           dataset :str,
+                           objsyst : str,
+                           wtsyst : str,
+                           table : str,
+                           location : str = 'local-submit') -> ValCovPairDataset:
+    
+    dsetcfg = lookup_dataset(runtag, dataset)
+    
+    fs, tablepath = lookup_skim_path(
+        location,
+        configsuite,
+        runtag,
+        dataset,
+        objsyst,
+        table
+    )
+
+    print(tablepath)
+    valpath = tablepath + '_BINNED_%s.npy' % wtsyst
+    covpath = tablepath + '_BINNED_covmat_%s.npy' % wtsyst
+    binningpath = tablepath + '_bincfg.json'
+
+    vals = np.load(fs.open(valpath, 'rb'))
+    covmat = np.load(fs.open(covpath, 'rb'))
+    with fs.open(binningpath, 'r') as f:
+        bincfg = json.load(f)
+    
+    binning = ArbitraryBinning()
+    binning.from_dict(bincfg)
+
+    theds = ValCovPairDataset(
+        key = dataset,
+        color = dsetcfg['color'],
+        label = dsetcfg['label'],
+        data = (vals, covmat),
+        binning = binning,
+        isMC = 'xsec' in dsetcfg
+    )
+
+    if 'xsec' in dsetcfg:
+        theds.set_xsec(dsetcfg['xsec'])
+    elif 'lumi' in dsetcfg:
+        theds.set_lumi(dsetcfg['lumi'])
+
+    return theds
 
 def build_pq_dataset(configsuite : str,
                      runtag: str, 
