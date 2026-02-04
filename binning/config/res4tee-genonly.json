@@ -33,7 +33,7 @@
             "type" : "Regular-Prebinned",
             "name" : "c",
             "start" : 0.0,
-            "stop" : 1.5707963267948966,
+            "stop" : 1.5707963269,
             "bins" : 15,
             "underflow" : true,
             "overflow" : true
