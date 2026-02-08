@@ -38,12 +38,16 @@ class SimonJetKinematicsTable:
         thevals['Jpt'] = jets.jets.pt[jetmask][evtmask]
         thevals['Jeta'] = jets.jets.eta[jetmask][evtmask]
         thevals['Jphi'] = jets.jets.phi[jetmask][evtmask]
-        thevals['Jpt_cmssw'] = jets.jets.pt_cmssw[jetmask][evtmask]
+        if hasattr(jets.jets, 'pt_cmssw'):
+            thevals['Jpt_cmssw'] = jets.jets.pt_cmssw[jetmask][evtmask]
         
         #flavor info
-        thevals['passLooseB'] = jets.simonjets.passLooseB[jetmask][evtmask]
-        thevals['passMediumB'] = jets.simonjets.passMediumB[jetmask][evtmask]
-        thevals['passTightB'] = jets.simonjets.passTightB[jetmask][evtmask]
+        if hasattr(jets.simonjets, 'passLooseB'):
+            thevals['passLooseB'] = jets.simonjets.passLooseB[jetmask][evtmask]
+        if hasattr(jets.simonjets, 'passMediumB'):
+            thevals['passMediumB'] = jets.simonjets.passMediumB[jetmask][evtmask]
+        if hasattr(jets.simonjets, 'passTightB'):
+            thevals['passTightB'] = jets.simonjets.passTightB[jetmask][evtmask]
 
         if hasattr(jets.jets, 'hadronFlavour'):
             thevals['flav'] = jets.jets.hadronFlavour[jetmask][evtmask]
@@ -53,7 +57,7 @@ class SimonJetKinematicsTable:
         thevals['nPassingConstituents'] = jets.simonjets.nPart[jetmask][evtmask]
 
         #CHS matching
-        if hasattr(jets.simonjets, 'nCHS'):
+        if hasattr(jets.simonjets, 'nCHS') and hasattr(jets.simonjets, 'CHSpt'):
             thevals['nCHS'] = jets.simonjets.nCHS[jetmask][evtmask]
             thevals['CHSpt'] = jets.simonjets.CHSpt[jetmask][evtmask]
             thevals['CHSeta'] = jets.simonjets.CHSeta[jetmask][evtmask]
@@ -65,6 +69,9 @@ class SimonJetKinematicsTable:
             thevals['matchedEta'] = jets.simonjets.jetMatchEta[jetmask][evtmask]
             thevals['matchedPhi'] = jets.simonjets.jetMatchPhi[jetmask][evtmask]
             thevals['matched'] = jets.simonjets.jetMatched[jetmask][evtmask]
+
+        if hasattr(jets.simonjets, 'DeltaPsi'):
+            thevals['DeltaPsi'] = jets.simonjets.DeltaPsi[jetmask][evtmask]
 
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(
