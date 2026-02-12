@@ -4,6 +4,7 @@ from .constituentkinematics import ConstituentKinematicsTable
 from .cutflow import CutflowTable
 from .jetkinematics import SimonJetKinematicsTable
 from .EEC import EECres4ObsTable, EECres4TransferTable
+from .generictable import GenericTable
 
 from coffea.analysis_tools import Weights, PackedSelection
 from skimming.objects.AllObjects import AllObjects
@@ -20,6 +21,7 @@ table_classes = {
     "SimonJetKinematicsTable": SimonJetKinematicsTable,
     "EECres4Obs": EECres4ObsTable,
     "EECres4Transfer": EECres4TransferTable,
+    'GenericTable': GenericTable
 }
 
 def construct_table_from_string(table_str : str) -> Any:

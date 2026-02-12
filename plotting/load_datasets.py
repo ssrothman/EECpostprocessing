@@ -97,7 +97,8 @@ def build_pq_dataset(configsuite : str,
                      dataset: str, 
                      objsyst : str, 
                      table: str, 
-                     location : str = 'local-submit') -> ParquetDataset:
+                     location : str = 'local-submit',
+                     no_count : bool = False) -> ParquetDataset:
     
     dsetcfg = lookup_dataset(runtag, dataset)
     
@@ -118,20 +119,21 @@ def build_pq_dataset(configsuite : str,
         filesystem=fs,
     )
 
-    countfs, countpath = lookup_skim_path(
-        location,
-        configsuite,
-        runtag,
-        dataset,
-        objsyst,
-        'count'
-    )
+    if not no_count:
+        countfs, countpath = lookup_skim_path(
+            location,
+            configsuite,
+            runtag,
+            dataset,
+            objsyst,
+            'count'
+        )
 
-    with countfs.open(os.path.join(countpath, 'merged.json'), 'r') as f:
-        countdict = json.load(f)
+        with countfs.open(os.path.join(countpath, 'merged.json'), 'r') as f:
+            countdict = json.load(f)
 
-    pqds.override_num_events(countdict['n_events'])
-
+        pqds.override_num_events(countdict['n_events'])
+        
     if 'lumi' in dsetcfg:
         pqds.set_lumi(dsetcfg['lumi'])
     elif 'xsec' in dsetcfg:

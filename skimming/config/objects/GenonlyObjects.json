@@ -45,6 +45,10 @@
                     "genWeight" : "genWeight"
                 },
                 "optional_names" : {
+                    "GenSplittingsHardSide" : "GenSplittingsHardSide",
+                    "GenSplittingsSoftSide" : "GenSplittingsSoftSide",
+                    "DeltaPsiHardSide" : "DeltaPsiHardSide",
+                    "DeltaPsiSoftSide" : "DeltaPsiSoftSide"
                 }
             },
             "MConly" : false

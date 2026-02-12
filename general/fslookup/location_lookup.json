@@ -7,6 +7,10 @@
         "local",
         "/ceph/submit/data/group/cms/store/user/srothman/EEC_v2"
     ],
+    "scratch-submit" : [
+        "local",
+        "/scratch/submit/cms/srothman/EEC_v2"
+    ],
     "xrootd-submit" : [
         "submit55.mit.edu",
         "/store/user/srothman/EEC_v2"

@@ -70,8 +70,9 @@ class SimonJetKinematicsTable:
             thevals['matchedPhi'] = jets.simonjets.jetMatchPhi[jetmask][evtmask]
             thevals['matched'] = jets.simonjets.jetMatched[jetmask][evtmask]
 
-        if hasattr(jets.simonjets, 'DeltaPsi'):
-            thevals['DeltaPsi'] = jets.simonjets.DeltaPsi[jetmask][evtmask]
+        for field in jets.simonjets.fields:
+            if field.startswith('splitting_'):
+                thevals[field] = getattr(jets.simonjets, field)[jetmask][evtmask]
 
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(
