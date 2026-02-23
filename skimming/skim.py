@@ -26,7 +26,7 @@ def skim(events : ak.Array, config : dict, output_path : str, fs : Any, tables):
         )
         fs.makedirs(os.path.dirname(destination), exist_ok=True)
         with fs.open(destination, 'w') as f:
-            json.dump({"n_events": n_events}, f, indent=4)
+            json.dump({"n_events": float(n_events)}, f, indent=4)
         print(f"Wrote count table with {n_events} events to {destination}")
     else:
         if 'btagging' not in config:
