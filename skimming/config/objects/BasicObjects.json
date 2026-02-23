@@ -37,18 +37,18 @@
             "params-common" : {
                 "jetsname" : "finalSelectedJetsAK8",
                 "CHSjetsname" : "Jet",
-                "skipJEC" : false,
-                "skipJER" : false,
-                "skipJUNC" : false,
-                "skipJES" : false,
                 "CHS_ptthreshold" : 30.0,
                 "CHS_etathreshold" : 2.4,
                 "CHS_minJetID" : 6,
                 "CHS_minPUID" : 7,
-                "CHS_PUID_ptthreshold" : 50.0
+                "CHS_PUID_ptthreshold" : 50.0,
+                "skipJEC" : false,
+                "skipJER" : false,
+                "skipJUNC" : false,
+                "skipJES" : false,
+                "simonjetsname" : "ChargedSimonJetsNOM"
             },
             "params" : {
-                "simonjetsname" : "ChargedSimonJetsNOM"
             },
             "params-CH_UP" : {
                 "simonjetsname" : "ChargedSimonJetsCHUP"

@@ -138,13 +138,8 @@ class AllObjects:
         if not hasattr(self, '_JECtarget') or self._JECtarget is None:
             raise RuntimeError("No JECTARGET specified in object config, cannot run JEC!")
         
-        if era == 'skip':
-            return #skip!
 
         targetobj = self._objects[self._JECtarget]
-       
-        if targetobj.skipJEC:
-            return #skip!
         
         # save cmssw pT
         # for checking :)
@@ -160,6 +155,17 @@ class AllObjects:
             targetobj.jets['pt_gen'] = targetobj.simonjets.jetMatchPt
             targetobj.jets['eta_gen'] = targetobj.simonjets.jetMatchEta
             targetobj.jets['phi_gen'] = targetobj.simonjets.jetMatchPhi
+
+        if era == 'skip' or targetobj.skipJEC:
+            # don't run JECs
+            # revert jet pT to raw value
+
+            targetobj.jets['pt'] = targetobj.jets['pt_raw']
+            targetobj.jets['mass'] = targetobj.jets['mass_raw']
+            if hasattr(targetobj, 'simonjets'):
+                targetobj.simonjets['jetPt'] = targetobj.jets['pt_raw']
+
+            return # exit early
 
         #then, build the JEC stack
         stacknames = []
@@ -229,3 +235,6 @@ class AllObjects:
         
         targetobj.jets['pt'] = corrjets.pt * factor
         targetobj.jets['mass'] = corrjets.mass * factor
+
+        if hasattr(targetobj, 'simonjets'):
+            targetobj.simonjets['jetPt'] = corrjets.pt * factor
