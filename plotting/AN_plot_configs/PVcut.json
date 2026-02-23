@@ -1,0 +1,163 @@
+{
+    "TO DO" : [
+                {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "No PV cuts",
+                    "color_override" : "blue",
+                    "extra_cuts" : [
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "|dz| < 0.1",
+                    "color_override" : "magenta",
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::AbsVariable('dz'), 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "|dz| < 0.2",
+                    "color_override" : "orange",
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::AbsVariable('dz'), 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "|dz| < 0.4",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::AbsVariable('dz'), 0.4)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "|dz| < 1.0",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::AbsVariable('dz'), 1.0)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable('nMatches', 'pt')",
+                "var::RateVariable('nMatches', 'puppiWeight')",
+                "var::RateVariable('nMatches', var::AbsVariable('dz'))",
+                "var::RateVariable('nMatches', var::AbsVariable('dxy'))",
+                "dxy",
+                "dz",
+                "puppiWeight",
+                "pt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/PVcut/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "No PV cuts",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_DZCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "Cut on puppi weight only",
+                    "color_override" : "orange"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PUPPICUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "Cut on dz only",
+                    "color_override" : "magenta"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "label_override" : "Cut on dz and puppi weight",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RateVariable('nMatches', 'pt')",
+                "var::RateVariable('nMatches', 'puppiWeight')",
+                "var::RateVariable('nMatches', var::AbsVariable('dz'))",
+                "var::RateVariable('nMatches', var::AbsVariable('dxy'))",
+                "dxy",
+                "dz",
+                "puppiWeight",
+                "pt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/PVcut/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        }
+    ]
+}
