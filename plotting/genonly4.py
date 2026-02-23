@@ -2,28 +2,26 @@ import simonplot as splt
 from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack
 from simonplot.cut.common_cuts import common_cuts
 
-for MC in ['pythia', 'herwig']:
+dsets_l = [
+    ['herwig_glu', 'herwig_glu_nospin_5X', 'herwig_glu_nospin_6X', 'herwig_glu_nospin_8X'],
+    ['pythia_glu', 'pythia_glu_nospin']
+]
+
+for dsets in dsets_l:
     for table in ['GenSplittingsHardSide', 'GenSplittingsSoftSide', 'DeltaPsiHardSide', 'DeltaPsiSoftSide']:
-        glu = build_pq_dataset(
-            'GenonlyConfig',
-            'Feb_11_2026',
-            f'{MC}_glu_TeV',
-            'nominal',
-            table,
-            location='scratch-submit',
-            no_count=True
-        )
-
-        glu_nospin = build_pq_dataset(
-            'GenonlyConfig',
-            'Feb_11_2026',
-            f'{MC}_glu_TeV_nospin',
-            'nominal',
-            table,
-            location='scratch-submit',
-            no_count=True
-        )
-
+        pqdsets = [
+            build_pq_dataset(
+                'GenonlyConfig',
+                'Feb_15_2026',
+                dset,
+                'nominal',
+                table,
+                location='scratch-submit',
+                no_count=True
+            )
+            for dset in dsets
+        ]
+        
         weight = splt.variable.BasicVariable('wt_nominal')
         binning = splt.binning.AutoBinning()
 
@@ -55,20 +53,18 @@ for MC in ['pythia', 'herwig']:
                 #splt.cut.LessThanCut(splt.variable.BasicVariable('deltaR23'), 0.1)
             ])
 
-        for varname in glu.schema.names:
+        for varname in pqdsets[0].schema.names:
+        #for varname in ['deltaPsi_type1', 'deltaPsi_type3']:
             print("Plotting variable %s"%varname)
             var = splt.variable.BasicVariable(varname)
             splt.plot_histogram(
                 var,
                 cut,
                 weight,
-                [
-                    glu,
-                    glu_nospin
-                ],
+                pqdsets,
                 binning,
-                output_folder='testplots/genonly3/%s'%table,
+                output_folder='testplots/genonly4/%s'%table,
                 output_prefix='jet',
                 logy= not ('psi' in varname.lower() or 'phi' in varname.lower()),
-                logx = 'pt' in varname.lower() or 'kt' in varname.lower() or 'z' in varname.lower()
+                logx = 'pt' in varname.lower() or 'kt' in varname.lower() or 'z' in varname.lower() or 'c2' in varname.lower()
             )

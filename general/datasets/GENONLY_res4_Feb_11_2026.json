@@ -152,7 +152,7 @@
             "flags": {},
             "label": "Pythia Z+glu; default",
             "xsec": 1.0,
-            "color": "blue"
+            "color": "dodgerblue"
         },
         "pythia_glu_TeV": {
             "tag": "pythia_glu_TeV_Feb_11_2026",
@@ -161,7 +161,7 @@
             "flags": {},
             "label": "Pythia Z[TeV]+glu; default",
             "xsec": 1.0,
-            "color": "navy"
+            "color": "steelblue"
         },
         "pythia_glu_TeV_nospin": {
             "tag": "pythia_glu_TeV_nospin_Feb_11_2026",
@@ -170,7 +170,7 @@
             "flags": {},
             "label": "Pythia Z[TeV]+glu; no spin corr.",
             "xsec": 1.0,
-            "color": "darkred"
+            "color": "maroon"
         },
         "pythia_glu_nospin": {
             "tag": "pythia_glu_nospin_Feb_11_2026",
@@ -179,7 +179,7 @@
             "flags": {},
             "label": "Pythia Z+glu; no spin corr.",
             "xsec": 1.0,
-            "color": "red"
+            "color": "orangered"
         },
         "pythia_q": {
             "tag": "pythia_q_Feb_11_2026",
@@ -188,7 +188,7 @@
             "flags": {},
             "label": "Pythia Z+q; default",
             "xsec": 1.0,
-            "color": "blue"
+            "color": "dodgerblue"
         },
         "pythia_q_TeV": {
             "tag": "pythia_q_TeV_Feb_11_2026",
@@ -197,7 +197,7 @@
             "flags": {},
             "label": "Pythia Z[TeV]+q; default",
             "xsec": 1.0,
-            "color": "navy"
+            "color": "steelblue"
         },
         "pythia_q_TeV_nospin": {
             "tag": "pythia_q_TeV_nospin_Feb_11_2026",
@@ -206,7 +206,7 @@
             "flags": {},
             "label": "Pythia Z[TeV]+q; no spin corr.",
             "xsec": 1.0,
-            "color": "darkred"
+            "color": "maroon"
         },
         "pythia_q_nospin": {
             "tag": "pythia_q_nospin_Feb_11_2026",
@@ -215,7 +215,7 @@
             "flags": {},
             "label": "Pythia Z+q; no spin corr.",
             "xsec": 1.0,
-            "color": "red"
+            "color": "orangered"
         }
     }
 }

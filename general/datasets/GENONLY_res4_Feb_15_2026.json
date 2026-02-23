@@ -1,0 +1,59 @@
+{
+    "Feb_15_2026": {
+        "base": "",
+        "herwig_glu": {
+            "tag": "NEW_herwig_glu_wC2_Feb_15_2026",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; default",
+            "xsec": 1.0,
+            "color": "blue"
+        },
+        "herwig_glu_nospin_5X": {
+            "tag": "NEW_herwig_glu_nospin_5X_wC2_Feb_15_2026",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; no spin corr. (5000s series)",
+            "xsec": 1.0,
+            "color": "red"
+        },
+        "herwig_glu_nospin_6X": {
+            "tag": "NEW_herwig_glu_nospin_6X_wC2_Feb_15_2026",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; no spin corr., (6000s series)",
+            "xsec": 1.0,
+            "color": "purple"
+        },
+        "herwig_glu_nospin_8X": {
+            "tag": "NEW_herwig_glu_nospin_8X_Feb_16_2026",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; no spin corr., (8000s series)",
+            "xsec": 1.0,
+            "color": "magenta"
+        },
+        "pythia_glu": {
+            "tag": "NEW_pythia_glu_wC2_Feb_15_2026",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z+glu; default",
+            "xsec": 1.0,
+            "color": "dodgerblue"
+        },
+        "pythia_glu_nospin": {
+            "tag": "NEW_pythia_glu_nospin_wC2_Feb_15_2026",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z+glu; no spin corr.",
+            "xsec": 1.0,
+            "color": "orangered"
+        }
+    }
+}
