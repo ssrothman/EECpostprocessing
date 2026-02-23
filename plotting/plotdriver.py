@@ -28,7 +28,10 @@ def run_plots(cfg):
                 dscfg['name'],
                 dscfg['objsyst'],
                 dscfg['table'],
-                dscfg.get('location', 'xrootd-submit')
+                dscfg.get('location', 'xrootd-submit'),
+                no_count = dscfg.get('no_count', False),
+                label_override=dscfg.get('label_override', None),
+                color_override=dscfg.get('color_override', None)
             )
         )
     
@@ -60,6 +63,12 @@ def run_plots(cfg):
     else:
         raise NotImplementedError("Only 'auto' binning is implemented so far in this driver script")
     
+    if 'force_range' in cfg:
+        if hasattr(binning, 'force_range'):
+            binning.force_range(*cfg['force_range']) # pyright: ignore[reportAttributeAccessIssue]
+        else:
+            raise ValueError(f"binning {binning} does not support force_range")
+
     if cfg['plotsprefix'] == '':
         cfg['plotsprefix'] = None
 

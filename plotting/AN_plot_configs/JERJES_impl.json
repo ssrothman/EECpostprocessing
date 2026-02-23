@@ -1,0 +1,250 @@
+{
+    "TO DO" : [
+                        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::GreaterThanCut('matchPt', 0.5)"
+            ],
+            "binning" : "auto",
+            "force_range" : [-0.5, 0.5],
+            "plotspath" : "ANplots/JERJES_impl/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "JER_UP",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "JER Up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "JER_DN",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "JER Down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchedPt','Jpt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('matched', 1)",
+                "cut::GreaterThanCut('matchedPt', 100)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/JERJES_impl/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Corrected JER",
+                    "color_override" : "red"
+                },                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "NO_JER",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Raw JER",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchedPt','Jpt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('matched', 1)",
+                "cut::GreaterThanCut('matchedPt', 100)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/JERJES_impl/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "JES_UP",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "JES Up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "JES_DN",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "JES Down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchedPt','Jpt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('matched', 1)",
+                "cut::GreaterThanCut('matchedPt', 100)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/JERJES_impl/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "NO_JER",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Corrected",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "NO_JEC",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "label_override" : "Raw",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchedPt','Jpt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('matched', 1)",
+                "cut::GreaterThanCut('matchedPt', 100)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/JERJES_impl/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        }
+    ]
+}

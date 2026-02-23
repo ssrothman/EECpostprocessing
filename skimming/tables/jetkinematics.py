@@ -35,12 +35,14 @@ class SimonJetKinematicsTable:
         
         #jet kinematics
         jets = objs.RecoJets
-        thevals['Jpt'] = jets.jets.pt[jetmask][evtmask]
+        thevals['Jpt'] = jets.simonjets.jetPt[jetmask][evtmask]
         thevals['Jeta'] = jets.jets.eta[jetmask][evtmask]
         thevals['Jphi'] = jets.jets.phi[jetmask][evtmask]
         if hasattr(jets.jets, 'pt_cmssw'):
             thevals['Jpt_cmssw'] = jets.jets.pt_cmssw[jetmask][evtmask]
-        
+        if hasattr(jets.jets, 'pt_raw'):
+            thevals['Jpt_raw'] = jets.jets.pt_raw[jetmask][evtmask]
+
         #flavor info
         if hasattr(jets.simonjets, 'passLooseB'):
             thevals['passLooseB'] = jets.simonjets.passLooseB[jetmask][evtmask]
