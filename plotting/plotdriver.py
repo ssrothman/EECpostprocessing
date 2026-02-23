@@ -27,7 +27,8 @@ def run_plots(cfg):
                 dscfg['runtag'],
                 dscfg['name'],
                 dscfg['objsyst'],
-                dscfg['table']
+                dscfg['table'],
+                dscfg.get('location', 'xrootd-submit')
             )
         )
     
