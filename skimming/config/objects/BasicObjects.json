@@ -59,6 +59,18 @@
             "params-TRK_EFF" : {
                 "simonjetsname" : "ChargedSimonJetsTRKEFF"
             },
+            "params-NO_PUPPI" : {
+                "simonjetsname" : "ChargedSimonJetsNOPUPPI"
+            },
+            "params-NO_PUPPICUT" : {
+                "simonjetsname" : "ChargedSimonJetsNOPUPPICUT"
+            },
+            "params-NO_DZCUT" : {
+                "simonjetsname" : "ChargedSimonJetsNODZCUT"
+            },
+            "params-NO_PVCUT" : {
+                "simonjetsname" : "ChargedSimonJetsNOPVCUT"
+            },
             "params-DATA" : {
                 "simonjetsname" : "ChargedSimonJets"
             },
