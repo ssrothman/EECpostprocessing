@@ -2,7 +2,7 @@ import os
 import awkward as ak
 from vector import obj
 from .jets import SimonJets, SimpleJets
-from .muons import Muons
+from .leptons import Muons, Electrons
 from .met import MET
 from .EEC import EECproj, EECres3, EECres4
 from .generics import GenericObjectContainer
@@ -16,6 +16,7 @@ objclasses = {
     "SimonJets" : SimonJets,
     "SimpleJets" : SimpleJets,
     "Muons" : Muons,
+    "Electrons" : Electrons,
     "MET" : MET,
     "GenericObjectContainer" : GenericObjectContainer,
     "EECproj" : EECproj,

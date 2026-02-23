@@ -23,6 +23,11 @@ def add_common_vars(thevals : dict[str, Any],
         thevals['numMediumB'] = ak.sum(objs.AK4Jets.jets.passMediumB[evtmask], axis=-1)
         thevals['numTightB'] = ak.sum(objs.AK4Jets.jets.passTightB[evtmask], axis=-1)
 
+    if hasattr(objs, 'Electrons'):
+        thevals['nEle'] = ak.num(objs.Electrons.electrons[evtmask], axis=-1)
+    if hasattr(objs, 'Muons'):
+        thevals['nMu'] = ak.num(objs.Muons.muons[evtmask], axis=-1)
+
 def add_weight_variations(thevals : dict[str, Any],
                           weights : Weights,
                           evtmask : ak.Array):

@@ -6,10 +6,31 @@
             "params" : {
                 "name" : "Muon",
                 "padTo" : 2,
-                "roccor" : true,
-                "roccorThreshold" : 200.0
+                "roccor" : false,
+                "roccorThreshold" : 0.0,
+                "minPt" : 15.0,
+                "maxEta" : 2.4,
+                "IDflags" : [
+                    "mediumId",
+                    ["pfIsoId", 2]
+                ],
+                "maxDXY" : 0.5,
+                "maxDZ" : 0.2
             },
             "MConly" : false
+        },
+        "Electrons" : {
+            "class" : "Electrons",
+            "params" : {
+                "name" : "Electron",
+                "minPt" : 15.0,
+                "maxEta" : 2.5,
+                "IDflags" : [
+                    "mvaFall17V2Iso_WPL"
+                ],
+                "maxDXY" : -1.0,
+                "maxDZ" : -1.0
+            }
         },
         "RecoJets" : {
             "class" : "SimonJets",
@@ -40,6 +61,15 @@
             },
             "params-DATA" : {
                 "simonjetsname" : "ChargedSimonJets"
+            },
+            "params-NO_JER" : {
+                "skipJER" : true
+            },
+            "params-NO_JES" : {
+                "skipJES" : true
+            },
+            "params-NO_JEC" : {
+                "skipJEC" : true
             },
             "MConly" : false
         },

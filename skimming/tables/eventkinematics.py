@@ -78,6 +78,28 @@ class EventKinematicsTable:
         thevals['subleadingMuDz'] = subleadmu.dz
         thevals['subleadingMuCharge'] = subleadmu.charge
 
+        # third muon
+        thevals['nMu'] = ak.num(objs.Muons.muons[evtmask], axis=1)
+        mu3s = objs.Muons.muons[evtmask, 2:]
+        mu3s = ak.pad_none(mu3s, 1, axis=1) # ensure at least one entry to avoid empty array issues
+        thevals['thirdMuPt'] = ak.fill_none(mu3s.pt[:,0], 0.0)
+        thevals['thirdMuEta'] = ak.fill_none(mu3s.eta[:,0], -999.0)
+        thevals['thirdMuPhi'] = ak.fill_none(mu3s.phi[:,0], -999.0)
+        thevals['thirdMuDxy'] = ak.fill_none(mu3s.dxy[:,0], -999.0)
+        thevals['thirdMuDz'] = ak.fill_none(mu3s.dz[:,0], -999.0)
+        thevals['thirdMuCharge'] = ak.fill_none(mu3s.charge[:,0], -999)  # Keep as -999 for charge
+
+        # electrons
+        thevals['nEle'] = ak.num(objs.Electrons.electrons[evtmask], axis=1)
+        eles = objs.Electrons.electrons[evtmask]
+        eles = ak.pad_none(eles, 1, axis=1) # ensure at least one entry to avoid empty array issues
+        thevals['leadingElePt'] = ak.fill_none(eles.pt[:,0], 0.0)
+        thevals['leadingEleEta'] = ak.fill_none(eles.eta[:,0], -999.0)
+        thevals['leadingElePhi'] = ak.fill_none(eles.phi[:,0], -999.0)
+        thevals['leadingEleDxy'] = ak.fill_none(eles.dxy[:,0], -999.0)
+        thevals['leadingEleDz'] = ak.fill_none(eles.dz[:,0], -999.0)
+        thevals['leadingEleCharge'] = ak.fill_none(eles.charge[:,0], -999)
+
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(
             thevals,
