@@ -18,7 +18,8 @@ def build_pq_dataset_stack(configsuite : str,
                            location : str = 'local-submit',
                            no_count : bool = False,
                            label_override : str | None = None,
-                           color_override : str | None = None) -> DatasetStack:
+                           color_override : str | None = None,
+                           extra_key : str | None = None) -> DatasetStack:
     stackcfg = cfg['stacks'][stackname]
     dsets = []
     for dset in stackcfg['dsets']:
@@ -42,8 +43,12 @@ def build_pq_dataset_stack(configsuite : str,
             no_count = no_count
         ))
 
+    thekey = stackname
+    if extra_key is not None:
+        thekey += '-' + extra_key
+
     return DatasetStack(
-        key = stackname + '-' + objsyst,
+        key = thekey,
         color = color_override if color_override is not None else stackcfg['color'],
         label = label_override if label_override is not None else stackcfg['label'],
         datasets = dsets
@@ -57,7 +62,8 @@ def load_prebinned_dataset(configsuite : str,
                            table : str,
                            location : str = 'local-submit',
                            label_override : str | None = None,
-                           color_override : str | None = None) -> ValCovPairDataset:
+                           color_override : str | None = None,
+                           extra_key : str | None = None) -> ValCovPairDataset:
     
     dsetcfg = lookup_dataset(runtag, dataset)
     
@@ -83,8 +89,12 @@ def load_prebinned_dataset(configsuite : str,
     binning = ArbitraryBinning()
     binning.from_dict(bincfg)
 
+    thekey = dataset
+    if extra_key is not None:
+        thekey += '-' + extra_key
+
     theds = ValCovPairDataset(
-        key = dataset + '-' + objsyst + '-' + wtsyst,
+        key = thekey,
         color = color_override if color_override is not None else dsetcfg['color'],
         label = label_override if label_override is not None else dsetcfg['label'],
         data = (vals, covmat),
@@ -107,7 +117,8 @@ def build_pq_dataset(configsuite : str,
                      location : str = 'local-submit',
                      no_count : bool = False,
                      label_override : str | None = None,
-                     color_override : str | None = None) -> ParquetDataset:
+                     color_override : str | None = None,
+                     extra_key : str | None = None) -> ParquetDataset:
     
     dsetcfg = lookup_dataset(runtag, dataset)
     
@@ -120,8 +131,12 @@ def build_pq_dataset(configsuite : str,
         table
     )
 
+    thekey = dataset
+    if extra_key is not None:
+        thekey += '-' + extra_key
+
     pqds = ParquetDataset(
-        key = dataset + '-' + objsyst,
+        key = thekey,
         color = color_override if color_override is not None else dsetcfg['color'],
         label = label_override if label_override is not None else dsetcfg['label'],
         path = tablepath,

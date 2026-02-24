@@ -15,12 +15,48 @@ def parse_var(varname):
 
 def run_plots(cfg):
     datasets = []
+    dsetcuts = []
+    nExtraCuts = 0
+
+    #check if all objsysts are the same
+    first_objsyst = cfg['datasets'][0]['objsyst']
+    all_same_objsyst = True
+    for dsetcfg in cfg['datasets'][1:]:
+        if dsetcfg['objsyst'] != first_objsyst:
+            all_same_objsyst = False
+            break
+
+    #check if extracuts are all the same
+    first_extracut = cfg['datasets'][0].get('extra_cuts', [])
+    all_same_extracut = True
+    for dsetcfg in cfg['datasets'][1:]:
+        if dsetcfg.get('extra_cuts', []) != first_extracut:
+            all_same_extracut = False
+            break
+
     for dscfg in cfg['datasets']:
+        if 'extra_cuts' in dscfg and len(dscfg['extra_cuts']) > 0:
+            thecuts = []
+            for cut in dscfg['extra_cuts']:
+                thecuts.append(parse_var(cut))
+            dsetcuts.append(splt.cut.AndCuts(thecuts))
+            nExtraCuts += 1
+        else:
+            dsetcuts.append(splt.cut.NoCut())
+        
         if dscfg['isstack']:
             factory = build_pq_dataset_stack
         else:
             factory = build_pq_dataset
         
+        extrakey = ''
+        if not all_same_objsyst:
+            extrakey += dscfg['objsyst'] + '-'
+        if not all_same_extracut and not isinstance(dsetcuts[-1], splt.cut.NoCut):
+            extrakey += dsetcuts[-1].key + '-'
+        if extrakey.endswith('-'):
+            extrakey = extrakey[:-1]
+
         datasets.append(
             factory(
                 dscfg['configsuite'],
@@ -31,9 +67,11 @@ def run_plots(cfg):
                 dscfg.get('location', 'xrootd-submit'),
                 no_count = dscfg.get('no_count', False),
                 label_override=dscfg.get('label_override', None),
-                color_override=dscfg.get('color_override', None)
+                color_override=dscfg.get('color_override', None),
+                extra_key = extrakey if extrakey else None
             )
         )
+
     
     variables = []
     for varname in cfg['variables']:
@@ -49,6 +87,11 @@ def run_plots(cfg):
         for cut in cfg['cut']:
             thecuts.append(parse_var(cut))
         cut = splt.cut.AndCuts(thecuts)
+
+    if nExtraCuts > 0:
+        cut = [
+            splt.cut.AndCuts([cut, dsetcut]) for dsetcut in dsetcuts
+        ]
 
     if cfg['binning'] == 'auto':
         binning = splt.binning.AutoBinning()
@@ -83,6 +126,7 @@ def run_plots(cfg):
                 binning,
                 output_folder=cfg['plotspath'],
                 output_prefix=cfg['plotsprefix'],
+                no_ratiopad=cfg.get('nopad', False)
             )
     else:
         raise NotImplementedError(f"Plotting driver {cfg['driver']} not implemented yet in this driver script!")
