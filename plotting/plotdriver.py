@@ -116,7 +116,7 @@ def run_plots(cfg):
         cfg['plotsprefix'] = None
 
     if cfg['driver'] == 'plot_histogram':
-        for var in variables:
+        for i, var in enumerate(variables):
             print(f"Plotting variable {var.key}")
             splt.plot_histogram(
                 var,
@@ -126,7 +126,10 @@ def run_plots(cfg):
                 binning,
                 output_folder=cfg['plotspath'],
                 output_prefix=cfg['plotsprefix'],
-                no_ratiopad=cfg.get('nopad', False)
+                no_ratiopad=cfg.get('nopad', False),
+                logy=cfg.get('logy', None),
+                density=cfg.get('density', False),
+                override_filename=cfg.get('override_filenames', [None]*len(variables))[i]
             )
     else:
         raise NotImplementedError(f"Plotting driver {cfg['driver']} not implemented yet in this driver script!")
