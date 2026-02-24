@@ -96,7 +96,8 @@
         "splitting_pt5" : "Subjet 5 $p_{T}$ [GeV]",
         "Jpt_minus_matchedPt_over_matchedPt" : "$(p_{T}^{reco} - p_{T}^{gen}) / p_{T}^{gen}$",
         "pt_minus_matchPt_over_matchPt" : "$(p_{T}^{reco} - p_{T}^{gen}) / p_{T}^{gen}$",
-        "nMatches_rate" : "Gen-matching efficiency"
+        "nMatches_rate" : "Gen-matching efficiency",
+        "ABS-dz" : "$|d_{z}|$ [cm]"
     },
     "auto_logx_patterns" : [
         "*MET",
