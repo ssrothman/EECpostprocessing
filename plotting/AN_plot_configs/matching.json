@@ -11,6 +11,358 @@
                     "location" : "scratch-submit",
                     "isstack" : false,
                     "color_override" : "blue",
+                    "label_override" : "$0 < \\Delta R < 0.02$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0, 0.02)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "magenta",
+                    "label_override" : "$0.02 < \\Delta R < 0.04$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.02, 0.04)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "yellow",
+                    "label_override" : "$0.04 < \\Delta R < 0.06$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.04, 0.06)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "orange",
+                    "label_override" : "$0.06 < \\Delta R < 0.08$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.06, 0.08)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "red",
+                    "label_override" : "$0.08 < \\Delta R < 0.1$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.08, 0.1)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "override_filenames" : [
+                "dpt_binned_by_dR_0pt0.5"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('puppiWeight', 0.99)",
+                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 0, 0.5)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true,
+            "logy" : false,
+            "force_range" : [-0.5, 0.5],
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "blue",
+                    "label_override" : "$0 < \\Delta R < 0.02$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0, 0.02)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "magenta",
+                    "label_override" : "$0.02 < \\Delta R < 0.04$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.02, 0.04)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "yellow",
+                    "label_override" : "$0.04 < \\Delta R < 0.06$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.04, 0.06)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "orange",
+                    "label_override" : "$0.06 < \\Delta R < 0.08$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.06, 0.08)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "red",
+                    "label_override" : "$0.08 < \\Delta R < 0.1$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 0.08, 0.1)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "override_filenames" : [
+                "dpt_binned_by_dR_0.5pt1.0"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('puppiWeight', 0.99)",
+                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 0.5, 1.0)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true,
+            "logy" : false,
+            "force_range" : [-0.5, 0.5],
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "blue",
+                    "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 0, 0.5)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "magenta",
+                    "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 0.5, 1)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "yellow",
+                    "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 1, 2)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "orange",
+                    "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 2, 5)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "red",
+                    "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 5, 10)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::ProfileVariable(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), var::RelativeResolutionVariable('matchPt','pt'), 'median')",
+                "var::ProfileVariable(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), var::RelativeResolutionVariable('matchPt','pt'), 'percentile-range', [16, 84])",
+                "var::ProfileVariable(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), var::RelativeResolutionVariable('matchPt','pt'), 'percentile-range', [2.5, 97.5])",
+                "var::ProfileVariable(var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), var::RelativeResolutionVariable('matchPt','pt'), 'percentile-range', [0.5, 99.5])"
+            ],
+            "override_filenames" : [
+                "median_dpt_vs_dR",
+                "sigma68_dpt_vs_dR",
+                "sigma95_dpt_vs_dR",
+                "sigma99_dpt_vs_dR"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('puppiWeight', 0.99)",
+                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
+                "cut::EqualsCut('nMatches', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true,
+            "logy" : false
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "k",
+                    "label_override" : "",
+                    "extra_cuts" : [
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::ProfileVariable('matchPt', var::RelativeResolutionVariable('matchPt','pt'), 'median')",
+                "var::ProfileVariable('matchPt', var::RelativeResolutionVariable('matchPt','pt'), 'std')",
+                "var::ProfileVariable('matchPt', var::RelativeResolutionVariable('matchPt','pt'), 'percentile-range', [16, 84])",
+                "var::ProfileVariable('matchPt', var::RelativeResolutionVariable('matchPt','pt'), 'percentile-range', [2.5, 97.5])",
+                "var::ProfileVariable('matchPt', var::RelativeResolutionVariable('matchPt','pt'), 'percentile-range', [0.5, 99.5])",
+
+                "var::ProfileVariable('matchPt', var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 'median')",
+                "var::ProfileVariable('matchPt', var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 'std')",
+                "var::ProfileVariable('matchPt', var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 'percentile', 68)",
+                "var::ProfileVariable('matchPt', var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 'percentile', 95)",
+                "var::ProfileVariable('matchPt', var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 'percentile', 99)"
+            ],
+            "override_filenames" : [
+                "median_dpt_vs_pt",
+                "std_dpt_vs_pt",
+                "sigma68_dpt_vs_pt",
+                "sigma95_dpt_vs_pt",
+                "sigma99_dpt_vs_pt",
+
+                "median_dR_vs_pt",
+                "std_dR_vs_pt",
+                "dR_68th_percentile_vs_pt",
+                "dR_95th_percentile_vs_pt",
+                "dR_99th_percentile_vs_pt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('puppiWeight', 0.99)",
+                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
+                "cut::EqualsCut('nMatches', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true,
+            "force_range" : [0.5, 100],
+            "logy" : false
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "NO_PVCUT",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "color_override" : "blue",
                     "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
                     "extra_cuts" : [
                         "cut::TwoSidedCut('matchPt', 0, 0.5)"
@@ -76,6 +428,9 @@
             "variables" : [
                 "var::RelativeResolutionVariable('matchPt','pt')"
             ],
+            "override_filenames" : [
+                "dpt_binned_by_pt"
+            ],
             "weights" : [
                 "wt_nominal"
             ],
@@ -91,7 +446,7 @@
             "force_range" : [-0.2, 0.2],
             "nopad" : true
         },
-                {
+        {
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
@@ -166,6 +521,9 @@
             ],
             "variables" : [
                 "var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi')"
+            ],
+            "override_filenames" : [
+                "dR_binned_by_pt"
             ],
             "weights" : [
                 "wt_nominal"
