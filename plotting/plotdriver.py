@@ -7,6 +7,7 @@ def parse_var(varname):
     if '::' in varname:
         varname = varname.replace('cut::', 'splt.cut.')
         varname = varname.replace('var::', 'splt.variable.')
+        varname = varname.replace('func::', 'splt.plottables.Functions.')
         if '::' in varname:
             raise ValueError(f"Variable {varname} has an unknown prefix!")
         return eval(varname)
@@ -115,6 +116,11 @@ def run_plots(cfg):
     if cfg['plotsprefix'] == '':
         cfg['plotsprefix'] = None
 
+    extra_stuff = []
+    if 'extras' in cfg:
+        for extra in cfg['extras']:
+            extra_stuff.append(parse_var(extra))
+
     if cfg['driver'] == 'plot_histogram':
         for i, var in enumerate(variables):
             print(f"Plotting variable {var.key}")
@@ -129,7 +135,8 @@ def run_plots(cfg):
                 no_ratiopad=cfg.get('nopad', False),
                 logy=cfg.get('logy', None),
                 density=cfg.get('density', False),
-                override_filename=cfg.get('override_filenames', [None]*len(variables))[i]
+                override_filename=cfg.get('override_filenames', [None]*len(variables))[i],
+                extra_stuff=extra_stuff
             )
     else:
         raise NotImplementedError(f"Plotting driver {cfg['driver']} not implemented yet in this driver script!")

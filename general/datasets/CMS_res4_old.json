@@ -156,7 +156,7 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT 200-400",
             "color" : "red",
-            "xsec" : 43.68
+            "xsec" : 43.60
         },
         "Pythia_HT-400to600" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-400to600",
@@ -165,7 +165,7 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT 400-600",
             "color" : "purple",
-            "xsec" : 5.926
+            "xsec" : 5.918
         },
         "Pythia_HT-600to800" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-600to800",
@@ -192,7 +192,7 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT 1200-2500",
             "color" : "gray",
-            "xsec" : 0.1516
+            "xsec" : 0.1514
         },
         "Pythia_HT-2500toInf" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/DYJetsToLL_HT-2500toInf",

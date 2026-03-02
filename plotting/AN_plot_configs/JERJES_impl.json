@@ -53,7 +53,10 @@
             "force_range" : [-0.5, 0.5],
             "plotspath" : "ANplots/JERJES_impl/",
             "plotsprefix" : "",
-            "driver" : "plot_histogram"
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "track_dpt_CH_scale_variations"
+            ]
         },
         {
             "datasets" : [
@@ -107,7 +110,10 @@
             "binning" : "auto",
             "plotspath" : "ANplots/JERJES_impl/",
             "plotsprefix" : "",
-            "driver" : "plot_histogram"
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "jet_dpt_JER_variations"
+            ]
         },
         {
             "datasets" : [
@@ -148,7 +154,10 @@
             "binning" : "auto",
             "plotspath" : "ANplots/JERJES_impl/",
             "plotsprefix" : "",
-            "driver" : "plot_histogram"
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "jet_dpt_corrected_vs_raw_JER"
+            ]
         },
         {
             "datasets" : [
@@ -202,7 +211,10 @@
             "binning" : "auto",
             "plotspath" : "ANplots/JERJES_impl/",
             "plotsprefix" : "",
-            "driver" : "plot_histogram"
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "jet_dpt_JES_variations"
+            ]
         },
         {
             "datasets" : [
@@ -244,7 +256,10 @@
             "binning" : "auto",
             "plotspath" : "ANplots/JERJES_impl/",
             "plotsprefix" : "",
-            "driver" : "plot_histogram"
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "jet_dpt_corrected_vs_raw_JEC"
+            ]
         }
     ]
 }
