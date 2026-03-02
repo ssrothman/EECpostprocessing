@@ -90,7 +90,6 @@ splt.plot_histogram(
     #logy= not ('psi' in varname.lower() or 'phi' in varname.lower()),
     #logx = 'pt' in varname.lower() or 'kt' in varname.lower() or '_z' in varname.lower()
 )
-afsdlkjafsdlkj
 
 for varname in herwig_glu.schema.names:
     var = splt.variable.BasicVariable(varname)
