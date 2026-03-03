@@ -1,6 +1,0 @@
-{
-    "doc" : "configuration to run on GEN from Phil's custom generation",
-    "configs" : [
-        "configs/genonly_main.json"
-    ]
-}

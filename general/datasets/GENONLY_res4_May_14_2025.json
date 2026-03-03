@@ -1,0 +1,221 @@
+{
+    "May_14_2025": {
+        "base": "",
+        "herwig_glu": {
+            "tag": "herwig_glu_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; default",
+            "xsec": 1.0,
+            "color": "blue"
+        },
+        "herwig_glu_TeV": {
+            "tag": "herwig_glu_TeV_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+glu; default",
+            "xsec": 1.0,
+            "color": "navy"
+        },
+        "herwig_glu_TeV_gg": {
+            "tag": "herwig_glu_TeV_gg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+glu; no glu->qq",
+            "xsec": 1.0,
+            "color": "darkgreen"
+        },
+        "herwig_glu_TeV_nospin": {
+            "tag": "herwig_glu_TeV_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+glu; no spin corr.",
+            "xsec": 1.0,
+            "color": "darkred"
+        },
+        "herwig_glu_TeV_nospin_gg": {
+            "tag": "herwig_glu_TeV_nospin_gg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+glu; no spin corr., no glu->qq",
+            "xsec": 1.0,
+            "color": "indigo"
+        },
+        "herwig_glu_gg": {
+            "tag": "herwig_glu_gg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; no glu->qq",
+            "xsec": 1.0,
+            "color": "green"
+        },
+        "herwig_glu_nospin": {
+            "tag": "herwig_glu_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; no spin corr.",
+            "xsec": 1.0,
+            "color": "red"
+        },
+        "herwig_glu_nospin_gg": {
+            "tag": "herwig_glu_nospin_gg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+glu; no spin corr., no glu->qq",
+            "xsec": 1.0,
+            "color": "purple"
+        },
+        "herwig_q": {
+            "tag": "herwig_q_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+q; default",
+            "xsec": 1.0,
+            "color": "blue"
+        },
+        "herwig_q_TeV": {
+            "tag": "herwig_q_TeV_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+q; default",
+            "xsec": 1.0,
+            "color": "navy"
+        },
+        "herwig_q_TeV_nogg": {
+            "tag": "herwig_q_TeV_nogg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+q; no glu->gluglu",
+            "xsec": 1.0,
+            "color": "darkgreen"
+        },
+        "herwig_q_TeV_nospin": {
+            "tag": "herwig_q_TeV_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+q; no spin corr.",
+            "xsec": 1.0,
+            "color": "darkred"
+        },
+        "herwig_q_TeV_nospin_nogg": {
+            "tag": "herwig_q_TeV_nospin_nogg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z[TeV]+q; no spin corr., no glu->gluglu",
+            "xsec": 1.0,
+            "color": "indigo"
+        },
+        "herwig_q_nogg": {
+            "tag": "herwig_q_nogg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+q; no glu->gluglu",
+            "xsec": 1.0,
+            "color": "green"
+        },
+        "herwig_q_nospin": {
+            "tag": "herwig_q_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+q; no spin corr.",
+            "xsec": 1.0,
+            "color": "red"
+        },
+        "herwig_q_nospin_nogg": {
+            "tag": "herwig_q_nospin_nogg_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Herwig Z+q; no spin corr., no glu->gluglu",
+            "xsec": 1.0,
+            "color": "purple"
+        },
+        "pythia_glu": {
+            "tag": "pythia_glu_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z+glu; default",
+            "xsec": 1.0,
+            "color": "blue"
+        },
+        "pythia_glu_TeV": {
+            "tag": "pythia_glu_TeV_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z[TeV]+glu; default",
+            "xsec": 1.0,
+            "color": "navy"
+        },
+        "pythia_glu_TeV_nospin": {
+            "tag": "pythia_glu_TeV_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z[TeV]+glu; no spin corr.",
+            "xsec": 1.0,
+            "color": "darkred"
+        },
+        "pythia_glu_nospin": {
+            "tag": "pythia_glu_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z+glu; no spin corr.",
+            "xsec": 1.0,
+            "color": "red"
+        },
+        "pythia_q": {
+            "tag": "pythia_q_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z+q; default",
+            "xsec": 1.0,
+            "color": "blue"
+        },
+        "pythia_q_TeV": {
+            "tag": "pythia_q_TeV_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z[TeV]+q; default",
+            "xsec": 1.0,
+            "color": "navy"
+        },
+        "pythia_q_TeV_nospin": {
+            "tag": "pythia_q_TeV_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z[TeV]+q; no spin corr.",
+            "xsec": 1.0,
+            "color": "darkred"
+        },
+        "pythia_q_nospin": {
+            "tag": "pythia_q_nospin_May_14_2025",
+            "location": "simon-LPC",
+            "era": "skip",
+            "flags": {},
+            "label": "Pythia Z+q; no spin corr.",
+            "xsec": 1.0,
+            "color": "red"
+        }
+    }
+}

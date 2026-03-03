@@ -1,0 +1,78 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_HTsum",
+                    "table" : "events",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "isstack" : true
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_inclusive",
+                    "table" : "events",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "isstack" : false
+                }
+            ],
+            "variables" : [
+                "genHT"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/HTstitching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "genHT_stitched_vs_inclusive"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_HTsum",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "isstack" : true
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Apr_23_2025",
+                    "name" : "Pythia_inclusive",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "isstack" : false
+                }
+            ],
+            "variables" : [
+                "Jpt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/HTstitching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "Jpt_stitched_vs_inclusive"
+            ]
+        }
+    ]
+}

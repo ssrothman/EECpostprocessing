@@ -1,126 +1,103 @@
-# Summary
 
-This is the code for filling EEC histograms off the parquet files produced by the EEC skimmers. At the moment it is only implemented for the 4-th order resoolved EECs, but it should be straightforward to port the functionality to the other observables. 
+# Binning Subpackage
 
-# Core logic
+The `binning` subpackage turns skimmed parquet tables into binned histograms (and optional covariance matrices) for EEC analysis. It supports gen-level, reco-level, and transfer binning, and can operate on large datasets via Arrow batch iteration.
 
-The core logic is in the file buildEECres4Hists.py. This is implemented in three functions:
+## Overview
 
-  #### 1. fill_hist_from_parquet(...). This just fills a regular EEC histogram from the parquet, and takes arguments:
- 
-  ##### Generic:
+This package provides:
 
-   - basepath: the path to the parquet dataset to run over
-   - systwt: the name of the event weight column in the parquet to use
-   - prebinned: boolean flag to control whether or not to use prebinned EEC functionality. 
-   - kinreweight: a function with signature (Z pt, Z rapidity) -> scale factor, or None. Used for event reweighting wrt Z kinematics
-   - fs: filesystem object on which the parquet dataset can be found
+- Histogram construction from JSON binning configs
+- Optional rebinning and narrowing of prebinned axes
+- Event-weighted histogram filling from parquet datasets
+- Covariance matrix computation via event-wise accumulation
+- A CLI for scaleout processing
 
- ##### Dataset splitting:
-   - statN: number of statistically independent subsets we will create
-   - statK: which of the statistically independent subsets to create right now [the function should be called N times, passing statK=0, 1, 2, .. N-1]
+## Key Modules
 
- ##### Poisson bootstrap (depricated, should not be used):
-   - Nboot: number of bootstrap replicas to create. This should probably just be set to zero, as I have discovered that the bootstrapping procedure has poor convergence, and have implemented a different approach for uncertainties (see below)
-   - rng_offset: offset into the rng stream for poisson bootstrapping
-   - r123type: rng generator type for poisson bootstrapping
-   - skipNominal: only record poisson bootstraps, and not the nominal variation
+- `main.py`: Core histogram building and filling utilities
+- `config/`: JSON binning configurations (e.g., `res4tee.json`)
+- `scripts/bin.py`: CLI wrapper used in scaleout workflows
 
- ##### Debug:
-   - nbatch: pass a positive value to run over the first nbatch fragments of the dataset. should only be used for testing
-   - collect_debug_info: also record and save a bunch of debug info alongside the histogram
+## Core API
 
-#### 2. fill_direct_covariance_type1(...). This builds a covariance matrix (the type1 label is legacy and doesn't mean anything), and takes arguments:
+### Histogram construction
 
-  ##### Generic:
- - basepath: the path to the parquet dataset to run over
- - systwt: the name of the event weight column in the parquet to use
- - kinreweight: a function with signature (Z pt, Z rapidity) -> scale factor, or None. Used for event reweighting wrt Z kinematics
- - fs: filesystem object on which the parquet dataset can be found
+```python
+from binning.main import build_hist, build_transfer_config
 
- ##### Dataset splitting:
-   - statN: number of statistically independent subsets we will create
-   - statK: which of the statistically independent subsets to create right now [the function should be called N times, passing statK=0, 1, 2, .. N-1]
+H, prebinned = build_hist(cfg)  # cfg is a list of axis dicts
+transfer_cfg = build_transfer_config(gen_cfg, reco_cfg)
+```
 
- ##### Poisson bootstrap (depricated, should not be used):
-   - Nboot: doesn't do anything
+`build_hist()` returns a `hist.Hist` plus a `prebinned` map for axes tagged as `Variable-Prebinned` or `Regular-Prebinned`. Those axes can be rebinned and/or narrowed while preserving original bin edges for lookup.
 
-#### 3. fill_transferhist_from_parquet(...) This fills the transfer matrix histogram, and takes arguments:
+### Filling histograms
 
-  ##### Generic:
+```python
+from binning.main import fill_hist, fill_cov
+import pyarrow.dataset as ds
 
-   - basepath: the path to the parquet dataset to run over
-   - systwt: the name of the event weight column in the parquet to use
-   - kinreweight: a function with signature (Z pt, Z rapidity) -> scale factor, or None. Used for event reweighting wrt Z kinematics
-   - fs: filesystem object on which the parquet dataset can be found
+dataset = ds.dataset("/path/to/parquet", format="parquet")
+H = fill_hist(H, prebinned, dataset, weightname="wt_nominal", itemwt="wt")
 
- ##### Dataset splitting:
-   - statN: number of statistically independent subsets we will create
-   - statK: which of the statistically independent subsets to create right now [the function should be called N times, passing statK=0, 1, 2, .. N-1]
+# Optional covariance
+cov = fill_cov(H, prebinned, dataset, weightname="wt_nominal", itemwt="wt")
+```
 
- ##### Poisson bootstrap (depricated, should not be used):
-   - Nboot: number of bootstrap replicas to create. This should probably just be set to zero, as I have discovered that the bootstrapping procedure has poor convergence, and have implemented a different approach for uncertainties (see below)
-   - rng_offset: offset into the rng stream for poisson bootstrapping
-   - r123type: rng generator type for poisson bootstrapping
-   - skipNominal: only record poisson bootstraps, and not the nominal variation
+Supported features:
 
- ##### Debug:
-   - nbatch: pass a positive value to run over the first nbatch fragments of the dataset. should only be used for testing
+- `itemwt`: optional per-row weight column (e.g., `wt` or `wt_reco`)
+- `reweight`: correctionlib `Correction` for reweighting
+- `statN/statK`: statistical splitting for distributed processing
 
-# Scripts
+## CLI Usage
 
-Directly setting up all of the arguments for these functions is kinda annoying, so I've written some scripts to partially automate things. The main one is
+The `scripts/bin.py` entry point is used by scaleout jobs:
 
-### fill_res4_hist.py
+```bash
+python binning/scripts/bin.py \
+	<runtag> <dataset> <objsyst> <table> \
+	--location local-submit \
+	--config-suite BasicConfig \
+	--bincfg res4tee \
+	--evtwt nominal \
+	--statN -1 --statK -1
+```
 
-Prepares a call to the backend functionality, respecting all of the naming conventions, etc, that I have defined. 
+Notes:
 
-Arguments:
+- `table` must end with `Reco`, `Gen`, or `transfer`.
+- `bincfg` defaults to the prefix of `table` (e.g., `res4tee` for `res4tee_Reco`).
+- `--cov` produces a covariance matrix instead of a histogram.
 
-  ##### Generic:
+Outputs:
 
- - Runtag, Sample, Binner, Hist, Objsyst: used to lookup the correct filepath for the parquet dataset
- - Wtsyst: name of the weight systematic to use
- - usexrootd: whether to access the parquet dataset over xrootd or over the local filesystem
- - prebinned:
+- Histogram arrays are saved as `.npy` in a `*_BINNED` directory next to the input tables.
+- A `*_bincfg.json` with the serialized binning is stored alongside output to ensure compatibility.
 
-  ##### Poisson bootstrap (depricated, should not be used):
+## Binning Configuration
 
- - nboot, rng, skipNominal, r123type
+Configs live in `binning/config/*.json` and contain `gen` and `reco` axis lists. Each axis entry supports:
 
- ##### Dataset splitting:
-   - statN: number of statistically independent subsets we will create
-   - statK: which of the statistically independent subsets to create right now [the function should be called N times, passing statK=0, 1, 2, .. N-1]
+- `type`: `Regular` or `Variable`, optionally suffixed with `-Prebinned`
+- `name`: axis name matching the parquet column
+- `bins`, `start`, `stop` for `Regular`
+- `edges` for `Variable`
+- Optional `rebin` and `narrow_to` for `*-Prebinned`
+- Optional `underflow`/`overflow` flags
 
- ##### Z kinematics reweighting:
-  - kinreweight_path: path to a correctionlib json containing the Z kinematic SF function
-  - kinreweight_key: key within the correctionlib json for the correct SF function
+Transfer binning concatenates reco axes with `_reco` suffix and gen axes with `_gen` suffix.
 
-  NB if these are not passed,their default values of None are valid and will just result in no Z kinematic reweighting
+## Dependencies
 
- ##### job execution:
+- `hist`
+- `numpy`
+- `pyarrow`
+- `tqdm`
+- `directcov`
+- `correctionlib`
 
-  - --slurm: run on slurm
-  - --condor: run on HTcondor
+## Testing
 
-  ##### Debug:
-   - nbatch: pass a positive value to run over the first nbatch fragments of the dataset. should only be used for testing
-   - collect_debug_info: also record and save a bunch of debug info alongside the histogram
-
-### fill_all_res4_hists.py
-
-This wraps multiple calls to fill_res4_hist.py. The argument signature is almost identical, except that most of the parameters accept a list rather than a single value. These are interpreted into a list of commands to run, which are then executed with subprocess through a multiprocessing Pool. 
-
-A few comments about scaling out:
-
- - It can be convenient to dump a bunch of jobs onto a batch system through slurm or condor
- - Each job reads the whole dataset, so you can't go too crazy without risking some I/O bottlenecks
- - If you want to break the dataset into chunks that can be processed independently for better scaling performance, the way to do this is through the statN/statK parameters. For example, to split the dataset into 10 independent jobs, you can do something like `--statK 10 --statN 0 1 2 3 4 5 6 7 8 9` to run 10 jobs each processing 1/10th of the dataset
-
-# Things that will need to be updated
-
-1. Make copies of all of the res4 functionality for projected EECs 
-2. Change the functionality to replace the (R, r, c) indexing with just (R) indexing
-3. Setup the binning correctly 
-4. Add and test the prebinned functionality. It's only been implemented for the base function, and I'm not sure that what is implemented even works correctly. But it should be pretty straightforward anyway... 
-5. Change the filesystem lookup to agree with whatever you are using
+The file `binning/test.py` demonstrates a local end-to-end workflow using the config in `binning/config/res4tee.json` and direct parquet paths.

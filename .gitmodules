@@ -1,3 +1,6 @@
-[submodule "binning/pyrandom123"]
-	path = binning/pyrandom123
-	url = git@github.com:ssrothman/pyrandom123.git
+[submodule "simonpy"]
+	path = simonpy
+	url = https://github.com/ssrothman/simonpy.git
+[submodule "simonplot"]
+	path = simonplot
+	url = https://github.com/ssrothman/simonplot.git

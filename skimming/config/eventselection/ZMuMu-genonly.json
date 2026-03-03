@@ -1,0 +1,29 @@
+{
+    "eventsel" : {
+        "class" : "ZMuMuEventSelector",
+        "params" : {
+            "muons" : {
+                "leadpt" : 26.0,
+                "subpt" : 15.0,
+                "leadeta" : 2.4,
+                "subeta" : 2.4,
+                "ID" : "none",
+                "iso" : "none",
+                "dxy" : -1,
+                "dz" : -1,
+                "oppsign" : true
+            },
+            "Zs" : {
+                "massWindow" : 20.0,
+                "polemass" : 91.1876,
+                "minpt" : 0.0,
+                "maxY" : -1
+            },
+            "global" : {
+                "trigger" : "",
+                "noiseFilters" : [
+                ]
+            }
+        }
+    }
+}

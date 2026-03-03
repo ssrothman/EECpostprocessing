@@ -1,0 +1,11 @@
+{
+    "configs" : [
+        "objects/GenonlyObjectsV2.json",
+        "eventselection/ZMuMu-genonly.json",
+        "eventselection/BkgVeto-No.json",
+        "jetselection/GenonlyJetSelection.json",
+        "weights/genonly.json"
+    ],
+    "configsuite_name" : "GenonlyConfig",
+    "configsuite_comments" : "Genonly ZMuMu config - generator-level studies with some basic cuts on the Z decay muons and jets, but nothing else (no trigger, scale factors, ...)"
+}

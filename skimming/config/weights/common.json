@@ -1,0 +1,44 @@
+{
+    "eventweight" : {
+        "class" : "StandardWeights",
+        "params" : {
+            "muonSFs" : {
+                "skipPrefireSF" : false,
+                "skipIDsf" : false,
+                "skipIsosf" : false,
+                "skipTriggersf" : false,
+                "path" : "skimming/data/weights/muon_Z.json.gz",
+                "idsfnames" : {
+                    "loose": "NUM_LooseID_DEN_genTracks",
+                    "medium": "NUM_MediumID_DEN_genTracks",
+                    "tight": "NUM_TightID_DEN_genTracks"        
+                },
+                "isosfnames" : {
+                    "loose" : {
+                        "loose" : "NUM_LooseRelIso_DEN_LooseID",
+                        "medium" : "NUM_LooseRelIso_DEN_MediumID",
+                        "tight" : "NUM_LooseRelIso_DEN_TightIDandIPCut"
+                    },
+                    "tight" : {
+                        "medium" : "NUM_TightRelIso_DEN_MediumID",
+                        "tight" : "NUM_TightRelIso_DEN_TightIDandIPCut"
+                    }        
+                },
+                "triggersfnames" : {
+                    "IsoMu24" : "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight"
+                }
+            },
+            "PUreweight" : {
+                "skip" : false,
+                "path" : "skimming/data/weights/puWeights.json.gz",
+                "name" : "Collisions18_UltraLegacy_goldenJSON"
+            },
+            "flavorWeights" : {
+                "uds" : 0,
+                "c" : 0,
+                "b" : 0,
+                "g" : 0
+            }
+        }
+    }
+}

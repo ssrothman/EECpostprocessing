@@ -1,0 +1,11 @@
+{
+    "eventweight" : {
+        "params" : {
+            "Zreweight" : {
+                "skip" : true,
+                "path" : "",
+                "name" : ""
+            }
+        }
+    }
+}

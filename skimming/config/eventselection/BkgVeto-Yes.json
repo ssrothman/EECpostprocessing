@@ -1,0 +1,12 @@
+{
+    "eventsel" : { 
+        "params" : {
+            "global" : {
+                "maxMETpt" : 50.0,
+                "maxNumBtag" : 1,
+                "maxNumBtag_level" : "Loose"
+            }
+        }
+    }
+    
+}

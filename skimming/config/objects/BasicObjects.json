@@ -1,0 +1,278 @@
+{
+    "objects" : {
+        "JECTARGET" : "RecoJets",
+        "Muons" : {
+            "class" : "Muons",
+            "params" : {
+                "name" : "Muon",
+                "padTo" : 2,
+                "roccor" : false,
+                "roccorThreshold" : 0.0,
+                "minPt" : 15.0,
+                "maxEta" : 2.4,
+                "IDflags" : [
+                    "mediumId",
+                    ["pfIsoId", 2]
+                ],
+                "maxDXY" : 0.5,
+                "maxDZ" : 0.2
+            },
+            "MConly" : false
+        },
+        "Electrons" : {
+            "class" : "Electrons",
+            "params" : {
+                "name" : "Electron",
+                "minPt" : 15.0,
+                "maxEta" : 2.5,
+                "IDflags" : [
+                    "mvaFall17V2Iso_WPL"
+                ],
+                "maxDXY" : -1.0,
+                "maxDZ" : -1.0
+            }
+        },
+        "RecoJets" : {
+            "class" : "SimonJets",
+            "params-common" : {
+                "jetsname" : "finalSelectedJetsAK8",
+                "CHSjetsname" : "Jet",
+                "CHS_ptthreshold" : 30.0,
+                "CHS_etathreshold" : 2.4,
+                "CHS_minJetID" : 6,
+                "CHS_minPUID" : 7,
+                "CHS_PUID_ptthreshold" : 50.0,
+                "skipJEC" : false,
+                "skipJER" : false,
+                "skipJUNC" : false,
+                "skipJES" : false,
+                "simonjetsname" : "ChargedSimonJetsNOM"
+            },
+            "params" : {
+            },
+            "params-CH_UP" : {
+                "simonjetsname" : "ChargedSimonJetsCHUP"
+            },
+            "params-CH_DN" : {
+                "simonjetsname" : "ChargedSimonJetsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "simonjetsname" : "ChargedSimonJetsTRKEFF"
+            },
+            "params-NO_PUPPI" : {
+                "simonjetsname" : "ChargedSimonJetsNOPUPPI"
+            },
+            "params-NO_PUPPICUT" : {
+                "simonjetsname" : "ChargedSimonJetsNOPUPPICUT"
+            },
+            "params-NO_DZCUT" : {
+                "simonjetsname" : "ChargedSimonJetsNODZCUT"
+            },
+            "params-NO_PVCUT" : {
+                "simonjetsname" : "ChargedSimonJetsNOPVCUT"
+            },
+            "params-DATA" : {
+                "simonjetsname" : "ChargedSimonJets"
+            },
+            "params-NO_JER" : {
+                "skipJER" : true
+            },
+            "params-NO_JES" : {
+                "skipJES" : true
+            },
+            "params-NO_JEC" : {
+                "skipJEC" : true
+            },
+            "MConly" : false
+        },
+        "GenJets" : {
+            "class" : "SimonJets",
+            "params" : {
+                "jetsname" : "arbitratedGenJetsAK8",
+                "simonjetsname" : "GenChargedSimonJetsNOM",
+                "CHSjetsname" : "",
+                "skipJEC" : true,
+                "skipJER" : true,
+                "skipJUNC" : true,
+                "skipJES" : true,
+                "CHS_ptthreshold" : -1,
+                "CHS_etathreshold" : -1,
+                "CHS_minJetID" : -1,
+                "CHS_minPUID" : -1,
+                "CHS_PUID_ptthreshold" : -1
+            },
+            "MConly" : true
+        },
+        "AK4Jets" : {
+            "class" : "SimpleJets",
+            "params" : {
+                "name" : "Jet",
+                "minpt" : 30.0,
+                "maxeta" : 2.4,
+                "minJetID" : 6,
+                "minPUID" : 7,
+                "PUID_ptthreshold" : 50.0
+            },
+            "MConly" : false
+        },
+        "MET" : {
+            "class" : "MET",
+            "params-common" : {
+                "name" : "PuppiMET"
+            },
+            "params" : {
+                "paramsuffix"  : ""
+            },
+            "params-JER_UP" : {
+                "paramsuffix"  : "JERUp"
+            },
+            "params-JER_DN" : {
+                "paramsuffix"  : "JERDown"
+            },
+            "params-JES_UP" : {
+                "paramsuffix"  : "JESUp"
+            },
+            "params-JES_DN" : {
+                "paramsuffix"  : "JESDown"
+            },
+            "params-UNCLUSTERED_UP" : {
+                "paramsuffix"  : "UnclusteredUp"
+            },
+            "params-UNCLUSTERED_DN" : {
+                "paramsuffix"  : "UnclusteredDown"
+            },
+            "MConly" : false
+        },
+        "RecoEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "RecoChargedEECsNOM"
+            },
+            "params-CH_UP" : {
+                "name" : "RecoChargedEECsCHUP"
+            },
+            "params-CH_DN" : {
+                "name" : "RecoChargedEECsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "name" : "RecoChargedEECsTRKEFF"
+            },
+            "params-DATA" : {
+                "name" : "RecoChargedEECs"
+            },
+            "MConly" : false
+        },
+        "UnmatchedRecoEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UnmatchedRecoChargedEECsNOM"
+            },
+            "params-CH_UP" : {
+                "name" : "UnmatchedRecoChargedEECsCHUP"
+            },
+            "params-CH_DN" : {
+                "name" : "UnmatchedRecoChargedEECsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "name" : "UnmatchedRecoChargedEECsTRKEFF"
+            },
+            "params-DATA" : {
+                "name" : "UnmatchedRecoChargedEECs"
+            },
+            "MConly" : true
+        },
+        "UntransferedRecoEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UntransferedRecoChargedEECsNOM"
+            },
+            "params-CH_UP" : {
+                "name" : "UntransferedRecoChargedEECsCHUP"
+            },
+            "params-CH_DN" : {
+                "name" : "UntransferedRecoChargedEECsCHDN"
+            },
+            "params-TRK_EFF" : {
+                "name" : "UntransferedRecoChargedEECsTRKEFF"
+            },
+            "params-DATA" : {
+                "name" : "UntransferedRecoChargedEECs"
+            },
+            "MConly" : true
+        },
+        "GenEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "GenChargedEECsNOM"
+            },
+            "MConly" : true
+        },
+        "UnmatchedGenEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UnmatchedGenChargedEECsNOM"
+            },
+            "MConly" : true
+        },
+        "UntransferedGenEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "UntransferedGenChargedEECsNOM"
+            },
+            "MConly" : true
+        },
+        "EECtransfer" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "ChargedEECsNOMTransfer"
+            },
+            "params-CH_UP" : {
+                "name" : "ChargedEECsCHUPTransfer"
+            },
+            "params-CH_DN" : {
+                "name" : "ChargedEECsCHDNTransfer"
+            },
+            "params-TRK_EFF" : {
+                "name" : "ChargedEECsTRKEFFTransfer"
+            },
+            "params-DATA" : {
+                "name" : "ChargedEECsTransfer"
+            },
+            "MConly" : true
+        },
+        "CommonGenerics" : {
+            "class" : "GenericObjectContainer",
+            "params" : {
+                "mandatory_names" : {
+                    "Flag" : "Flag",
+                    "rho" : "fixedGridRhoFastjetAll",
+                    "event" : "event",
+                    "run" : "run",
+                    "lumi" : "luminosityBlock",
+                    "HLT" : "HLT"
+                },
+                "optional_names" : {
+                }
+            },
+            "MConly" : false
+        },
+        "MCGenerics" : {
+            "class" : "GenericObjectContainer",
+            "params" : {
+                "mandatory_names" : {
+                    "PrefireWeight" : "L1PreFiringWeight"
+                },
+                "optional_names" : {
+                    "PileupInfo" : "Pileup",
+                    "LHE" : "LHE",
+                    "genWeight" : "genWeight",
+                    "PSWeight" : "PSWeight",
+                    "LHEScaleWeight" : "LHEScaleWeight",
+                    "LHEPdfWeight" : "LHEPdfWeight"
+                }
+            },
+            "MConly" : true
+        }
+
+    }
+}
