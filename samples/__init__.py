@@ -30,6 +30,12 @@ import samples.samples_04_01_2025
 import samples.samples_04_23_2025
 import samples.samples_05_04_2025
 import samples.samples_05_14_2025
+import samples.samples_09_09_2025
+import samples.samples_01_30_2026
+import samples.samples_11_14_2025
+import samples.samples_02_03_2026
+import samples.samples_02_05_2026
+import samples.samples_02_06_2026
 
 samplelists = {
     '04_09_2024' : samples.samples_04_09_2024,
@@ -63,6 +69,12 @@ samplelists = {
     '04_23_2025' : samples.samples_04_23_2025,
     '05_04_2025' : samples.samples_05_04_2025,
     '05_14_2025' : samples.samples_05_14_2025,
+    '09_09_2025' : samples.samples_09_09_2025,
+    '01_30_2026' : samples.samples_01_30_2026,
+    '02_03_2026' : samples.samples_02_03_2026,
+    '02_05_2026' : samples.samples_02_05_2026,
+    '02_06_2026' : samples.samples_02_06_2026,
+    '11_14_2025' : samples.samples_11_14_2025,
     'latest_genonly' : samples.samples_05_14_2025,
     'latest_res4' : samples.samples_04_23_2025,
     'latest' : None
