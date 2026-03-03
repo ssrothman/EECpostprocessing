@@ -9,3 +9,6 @@ __pycache__/*
 *.lck
 slurm/
 testlocal/
+.vscode/*
+test_output/*
+*.pdf

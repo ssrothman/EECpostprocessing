@@ -1,0 +1,240 @@
+import os
+import awkward as ak
+from vector import obj
+from .jets import SimonJets, SimpleJets
+from .leptons import Muons, Electrons
+from .met import MET
+from .EEC import EECproj, EECres3, EECres4
+from .generics import GenericObjectContainer
+from coffea.lookup_tools import extractor
+from coffea.jetmet_tools import FactorizedJetCorrector, JECStack, CorrectedJetsFactory
+import cachetools
+import numpy as np
+from typing import Any, Mapping
+
+objclasses = {
+    "SimonJets" : SimonJets,
+    "SimpleJets" : SimpleJets,
+    "Muons" : Muons,
+    "Electrons" : Electrons,
+    "MET" : MET,
+    "GenericObjectContainer" : GenericObjectContainer,
+    "EECproj" : EECproj,
+    "EECres3" : EECres3,
+    "EECres4" : EECres4
+}
+
+class AllObjects:
+    def __init__(self, 
+                events : ak.Array, 
+                JECera : str,
+                objcfg : dict,
+                btagcfg : dict,
+                JECcfg : dict,
+                objsyst : str):
+
+        #hack that uses private API 
+        #to get unique file + event range hash
+        self._uniqueid = self.get_uniqueid(events)
+        
+        self._setup_objects(events, objcfg, objsyst)
+
+        if (not self.isMC) and objsyst != 'DATA':
+            raise RuntimeError("Data events cannot be processed with systematic variations other than 'DATA'!")
+
+        if btagcfg:
+            self._check_btags(btagcfg)
+        if JECcfg:
+            self._run_JEC(JECera, JECcfg)
+
+        self._JECtarget = None
+
+    @classmethod
+    def get_uniqueid(cls, events : ak.Array) -> str:
+        uniqueid = events._attrs['@events_factory']._partition_key # pyright: ignore[reportOptionalSubscript]
+        uniqueid = uniqueid.replace('/', '_')
+        return uniqueid
+
+    def _setup_objects(self, events : ak.Array,
+                       objcfg : dict, 
+                       objsyst : str) -> None:
+        
+        self._objects = {}
+
+        #special attributes
+        self._objects['objsyst'] =  objsyst
+        self._objects['isMC'] = hasattr(events, 'Generator') 
+
+        for objname, objcfg in objcfg.items():
+            if objname == 'JECTARGET': # not actually an object
+                if hasattr(self, '_JECtarget') and self._JECtarget is not None:
+                    raise RuntimeError("Multiple JECTARGETs specified in object config!")
+                
+                self._JECtarget = objcfg
+                continue
+            
+            if not self.isMC and objcfg['MConly']:
+                continue #skip MC-only objects
+
+            clsname = objcfg['class']
+            cls = objclasses[clsname]
+
+            thecfg = {}
+            #first load "common" params
+            if 'params-common' in objcfg:
+                thecfg.update(objcfg['params-common'])
+            
+            #then if syst-specific config exists, use that
+            if 'params-%s'%objsyst in objcfg:
+                thecfg.update(objcfg['params-%s'%objsyst])
+            else: #else use default config
+                thecfg.update(objcfg['params'])
+
+            nextobj = cls(
+                events,
+                **thecfg
+            )
+
+            #export all sub-objects from `GenericObjectContainer`s
+            if clsname == 'GenericObjectContainer':
+                for subname in objcfg['params']['mandatory_names'].keys():
+                    self._objects[subname] = getattr(nextobj, subname)
+                for subname in objcfg['params']['optional_names'].keys():
+                    objobj = getattr(nextobj, subname)
+                    if objobj is not None:
+                        self._objects[subname] = objobj
+            else:
+                self._objects[objname] = nextobj
+
+    def __getattr__(self, name : str) -> Any:
+        if name in self._objects:
+            return self._objects[name]
+        else:
+            raise AttributeError("Object %s not loaded!"%name)
+        
+    @property
+    def objlist(self) -> list[str]:
+        return list(self._objects.keys())
+
+    @property
+    def uniqueid(self) -> str:
+        return self._uniqueid
+
+    #autocomplete support :)    
+    def __dir__(self) -> list[str]:
+        return self.objlist
+    
+    # propagate b-tagging to subobjects
+    def _check_btags(self, btagcfg : dict) -> None:
+        for obj in self._objects.values():
+            if hasattr(obj, 'check_btags'):
+                obj.check_btags(
+                    btagger = btagcfg['btagger'],
+                    wps = btagcfg['wps']
+                )
+    
+    # run JEC on _JECtarget
+    def _run_JEC(self, era : str, JECcfg : dict) -> None:
+        if not hasattr(self, '_JECtarget') or self._JECtarget is None:
+            raise RuntimeError("No JECTARGET specified in object config, cannot run JEC!")
+        
+
+        targetobj = self._objects[self._JECtarget]
+        
+        # save cmssw pT
+        # for checking :)
+        targetobj.jets['pt_cmssw'] = targetobj.jets.pt
+        targetobj.jets['mass_cmssw'] = targetobj.jets.mass
+
+        #first, setup inputs
+        targetobj.jets['pt_raw'] = targetobj.jets.pt * targetobj.jets.jecFactor
+        targetobj.jets['mass_raw'] = targetobj.jets.mass * targetobj.jets.jecFactor
+        targetobj.jets['event_rho'] = self.rho
+
+        if self.isMC:
+            targetobj.jets['pt_gen'] = targetobj.simonjets.jetMatchPt
+            targetobj.jets['eta_gen'] = targetobj.simonjets.jetMatchEta
+            targetobj.jets['phi_gen'] = targetobj.simonjets.jetMatchPhi
+
+        if era == 'skip' or targetobj.skipJEC:
+            # don't run JECs
+            # revert jet pT to raw value
+
+            targetobj.jets['pt'] = targetobj.jets['pt_raw']
+            targetobj.jets['mass'] = targetobj.jets['mass_raw']
+            if hasattr(targetobj, 'simonjets'):
+                targetobj.simonjets['jetPt'] = targetobj.jets['pt_raw']
+
+            return # exit early
+
+        #then, build the JEC stack
+        stacknames = []
+        files = JECcfg['files'][era]
+        for i in range(len(files)):
+            file = files[i]
+            if not file.startswith('/'):
+                #make path absolute
+                #referenced with respect to the path to the top of the module
+                files[i] = os.path.join(os.path.dirname(__file__), '..', '..',  file)
+                
+        if not targetobj.skipJES:
+            stacknames += JECcfg['JESstacks'][era]
+        if self.isMC and not targetobj.skipJER:
+            stacknames += JECcfg['JERstacks'][era]
+        if self.isMC and not targetobj.skipJUNC:
+            stacknames += JECcfg['JECuncertainties']
+        
+        ex = extractor()
+        ex.add_weight_sets(
+            ['* * %s'%f for f in files]
+        )
+        ex.finalize()
+        ev = ex.make_evaluator()
+
+        stack = JECStack({key : ev[key] for key in stacknames})
+
+        #then setup input name map
+        name_map = stack.blank_name_map
+        name_map['JetPt'] = 'pt'                # pyright: ignore[reportArgumentType]
+        name_map['JetMass'] = 'mass'            # pyright: ignore[reportArgumentType]
+        name_map['JetEta'] = 'eta'              # pyright: ignore[reportArgumentType]
+        name_map['Rho'] = 'event_rho'           # pyright: ignore[reportArgumentType]
+        name_map['JetA'] = 'area'               # pyright: ignore[reportArgumentType]
+        name_map['massRaw'] = 'mass_raw'        # pyright: ignore[reportArgumentType]
+        name_map['ptRaw'] = 'pt_raw'            # pyright: ignore[reportArgumentType]
+        if 'MC' in era:
+            name_map['ptGenJet'] = 'pt_gen'     # pyright: ignore[reportArgumentType]
+
+        #jec_cache = cachetools.Cache(np.inf)
+        jet_factory = CorrectedJetsFactory(name_map, stack)
+        corrected_jets : ak.Array = jet_factory.build(targetobj.jets)      # pyright: ignore[reportAssignmentType]
+                                           #lazy_cache=jec_cache)
+
+        if self.objsyst == 'JER_UP':
+            corrjets = corrected_jets.JER['up']
+            factor = 1.0
+        elif self.objsyst == 'JER_DN':
+            corrjets = corrected_jets.JER['down']
+            factor = 1.0
+        elif 'JES' in self.objsyst:
+            corrjets = corrected_jets
+            uncs = []
+            for field in corrjets.fields:
+                if field.startswith("jet_energy_uncertainty"):
+                    uncs.append(np.square(corrjets[field][:,:,0] - 1))
+            
+            total_unc = np.sqrt(ak.sum(uncs, axis=0))
+            if self.objsyst.endswith('_UP'):
+                factor = 1.0 + total_unc
+            else:
+                factor = 1.0 - total_unc
+
+        else:
+            corrjets = corrected_jets
+            factor = 1.0
+        
+        targetobj.jets['pt'] = corrjets.pt * factor
+        targetobj.jets['mass'] = corrjets.mass * factor
+
+        if hasattr(targetobj, 'simonjets'):
+            targetobj.simonjets['jetPt'] = corrjets.pt * factor

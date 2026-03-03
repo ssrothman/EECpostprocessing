@@ -1,0 +1,57 @@
+{
+    "objects" : {
+        "Muons" : {
+            "class" : "Muons",
+            "params" : {
+                "name" : "ZMuMuMuons",
+                "padTo" : 2,
+                "roccor" : false,
+                "roccorThreshold" : -1
+            },
+            "MConly" : false
+        },
+        "RecoJets" : {
+            "class" : "SimonJets",
+            "params" : {
+                "jetsname" : "arbitratedGenJetsAK8",
+                "CHSjetsname" : "",
+                "skipJEC" : true,
+                "skipJER" : true,
+                "skipJUNC" : true,
+                "skipJES" : true,
+                "CHS_ptthreshold" : -1,
+                "CHS_etathreshold" : -1,
+                "CHS_minJetID" : -1,
+                "CHS_minPUID" : -1,
+                "CHS_PUID_ptthreshold" : -1,
+                "simonjetsname" : "GenSimonJets"
+            },
+            "MConly" : false
+        },
+        "RecoEEC" : {
+            "class" : "EECres4",
+            "params" : {
+                "name" : "RecoEECsres4"
+            },
+            "MConly" : false
+        },
+        "Generics" : {
+            "class" : "GenericObjectContainer",
+            "params" : {
+                "mandatory_names" : {
+                    "event" : "event",
+                    "run" : "run",
+                    "lumi" : "luminosityBlock",
+                    "genWeight" : "genWeight"
+                },
+                "optional_names" : {
+                    "GenSplittingsHardSide" : "GenHardSideDeltaPsiTable",
+                    "GenSplittingsSoftSide" : "GenSoftSideDeltaPsiTable",
+                    "DeltaPsiHardSide" : "GenSimonJetsHardSideDeltaPsiTable",
+                    "DeltaPsiSoftSide" : "GenSimonJetsSoftSideDeltaPsiTable"
+                }
+            },
+            "MConly" : false
+        }
+    }
+}

@@ -1,8 +1,0 @@
-{
-    "doc" : "configuration to run on data",
-    "configs" : [
-        "configs/data_main.json",
-        "configs/data_MC_common.json",
-        "configs/systematics.json"
-    ]
-}

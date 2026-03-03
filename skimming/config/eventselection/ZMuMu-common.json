@@ -1,0 +1,38 @@
+{
+    "eventsel" : {
+        "class" : "ZMuMuEventSelector",
+        "params" : {
+            "muons" : {
+                "leadpt" : 26.0,
+                "subpt" : 15.0,
+                "leadeta" : 2.4,
+                "subeta" : 2.4,
+                "ID" : "medium",
+                "iso" : "loose",
+                "dxy" : 0.2,
+                "dz" : 0.5,
+                "oppsign" : true
+            },
+            "Zs" : {
+                "massWindow" : 20.0,
+                "polemass" : 91.1876,
+                "minpt" : 0.0,
+                "maxY" : -1
+            },
+            "global" : {
+                "trigger" : "IsoMu24",
+                "noiseFilters" : [
+                    "goodVertices",
+                    "globalSuperTightHalo2016Filter",
+                    "HBHENoiseFilter",
+                    "HBHENoiseIsoFilter",
+                    "EcalDeadCellTriggerPrimitiveFilter",
+                    "BadPFMuonFilter",
+                    "BadPFMuonDzFilter",
+                    "eeBadScFilter",
+                    "ecalBadCalibFilter"
+                ]
+            }
+        }
+    }
+}
