@@ -16,16 +16,52 @@ parser.add_argument("--config-suite", type=str, required=True,
 parser.add_argument("--nocheck", action='store_true', help="Skip checking for existing outputs before setting up workspace")
 args = parser.parse_args()
 
-_ALL_TABLES = [
+_ALL_KINEMATICS_TABLES = [
     "AK4JetKinematicsTable",
     "EventKinematicsTable",
     "ConstituentKinematicsTable",
     "CutflowTable",
     "SimonJetKinematicsTable",
 ]
+_ALL_RES4TEE_TABLES = [
+    "EECres4Obs:True,tee,total",
+    "EECres4Obs:True,tee,unmatched",
+    "EECres4Obs:True,tee,untransfered",
+    "EECres4Obs:False,tee,total",
+    "EECres4Obs:False,tee,unmatched",
+    "EECres4Obs:False,tee,untransfered",
+    "EECres4Transfer:tee"
+]
+_ALL_RES4DIPOLE_TABLES = [
+    "EECres4Obs:True,dipole,total",
+    "EECres4Obs:True,dipole,unmatched",
+    "EECres4Obs:True,dipole,untransfered",
+    "EECres4Obs:False,dipole,total",
+    "EECres4Obs:False,dipole,unmatched",
+    "EECres4Obs:False,dipole,untransfered",
+    "EECres4Transfer:dipole"
+]
+_ALL_RES4TRIANGLE_TABLES = [
+    "EECres4Obs:True,triangle,total",
+    "EECres4Obs:True,triangle,unmatched",
+    "EECres4Obs:True,triangle,untransfered",
+    "EECres4Obs:False,triangle,total",
+    "EECres4Obs:False,triangle,unmatched",
+    "EECres4Obs:False,triangle,untransfered",
+    "EECres4Transfer:triangle"
+]
+_ALL_RES4_TABLES = _ALL_RES4TEE_TABLES + _ALL_RES4DIPOLE_TABLES + _ALL_RES4TRIANGLE_TABLES
 
-if args.tables == ['all']:
-    args.tables = _ALL_TABLES
+if args.tables == ['allKinematics']:
+    args.tables = _ALL_KINEMATICS_TABLES
+elif args.tables == ['allRes4']:
+    args.tables = _ALL_RES4_TABLES
+elif args.tables == ['allRes4tee']:
+    args.tables = _ALL_RES4TEE_TABLES
+elif args.tables == ['allRes4dipole']:
+    args.tables = _ALL_RES4DIPOLE_TABLES
+elif args.tables == ['allRes4triangle']:
+    args.tables = _ALL_RES4TRIANGLE_TABLES
 
 from skimming.config.load_config import load_config
 thecfg = load_config(args.config_suite)

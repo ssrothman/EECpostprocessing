@@ -25,7 +25,7 @@
             "name" : "r",
             "start" : 0.0,
             "stop" : 1.0,
-            "bins" : 10,
+            "bins" : 12,
             "underflow" : false,
             "overflow" : false,
             "clamp" : true
@@ -35,7 +35,7 @@
             "name" : "c",
             "start" : 0.0,
             "stop" : 1.5707963267948966,
-            "bins" : 10,
+            "bins" : 12,
             "underflow" : false,
             "overflow" : false,
             "clamp" : true
@@ -67,7 +67,7 @@
             "name" : "r",
             "start" : 0.0,
             "stop" : 1.0,
-            "bins" : 10,
+            "bins" : 12,
             "underflow" : false,
             "overflow" : false,
             "clamp" : true
@@ -77,7 +77,7 @@
             "name" : "c",
             "start" : 0.0,
             "stop" : 1.5707963267948966,
-            "bins" : 10,
+            "bins" : 12,
             "underflow" : false,
             "overflow" : false,
             "clamp" : true

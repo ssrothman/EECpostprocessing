@@ -1,3 +1,4 @@
+import json
 from typing import Any, List, Sequence
 import hist
 from tqdm import tqdm
@@ -6,6 +7,8 @@ import directcov
 import pyarrow.dataset as ds
 import pyarrow.compute as pc
 from correctionlib import Correction 
+import os.path
+import os
 
 def narrow_axis(axis, narrow_to: List[int]):
     if len(narrow_to) != 2:
@@ -110,6 +113,11 @@ def build_hist(cfg : List[dict]):
         else:
             raise ValueError(f"Unknown axis type: {axis_cfg['type']}")
         
+        if 'clamp' in axis_cfg and axis_cfg['clamp']:
+            theaxis.clamp = True
+        else:
+            theaxis.clamp = False
+
         if subtype == 'Prebinned':
             prebinned_axis = theaxis
 
@@ -193,6 +201,9 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
 
     for batch in iterator:
         rows_so_far += batch.num_rows
+        if batch.num_rows == 0:
+            continue
+
         iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
 
         values = [
@@ -202,7 +213,11 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
             H.axes[i].index(values[i]) for i in range(len(H.axes))
         ]
         indices = np.stack(indices, axis=1) # pyright: ignore[reportArgumentType, reportCallIssue]
-        
+
+        for i, ax in enumerate(H.axes):
+            if ax.clamp:
+                indices[:,i] = np.clip(indices[:,i], 0, ax.extent-1)
+
         for i, name in enumerate(H.axes.name):
             if H.axes[name].traits.underflow:
                 indices[:,i] += 1
@@ -261,6 +276,8 @@ def fill_hist(H : hist.Hist,
         }
         for name in prebinned:
             filldict[name] = prebinned[name][filldict[name]]
+            if H.axes[name].clamp:
+                filldict[name] = np.clip(filldict[name], H.axes[name].edges[0], H.axes[name].edges[-1])
 
         H.fill(
             **filldict,

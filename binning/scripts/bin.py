@@ -37,6 +37,7 @@ from binning.main import build_hist, build_transfer_config, fill_cov, fill_hist
 from general.datasets.datasets import location_lookup
 from general.fslookup.location_lookup import lookup_hostid
 from general.fslookup.skim_path import lookup_skim_path
+from general.fslookup.hist_lookup import get_hist_path, get_hist_bincfg_path
 import os.path
 import pyarrow.dataset as ds
 import numpy as np
@@ -108,18 +109,18 @@ result = thefun(
     reweight = None #for now
 )
 
-outpath = os.path.join(
-    os.path.dirname(skimpath),
-    '%s_BINNED' % args.table
+_, outpath = get_hist_path(
+    args.location,
+    args.config_suite,
+    args.runtag,
+    args.dataset,
+    args.objsyst,
+    args.evtwt,
+    args.table,
+    args.cov,
+    args.statN,
+    args.statK
 )
-
-if args.cov:
-    outpath += '_covmat'
-
-outpath += '_%s' % args.evtwt
-
-if args.statN > 0:
-    outpath += '_%dstat%d' % (args.statN, args.statK)
 
 if args.cov:
     halfshape = result.shape[:len(result.shape)//2]
@@ -129,12 +130,16 @@ else:
     output = result.values(flow=True).ravel() # type: ignore
     
 print("Writing result to", outpath)
-with fs.open(outpath + '.npy', 'wb') as f:
+with fs.open(outpath, 'wb') as f:
     np.save(f, output)
 
-bincfg_path = os.path.join(
-    os.path.dirname(skimpath),
-    '%s_bincfg.json' % args.table
+_, bincfg_path = get_hist_bincfg_path(
+    args.location,
+    args.config_suite,
+    args.runtag,
+    args.dataset,
+    args.objsyst,
+    args.table
 )
 
 if fs.exists(bincfg_path):

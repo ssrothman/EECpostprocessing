@@ -1,30 +1,77 @@
 import json
 
-with open("binning/config/res4tee.json", 'r') as f:
-    binning_cfg = json.load(f)
-
-dspath_gen = '/ceph/submit/data/group/cms/store/user/srothman/EEC_v2/BasicConfig/Apr_23_2025/Pythia_inclusive/nominal/res4tee_gen/'
-dspath_reco = '/ceph/submit/data/group/cms/store/user/srothman/EEC_v2/BasicConfig/Apr_23_2025/Pythia_inclusive/nominal/res4tee_reco/'
-dspath_transfer = '/ceph/submit/data/group/cms/store/user/srothman/EEC_v2/BasicConfig/Apr_23_2025/Pythia_inclusive/nominal/res4tee_transfer/'
-
+from general.fslookup.skim_path import lookup_skim_path
+import os
 from binning.main import build_hist, build_transfer_config, fill_hist, fill_cov
 import pyarrow.dataset as ds
 
-gencfg = binning_cfg['gen']
-recocfg = binning_cfg['reco']
-transfercfg = build_transfer_config(gencfg, recocfg)
+binpkgpath = os.path.dirname(__file__)
+print(binpkgpath)
+bincfgpath = os.path.join(
+    binpkgpath,
+    'config',
+    'res4tee'
+)
+with open(bincfgpath + '.json') as f:
+    bincfg = json.load(f)
 
-Hgen, prebinned_gen = build_hist(gencfg)
-ds_gen = ds.dataset(dspath_gen, format="parquet")
-Hgen = fill_hist(Hgen, prebinned_gen, ds_gen, 'wt_nominal', 'wt')
-covgen = fill_cov(Hgen, ds_gen, 'wt_nominal', 'wt')
+fs, skimpath = lookup_skim_path(
+    'scratch-submit',
+    'BasicConfig',
+    'Apr_23_2025',
+    'Pythia_inclusive',
+    'nominal',
+    'res4tee_totalReco'
+)
 
+Hreco, prebinned_reco = build_hist(bincfg['reco'])
+ds_reco = ds.dataset(skimpath, format='parquet', filesystem=fs)
+print("Filling hist")
+Hreco = fill_hist(
+    Hreco,
+    prebinned_reco, 
+    ds_reco, 
+    'wt_nominal', 
+    itemwt = 'wt',
+    statN = 100,
+    statK = 0,
+    reweight = None
+)
+print("Filling cov")
+covreco = fill_cov(
+    Hreco,
+    prebinned_reco, 
+    ds_reco, 
+    'wt_nominal', 
+    itemwt = 'wt',
+    statN = 100,
+    statK = 0,
+    reweight = None
+)
 
-Hreco, prebinned_reco = build_hist(recocfg)
-ds_reco = ds.dataset(dspath_reco, format="parquet")
-Hreco = fill_hist(Hreco, prebinned_reco, ds_reco, 'wt_nominal', 'wt')
-covreco = fill_cov(Hreco, ds_reco, 'wt_nominal', 'wt')
-
-Htransfer, prebinned_transfer = build_hist(transfercfg)
-ds_transfer = ds.dataset(dspath_transfer, format="parquet")
-Htransfer = fill_hist(Htransfer, prebinned_transfer, ds_transfer, 'wt_nominal', 'wt_reco')
+print("Filling transfer")
+Htransfer, prebinned_transfer = build_hist(
+    build_transfer_config(
+        bincfg['gen'],
+        bincfg['reco']
+    )
+)
+fs, skimpath = lookup_skim_path(
+    'scratch-submit',
+    'BasicConfig',
+    'Apr_23_2025',
+    'Pythia_inclusive',
+    'nominal',
+    'res4tee_transfer'
+)
+ds_transfer = ds.dataset(skimpath, format="parquet", filesystem=fs)
+Htransfer = fill_hist(
+    Htransfer, 
+    prebinned_transfer, 
+    ds_transfer, 
+    'wt_nominal', 
+    itemwt = 'wt_reco',
+    statN = 100,
+    statK = 0,
+    reweight = None
+)

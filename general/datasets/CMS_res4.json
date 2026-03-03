@@ -1,0 +1,212 @@
+{   
+    "Mar_01_2026" : {
+        "base" : "crab/crab_Mar_01_2026/2018/",
+        "WW" : {
+            "tag" : "WW/WW_TuneCP5_13TeV-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "$WW$",
+            "color" : "darkred",
+            "xsec" : 118.7
+        },
+        "WZ" : {
+            "tag" : "WZ/WZ_TuneCP5_13TeV-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "$WZ$",
+            "color" : "darkgreen",
+            "xsec" : 47.13
+        },
+        "ZZ" : {
+            "tag" : "ZZ/ZZ_TuneCP5_13TeV-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "$ZZ$",
+            "color" : "darkorange",
+            "xsec" : 16.523
+        },
+        "TT" : {
+            "tag" : "TT/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "$t\\bar{t}$",
+            "color" : "darkblue",
+            "xsec" : 87.31
+        },
+        "ST_t" : {
+            "tag" : "ST/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "t-channel single $t$",
+            "color" : "lightblue",
+            "xsec" : 134.2
+        },
+        "ST_t_anti" : {
+            "tag" : "ST/ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "t-channel single $\\bar{t}$",
+            "color" : "lightgreen",
+            "xsec" : 80.0
+        },
+        "ST_tW" : {
+            "tag" : "ST/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "single $tW$",
+            "color" : "yellow",
+            "xsec" : 35.6  
+        },
+        "ST_tW_anti" : {
+            "tag" : "ST/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "single $\\bar{t}W$",
+            "color" : "orange",
+            "xsec" : 35.6
+        },
+        "Pythia_inclusive" : {
+            "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; Inclusive",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Herwig_inclusive" : {
+            "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Herwig $Z\\rightarrow\\ell\\ell$; Inclusive",
+            "color" : "darkgreen",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-0to70" : {
+            "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : { "genHT" : 70 },
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-0to70",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-70to100" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-70to100",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-100to200" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-100to200",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-200to400" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-200to400",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-400to600" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-400to600",  
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-600to800" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-600to800",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-800to1200" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-800to1200",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-1200to2500" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-1200to2500",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "Pythia_HT-2500toInf" : {
+            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "location" : "simon-LPC",
+            "era" : "MC",
+            "flags" : {},
+            "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-2500toInf",
+            "color" : "darkblue",
+            "xsec" : 6077.22
+        },
+        "DATA_2018A" : {
+            "tag" : "SingleMuon/SingleMuon/2018A",
+            "location" : "simon-LPC",
+            "era" : "Data",
+            "flags" : {},
+            "label" : "Data 2018A",
+            "color" : "black",
+            "lumi" : 1.0
+        },
+        "DATA_2018B" : {
+            "tag" : "SingleMuon/SingleMuon/2018B",
+            "location" : "simon-LPC",
+            "era" : "Data",
+            "flags" : {},
+            "label" : "Data 2018B",
+            "color" : "black",
+            "lumi" : 1.0
+        },
+        "DATA_2018C" : {
+            "tag" : "SingleMuon/SingleMuon/2018C",
+            "location" : "simon-LPC",
+            "era" : "Data",
+            "flags" : {},
+            "label" : "Data 2018C",
+            "color" : "black",
+            "lumi" : 1.0
+         },
+         "DATA_2018D" : {
+            "tag" : "SingleMuon/SingleMuon/2018D",
+            "location" : "simon-LPC",
+            "era" : "Data",
+            "flags" : {},
+            "label" : "Data 2018D",
+            "color" : "black",
+            "lumi" : 1.0    
+        }
+    }
+}
