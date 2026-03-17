@@ -1,0 +1,11 @@
+{
+    "configs" : [
+        "objects/EvtMCprojObjects.json",
+        "eventselection/ZMuMu-genonly.json",
+        "eventselection/BkgVeto-No.json",
+        "jetselection/NoJetSelection.json",
+        "weights/genonly.json"
+    ],
+    "configsuite_name"     : "EvtMCprojConfig",
+    "configsuite_comments" : ""
+}

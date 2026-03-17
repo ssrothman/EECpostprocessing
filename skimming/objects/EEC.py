@@ -109,6 +109,26 @@ class EECres3(EECgeneric):
     def _setup_res3(self):
         self._res3 = self._setup_generic('res3')
 
+class EECprojOrder2(EECgeneric):
+    def __init__(self, events, name):
+        super().__init__(events, name)
+        self._proj = None
+
+    @property
+    def proj(self):
+        if self._proj is None:
+            self._setup_proj()
+        return self._proj
+
+    def _setup_proj(self):
+        result = ak.materialize(self._events[self._name + 'Order2'])
+        nEntry = ak.materialize(self._events[self._name + 'BK']['nEntryOrder2'])
+        nEntry = ak.values_astype(nEntry, np.int32)
+        result = unflatVector(result, nEntry)
+        result = result[result.wt > 0]
+        self._proj = result
+
+
 class EECres4(EECgeneric):
     def __init__(self, events, name):
         super().__init__(events, name)

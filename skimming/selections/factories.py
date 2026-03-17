@@ -1,6 +1,7 @@
 from skimming.objects.AllObjects import AllObjects
 from skimming.typing.Protocols import EventSelectorProtocol, JetSelectorProtocol
 from .StandardJetSelector import StandardJetSelector
+from .NullJetSelector import NullJetSelector
 from .ZMuMuEventSelector import ZMuMuEventSelector
 from .PackedJetSelection import PackedJetSelection
 from coffea.analysis_tools import PackedSelection
@@ -11,6 +12,7 @@ eventselectors = {
 }
 jetselectors = {
     'StandardJetSelector' : StandardJetSelector,
+    'NullJetSelector'     : NullJetSelector,
 }
 
 def runEventSelection(cfg : dict,

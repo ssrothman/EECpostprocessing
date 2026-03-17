@@ -198,6 +198,31 @@ class EECgenericTable:
 
         return to_pa_table(thevals)
     
+class EECprojObsTable(EECgenericTable):
+    def __init__(self, gen: bool, whichEECobj: _EECobjs):
+        self._gen = gen
+        self._whichEECobj = whichEECobj
+
+    @property
+    def name(self) -> str:
+        level = 'Gen' if self._gen else 'Reco'
+        return 'proj_%s%s' % (self._whichEECobj, level)
+
+    def run_table(self,
+                  objs: AllObjects,
+                  evtsel: PackedSelection,
+                  jetsel: PackedJetSelection,
+                  weights: Weights):
+        return self._table_observed(
+            objs, evtsel, jetsel, weights,
+            self._gen,
+            'proj',
+            self._whichEECobj,
+            ['R'],
+            2
+        )
+
+
 class EECres4ObsTable(EECgenericTable):
     def __init__(self, gen : bool, whichEECdistr : str, whichEECobj : _EECobjs):
         self._gen = gen
