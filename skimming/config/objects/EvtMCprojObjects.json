@@ -81,14 +81,6 @@
             "params" : { "name" : "UnmatchedGenChargedEECsNOMproj" },
             "MConly" : true
         },
-        "EECtransfer" : {
-            "class"         : "EECprojOrder2Transfer",
-            "params"        : { "name" : "GenChargedEECsNOMprojTransfer"    },
-            "params-CH_UP"  : { "name" : "GenChargedEECsCHUPprojTransfer"   },
-            "params-CH_DN"  : { "name" : "GenChargedEECsCHDNprojTransfer"   },
-            "params-TRK_EFF": { "name" : "GenChargedEECsTRKEFFprojTransfer" },
-            "MConly" : true
-        },
         "Generics" : {
             "class" : "GenericObjectContainer",
             "params" : {

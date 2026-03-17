@@ -21,7 +21,6 @@ tables = [
     'EECprojObs:True,total',
     'EECprojObs:False,unmatched',
     'EECprojObs:True,unmatched',
-    'EECprojTransfer',
 ]
 
 output_dir = os.path.join(os.path.dirname(__file__), 'skim_output')
