@@ -3,7 +3,10 @@ from typing import Any, List, Sequence
 import hist
 from tqdm import tqdm
 import numpy as np
-import directcov
+try:
+    import directcov
+except ImportError:
+    directcov = None
 import pyarrow.dataset as ds
 import pyarrow.compute as pc
 from correctionlib import Correction 
@@ -186,6 +189,8 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
              statN : int = -1,
              statK : int = -1,
              reweight : Correction | None = None) -> np.ndarray:
+    if directcov is None:
+        raise ImportError("directcov is not installed")
     
     iterator = build_iterator(
         dset, H.axes.name,
