@@ -41,7 +41,8 @@ def eec_hist(df, lo, hi):
 df_reco = load_table('proj_Reco')
 df_gen  = load_table('proj_Gen')
 
-fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharey=False)
+fig, axes = plt.subplots(2, 3, figsize=(24, 14), sharey=False)
+plt.rcParams.update({'font.size': 10})
 axes = axes.flatten()
 
 for i, (lo, hi) in enumerate(zip(jpt_bins[:-1], jpt_bins[1:])):
@@ -57,7 +58,7 @@ for i, (lo, hi) in enumerate(zip(jpt_bins[:-1], jpt_bins[1:])):
     ax.set_ylabel('EEC')
     ax.set_title(f'Jpt [{lo}, {hi}] GeV')
     ax.legend()
-    hep.cms.label('Simulation Private', ax=ax, loc=0)
+    hep.cms.label('Private', ax=ax, loc=0, fontsize=10)
 
 plt.tight_layout()
 plt.savefig('plots/proj/EEC_R_per_jpt_pythia.pdf')
@@ -74,7 +75,7 @@ ax.set_xlabel('Jet $p_T$ [GeV]')
 ax.set_xscale('log')
 ax.set_yscale('log')
 ax.legend()
-hep.cms.label('Simulation Private', ax=ax, loc=0)
+hep.cms.label('Private', ax=ax, loc=0, fontsize=10)
 plt.tight_layout()
 plt.savefig('plots/proj/Jpt_pythia.pdf')
 plt.close()
