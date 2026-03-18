@@ -1,4 +1,5 @@
 import simonplot as splt
+import numpy as np
 from plotting.load_datasets import build_pq_dataset, load_prebinned_dataset
 
 LOCATION    = 'dylan-lxplus-eos'
@@ -60,7 +61,7 @@ pythia_reco_pq = build_pq_dataset(
 jpt_var    = splt.variable.BasicVariable('Jpt')
 jpt_weight = splt.variable.BasicVariable('wt_nominal')
 jpt_cut    = splt.cut.NoCut()
-jpt_binning = splt.binning.ManualBinning(start=4, stop=1000, bins=100)
+jpt_binning = splt.binning.ExplicitBinning(list(np.linspace(4, 1000, 101)))
 
 splt.plot_histogram(
     jpt_var, jpt_cut, jpt_weight,

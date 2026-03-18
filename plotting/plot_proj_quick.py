@@ -42,7 +42,7 @@ df_reco = load_table('proj_Reco')
 df_gen  = load_table('proj_Gen')
 
 fig, axes = plt.subplots(2, 3, figsize=(24, 14), sharey=False)
-plt.rcParams.update({'font.size': 10})
+plt.rcParams.update({'font.size': 15})
 axes = axes.flatten()
 
 for i, (lo, hi) in enumerate(zip(jpt_bins[:-1], jpt_bins[1:])):
@@ -55,7 +55,7 @@ for i, (lo, hi) in enumerate(zip(jpt_bins[:-1], jpt_bins[1:])):
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_xlabel('R')
-    ax.set_ylabel('EEC')
+    ax.set_ylabel('A.U.')
     ax.set_title(f'Jpt [{lo}, {hi}] GeV')
     ax.legend()
     hep.cms.label('Private', ax=ax, loc=0, fontsize=10)
