@@ -1,16 +1,15 @@
 #!/bin/bash
 
-set -e # Exit with nonzero exit code if anything fails 
+set -e
 
 JOB_INDEX=$1
 echo "Starting job $JOB_INDEX"
 echo "Running on host $(hostname)"
 
-git clone https://github.com/ssrothman/EECpostprocessing.git -b refactor --depth 1 --no-tags --recurse-submodules --shallow-submodules --single-branch
-cd EECpostprocessing/
-source env.sh
+source /afs/cern.ch/user/d/dponman/EECpostproc/venv/bin/activate
+source /afs/cern.ch/user/d/dponman/EECpostproc/env.sh
 
-cd ../
+cd WORKINGDIR
 
 for i in $(seq 0 $((FILES_PER_JOB - 1))); do
     index=$((FILES_PER_JOB * JOB_INDEX + i))
