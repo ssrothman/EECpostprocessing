@@ -33,8 +33,8 @@ with open("./config.json") as f:
 # setup output location and filesystem
 targetfs, rootpath = location_lookup(config['output_location'])
 
-if config['input_location'] != 'local':
-    hostid = lookup_hostid(config['input_location'])
+hostid = lookup_hostid(config['input_location'])
+if hostid != 'local':
     input_file = 'root://' + hostid + '//' + input_file
     
 events = NanoEventsFactory.from_root(input_file+":Events", schemaclass=NanoAODSchema).events()

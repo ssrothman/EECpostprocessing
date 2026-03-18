@@ -54,7 +54,7 @@ class EECgenericTable:
                 assert_never(whichEECobj)
 
             thejets = objs.GenJets
-            iReco = objs.EECtransfer.jetidx_reco
+            iReco = theEECs.jetidx_reco
         else:
             if whichEECobj == 'total':
                 theEECs = objs.RecoEEC
@@ -206,6 +206,8 @@ class EECprojObsTable(EECgenericTable):
     @property
     def name(self) -> str:
         level = 'Gen' if self._gen else 'Reco'
+        if self._whichEECobj == 'total':
+            return 'proj_%s' % level
         return 'proj_%s%s' % (self._whichEECobj, level)
 
     def run_table(self,
