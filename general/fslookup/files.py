@@ -1,5 +1,8 @@
-import fsspec_xrootd as xrdfs
 import os.path
+try:
+    import fsspec_xrootd as xrdfs
+except ImportError:
+    xrdfs = None
 
 def get_rootfiles(fs, path, exclude_dropped=True):
     if exclude_dropped:
@@ -22,4 +25,4 @@ def get_files_recursive(fs, rootpath, allowed = lambda f : True, prepend = ''):
             raise RuntimeError("Unexpected file type: {}".format(path['type']))
     return result
 
-submitfs = xrdfs.XRootDFileSystem(hostid = "submit54.mit.edu")
+submitfs = xrdfs.XRootDFileSystem(hostid = "submit54.mit.edu") if xrdfs is not None else None
