@@ -14,6 +14,17 @@ from typing import Sequence
 
 _EECobjs = Literal['total', 'unmatched', 'untransfered']
 
+_PROJ_R_BINS = np.array([
+    0.001, 0.001139, 0.001298, 0.001479, 0.001685, 0.00192, 0.002187, 0.002492,
+    0.002839, 0.003235, 0.003686, 0.004199, 0.004784, 0.005451, 0.00621, 0.007075,
+    0.008061, 0.009184, 0.010464, 0.011922, 0.013583, 0.015476, 0.017632, 0.020089,
+    0.022888, 0.026077, 0.02971, 0.03385, 0.038566, 0.04394, 0.050062, 0.057037,
+    0.064984, 0.074038, 0.084354, 0.096107, 0.109498, 0.124755, 0.142137, 0.161941,
+    0.184505, 0.210212, 0.239501, 0.272871, 0.310891, 0.354208, 0.40356, 0.459789,
+    0.523852, 0.596841, 0.68
+])
+_PROJ_R_CENTERS = 0.5 * (_PROJ_R_BINS[:-1] + _PROJ_R_BINS[1:])
+
 class EECgenericTable:
     def __init__(self):
         pass
@@ -215,7 +226,7 @@ class EECprojObsTable(EECgenericTable):
                   evtsel: PackedSelection,
                   jetsel: PackedJetSelection,
                   weights: Weights):
-        return self._table_observed(
+        table = self._table_observed(
             objs, evtsel, jetsel, weights,
             self._gen,
             'proj',
@@ -223,6 +234,10 @@ class EECprojObsTable(EECgenericTable):
             ['R'],
             2
         )
+        R_idx = table['R'].to_pylist()
+        R_float = pa.array([float(_PROJ_R_CENTERS[i]) for i in R_idx], type=pa.float32())
+        col_idx = table.schema.get_field_index('R')
+        return table.set_column(col_idx, 'R', R_float)
 
 
 class EECres4ObsTable(EECgenericTable):
