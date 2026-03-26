@@ -1,5 +1,5 @@
 {
-    "new_v6" : {
+    "v6" : {
         "base" : "crab/v6/2018/DYJetsToLL_Pythia",
         "DYJetsToLL_Pythia" : {
             "tag"      : [
