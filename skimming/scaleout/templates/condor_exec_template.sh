@@ -7,7 +7,7 @@ echo "Starting job $JOB_INDEX"
 echo "Running on host $(hostname)"
 
 source /afs/cern.ch/user/d/dponman/EECpostproc/venv/bin/activate
-source /afs/cern.ch/user/d/dponman/EECpostproc/env.sh
+export PYTHONPATH=/afs/cern.ch/user/d/dponman/EECpostproc:$PYTHONPATH
 
 cd WORKINGDIR
 

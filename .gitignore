@@ -11,4 +11,4 @@ slurm/
 testlocal/
 .vscode/*
 test_output/*
-*.pdf
+*.pdfbench*/condor/*.log
