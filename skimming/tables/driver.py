@@ -36,9 +36,9 @@ def construct_table_from_string(table_str : str) -> Any:
     #coerce datatypes
     for i in range(len(options)):
         opt = options[i].strip()
-        if opt.lower() == 'true':
+        if opt.lower() in ('true', 'gen'):
             opt = True
-        elif opt.lower() == 'false':
+        elif opt.lower() in ('false', 'reco'):
             opt = False
         else:
             try:
