@@ -1,0 +1,23 @@
+{
+    "new_v3" : {
+        "base" : "crab/new_v3/2018/DYJetsToLL",
+        "DYJetsToLL_Herwig" : {
+            "tag"      : "DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Herwig7)",
+            "color"    : "darkblue",
+            "xsec"     : -1
+        },
+        "DYJetsToLL_Pythia" : {
+            "tag"      : "DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8)",
+            "color"    : "darkred",
+            "xsec"     : -1
+        }
+    }
+}

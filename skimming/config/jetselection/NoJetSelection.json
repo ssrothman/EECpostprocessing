@@ -1,0 +1,6 @@
+{
+    "jetsel" : {
+        "class" : "NullJetSelector",
+        "params" : {}
+    }
+}

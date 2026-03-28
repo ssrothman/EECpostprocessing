@@ -1,0 +1,98 @@
+{
+    "objects" : {
+        "Muons" : {
+            "class" : "Muons",
+            "params" : {
+                "name"             : "ZMuMuMuons",
+                "padTo"            : 2,
+                "roccor"           : false,
+                "roccorThreshold"  : -1.0,
+                "minPt"            : -1.0,
+                "maxEta"           : -1.0,
+                "IDflags"          : [],
+                "maxDXY"           : -1.0,
+                "maxDZ"            : -1.0
+            },
+            "MConly" : false
+        },
+        "RecoJets" : {
+            "class" : "SimonJets",
+            "params-common" : {
+                "jetsname"              : "finalSelectedJetsAK8",
+                "CHSjetsname"           : "",
+                "skipJEC"               : true,
+                "skipJER"               : true,
+                "skipJUNC"              : true,
+                "skipJES"               : true,
+                "CHS_ptthreshold"       : -1,
+                "CHS_etathreshold"      : -1,
+                "CHS_minJetID"          : -1,
+                "CHS_minPUID"           : -1,
+                "CHS_PUID_ptthreshold"  : -1,
+                "simonjetsname"         : "ChargedEventJetsNOM"
+            },
+            "params"          : {},
+            "params-CH_UP"    : { "simonjetsname" : "ChargedEventJetsCHUP"   },
+            "params-CH_DN"    : { "simonjetsname" : "ChargedEventJetsCHDN"   },
+            "params-TRK_EFF"  : { "simonjetsname" : "ChargedEventJetsTRKEFF" },
+            "MConly" : false
+        },
+        "GenJets" : {
+            "class" : "SimonJets",
+            "params" : {
+                "jetsname"              : "arbitratedGenJetsAK8",
+                "simonjetsname"         : "GenChargedEventJetsNOM",
+                "CHSjetsname"           : "",
+                "skipJEC"               : true,
+                "skipJER"               : true,
+                "skipJUNC"              : true,
+                "skipJES"               : true,
+                "CHS_ptthreshold"       : -1,
+                "CHS_etathreshold"      : -1,
+                "CHS_minJetID"          : -1,
+                "CHS_minPUID"           : -1,
+                "CHS_PUID_ptthreshold"  : -1
+            },
+            "MConly" : true
+        },
+        "RecoEEC" : {
+            "class"         : "EECprojOrder2",
+            "params"        : { "name" : "RecoChargedEECsNOMproj"    },
+            "params-CH_UP"  : { "name" : "RecoChargedEECsCHUPproj"   },
+            "params-CH_DN"  : { "name" : "RecoChargedEECsCHDNproj"   },
+            "params-TRK_EFF": { "name" : "RecoChargedEECsTRKEFFproj" },
+            "MConly" : false
+        },
+        "UnmatchedRecoEEC" : {
+            "class"         : "EECprojOrder2",
+            "params"        : { "name" : "UnmatchedRecoChargedEECsNOMproj"    },
+            "params-CH_UP"  : { "name" : "UnmatchedRecoChargedEECsCHUPproj"   },
+            "params-CH_DN"  : { "name" : "UnmatchedRecoChargedEECsCHDNproj"   },
+            "params-TRK_EFF": { "name" : "UnmatchedRecoChargedEECsTRKEFFproj" },
+            "MConly" : true
+        },
+        "GenEEC" : {
+            "class"  : "EECprojOrder2",
+            "params" : { "name" : "GenChargedEECsNOMproj" },
+            "MConly" : true
+        },
+        "UnmatchedGenEEC" : {
+            "class"  : "EECprojOrder2",
+            "params" : { "name" : "UnmatchedGenChargedEECsNOMproj" },
+            "MConly" : true
+        },
+        "Generics" : {
+            "class" : "GenericObjectContainer",
+            "params" : {
+                "mandatory_names" : {
+                    "event"     : "event",
+                    "run"       : "run",
+                    "lumi"      : "luminosityBlock",
+                    "genWeight" : "genWeight"
+                },
+                "optional_names" : {}
+            },
+            "MConly" : false
+        }
+    }
+}

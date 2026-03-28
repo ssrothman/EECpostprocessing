@@ -1,16 +1,18 @@
 #!/bin/bash
 
-set -e # Exit with nonzero exit code if anything fails 
+set -e
 
 JOB_INDEX=$1
 echo "Starting job $JOB_INDEX"
 echo "Running on host $(hostname)"
 
-git clone https://github.com/ssrothman/EECpostprocessing.git -b refactor --depth 1 --no-tags --recurse-submodules --shallow-submodules --single-branch
-cd EECpostprocessing/
-source env.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-opt/setup.sh
+unset PYTHONHOME
+unset PYTHONPATH
+source /afs/cern.ch/user/d/dponman/EECpostproc/venv/bin/activate
+export PYTHONPATH=/afs/cern.ch/user/d/dponman/EECpostproc:$PYTHONPATH
 
-cd ../
+cd WORKINGDIR
 
 for i in $(seq 0 $((FILES_PER_JOB - 1))); do
     index=$((FILES_PER_JOB * JOB_INDEX + i))

@@ -1,4 +1,8 @@
 {
+    "dylan-lxplus-eos" : [
+        "local",
+        "/eos/user/d/dponman/"
+    ],
     "simon-LPC" : [
         "cmseos.fnal.gov",
         "/store/group/lpcpfnano/srothman/"

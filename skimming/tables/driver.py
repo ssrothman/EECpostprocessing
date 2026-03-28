@@ -3,7 +3,7 @@ from .eventkinematics import EventKinematicsTable
 from .constituentkinematics import ConstituentKinematicsTable
 from .cutflow import CutflowTable
 from .jetkinematics import SimonJetKinematicsTable
-from .EEC import EECres4ObsTable, EECres4TransferTable
+from .EEC import EECprojObsTable, EECres4ObsTable, EECres4TransferTable
 from .generictable import GenericTable
 
 from coffea.analysis_tools import Weights, PackedSelection
@@ -19,6 +19,7 @@ table_classes = {
     "ConstituentKinematicsTable": ConstituentKinematicsTable,
     "CutflowTable": CutflowTable,
     "SimonJetKinematicsTable": SimonJetKinematicsTable,
+    "EECprojObs": EECprojObsTable,
     "EECres4Obs": EECres4ObsTable,
     "EECres4Transfer": EECres4TransferTable,
     'GenericTable': GenericTable
@@ -35,9 +36,9 @@ def construct_table_from_string(table_str : str) -> Any:
     #coerce datatypes
     for i in range(len(options)):
         opt = options[i].strip()
-        if opt.lower() == 'true':
+        if opt.lower() in ('true', 'gen'):
             opt = True
-        elif opt.lower() == 'false':
+        elif opt.lower() in ('false', 'reco'):
             opt = False
         else:
             try:
