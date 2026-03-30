@@ -30,7 +30,8 @@
                 ],
                 "maxDXY" : -1.0,
                 "maxDZ" : -1.0
-            }
+            },
+            "MConly" : false
         },
         "RecoJets" : {
             "class" : "SimonJets",

@@ -6,7 +6,13 @@
                 "name" : "ZMuMuMuons",
                 "padTo" : 2,
                 "roccor" : false,
-                "roccorThreshold" : -1
+                "roccorThreshold" : 0.0,
+                "minPt" : 15.0,
+                "maxEta" : 2.4,
+                "IDflags" : [
+                ],
+                "maxDXY" : -1,
+                "maxDZ" : -1
             },
             "MConly" : false
         },
