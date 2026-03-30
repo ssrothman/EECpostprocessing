@@ -87,6 +87,8 @@ def build_hist(cfg : List[dict]):
     axes = []
     prebinned_edges = {}
     for axis_cfg in cfg:
+        print("Building axis named", axis_cfg['name'])
+
         axistype = axis_cfg['type']
         if '-' in axistype:
             axistype, subtype = axistype.split('-', 1)
@@ -115,17 +117,21 @@ def build_hist(cfg : List[dict]):
         
         if 'clamp' in axis_cfg and axis_cfg['clamp']:
             theaxis.clamp = True
+            print("setting clamp=True")
         else:
             theaxis.clamp = False
+            print("setting clamp=False")
 
         if subtype == 'Prebinned':
             prebinned_axis = theaxis
 
             if 'rebin' in axis_cfg:
                 theaxis = rebin_axis(prebinned_axis, axis_cfg['rebin'])
+                theaxis.clamp = prebinned_axis.clamp
 
             if 'narrow_to' in axis_cfg:
                 theaxis = narrow_axis(theaxis, axis_cfg['narrow_to'])
+                theaxis.clamp = prebinned_axis.clamp
             
             pbedges = prebinned_axis.edges
             if prebinned_axis.traits.underflow:
@@ -214,9 +220,9 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
         ]
         indices = np.stack(indices, axis=1) # pyright: ignore[reportArgumentType, reportCallIssue]
 
-        for i, ax in enumerate(H.axes):
-            if ax.clamp:
-                indices[:,i] = np.clip(indices[:,i], 0, ax.extent-1)
+        for i, name in enumerate(H.axes.name):
+            if H.axes[name].clamp:
+                indices[:,i] = np.clip(indices[:,i], 0, H.axes[name].extent-1)
 
         for i, name in enumerate(H.axes.name):
             if H.axes[name].traits.underflow:

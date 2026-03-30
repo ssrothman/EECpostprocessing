@@ -24,10 +24,9 @@
             "name" : "r",
             "start" : 0.0,
             "stop" : 1.0,
-            "bins" : 40,
+            "bins" : 15,
             "underflow" : true,
-            "overflow" : true,
-            "rebin" : 2
+            "overflow" : true
         },
         {
             "type" : "Regular-Prebinned",

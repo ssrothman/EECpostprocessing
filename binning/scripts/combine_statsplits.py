@@ -41,9 +41,10 @@ from general.fslookup.hist_lookup import get_hist_path
 import numpy as np
 
 accu = None
+print(args.oldStatN)
 
 for oldStatK in range(args.oldStatN):
-    if oldStatK % args.statN != args.statK:
+    if oldStatK % args.statN != args.statK and args.statN > 0:
         continue
 
     print(f"Processing statsplit {oldStatK}...")
