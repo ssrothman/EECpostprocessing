@@ -12,3 +12,4 @@ testlocal/
 .vscode/*
 test_output/*
 *.pdf
+ANplots/*
