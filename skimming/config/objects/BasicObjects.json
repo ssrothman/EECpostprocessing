@@ -147,97 +147,121 @@
         "RecoEEC" : {
             "class" : "EECres4",
             "params" : {
-                "name" : "RecoChargedEECsNOM"
+                "name" : "RecoChargedEECsNOMres4"
             },
             "params-CH_UP" : {
-                "name" : "RecoChargedEECsCHUP"
+                "name" : "RecoChargedEECsCHUPres4"
             },
             "params-CH_DN" : {
-                "name" : "RecoChargedEECsCHDN"
+                "name" : "RecoChargedEECsCHDNres4"
             },
             "params-TRK_EFF" : {
-                "name" : "RecoChargedEECsTRKEFF"
+                "name" : "RecoChargedEECsTRKEFFres4"
             },
             "params-DATA" : {
-                "name" : "RecoChargedEECs"
+                "name" : "RecoChargedEECsres4"
             },
             "MConly" : false
         },
         "UnmatchedRecoEEC" : {
             "class" : "EECres4",
             "params" : {
-                "name" : "UnmatchedRecoChargedEECsNOM"
+                "name" : "UnmatchedRecoChargedEECsNOMres4"
             },
             "params-CH_UP" : {
-                "name" : "UnmatchedRecoChargedEECsCHUP"
+                "name" : "UnmatchedRecoChargedEECsCHUPres4"
             },
             "params-CH_DN" : {
-                "name" : "UnmatchedRecoChargedEECsCHDN"
+                "name" : "UnmatchedRecoChargedEECsCHDNres4"
             },
             "params-TRK_EFF" : {
-                "name" : "UnmatchedRecoChargedEECsTRKEFF"
+                "name" : "UnmatchedRecoChargedEECsTRKEFFres4"
             },
             "params-DATA" : {
-                "name" : "UnmatchedRecoChargedEECs"
+                "name" : "UnmatchedRecoChargedEECsres4"
             },
             "MConly" : true
         },
         "UntransferedRecoEEC" : {
             "class" : "EECres4",
             "params" : {
-                "name" : "UntransferedRecoChargedEECsNOM"
+                "name" : "UntransferedRecoChargedEECsNOMres4"
             },
             "params-CH_UP" : {
-                "name" : "UntransferedRecoChargedEECsCHUP"
+                "name" : "UntransferedRecoChargedEECsCHUPres4"
             },
             "params-CH_DN" : {
-                "name" : "UntransferedRecoChargedEECsCHDN"
+                "name" : "UntransferedRecoChargedEECsCHDNres4"
             },
             "params-TRK_EFF" : {
-                "name" : "UntransferedRecoChargedEECsTRKEFF"
+                "name" : "UntransferedRecoChargedEECsTRKEFFres4"
             },
             "params-DATA" : {
-                "name" : "UntransferedRecoChargedEECs"
+                "name" : "UntransferedRecoChargedEECsres4"
             },
             "MConly" : true
         },
         "GenEEC" : {
             "class" : "EECres4",
             "params" : {
-                "name" : "GenChargedEECsNOM"
+                "name" : "GenChargedEECsNOMres4"
+            },
+            "params-CH_UP" : {
+                "name" : "GenChargedEECsCHUPres4"
+            },
+            "params-CH_DN" : {
+                "name" : "GenChargedEECsCHDNres4"
+            },
+            "params-TRK_EFF" : {
+                "name" : "GenChargedEECsTRKEFFres4"
             },
             "MConly" : true
         },
         "UnmatchedGenEEC" : {
             "class" : "EECres4",
             "params" : {
-                "name" : "UnmatchedGenChargedEECsNOM"
+                "name" : "UnmatchedGenChargedEECsNOMres4"
+            },
+            "params-CH_UP" : {
+                "name" : "UnmatchedGenChargedEECsCHUPres4"
+            },
+            "params-CH_DN" : {
+                "name" : "UnmatchedGenChargedEECsCHDNres4"
+            },
+            "params-TRK_EFF" : {
+                "name" : "UnmatchedGenChargedEECsTRKEFFres4"
             },
             "MConly" : true
         },
         "UntransferedGenEEC" : {
             "class" : "EECres4",
             "params" : {
-                "name" : "UntransferedGenChargedEECsNOM"
+                "name" : "UntransferedGenChargedEECsNOMres4"
+            },
+            "params-CH_UP" : {
+                "name" : "UntransferedGenChargedEECsCHUPres4"
+            },
+            "params-CH_DN" : {
+                "name" : "UntransferedGenChargedEECsCHDNres4"
+            },
+            "params-TRK_EFF" : {
+                "name" : "UntransferedGenChargedEECsTRKEFFres4"
             },
             "MConly" : true
         },
         "EECtransfer" : {
             "class" : "EECres4",
             "params" : {
-                "name" : "ChargedEECsNOMTransfer"
+                "name" : "GenChargedEECsNOMres4Transfer"
             },
             "params-CH_UP" : {
-                "name" : "ChargedEECsCHUPTransfer"
+                "name" : "GenChargedEECsCHUPres4Transfer"
             },
             "params-CH_DN" : {
-                "name" : "ChargedEECsCHDNTransfer"
+                "name" : "GenChargedEECsCHDNres4Transfer"
             },
             "params-TRK_EFF" : {
-                "name" : "ChargedEECsTRKEFFTransfer"
-            },
-            "params-DATA" : {
-                "name" : "ChargedEECsTransfer"
+                "name" : "GenChargedEECsTRKEFFres4Transfer"
             },
             "MConly" : true
         },

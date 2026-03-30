@@ -5,7 +5,7 @@ import argparse
 parser = argparse.ArgumentParser(description="Run EVERYTHING.")
 parser.add_argument('--signal-mc', type=str, nargs='+', help="List of signal MC datasets to process",
                     default=[
-                        #'Pythia_inclusive', 
+                        'Pythia_inclusive', 
                         'Herwig_inclusive',
                         'Pythia_HT-0to70',
                         'Pythia_HT-70to100',
@@ -30,10 +30,10 @@ parser.add_argument('--background-mc', type=str, nargs='*', help="List of backgr
                     ])
 parser.add_argument('--data', type=str, nargs='*', help="List of data datasets to process",
                     default=[
-                        #'DATA_2018A', 
-                        #'DATA_2018B', 
-                        #'DATA_2018C', 
-                        #'DATA_2018D'
+                        'DATA_2018A', 
+                        'DATA_2018B', 
+                        'DATA_2018C', 
+                        'DATA_2018D'
                     ])
 parser.add_argument('--config-suite', type=str, help="name of config suite to use",
                      default="basic")
