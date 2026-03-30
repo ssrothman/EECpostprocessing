@@ -7,7 +7,7 @@
             "era" : "MC",
             "flags" : {},
             "label" : "$WW$",
-            "color" : "darkred",
+            "color" : "#1F77B4",
             "xsec" : 118.7
         },
         "WZ" : {
@@ -16,7 +16,7 @@
             "era" : "MC",
             "flags" : {},
             "label" : "$WZ$",
-            "color" : "darkgreen",
+            "color" : "#17BECF",
             "xsec" : 47.13
         },
         "ZZ" : {
@@ -25,7 +25,7 @@
             "era" : "MC",
             "flags" : {},
             "label" : "$ZZ$",
-            "color" : "darkorange",
+            "color" : "#9467BD",
             "xsec" : 16.523
         },
         "TT" : {
@@ -33,9 +33,9 @@
             "location" : "simon-LPC",
             "era" : "MC",
             "flags" : {},
-            "label" : "$t\\bar{t}$",
-            "color" : "darkblue",
-            "xsec" : 87.31
+            "label" : "$t\\bar{t}\\rightarrow 2\\ell 2\\nu$",
+            "color" : "#D62728",
+            "xsec" : 88.51
         },
         "ST_t" : {
             "tag" : "ST/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
@@ -43,7 +43,7 @@
             "era" : "MC",
             "flags" : {},
             "label" : "t-channel single $t$",
-            "color" : "lightblue",
+            "color" : "#FF7F0E",
             "xsec" : 134.2
         },
         "ST_t_anti" : {
@@ -52,7 +52,7 @@
             "era" : "MC",
             "flags" : {},
             "label" : "t-channel single $\\bar{t}$",
-            "color" : "lightgreen",
+            "color" : "#FFB000",
             "xsec" : 80.0
         },
         "ST_tW" : {
@@ -61,8 +61,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "single $tW$",
-            "color" : "yellow",
-            "xsec" : 35.6  
+            "color" : "#A65628",
+            "xsec" : 39.65
         },
         "ST_tW_anti" : {
             "tag" : "ST/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
@@ -70,8 +70,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "single $\\bar{t}W$",
-            "color" : "orange",
-            "xsec" : 35.6
+            "color" : "#C97C3B",
+            "xsec" : 39.65
         },
         "Pythia_inclusive" : {
             "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/",
@@ -79,7 +79,7 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; Inclusive",
-            "color" : "darkblue",
+            "color" : "#2CA02C",
             "xsec" : 6077.22
         },
         "Herwig_inclusive" : {
@@ -88,7 +88,7 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Herwig $Z\\rightarrow\\ell\\ell$; Inclusive",
-            "color" : "darkgreen",
+            "color" : "#00A651",
             "xsec" : 6077.22
         },
         "Pythia_HT-0to70" : {
@@ -97,7 +97,7 @@
             "era" : "MC",
             "flags" : { "genHT" : 70 },
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-0to70",
-            "color" : "darkblue",
+            "color" : "#D9F2D0",
             "xsec" : 6077.22
         },
         "Pythia_HT-70to100" : {
@@ -106,8 +106,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-70to100",
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#AEE5A1",
+            "xsec" : 159.1
         },
         "Pythia_HT-100to200" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -115,8 +115,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-100to200",
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#82D37B",
+            "xsec" : 159.4
         },
         "Pythia_HT-200to400" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -124,8 +124,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-200to400",
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#54C45F",
+            "xsec" : 43.60
         },
         "Pythia_HT-400to600" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -133,8 +133,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-400to600",  
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#2FAE53",
+            "xsec" : 5.918
         },
         "Pythia_HT-600to800" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -142,8 +142,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-600to800",
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#1F9645",
+            "xsec" : 1.439
         },
         "Pythia_HT-800to1200" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -151,8 +151,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-800to1200",
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#007F33",
+            "xsec" : 0.6462
         },
         "Pythia_HT-1200to2500" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -160,8 +160,8 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-1200to2500",
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#006B3B",
+            "xsec" : 0.1514
         },
         "Pythia_HT-2500toInf" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -169,43 +169,51 @@
             "era" : "MC",
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-2500toInf",
-            "color" : "darkblue",
-            "xsec" : 6077.22
+            "color" : "#005224",
+            "xsec" : 0.003395
         },
         "DATA_2018A" : {
-            "tag" : "SingleMuon/SingleMuon/2018A",
+            "tag" : [
+                "SingleMuon/SingleMuon/2018A",
+                "SingleMuon/SingleMuon/2018A_recover1",
+                "SingleMuon/SingleMuon/2018A_recover3"
+            ],
             "location" : "simon-LPC",
-            "era" : "Data",
+            "era" : "DATA_2018A",
             "flags" : {},
             "label" : "Data 2018A",
-            "color" : "black",
+            "color" : "#000000",
             "lumi" : 1.0
         },
         "DATA_2018B" : {
             "tag" : "SingleMuon/SingleMuon/2018B",
             "location" : "simon-LPC",
-            "era" : "Data",
+            "era" : "DATA_2018B",
             "flags" : {},
             "label" : "Data 2018B",
-            "color" : "black",
+            "color" : "#000000",
             "lumi" : 1.0
         },
         "DATA_2018C" : {
-            "tag" : "SingleMuon/SingleMuon/2018C",
+            "tag" : "SingleMuon/SingleMuon/2018C_take2",
             "location" : "simon-LPC",
-            "era" : "Data",
+            "era" : "DATA_2018C",
             "flags" : {},
             "label" : "Data 2018C",
-            "color" : "black",
+                "color" : "#000000",
             "lumi" : 1.0
          },
          "DATA_2018D" : {
-            "tag" : "SingleMuon/SingleMuon/2018D",
+            "tag" : [
+                "SingleMuon/SingleMuon/2018D",
+                "SingleMuon/SingleMuon/2018D_recover1",
+                "SingleMuon/SingleMuon/2018D_recover2"
+            ],
             "location" : "simon-LPC",
-            "era" : "Data",
+            "era" : "DATA_2018D",
             "flags" : {},
             "label" : "Data 2018D",
-            "color" : "black",
+            "color" : "#000000",
             "lumi" : 1.0    
         }
     }

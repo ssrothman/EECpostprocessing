@@ -1,0 +1,78 @@
+{
+        "stacks" : {
+        "herwig_glu_nospin_5Xand6X" : {
+            "dsets" : [
+                "herwig_glu_nospin_5X",
+                "herwig_glu_nospin_6X"
+            ],
+            "stacks" : [],
+            "color" : "#9467BD",
+            "label" : "Herwig Z+glu; nospin 1"
+        },
+        "allMC" : {
+            "dsets" : [
+                "ZZ",
+                "WW",
+                "WZ",
+                "TT"
+            ],
+            "stacks" : [
+                "Pythia_HTsum",
+                "ST"
+            ],
+            "color" : "#D62728",
+            "label" : "MC signal+background"
+        },
+        "ST" : {
+            "dsets" : [
+                "ST_t",
+                "ST_t_anti",
+                "ST_tW",
+                "ST_tW_anti"
+            ],
+            "stacks" : [],
+            "color" : "#FF7F0E",
+            "label" : "Single Top"
+        },
+        "allBKG" : {
+            "dsets" : [
+                "ZZ",
+                "WW",
+                "WZ",
+                "TT"
+            ],
+            "stacks" : [
+                "ST"
+            ],
+            "color" : "#1F77B4",
+            "label" : "MC background"
+        },
+        "Pythia_HTsum" : {
+            "dsets" : [
+                "Pythia_HT-0to70",
+                "Pythia_HT-70to100",
+                "Pythia_HT-100to200",
+                "Pythia_HT-200to400",
+                "Pythia_HT-400to600",
+                "Pythia_HT-600to800",
+                "Pythia_HT-800to1200",
+                "Pythia_HT-1200to2500",
+                "Pythia_HT-2500toInf"
+            ],
+            "stacks" : [],
+            "color" : "#2CA02C",
+            "label" : "$Z\\rightarrow\\ell\\ell$"
+        },
+        "DATA" : {
+            "dsets" : [
+                "DATA_2018A",
+                "DATA_2018B",
+                "DATA_2018C",
+                "DATA_2018D"
+            ],
+            "stacks" : [],
+            "color" : "#000000",
+            "label" : "Data 2018"
+        }
+    }
+}

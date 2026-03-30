@@ -33,7 +33,7 @@
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "Herwig Z+glu; no spin corr., (8000s series)",
+            "label": "Herwig Z+glu; nospin 2",
             "xsec": 1.0,
             "color": "magenta"
         },
