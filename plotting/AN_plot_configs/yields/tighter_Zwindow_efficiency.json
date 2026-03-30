@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "table_name": "tighter_Zwindow_efficiency",
+    "output_file": "ANplots/yields/tighter_Zwindow_efficiency.txt",
+    "target_lumi": 59.81,
+    "float_format": "%.2f"
+  },
+  "datasets": [
+    {
+      "key": "signal",
+      "label": "Z+Jets",
+      "configsuite": "BasicConfig",
+      "runtag": "Mar_01_2026",
+      "name": "Pythia_HTsum",
+      "table": "jets",
+      "objsyst": "nominal",
+      "location": "scratch-submit",
+      "isstack": true,
+      "isprebinned": false
+    },
+    {
+      "key": "ZZ",
+      "label": "ZZ",
+      "configsuite": "BasicConfig",
+      "runtag": "Mar_01_2026",
+      "name": "ZZ",
+      "table": "jets",
+      "objsyst": "nominal",
+      "location": "scratch-submit",
+      "isstack": false,
+      "isprebinned": false
+    },
+    {
+      "key": "WW",
+      "label": "WW",
+      "configsuite": "BasicConfig",
+      "runtag": "Mar_01_2026",
+      "name": "WW",
+      "table": "jets",
+      "objsyst": "nominal",
+      "location": "scratch-submit",
+      "isstack": false,
+      "isprebinned": false
+    },
+    {
+      "key": "WZ",
+      "label": "WZ",
+      "configsuite": "BasicConfig",
+      "runtag": "Mar_01_2026",
+      "name": "WZ",
+      "table": "jets",
+      "objsyst": "nominal",
+      "location": "scratch-submit",
+      "isstack": false,
+      "isprebinned": false
+    },
+    {
+      "key": "TT",
+      "label": "TT",
+      "configsuite": "BasicConfig",
+      "runtag": "Mar_01_2026",
+      "name": "TT",
+      "table": "jets",
+      "objsyst": "nominal",
+      "location": "scratch-submit",
+      "isstack": false,
+      "isprebinned": false
+    },
+    {
+      "key": "ST",
+      "label": "ST",
+      "configsuite": "BasicConfig",
+      "runtag": "Mar_01_2026",
+      "name": "ST",
+      "table": "jets",
+      "objsyst": "nominal",
+      "location": "scratch-submit",
+      "isstack": true,
+      "isprebinned": false
+    }
+  ],
+  "base_cuts": [
+    "cut::EqualsCut('nMu', 2)",
+    "cut::EqualsCut('nEle', 0)",
+    "cut::LessThanCut('numMediumB', 2)"
+  ],
+  "alternative_cut" : [
+    "cut::EqualsCut('nMu', 2)",
+    "cut::EqualsCut('nEle', 0)",
+    "cut::LessThanCut('numMediumB', 2)",
+    "cut::TwoSidedCut(var::DifferenceVariable('Zmass', var::ConstantVariable(91.1876)), -15, 15)"
+  ],
+  "table_metric" : "efficiency",
+  "bins": [
+    [
+      "cut::TwoSidedCut('Jpt', 30, 50)"
+    ],
+    [
+      "cut::TwoSidedCut('Jpt', 50, 90)"
+    ],
+    [
+      "cut::TwoSidedCut('Jpt', 90, 150)"
+    ],
+    [
+      "cut::TwoSidedCut('Jpt', 150, 250)"
+    ],
+    [
+      "cut::TwoSidedCut('Jpt', 250, 400)"
+    ],
+    [
+      "cut::GreaterThanCut('Jpt', 400)"
+    ]
+  ],
+  "bin_labels": [
+    "30 <= Jpt < 50",
+    "50 <= Jpt < 90",
+    "90 <= Jpt < 150",
+    "150 <= Jpt < 250",
+    "250 <= Jpt < 400",
+    "400 <= Jpt"
+  ],
+  "weight_variable": "wt_nominal",
+  "totals": [
+    {
+      "label": "Background Total",
+      "datasets": [
+        "ZZ",
+        "WW",
+        "WZ",
+        "TT",
+        "ST"
+      ]
+    },
+    {
+      "label": "MC Total",
+      "datasets": [
+        "signal",
+        "ZZ",
+        "WW",
+        "WZ",
+        "TT",
+        "ST"
+      ]
+    }
+  ],
+  "percent_contribution": {
+    "reference_total": "MC Total",
+    "format": "%.2f",
+    "label_suffix": " (% of MC Total)"
+  }
+}
