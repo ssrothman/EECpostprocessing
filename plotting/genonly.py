@@ -51,6 +51,7 @@ weight = splt.variable.BasicVariable('wt_nominal')
 binning = splt.binning.AutoBinning()
 
 dpsi = splt.variable.BasicVariable('splitting_deltaPsi')
+
 cut = splt.cut.AndCuts([
     splt.cut.GreaterThanCut(dpsi, 0),
     splt.cut.GreaterThanCut(splt.variable.BasicVariable('splitting_pt1'), 20),

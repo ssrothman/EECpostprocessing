@@ -10,17 +10,72 @@ import numpy as np
 from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
 from simonpy.AbitraryBinning import ArbitraryBinning
 
+def build_prebinned_dataset_stack(configsuite : str,
+                                  runtag : str,
+                                  dataset : str,
+                                  objsyst : str,
+                                  wtsyst : str,
+                                  table : str,
+                                  location : str = 'local-submit',
+                                  no_count : bool = False,
+                                  label_override : str | None = None,
+                                  color_override : str | None = None,
+                                  extra_key : str | None = None,
+                                  nocov : bool = False,
+                                  showStack : bool = True) -> DatasetStack:
+    
+    stackcfg = cfg['stacks'][dataset]
+    dsets = []
+    for dset in stackcfg['dsets']:
+        dsets.append(load_prebinned_dataset(
+            configsuite,
+            runtag, 
+            dset, 
+            objsyst, 
+            wtsyst,
+            table,
+            location,
+            nocov = nocov,
+        ))
+    for dset in stackcfg['stacks']:
+        dsets.append(build_prebinned_dataset_stack(
+            configsuite,
+            runtag,
+            dset,
+            objsyst,
+            wtsyst,
+            table,
+            location,
+            no_count=no_count,
+            nocov = nocov,
+        ))
+
+    thekey = dataset
+    if extra_key is not None:
+        thekey += '-' + extra_key
+
+    return DatasetStack(
+        key = thekey,
+        color = color_override if color_override is not None else stackcfg['color'],
+        label = label_override if label_override is not None else stackcfg['label'],
+        datasets = dsets,
+        showstack = showStack
+    )
+
+
+
 def build_pq_dataset_stack(configsuite : str,
                            runtag : str,
-                           stackname : str,
+                           dataset : str,
                            objsyst : str,
                            table : str,
                            location : str = 'local-submit',
                            no_count : bool = False,
                            label_override : str | None = None,
                            color_override : str | None = None,
-                           extra_key : str | None = None) -> DatasetStack:
-    stackcfg = cfg['stacks'][stackname]
+                           extra_key : str | None = None,
+                           showStack : bool = True) -> DatasetStack:
+    stackcfg = cfg['stacks'][dataset]
     dsets = []
     for dset in stackcfg['dsets']:
         dsets.append(build_pq_dataset(
@@ -43,7 +98,7 @@ def build_pq_dataset_stack(configsuite : str,
             no_count = no_count
         ))
 
-    thekey = stackname
+    thekey = dataset
     if extra_key is not None:
         thekey += '-' + extra_key
 
@@ -51,7 +106,8 @@ def build_pq_dataset_stack(configsuite : str,
         key = thekey,
         color = color_override if color_override is not None else stackcfg['color'],
         label = label_override if label_override is not None else stackcfg['label'],
-        datasets = dsets
+        datasets = dsets,
+        showstack = showStack
     )
 
 def load_prebinned_dataset(configsuite : str,
@@ -63,7 +119,8 @@ def load_prebinned_dataset(configsuite : str,
                            location : str = 'local-submit',
                            label_override : str | None = None,
                            color_override : str | None = None,
-                           extra_key : str | None = None) -> ValCovPairDataset:
+                           extra_key : str | None = None,
+                           nocov : bool = False) -> ValCovPairDataset:
     
     dsetcfg = lookup_dataset(runtag, dataset)
     
@@ -76,13 +133,16 @@ def load_prebinned_dataset(configsuite : str,
         table
     )
 
-    print(tablepath)
     valpath = tablepath + '_BINNED_%s.npy' % wtsyst
     covpath = tablepath + '_BINNED_covmat_%s.npy' % wtsyst
     binningpath = tablepath + '_bincfg.json'
 
     vals = np.load(fs.open(valpath, 'rb'))
-    covmat = np.load(fs.open(covpath, 'rb'))
+    if nocov:
+        covmat = np.zeros((vals.shape[0], vals.shape[0]))
+    else:
+        covmat = np.load(fs.open(covpath, 'rb'))
+        
     with fs.open(binningpath, 'r') as f:
         bincfg = json.load(f)
     

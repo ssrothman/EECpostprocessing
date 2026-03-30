@@ -1,0 +1,1385 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.0, 0.2)"
+                    ],
+                    "label_override" : "$0.0 < z_{1} < 0.2$",
+                    "color_override" : "#1f77b4",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{1} < 0.3$",
+                    "color_override" : "#2ca02c",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{1} < 0.4$",
+                    "color_override" : "#ff7f0e",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{1} < 0.5$",
+                    "color_override" : "#d62728",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_comparison_z1"
+            ],
+            "logy" : false,
+            "density" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.0, 0.1)"
+                    ],
+                    "label_override" : "$0.0 < z_{2} < 0.1$",
+                    "color_override" : "#1f77b4",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.1, 0.2)"
+                    ],
+                    "label_override" : "$0.1 < z_{2} < 0.2$",
+                    "color_override" : "#ff7f0e",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{2} < 0.3$",
+                    "color_override" : "#2ca02c",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{2} < 0.4$",
+                    "color_override" : "#d62728",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{2} < 0.5$",
+                    "color_override" : "#9467bd",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_comparison_z2"
+            ],
+            "logy" : false,
+            "density" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.0, 0.2)"
+                    ],
+                    "label_override" : "$0.0 < z_{1} < 0.2$",
+                    "color_override" : "#1f77b4",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{1} < 0.3$",
+                    "color_override" : "#2ca02c",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{1} < 0.4$",
+                    "color_override" : "#ff7f0e",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{1} < 0.5$",
+                    "color_override" : "#d62728",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_comparison_z1"
+            ],
+            "logy" : false,
+            "density" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.0, 0.1)"
+                    ],
+                    "label_override" : "$0.0 < z_{2} < 0.1$",
+                    "color_override" : "#1f77b4",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.1, 0.2)"
+                    ],
+                    "label_override" : "$0.1 < z_{2} < 0.2$",
+                    "color_override" : "#ff7f0e",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{2} < 0.3$",
+                    "color_override" : "#2ca02c",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{2} < 0.4$",
+                    "color_override" : "#d62728",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : false,
+                        "no_count" : true    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "GenSplittingsSoftSide",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "isstack" : true,
+                        "no_count" : true    
+                    },
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{2} < 0.5$",
+                    "color_override" : "#9467bd",
+                    "comparison" : "ratio",
+                    "key" : "test",
+                    "ylabel" : "nominal / nospin"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_comparison_z2"
+            ],
+            "logy" : false,
+            "density" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.0, 0.2)"
+                    ],
+                    "label_override" : "$0.0 < z_{1} < 0.2$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{1} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{1} < 0.4$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{1} < 0.5$",
+                    "color_override" : "#d62728"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_nominal_abs_deltaPsi_type3_z23scan"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.0, 0.1)"
+                    ],
+                    "label_override" : "$0.0 < z_{2} < 0.1$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.1, 0.2)"
+                    ],
+                    "label_override" : "$0.1 < z_{2} < 0.2$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{2} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{2} < 0.4$",
+                    "color_override" : "#d62728"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{2} < 0.5$",
+                    "color_override" : "#9467bd"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_nominal_abs_deltaPsi_type3_z56scan"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.0, 0.2)"
+                    ],
+                    "label_override" : "$0.0 < z_{1} < 0.2$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{1} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{1} < 0.4$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{1} < 0.5$",
+                    "color_override" : "#d62728"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_nominal_abs_deltaPsi_type3_z23scan"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.0, 0.1)"
+                    ],
+                    "label_override" : "$0.0 < z_{2} < 0.1$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.1, 0.2)"
+                    ],
+                    "label_override" : "$0.1 < z_{2} < 0.2$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{2} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{2} < 0.4$",
+                    "color_override" : "#d62728"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{2} < 0.5$",
+                    "color_override" : "#9467bd"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_nominal_abs_deltaPsi_type3_z56scan"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.0, 0.2)"
+                    ],
+                    "label_override" : "$0.0 < z_{1} < 0.2$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{1} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{1} < 0.4$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{1} < 0.5$",
+                    "color_override" : "#d62728"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_nospin_5Xand6X_nominal_abs_deltaPsi_type3_z23scan"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.0, 0.1)"
+                    ],
+                    "label_override" : "$0.0 < z_{2} < 0.1$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.1, 0.2)"
+                    ],
+                    "label_override" : "$0.1 < z_{2} < 0.2$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{2} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{2} < 0.4$",
+                    "color_override" : "#d62728"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{2} < 0.5$",
+                    "color_override" : "#9467bd"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_nospin_5Xand6X_nominal_abs_deltaPsi_type3_z56scan"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.0, 0.2)"
+                    ],
+                    "label_override" : "$0.0 < z_{1} < 0.2$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{1} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{1} < 0.4$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z23', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{1} < 0.5$",
+                    "color_override" : "#d62728"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_nospin_8X_nominal_abs_deltaPsi_type3_z23scan"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.0, 0.1)"
+                    ],
+                    "label_override" : "$0.0 < z_{2} < 0.1$",
+                    "color_override" : "#1f77b4"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.1, 0.2)"
+                    ],
+                    "label_override" : "$0.1 < z_{2} < 0.2$",
+                    "color_override" : "#ff7f0e"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.2, 0.3)"
+                    ],
+                    "label_override" : "$0.2 < z_{2} < 0.3$",
+                    "color_override" : "#2ca02c"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.3, 0.4)"
+                    ],
+                    "label_override" : "$0.3 < z_{2} < 0.4$",
+                    "color_override" : "#d62728"
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('z56', 0.4, 0.5)"
+                    ],
+                    "label_override" : "$0.4 < z_{2} < 0.5$",
+                    "color_override" : "#9467bd"
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen_zscan/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_nospin_8X_nominal_abs_deltaPsi_type3_z56scan"
+            ],
+            "logy" : false,
+            "density" : true
+        }
+    ]
+}

@@ -1,0 +1,365 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu_nospin",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type1')",              
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_abs_deltaPsi_type1",
+                "pythia_abs_deltaPsi_type3"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu_nospin",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                }
+            ],
+            "variables" : [
+                "psi123_type1",
+                "psi456_type1",
+                "var::DeltaPhiVariable('psi123_type1', 'psi456_type1')",
+                "pt1",
+                "pt4",
+                "kt23",
+                "kt56",
+                "z23",
+                "z56",
+                "Zmass",
+                "Zpt",
+                "Zy"        
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_psi123_type1",
+                "pythia_psi456_type1",
+                "pythia_deltaphi_psi123_psi456_type1",
+                "pythia_pt1",
+                "pythia_pt4",
+                "pythia_kt23",
+                "pythia_kt56",
+                "pythia_z23",
+                "pythia_z56",
+                "pythia_Zmass",
+                "pythia_Zpt",
+                "pythia_Zy"
+            ],
+            "logy" : true,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type1')",              
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_abs_deltaPsi_type1",
+                "herwig_abs_deltaPsi_type3"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                }
+            ],
+            "variables" : [
+                "psi123_type1",
+                "psi456_type1",
+                "var::DeltaPhiVariable('psi123_type1', 'psi456_type1')",
+                "pt1",
+                "pt4",
+                "kt23",
+                "kt56",
+                "z23",
+                "z56",
+                "Zmass",
+                "Zpt",
+                "Zy"        
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_psi123_type1",
+                "herwig_psi456_type1",
+                "herwig_deltaphi_psi123_psi456_type1",
+                "herwig_pt1",
+                "herwig_pt4",
+                "herwig_kt23",
+                "herwig_kt56",
+                "herwig_z23",
+                "herwig_z56",
+                "herwig_Zmass",
+                "herwig_Zpt",
+                "herwig_Zy"
+            ],
+            "logy" : true,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable('deltaPsi_type1')",              
+                "var::AbsVariable('deltaPsi_type3')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "regular:(0,3.141592, 10)",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_no8x_abs_deltaPsi_type1",
+                "herwig_no8x_abs_deltaPsi_type3"
+            ],
+            "logy" : false,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "GenSplittingsSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "no_count" : true,
+                    "never_resolve" : true
+                }
+            ],
+            "variables" : [
+                "psi123_type1",
+                "psi456_type1",
+                "var::DeltaPhiVariable('psi123_type1', 'psi456_type1')",
+                "pt1",
+                "pt4",
+                "kt23",
+                "kt56",
+                "z23",
+                "z56",
+                "Zmass",
+                "Zpt",
+                "Zy"        
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt4', 200)",
+                "cut::GreaterThanCut('Zpt', 1000)",
+                "cut::GreaterThanCut('pt1', 1000)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "res4_pheno_plots/deltaPsi_gen/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_no8x_psi123_type1",
+                "herwig_no8x_psi456_type1",
+                "herwig_no8x_deltaphi_psi123_psi456_type1",
+                "herwig_no8x_pt1",
+                "herwig_no8x_pt4",
+                "herwig_no8x_kt23",
+                "herwig_no8x_kt56",
+                "herwig_no8x_z23",
+                "herwig_no8x_z56",
+                "herwig_no8x_Zmass",
+                "herwig_no8x_Zpt",
+                "herwig_no8x_Zy"
+            ],
+            "logy" : true,
+            "density" : true
+        }
+
+    ]
+}

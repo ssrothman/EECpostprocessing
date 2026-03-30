@@ -1,7 +1,54 @@
-from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack
+from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack, load_prebinned_dataset, build_prebinned_dataset_stack
 import simonplot as splt
 import json
 import os
+
+
+def build_dataset_from_dscfg(dscfg, all_same_objsyst, all_same_extracut, dsetcut):
+    if dscfg['isstack']:
+        if dscfg.get('isprebinned', False):
+            factory = build_prebinned_dataset_stack
+        else:
+            factory = build_pq_dataset_stack
+    else:
+        if dscfg.get('isprebinned', False):
+            factory = load_prebinned_dataset
+        else:
+            factory = build_pq_dataset
+
+    extrakey = ''
+    if not all_same_objsyst:
+        extrakey += dscfg['objsyst'] + '-'
+    if not all_same_extracut and not isinstance(dsetcut, splt.cut.NoCut):
+        extrakey += dsetcut.key + '-'
+    if extrakey.endswith('-'):
+        extrakey = extrakey[:-1]
+
+    extraargs = {}
+    if 'never_resolve' in dscfg:
+        extraargs['showStack'] = not dscfg['never_resolve']
+
+    if not dscfg.get('isprebinned', False):
+        extraargs['no_count'] = dscfg.get('no_count', False)
+
+    if dscfg.get('isprebinned', False):
+        extraargs['wtsyst'] = dscfg.get('wtsyst', 'nominal')
+
+    if 'nocov' in dscfg:
+        extraargs['nocov'] = dscfg['nocov']
+
+    return factory(
+        configsuite=dscfg['configsuite'],
+        runtag=dscfg['runtag'],
+        dataset=dscfg['name'],
+        objsyst=dscfg['objsyst'],
+        table=dscfg['table'],
+        location=dscfg.get('location', 'xrootd-submit'),
+        label_override=dscfg.get('label_override', None),
+        color_override=dscfg.get('color_override', None),
+        extra_key=extrakey if extrakey else None,
+        **extraargs
+    )
 
 def parse_var(varname):
     if '::' in varname:
@@ -20,12 +67,21 @@ def run_plots(cfg):
     nExtraCuts = 0
 
     #check if all objsysts are the same
-    first_objsyst = cfg['datasets'][0]['objsyst']
+    if 'comparison' in cfg['datasets'][0]:
+        first_objsyst = cfg['datasets'][0]['dataset1']['objsyst']
+    else:
+        first_objsyst = cfg['datasets'][0]['objsyst']
+        
     all_same_objsyst = True
     for dsetcfg in cfg['datasets'][1:]:
-        if dsetcfg['objsyst'] != first_objsyst:
-            all_same_objsyst = False
-            break
+        if 'comparison' in dsetcfg:
+            if dsetcfg['dataset1']['objsyst'] != first_objsyst or dsetcfg['dataset2']['objsyst'] != first_objsyst:
+                all_same_objsyst = False
+                break
+        else:
+            if dsetcfg['objsyst'] != first_objsyst:
+                all_same_objsyst = False
+                break
 
     #check if extracuts are all the same
     first_extracut = cfg['datasets'][0].get('extra_cuts', [])
@@ -44,34 +100,36 @@ def run_plots(cfg):
             nExtraCuts += 1
         else:
             dsetcuts.append(splt.cut.NoCut())
-        
-        if dscfg['isstack']:
-            factory = build_pq_dataset_stack
-        else:
-            factory = build_pq_dataset
-        
-        extrakey = ''
-        if not all_same_objsyst:
-            extrakey += dscfg['objsyst'] + '-'
-        if not all_same_extracut and not isinstance(dsetcuts[-1], splt.cut.NoCut):
-            extrakey += dsetcuts[-1].key + '-'
-        if extrakey.endswith('-'):
-            extrakey = extrakey[:-1]
 
-        datasets.append(
-            factory(
-                dscfg['configsuite'],
-                dscfg['runtag'],
-                dscfg['name'],
-                dscfg['objsyst'],
-                dscfg['table'],
-                dscfg.get('location', 'xrootd-submit'),
-                no_count = dscfg.get('no_count', False),
-                label_override=dscfg.get('label_override', None),
-                color_override=dscfg.get('color_override', None),
-                extra_key = extrakey if extrakey else None
+        if 'comparison' in dscfg:
+            dset1 = build_dataset_from_dscfg(
+                dscfg['dataset1'],
+                all_same_objsyst,
+                all_same_extracut,
+                dsetcuts[-1],
             )
-        )
+            dset2 = build_dataset_from_dscfg(
+                dscfg['dataset2'],
+                all_same_objsyst,
+                all_same_extracut,
+                dsetcuts[-1],
+            )
+            datasets.append(splt.plottables.DatasetComparison(
+                key=dscfg['key'],
+                color=dscfg.get('color_override', None),
+                label=dscfg.get('label_override', dscfg['key']),
+                ylabel = dscfg['ylabel'],
+                dataset1=dset1,
+                dataset2=dset2,
+                kind=dscfg['comparison']
+            ))
+        else:
+            datasets.append(build_dataset_from_dscfg(
+                dscfg,
+                all_same_objsyst,
+                all_same_extracut,
+                dsetcuts[-1],
+            ))
 
     
     variables = []
@@ -104,8 +162,15 @@ def run_plots(cfg):
         binning = splt.binning.AutoIntCategoryBinning(
             label_lookup=label_lookup.get(labelkey, {})
         )
+    elif cfg['binning'].startswith('regular'):
+        #expect something of the form "regular:(start, stop, nbins)"
+        _, params = cfg['binning'].split(':')
+        start, stop, nbins = eval(params)
+        binning = splt.binning.BasicBinning(nbins=nbins, low=start, high=stop)
+    elif cfg['binning'] == 'prebinned':
+        binning = splt.binning.PrebinnedBinning()
     else:
-        raise NotImplementedError("Only 'auto' binning is implemented so far in this driver script")
+        raise NotImplementedError("Binning type {} not implemented in this driver script!".format(cfg['binning']))
     
     if 'force_range' in cfg:
         if hasattr(binning, 'force_range'):
@@ -133,6 +198,7 @@ def run_plots(cfg):
                 output_folder=cfg['plotspath'],
                 output_prefix=cfg['plotsprefix'],
                 no_ratiopad=cfg.get('nopad', False),
+                no_lumi_normalization=cfg.get('no_lumi_normalization', False),
                 logy=cfg.get('logy', None),
                 density=cfg.get('density', False),
                 override_filename=cfg.get('override_filenames', [None]*len(variables))[i],

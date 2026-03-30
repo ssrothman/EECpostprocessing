@@ -1,0 +1,304 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu_nospin",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::NormalizePerBlock(var::BasicPrebinnedVariable(), axes=['r'])"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5], 'r' : [0, 0.4]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_res4tee_totalReco_normalized"
+            ],
+            "logy" : false,
+            "no_lumi_normalization" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_6X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::NormalizePerBlock(var::BasicPrebinnedVariable(), axes=['r'])"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5], 'r' : [0, 0.4]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_6X_res4tee_totalReco_normalized"
+            ],
+            "logy" : false,
+            "no_lumi_normalization" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_6X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::NormalizePerBlock(var::BasicPrebinnedVariable(), axes=['r'])"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5], 'r' : [0, 0.4]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_6X8X_res4tee_totalReco_normalized"
+            ],
+            "logy" : false,
+            "no_lumi_normalization" : true
+        },
+
+
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu_nospin",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicPrebinnedVariable()"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5], 'r' : [0, 0.4]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_res4tee_totalReco"
+            ],
+            "logy" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_6X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicPrebinnedVariable()"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5], 'r' : [0, 0.4]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_6X_res4tee_totalReco"
+            ],
+            "logy" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_6X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : false,
+                    "no_count" : true,
+                    "isprebinned" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicPrebinnedVariable()"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5], 'r' : [0, 0.4]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_6X8X_res4tee_totalReco"
+            ],
+            "logy" : true
+        }
+    ]
+}
