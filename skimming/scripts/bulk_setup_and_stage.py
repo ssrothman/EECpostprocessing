@@ -5,7 +5,7 @@ import argparse
 parser = argparse.ArgumentParser(description="Run EVERYTHING.")
 parser.add_argument('--signal-mc', type=str, nargs='+', help="List of signal MC datasets to process",
                     default=[
-                        'Pythia_inclusive', 
+                        #'Pythia_inclusive', 
                         'Herwig_inclusive',
                         'Pythia_HT-0to70',
                         'Pythia_HT-70to100',
@@ -30,50 +30,51 @@ parser.add_argument('--background-mc', type=str, nargs='*', help="List of backgr
                     ])
 parser.add_argument('--data', type=str, nargs='*', help="List of data datasets to process",
                     default=[
-                        'DATA_2018A', 
-                        'DATA_2018B', 
-                        'DATA_2018C', 
-                        'DATA_2018D'
+                        #'DATA_2018A', 
+                        #'DATA_2018B', 
+                        #'DATA_2018C', 
+                        #'DATA_2018D'
                     ])
 parser.add_argument('--config-suite', type=str, help="name of config suite to use",
                      default="basic")
 parser.add_argument('--objsysts', type=str, nargs='+', help="List of object syst variations to process",
                     default=[
                         'nominal',
-                        'JES_UP',
-                        'JES_DN',
-                        'JER_UP',
-                        'JER_DN',
-                        'UNCLUSTERED_UP', 
-                        'UNCLUSTERED_DN', 
-                        'CH_UP', 
-                        'CH_DN',
-                        'TRK_EFF'
+                        #'JES_UP',
+                        #'JES_DN',
+                        #'JER_UP',
+                        #'JER_DN',
+                        #'UNCLUSTERED_UP', 
+                        #'UNCLUSTERED_DN', 
+                        #'CH_UP', 
+                        #'CH_DN',
+                        #'TRK_EFF'
                     ])
 parser.add_argument('--tables', type=str, nargs='+', help="List of table variations to process",
                     default=[
-                        #'all', 
-                        #'count'
-                        "EECres4Transfer:tee",
-                        "EECres4Obs:True,tee,total",
-                        "EECres4Obs:False,tee,total",
-                        "EECres4Obs:True,tee,unmatched",
-                        "EECres4Obs:False,tee,unmatched",
-                        "EECres4Obs:True,tee,untransfered",
-                        "EECres4Obs:False,tee,untransfered"
+                        'allKinematics', 
+                        'count'
                     ])
 parser.add_argument('--files_per_job', type=int, help="Number of input files per job",
-                     default=5)
+                     default=100)
 parser.add_argument('--runtag', type=str, help="Datasets runtag",
-                    default='Apr_23_2025')
+                    default='Mar_01_2026')
+
 parser.add_argument('--nocheck', action='store_true', help="Skip checking for existing outputs before setting up workspaces")
+
+parser.add_argument('--location', type=str, help="Location to stage outputs to", default='xrootd-submit')
+
+stage = parser.add_mutually_exclusive_group(required=True)
+stage.add_argument('--condor', dest='stage', action='store_const', const='condor')
+stage.add_argument('--slurm',  dest='stage', action='store_const', const='slurm')
+
 args = parser.parse_args()
 
 import os
 import subprocess
 
 def setup_and_stage(dset, objsyst, table):
-    cmd = 'setup_skimming_workspace.py skim_%s_%s_%s %s %s %s --tables %s --output-location xrootd-submit --config-suite %s' % (
+    cmd = 'setup_skimming_workspace.py skim_%s_%s_%s %s %s %s --tables %s --output-location %s --config-suite %s' % (
         dset,
         objsyst,
         table,
@@ -81,6 +82,7 @@ def setup_and_stage(dset, objsyst, table):
         dset,
         objsyst,
         table,
+        args.location,
         args.config_suite
     )
     if args.nocheck:
@@ -96,7 +98,9 @@ def setup_and_stage(dset, objsyst, table):
                     # it's because all the desired outputs already exist! 
                     # so we can skip staging too.
                     
-    cmd = 'stage_to_condor.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --exec' % (
+
+    cmd = 'stage_to_%s.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --exec' % (
+        args.stage,
         dset,
         objsyst,
         table,
@@ -109,7 +113,7 @@ def setup_and_stage(dset, objsyst, table):
     print(output.stdout.decode())
     if output.returncode != 0:
         print(output.stderr.decode())
-        raise RuntimeError("Staging to condor failed")
+        raise RuntimeError("Staging to %s failed" % args.stage)
 
 for smc in args.signal_mc:
     for table in args.tables:
