@@ -94,12 +94,7 @@ else:
     ab = ArbitraryBinning()
     ab.setup_from_histogram(H)
 
-if args.cov:
-    thefun = fill_cov
-else:
-    thefun = fill_hist
-
-result = thefun(
+result = fill_hist(
     H, prebinned,
     dataset,
     'wt_%s' % args.evtwt,
@@ -117,21 +112,46 @@ _, outpath = get_hist_path(
     args.objsyst,
     args.evtwt,
     args.table,
-    args.cov,
+    False,
     args.statN,
     args.statK
 )
 
-if args.cov:
-    halfshape = result.shape[:len(result.shape)//2]
-    thelen = np.prod(halfshape)
-    output = result.reshape((thelen, thelen)) # type: ignore
-else:
-    output = result.values(flow=True).ravel() # type: ignore
-    
+output = result.values(flow=True).ravel() # type: ignore
 print("Writing result to", outpath)
 with fs.open(outpath, 'wb') as f:
     np.save(f, output)
+
+if args.cov:
+    cov_result = fill_cov(
+        H, prebinned,
+        dataset,
+        'wt_%s' % args.evtwt,
+        itemwt = itemwt,
+        statN = args.statN,
+        statK = args.statK,
+        reweight = None #for now
+    )
+
+    _, cov_outpath = get_hist_path(
+        args.location,
+        args.config_suite,
+        args.runtag,
+        args.dataset,
+        args.objsyst,
+        args.evtwt,
+        args.table,
+        True,
+        args.statN,
+        args.statK
+    )
+
+    halfshape = cov_result.shape[:len(cov_result.shape)//2]
+    thelen = np.prod(halfshape)
+    cov_output = cov_result.reshape((thelen, thelen)) # type: ignore
+    print("Writing covariance to", cov_outpath)
+    with fs.open(cov_outpath, 'wb') as f:
+        np.save(f, cov_output)
 
 _, bincfg_path = get_hist_bincfg_path(
     args.location,

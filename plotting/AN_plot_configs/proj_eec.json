@@ -4,8 +4,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [40, 100]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -18,8 +18,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [100, 200]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -32,8 +32,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [200, 340]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -46,8 +46,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [340, 520]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -60,8 +60,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [520, 740]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -74,8 +74,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [740, 1000]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -88,8 +88,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [1000, 2000]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -102,8 +102,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [40, 100]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -116,8 +116,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [100, 200]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -130,8 +130,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [200, 340]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -144,8 +144,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [340, 520]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -158,8 +158,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [520, 740]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -172,8 +172,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [740, 1000]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
@@ -186,8 +186,8 @@
             "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
-            "variables": ["var::splt.variable.BasicPrebinnedVariable()"],
-            "weights": ["var::splt.variable.ConstantVariable(1.0)"],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
             "cut": [{"type": "slice", "edges": {"Jpt": [1000, 2000]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
