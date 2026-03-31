@@ -22,7 +22,7 @@ fig.colorbar(im, ax=ax)
 ax.set_xlabel("Bin index")
 ax.set_ylabel("Bin index")
 
-hep.label.ExpLabel(ax=ax, exp='CMS', text='Private Simulation', com=13)
+hep.cms.label(ax=ax, data=False, label='Private Simulation', com=13)
 
 fig.tight_layout()
 fig.savefig(args.output, dpi=150)
