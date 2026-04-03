@@ -74,5 +74,29 @@
                 "Jpt_stitched_vs_inclusive"
             ]
         }
+        ,{
+            "datasets" : [
+                {
+                    "configsuite" : "EvtMCprojConfig",
+                    "runtag" : "v6",
+                    "name" : "DYJetsToLL_Pythia",
+                    "table" : "jets",
+                    "objsyst" : "NOM",
+                    "location" : "dylan-lxplus-eos",
+                    "isstack" : false,
+                    "no_count" : true
+                }
+            ],
+            "variables" : ["LHE_HT"],
+            "weights" : ["wt_nominal"],
+            "cut" : [],
+            "binning" : "explicit:[70,100,200,400,600,800,1200,2500,5000]",
+            "plotspath" : "ANplots/HTstitching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "no_lumi_normalization" : true,
+            "logx" : true,
+            "override_filenames" : ["LHE_HT_v6"]
+        }
     ]
 }
