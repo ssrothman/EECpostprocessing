@@ -201,10 +201,85 @@
             ],
             "variables": ["var::BasicPrebinnedVariable()"],
             "weights": ["var::ConstantVariable(1.0)"],
-            "cut": [{"type": "slice", "edges": {"Jpt": [1000, 2000]}}],
+            "cut": [{"type": "slice", "edges": {"Jpt": [1000, 1500]}}],
             "binning": "prebinned",
             "plotspath": "plots/proj",
-            "plotsprefix": "EEC_gen_Jpt1000-2000",
+            "plotsprefix": "EEC_gen_Jpt1000-1500",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [1000, 1500]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/proj",
+            "plotsprefix": "EEC_reco_Jpt1000-1500",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [1500, 2500]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/proj",
+            "plotsprefix": "EEC_gen_Jpt1500-2500",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [1500, 2500]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/proj",
+            "plotsprefix": "EEC_reco_Jpt1500-2500",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [2500, 5000]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/proj",
+            "plotsprefix": "EEC_gen_Jpt2500-5000",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [2500, 5000]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/proj",
+            "plotsprefix": "EEC_reco_Jpt2500-5000",
             "driver": "plot_histogram",
             "no_lumi_normalization": true,
             "logx": true,
