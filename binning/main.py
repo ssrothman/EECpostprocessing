@@ -271,6 +271,9 @@ def fill_hist(H : hist.Hist,
     total_rows = dset.count_rows()
     rows_so_far = 0
 
+    if total_rows == 0:
+        return H
+
     for batch in iterator:
         rows_so_far += batch.num_rows
         iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
