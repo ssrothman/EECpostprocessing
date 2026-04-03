@@ -17,4 +17,8 @@ echo "Computing covariance for proj_Reco NOM..."
 python binning/scripts/bin.py $RUNTAG $DATASET NOM proj_Reco \
     --location $LOCATION --config-suite $CONFIG --cov
 
+echo "Computing covariance for proj_Gen NOM..."
+python binning/scripts/bin.py $RUNTAG $DATASET NOM proj_Gen \
+    --location $LOCATION --config-suite $CONFIG --cov
+
 echo "Done."
