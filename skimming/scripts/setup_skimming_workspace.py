@@ -60,18 +60,21 @@ _ALL_PROJ_TABLES = [
     "EECprojTransfer",
 ]
 
-if args.tables == ['allKinematics']:
-    args.tables = _ALL_KINEMATICS_TABLES
-elif args.tables == ['allProj']:
-    args.tables = _ALL_PROJ_TABLES
-elif args.tables == ['allRes4']:
-    args.tables = _ALL_RES4_TABLES
-elif args.tables == ['allRes4tee']:
-    args.tables = _ALL_RES4TEE_TABLES
-elif args.tables == ['allRes4dipole']:
-    args.tables = _ALL_RES4DIPOLE_TABLES
-elif args.tables == ['allRes4triangle']:
-    args.tables = _ALL_RES4TRIANGLE_TABLES
+_SHORTCUTS = {
+    'allKinematics'  : _ALL_KINEMATICS_TABLES,
+    'allProj'        : _ALL_PROJ_TABLES,
+    'allRes4'        : _ALL_RES4_TABLES,
+    'allRes4tee'     : _ALL_RES4TEE_TABLES,
+    'allRes4dipole'  : _ALL_RES4DIPOLE_TABLES,
+    'allRes4triangle': _ALL_RES4TRIANGLE_TABLES,
+}
+expanded = []
+for t in args.tables:
+    if t in _SHORTCUTS:
+        expanded.extend(_SHORTCUTS[t])
+    else:
+        expanded.append(t)
+args.tables = expanded
 
 from skimming.config.load_config import load_config
 thecfg = load_config(args.config_suite)

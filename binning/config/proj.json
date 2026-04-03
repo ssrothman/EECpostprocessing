@@ -22,7 +22,7 @@
             ],
             "underflow" : false,
             "overflow" : false,
-            "clamp" : true
+            "clamp" : false
         }
     ],
     "gen" : [
@@ -48,7 +48,7 @@
             ],
             "underflow" : false,
             "overflow" : false,
-            "clamp" : true
+            "clamp" : false
         }
     ]
 }

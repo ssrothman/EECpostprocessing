@@ -227,6 +227,13 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
             if H.axes[name].traits.underflow:
                 indices[:,i] += 1
 
+        # mask out entries that fall outside any non-clamped axis
+        mask = np.ones(len(indices), dtype=bool)
+        for i, ax in enumerate(H.axes):
+            if not ax.clamp:
+                mask &= (indices[:,i] >= 0) & (indices[:,i] < ax.extent)
+        indices = indices[mask]
+
         weight = get(batch, weightname)
         if itemwt is not None:
             weight = weight * get(batch, itemwt)
@@ -236,7 +243,8 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
                 rwin[input] = get(batch, input.name)
             weight = weight * reweight.evaluate(**rwin)
 
-        evtid = get(batch, 'event_id')
+        weight = weight[mask]
+        evtid = get(batch, 'event_id')[mask]
 
         cov.fillEvents(indices, weight, evtid)
             
