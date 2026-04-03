@@ -3,7 +3,7 @@ from .eventkinematics import EventKinematicsTable
 from .constituentkinematics import ConstituentKinematicsTable
 from .cutflow import CutflowTable
 from .jetkinematics import SimonJetKinematicsTable
-from .EEC import EECprojObsTable, EECres4ObsTable, EECres4TransferTable
+from .EEC import EECprojObsTable, EECprojTransferTable, EECres4ObsTable, EECres4TransferTable
 from .generictable import GenericTable
 
 from coffea.analysis_tools import Weights, PackedSelection
@@ -20,6 +20,7 @@ table_classes = {
     "CutflowTable": CutflowTable,
     "SimonJetKinematicsTable": SimonJetKinematicsTable,
     "EECprojObs": EECprojObsTable,
+    "EECprojTransfer": EECprojTransferTable,
     "EECres4Obs": EECres4ObsTable,
     "EECres4Transfer": EECres4TransferTable,
     'GenericTable': GenericTable

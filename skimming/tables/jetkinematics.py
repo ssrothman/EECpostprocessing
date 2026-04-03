@@ -76,6 +76,9 @@ class SimonJetKinematicsTable:
             if field.startswith('splitting_'):
                 thevals[field] = getattr(jets.simonjets, field)[jetmask][evtmask]
 
+        if hasattr(objs, 'LHE_HT'):
+            thevals['LHE_HT'] = objs.LHE_HT[evtmask]
+
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(
             thevals,

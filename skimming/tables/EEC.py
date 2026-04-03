@@ -240,6 +240,28 @@ class EECprojObsTable(EECgenericTable):
         return table.set_column(col_idx, 'R', R_float)
 
 
+class EECprojTransferTable(EECgenericTable):
+    @property
+    def name(self) -> str:
+        return 'proj_transfer'
+
+    def run_table(self,
+                  objs: AllObjects,
+                  evtsel: PackedSelection,
+                  jetsel: PackedJetSelection,
+                  weights: Weights):
+        table = self._table_transfer(
+            objs, evtsel, jetsel, weights,
+            'proj', ['R'], 2
+        )
+        for col in ['R_gen', 'R_reco']:
+            col_idx = table.schema.get_field_index(col)
+            r_int = table[col].to_pylist()
+            r_float = pa.array([float(_PROJ_R_CENTERS[i]) for i in r_int], type=pa.float32())
+            table = table.set_column(col_idx, col, r_float)
+        return table
+
+
 class EECres4ObsTable(EECgenericTable):
     def __init__(self, gen : bool, whichEECdistr : str, whichEECobj : _EECobjs):
         self._gen = gen

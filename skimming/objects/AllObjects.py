@@ -4,7 +4,7 @@ from vector import obj
 from .jets import SimonJets, SimpleJets
 from .leptons import Muons, Electrons
 from .met import MET
-from .EEC import EECproj, EECprojOrder2, EECres3, EECres4
+from .EEC import EECproj, EECprojOrder2, EECprojOrder2Transfer, EECres3, EECres4
 from .generics import GenericObjectContainer
 from coffea.lookup_tools import extractor
 from coffea.jetmet_tools import FactorizedJetCorrector, JECStack, CorrectedJetsFactory
@@ -21,6 +21,7 @@ objclasses = {
     "GenericObjectContainer" : GenericObjectContainer,
     "EECproj" : EECproj,
     "EECprojOrder2" : EECprojOrder2,
+    "EECprojOrder2Transfer" : EECprojOrder2Transfer,
     "EECres3" : EECres3,
     "EECres4" : EECres4
 }

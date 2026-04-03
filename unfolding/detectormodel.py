@@ -32,13 +32,16 @@ def get_model_matrices(dset : dsspec, syst : str, isobjsyst : bool, what : str):
         )
 
         umG = load_hist_from_dataset(
-            dset, objsyst, 
+            dset, objsyst,
             '%s_unmatchedGen_BINNED_%s.npy' % (what, wtsyst)
         )
-        utG = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_untransferedGen_BINNED_%s.npy' % (what, wtsyst)
-        )
+        try:
+            utG = load_hist_from_dataset(
+                dset, objsyst,
+                '%s_untransferedGen_BINNED_%s.npy' % (what, wtsyst)
+            )
+        except FileNotFoundError:
+            utG = np.zeros_like(umG)
         bkgG = umG + utG
 
         totG = load_hist_from_dataset(
@@ -50,13 +53,16 @@ def get_model_matrices(dset : dsspec, syst : str, isobjsyst : bool, what : str):
         gamma = bkgG / Gdenom
 
         umR = load_hist_from_dataset(
-            dset, objsyst, 
+            dset, objsyst,
             '%s_unmatchedReco_BINNED_%s.npy' % (what, wtsyst)
         )
-        utR = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_untransferedReco_BINNED_%s.npy' % (what, wtsyst)
-        )
+        try:
+            utR = load_hist_from_dataset(
+                dset, objsyst,
+                '%s_untransferedReco_BINNED_%s.npy' % (what, wtsyst)
+            )
+        except FileNotFoundError:
+            utR = np.zeros_like(umR)
         bkgR = umR + utR
 
         totR = load_hist_from_dataset(

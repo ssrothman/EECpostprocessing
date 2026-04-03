@@ -81,6 +81,11 @@
             "params" : { "name" : "UnmatchedGenChargedEECsNOMproj" },
             "MConly" : true
         },
+        "EECtransfer" : {
+            "class"  : "EECprojOrder2Transfer",
+            "params" : { "name" : "GenChargedEECsNOMprojTransfer" },
+            "MConly" : true
+        },
         "Generics" : {
             "class" : "GenericObjectContainer",
             "params" : {
@@ -90,7 +95,9 @@
                     "lumi"      : "luminosityBlock",
                     "genWeight" : "genWeight"
                 },
-                "optional_names" : {}
+                "optional_names" : {
+                    "LHE_HT" : "LHE_HT"
+                }
             },
             "MConly" : false
         }

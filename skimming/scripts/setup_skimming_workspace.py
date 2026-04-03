@@ -52,8 +52,18 @@ _ALL_RES4TRIANGLE_TABLES = [
 ]
 _ALL_RES4_TABLES = _ALL_RES4TEE_TABLES + _ALL_RES4DIPOLE_TABLES + _ALL_RES4TRIANGLE_TABLES
 
+_ALL_PROJ_TABLES = [
+    "EECprojObs:True,total",
+    "EECprojObs:True,unmatched",
+    "EECprojObs:False,total",
+    "EECprojObs:False,unmatched",
+    "EECprojTransfer",
+]
+
 if args.tables == ['allKinematics']:
     args.tables = _ALL_KINEMATICS_TABLES
+elif args.tables == ['allProj']:
+    args.tables = _ALL_PROJ_TABLES
 elif args.tables == ['allRes4']:
     args.tables = _ALL_RES4_TABLES
 elif args.tables == ['allRes4tee']:
