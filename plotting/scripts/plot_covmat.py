@@ -12,11 +12,15 @@ args = parser.parse_args()
 
 cov = np.load(args.path)
 
+diag = np.sqrt(np.diag(cov))
+denom = np.outer(diag, diag)
+denom = np.where(denom == 0, 1.0, denom)
+corr = cov / denom
+
 fig, ax = plt.subplots(figsize=(8, 7))
 hep.style.use("CMS")
 
-im = ax.imshow(cov, aspect='auto', cmap='RdBu_r',
-               vmin=-np.max(np.abs(cov)), vmax=np.max(np.abs(cov)))
+im = ax.imshow(corr, aspect='auto', cmap='RdBu_r', vmin=-1, vmax=1)
 fig.colorbar(im, ax=ax)
 
 ax.set_xlabel("Bin index")
