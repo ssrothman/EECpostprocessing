@@ -92,21 +92,6 @@
         },
         {
             "datasets": [
-                {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Reco", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
-            ],
-            "variables": ["var::BasicPrebinnedVariable()"],
-            "weights": ["var::ConstantVariable(1.0)"],
-            "cut": [{"type": "slice", "edges": {"Jpt": [1000, 2000]}}],
-            "binning": "prebinned",
-            "plotspath": "plots/proj",
-            "plotsprefix": "EEC_reco_Jpt1000-2000",
-            "driver": "plot_histogram",
-            "no_lumi_normalization": true,
-            "logx": true,
-            "nopad": true
-        },
-        {
-            "datasets": [
                 {"configsuite": "EvtMCprojConfig", "runtag": "v6", "name": "DYJetsToLL_Pythia", "table": "proj_Gen", "objsyst": "NOM", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
             ],
             "variables": ["var::BasicPrebinnedVariable()"],
