@@ -63,6 +63,20 @@ class Histogram:
         with fs.open(binningpath, 'r') as f:
             binning.from_dict(json.load(f))
 
+        length = len(covmat)
+        covmat = np.delete(covmat, range(length-50, length), 0)
+        covmat = np.delete(covmat, range(length-50, length), 1)
+        covmat = np.delete(covmat, range(0, 50), 0)
+        covmat = np.delete(covmat, range(0, 50), 1)
+        values = values[50:-50]
+        valid = ~np.isnan(np.diag(covmat))
+        covmat = covmat[valid][:, valid]
+        values = values[valid]
+        print(binning)
+        print(covmat.shape)
+        print(values.shape)
+        print(covmat)
+
         print("Inverting covariance matrix...")
         invcov = smart_inverse(covmat, False)
 

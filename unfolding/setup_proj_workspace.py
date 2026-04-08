@@ -69,4 +69,12 @@ model = DetectorModel(
 print(model)
 model.dump_to_disk(os.path.join(WORKSPACE, 'detectormodel'))
 
+valid_mask_path = os.path.join(WORKSPACE, 'valid_bins.npy')                                                                           
+raw_cov = load_hist_from_dataset(pythia_v6, OBJSYST, 'proj_Reco_BINNED_covmat_nominal.npy')                                           
+raw_cov = raw_cov[50:-50, 50:-50]                                                                                                     
+valid = ~np.isnan(np.diag(raw_cov))                                                                                                   
+np.save(valid_mask_path, valid)                                                                                                       
+print("Valid bins:", valid.sum(), "of", len(valid))
+
+
 print("Workspace written to:", WORKSPACE)

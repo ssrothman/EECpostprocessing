@@ -20,7 +20,22 @@ gen = Histogram.from_disk(os.path.join(WORKSPACE, 'gen'))
 print("Loading detector model...")
 model = DetectorModel.from_disk(os.path.join(WORKSPACE, 'detectormodel'))
 print(model)
-
+valid = np.load(os.path.join(WORKSPACE, 'valid_bins.npy'))
+ntrim = (model.nReco - len(valid)) // 2 
+model._transfer0          = model._transfer0[ntrim:-ntrim, ntrim:-ntrim]
+model._gamma0             = model._gamma0[ntrim:-ntrim]
+model._rho0               = model._rho0[ntrim:-ntrim]
+model._gammaVariations    = model._gammaVariations[:, ntrim:-ntrim]
+model._rhoVariations      = model._rhoVariations[:, ntrim:-ntrim]
+model._transferVariations = model._transferVariations[:, ntrim:-ntrim, ntrim:-ntrim]
+model._transfer0          = model._transfer0[np.ix_(valid, valid)]
+model._gamma0             = model._gamma0[valid]
+model._rho0               = model._rho0[valid]
+model._gammaVariations    = model._gammaVariations[:, valid]                                                                          
+model._rhoVariations      = model._rhoVariations[:, valid]                                                                            
+model._transferVariations = model._transferVariations[:, np.ix_(valid, valid)[0], np.ix_(valid, valid)[1]]
+model._nGen  = int(valid.sum())                                                                                                       
+model._nReco = int(valid.sum())
 # gen values are used as the baseline; minimizer solves for per-bin multipliers
 genbaseline = gen.values.copy()
 
