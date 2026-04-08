@@ -1,13 +1,11 @@
 {
   "meta": {
-    "table_name": "mediumB_efficiency",
-    "output_file": "ANplots/yields/mediumB_efficiency.txt",
+    "table_name": "events_yield_naive",
+    "output_file": "ANplots/yields/events_yield_naive.txt",
     "target_lumi": 59.81,
-    "float_format": "%.2f",
-    "latex_bins_label" : "Jet $p_{T}$ bin [GeV]"
+    "float_format": "%.0f"
   },
   "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC || DATA",
-  "table_metric" : "efficiency",
   "datasets": [
     {
       "key": "ZZ",
@@ -15,7 +13,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "ZZ",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": false,
@@ -27,7 +25,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "WW",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": false,
@@ -39,7 +37,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "WZ",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": false,
@@ -51,7 +49,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "TT",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": false,
@@ -63,7 +61,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "ST",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": true,
@@ -75,7 +73,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "Pythia_HTsum",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": true,
@@ -87,7 +85,7 @@
       "configsuite" : "BasicConfig",
       "runtag" : "Mar_01_2026",
       "name" : "DATA",
-      "table" : "jets",
+      "table" : "events",
       "objsyst" : "DATA",
       "location" : "scratch-submit",
       "isstack" : true,
@@ -96,41 +94,12 @@
     }
   ],
   "base_cuts": [
-    "cut::EqualsCut('nMu', 2)",
-    "cut::EqualsCut('nEle', 0)"
-  ],
-  "alternative_cut": [
-    "cut::LessThanCut('numMediumB', 2)",
-    "cut::EqualsCut('nMu', 2)",
-    "cut::EqualsCut('nEle', 0)"
   ],
   "bins": [
-    [
-      "cut::TwoSidedCut('Jpt', 30, 50)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 50, 90)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 90, 150)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 150, 250)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 250, 400)"
-    ],
-    [
-      "cut::GreaterThanCut('Jpt', 400)"
-    ]
+    []
   ],
   "bin_labels": [
-    "[30,50]",
-    "[50,90]",
-    "[90,150]",
-    "[150,250]",
-    "[250,400]",
-    "[400,inf]"
+    "Events"
   ],
   "weight_variable": "wt_nominal",
   "totals": [
