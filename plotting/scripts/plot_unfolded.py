@@ -34,7 +34,8 @@ JPT_BINS = [
 ]
 
 x          = np.load(os.path.join(args.workspace, 'minimization', 'result', 'x.npy'))
-gen_values = np.load(os.path.join(args.workspace, 'gen', 'values.npy'))
+gen_values = np.load(os.path.join(args.workspace, 'gen',  'values.npy'))
+reco_values = np.load(os.path.join(args.workspace, 'reco', 'values.npy'))
 valid      = np.load(os.path.join(args.workspace, 'valid_bins.npy'))
 
 unfolded = x * gen_values
@@ -56,29 +57,38 @@ for i in range(len(JPT_BINS)):
     jpt_r_edges.append(r_edges)
     idx += n_r
 
+def norm(vals, edges):
+    dR = np.diff(edges)
+    integral = np.sum(vals * dR)
+    if integral == 0:
+        return vals / dR
+    return vals / (integral * dR)
+
 os.makedirs(args.output, exist_ok=True)
 hep.style.use('CMS')
 
 for i, (jlo, jhi) in enumerate(JPT_BINS):
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(10, 8))
 
-    sl       = jpt_slices[i]
-    r_edges  = jpt_r_edges[i]
-    unf_vals = unfolded[sl]
-    gen_vals = gen_values[sl]
+    sl        = jpt_slices[i]
+    r_edges   = jpt_r_edges[i]
+    unf_vals  = unfolded[sl]
+    gen_vals  = gen_values[sl]
+    reco_vals = reco_values[sl]
 
-    ax.stairs(unf_vals, r_edges, label='Unfolded', color='black')
-    ax.stairs(gen_vals, r_edges, label='MC Gen',   color='red', linestyle='--')
+    hep.histplot(norm(unf_vals,  r_edges), r_edges, ax=ax, label='Unfolded', color='black')
+    hep.histplot(norm(gen_vals,  r_edges), r_edges, ax=ax, label='MC Gen',   color='red',  linestyle='--')
+    hep.histplot(norm(reco_vals, r_edges), r_edges, ax=ax, label='Reco',     color='blue', linestyle=':')
 
     ax.set_xscale('log')
     if i > 0:
         ax.set_yscale('log')
 
     ax.set_xlabel('R')
-    ax.set_ylabel('EEC')
+    ax.set_ylabel('$(1/\\sigma)\\, d\\sigma/dR$')
     ax.legend()
 
-    hep.cms.label(ax=ax, data=False, text='Private Simulation', com=13)
+    hep.cms.label(ax=ax, data=False, text='Private', com=13)
 
     fig.tight_layout()
     fname = os.path.join(args.output, f'unfolded_Jpt{jlo}-{jhi}.png')
