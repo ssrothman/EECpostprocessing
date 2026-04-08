@@ -40,7 +40,7 @@ valid      = np.load(os.path.join(args.workspace, 'valid_bins.npy'))
 unfolded = x * gen_values
 
 # bin structure: Jpt slow index, R fast index (C-order)
-# first Jpt bin is missing some leading R bins (removed as NaN)
+# first Jpt bin may be missing leading R bins (removed as NaN)
 n_first = int(valid.sum()) - 8 * 50
 jpt_slices  = []
 jpt_r_edges = []
@@ -60,36 +60,27 @@ os.makedirs(args.output, exist_ok=True)
 hep.style.use('CMS')
 
 for i, (jlo, jhi) in enumerate(JPT_BINS):
-    fig, (ax, ax_ratio) = plt.subplots(
-        2, 1, figsize=(8, 7),
-        gridspec_kw={'height_ratios': [3, 1]},
-        sharex=True
-    )
+    fig, ax = plt.subplots(figsize=(8, 8))
 
-    sl      = jpt_slices[i]
-    r_edges = jpt_r_edges[i]
+    sl       = jpt_slices[i]
+    r_edges  = jpt_r_edges[i]
     unf_vals = unfolded[sl]
     gen_vals = gen_values[sl]
 
     ax.stairs(unf_vals, r_edges, label='Unfolded', color='black')
     ax.stairs(gen_vals, r_edges, label='MC Gen',   color='red', linestyle='--')
+
     ax.set_xscale('log')
-    ax.set_yscale('log')
+    if i > 0:
+        ax.set_yscale('log')
+
+    ax.set_xlabel('R')
     ax.set_ylabel('EEC')
     ax.legend()
-    hep.cms.label(ax=ax, data=False, label='Private Simulation', com=13)
 
-    ratio = np.where(gen_vals != 0, unf_vals / gen_vals, np.nan)
-    ax_ratio.stairs(ratio, r_edges, color='black')
-    ax_ratio.axhline(1.0, color='red', linestyle='--')
-    ax_ratio.set_xscale('log')
-    ax_ratio.set_xlabel('R')
-    ax_ratio.set_ylabel('Unfolded / Gen')
-    ax_ratio.set_ylim(0.5, 1.5)
+    hep.cms.label(ax=ax, data=False, text='Private Simulation', com=13)
 
-    fig.suptitle(f'Jpt {jlo}–{jhi} GeV')
     fig.tight_layout()
-
     fname = os.path.join(args.output, f'unfolded_Jpt{jlo}-{jhi}.png')
     fig.savefig(fname, dpi=150)
     plt.close(fig)
