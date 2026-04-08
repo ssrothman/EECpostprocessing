@@ -5,6 +5,85 @@
                 {
                     "configsuite" : "BasicConfig",
                     "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "label_override" : "No b veto",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "label_override" : "Loose b veto",
+                    "color_override" : "orange",
+                    "extra_cuts" : [
+                        "cut::LessThanCut('numLooseB', 2)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "label_override" : "Medium b veto",
+                    "color_override" : "blue",
+                    "extra_cuts" : [
+                        "cut::LessThanCut('numMediumB', 2)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "label_override" : "Tight b veto",
+                    "color_override" : "green",
+                    "extra_cuts" : [
+                        "cut::LessThanCut('numTightB', 2)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::OrCuts([cut::EqualsCut('flav', 0), cut::EqualsCut('flav', 21)])), 'Jpt')"
+            ],
+            "override_filenames" : [
+                "udsg_rate_vs_Jpt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/bkgveto/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "logy" : false
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
                     "name" : "allMC",
                     "table" : "events",
                     "objsyst" : "nominal",
@@ -17,12 +96,14 @@
             "variables" : [
                 "Zmass",
                 "Zpt",
-                "numJets"
+                "numJets",
+                "Zy"
             ],
             "override_filenames" : [
                 "Zmass_lep3_and_tightB_and_Zmass10",
                 "Zpt_lep3_and_tightB_and_Zmass10",
-                "nJets_lep3_and_tightB_and_Zmass10"
+                "nJets_lep3_and_tightB_and_Zmass10",
+                "Zy_lep3_and_tightB_and_Zmass10"
             ],
             "weights" : [
                 "wt_nominal"

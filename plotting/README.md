@@ -62,6 +62,14 @@ Run it with:
 python plotting/run_yields.py plotting/yield_config_example.json
 ```
 
+For LaTeX-formatted output tables:
+
+```bash
+python plotting/run_yields.py --tex plotting/yield_config_example.json
+```
+
+When `--tex` is used, output files are written with a `.tex` extension.
+
 The config schema is single-task (no `TO DO` wrapper) and expects:
 
 - `meta`: output and formatting options
@@ -80,6 +88,16 @@ The config schema is single-task (no `TO DO` wrapper) and expects:
 - `percent_contribution` (optional): print dataset percentage rows relative to one totals row
 	- `reference_total`: totals label to use as denominator
 	- `format` (optional): printf-style number format (default `%.1f`)
+- `row_order` (optional): customize row order and separator lines using a compact DSL
+	- tokens are dataset `key` values and total labels
+	- `|` inserts a single horizontal separator
+	- `||` inserts a double horizontal separator
+	- example: `"WW WZ ZZ TT ST | signal | Background Total | MC Total || DATA"`
+- `bin_splits` (optional): emit multiple tables with duplicated dataset rows and different bin subsets
+	- list of objects with:
+		- `label` (optional): split/table label
+		- `bins` (required): list of bin indices or bin-label strings to include in that split
+		- `bins_group_label` (optional): LaTeX-only override for the multicolumn bins header text
 
 Output format:
 
@@ -90,6 +108,7 @@ Output format:
 - Optional percent contributions are rendered inline in each dataset cell as `yield (percent%)` using the configured total-row denominator
 - In `efficiency` mode, totals are computed as grouped efficiencies with respect to the grouped base-cut denominator
 - In `efficiency` mode, table cells (including totals rows) are rendered directly as percentages
+- When `bin_splits` is provided, one table is produced per split with the same dataset column and only the selected bins
 
 See [plotting/yield_config_example.json](plotting/yield_config_example.json) for a complete working config.
 

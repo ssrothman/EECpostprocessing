@@ -29,7 +29,7 @@ def build_dataset_from_dscfg(dscfg, all_same_objsyst, all_same_extracut, dsetcut
         extraargs['showStack'] = not dscfg['never_resolve']
 
     if not dscfg.get('isprebinned', False):
-        extraargs['no_count'] = dscfg.get('no_count', False)
+        extraargs['no_count'] = dscfg.get('no_count', False) or dscfg.get('nocount', False) # support both spellings of this option for now
 
     if dscfg.get('isprebinned', False):
         extraargs['wtsyst'] = dscfg.get('wtsyst', 'nominal')
@@ -151,6 +151,13 @@ def run_plots(cfg):
         cut = [
             splt.cut.AndCuts([cut, dsetcut]) for dsetcut in dsetcuts
         ]
+
+    if 'override_cuttext' in cfg:
+        if isinstance(cut, list):
+            for onecut in cut:
+                onecut.override_label(cfg['override_cuttext']) # pyright: ignore[reportAttributeAccessIssue]
+        else:
+            cut.override_label(cfg['override_cuttext']) # pyright: ignore[reportAttributeAccessIssue]
 
     if cfg['binning'] == 'auto':
         binning = splt.binning.AutoBinning()

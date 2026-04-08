@@ -183,7 +183,7 @@
             "flags" : {},
             "label" : "Data 2018A",
             "color" : "#000000",
-            "lumi" : 1.0
+            "lumi" : 13.952030343
         },
         "DATA_2018B" : {
             "tag" : "SingleMuon/SingleMuon/2018B",
@@ -192,7 +192,7 @@
             "flags" : {},
             "label" : "Data 2018B",
             "color" : "#000000",
-            "lumi" : 1.0
+            "lumi" : 7.022380986
         },
         "DATA_2018C" : {
             "tag" : "SingleMuon/SingleMuon/2018C_take2",
@@ -201,7 +201,7 @@
             "flags" : {},
             "label" : "Data 2018C",
                 "color" : "#000000",
-            "lumi" : 1.0
+            "lumi" : 6.868910412
          },
          "DATA_2018D" : {
             "tag" : [
@@ -214,7 +214,7 @@
             "flags" : {},
             "label" : "Data 2018D",
             "color" : "#000000",
-            "lumi" : 1.0    
+            "lumi" : 31.692637576 
         }
     }
 }
