@@ -68,7 +68,11 @@ os.makedirs(args.output, exist_ok=True)
 hep.style.use('CMS')
 
 for i, (jlo, jhi) in enumerate(JPT_BINS):
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, (ax, ax_gen, ax_reco) = plt.subplots(
+        3, 1, figsize=(10, 8),
+        gridspec_kw={'height_ratios': [3, 1, 1]},
+        sharex=True
+    )
 
     sl        = jpt_slices[i]
     r_edges   = jpt_r_edges[i]
@@ -76,19 +80,40 @@ for i, (jlo, jhi) in enumerate(JPT_BINS):
     gen_vals  = gen_values[sl]
     reco_vals = reco_values[sl]
 
-    hep.histplot(norm(unf_vals,  r_edges), r_edges, ax=ax, label='Unfolded', color='black')
-    hep.histplot(norm(gen_vals,  r_edges), r_edges, ax=ax, label='MC Gen',   color='red',  linestyle='--')
-    hep.histplot(norm(reco_vals, r_edges), r_edges, ax=ax, label='Reco',     color='blue', linestyle=':')
+    unf_norm  = norm(unf_vals,  r_edges)
+    gen_norm  = norm(gen_vals,  r_edges)
+    reco_norm = norm(reco_vals, r_edges)
+
+    C_UNF  = '#3B2F2F'  # dark espresso
+    C_GEN  = '#8B5E3C'  # warm tan
+    C_RECO = '#6B8C6B'  # sage green
+
+    hep.histplot(unf_norm,  r_edges, ax=ax, label='Unfolded', color=C_UNF)
+    hep.histplot(gen_norm,  r_edges, ax=ax, label='MC Gen',   color=C_GEN,  linestyle='--')
+    hep.histplot(reco_norm, r_edges, ax=ax, label='Reco',     color=C_RECO, linestyle=':')
 
     ax.set_xscale('log')
     if i > 0:
         ax.set_yscale('log')
-
-    ax.set_xlabel('R')
-    ax.set_ylabel('$(1/\\sigma)\\, d\\sigma/dR$')
+    ax.set_ylabel('A.U.')
     ax.legend()
-
     hep.cms.label(ax=ax, data=False, text='Private', com=13)
+
+    gen_ratio  = np.where(unf_norm != 0, gen_norm  / unf_norm, np.nan)
+    reco_ratio = np.where(unf_norm != 0, reco_norm / unf_norm, np.nan)
+
+    hep.histplot(gen_ratio,  r_edges, ax=ax_gen,  color=C_GEN,  linestyle='--')
+    ax_gen.axhline(1.0, color=C_UNF, linestyle='-', linewidth=0.8)
+    ax_gen.set_xscale('log')
+    ax_gen.set_ylabel('Gen / Unf')
+    ax_gen.set_ylim(0.5, 1.5)
+
+    hep.histplot(reco_ratio, r_edges, ax=ax_reco, color=C_RECO, linestyle=':')
+    ax_reco.axhline(1.0, color=C_UNF, linestyle='-', linewidth=0.8)
+    ax_reco.set_xscale('log')
+    ax_reco.set_xlabel('$\\Delta R$')
+    ax_reco.set_ylabel('Reco / Unf')
+    ax_reco.set_ylim(0.5, 1.5)
 
     fig.tight_layout()
     fname = os.path.join(args.output, f'unfolded_Jpt{jlo}-{jhi}.png')
