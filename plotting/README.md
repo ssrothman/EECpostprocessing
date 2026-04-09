@@ -79,6 +79,10 @@ The config schema is single-task (no `TO DO` wrapper) and expects:
 	- a list of cut expressions (with optional `bin_labels`), or
 	- an object with `label` and `cuts`
 - `weight_variable`: weight expression (for example `wt_nominal`)
+- `alternative_weight` (optional): alternate weight expression available for selective dataset use
+- `datasets[].use_alternative_weight` (optional): boolean flag to use `alternative_weight` for that dataset
+	- defaults to `false` when omitted
+	- requires top-level `alternative_weight` when any dataset enables it
 - `table_metric` (optional):
 	- `yield` (default): print raw yields in each bin
 	- `efficiency`: print efficiency percentages in each bin

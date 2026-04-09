@@ -212,6 +212,8 @@ def _validate_config(cfg: dict[str, Any]) -> None:
         raise ValueError("'base_cuts' must be a list")
     if not isinstance(cfg["weight_variable"], str):
         raise ValueError("'weight_variable' must be a string")
+    if "alternative_weight" in cfg and not isinstance(cfg["alternative_weight"], str):
+        raise ValueError("'alternative_weight' must be a string when provided")
     if "row_order" in cfg and not isinstance(cfg["row_order"], str):
         raise ValueError("'row_order' must be a string when provided")
 
@@ -229,6 +231,7 @@ def _validate_config(cfg: dict[str, Any]) -> None:
         "isstack",
     ]
     dataset_keys: list[str] = []
+    use_alternative_weight_requested = False
     for i, dscfg in enumerate(cfg["datasets"]):
         if not isinstance(dscfg, dict):
             raise ValueError(f"datasets[{i}] must be an object")
@@ -245,6 +248,21 @@ def _validate_config(cfg: dict[str, Any]) -> None:
         for j, cut_expr in enumerate(extra_cuts):
             if not isinstance(cut_expr, str):
                 raise ValueError(f"datasets[{i}].extra_cuts[{j}] must be a string")
+
+        use_alternative_weight = dscfg.get("use_alternative_weight", False)
+        if not isinstance(use_alternative_weight, bool):
+            raise ValueError(
+                f"datasets[{i}].use_alternative_weight must be a boolean when provided"
+            )
+        use_alternative_weight_requested = (
+            use_alternative_weight_requested or use_alternative_weight
+        )
+
+    if use_alternative_weight_requested and "alternative_weight" not in cfg:
+        raise ValueError(
+            "'alternative_weight' must be provided when any dataset sets "
+            "'use_alternative_weight' to true"
+        )
 
     for i, cut_expr in enumerate(cfg["base_cuts"]):
         if not isinstance(cut_expr, str):
@@ -519,6 +537,7 @@ def _build_datasets(cfg: dict[str, Any]):
                 "cfg": dscfg,
                 "dataset": dataset,
                 "extra_cut": dsetcut,
+                "use_alternative_weight": dscfg.get("use_alternative_weight", False),
                 "key": dscfg["key"],
                 "label": dscfg.get("label", dscfg["key"]),
             }
@@ -550,7 +569,10 @@ def run_yield_table(cfg: dict[str, Any], output_format: str = "text") -> str:
         )
 
     base_cut = _parse_cut_strings(cfg["base_cuts"], context="base_cuts")
-    weight = parse_var(cfg["weight_variable"])
+    default_weight = parse_var(cfg["weight_variable"])
+    alternative_weight = None
+    if "alternative_weight" in cfg:
+        alternative_weight = parse_var(cfg["alternative_weight"])
 
     built_datasets = _build_datasets(cfg)
     for info in built_datasets:
@@ -565,6 +587,10 @@ def run_yield_table(cfg: dict[str, Any], output_format: str = "text") -> str:
         num_values = []
         den_values = []
         for info in built_datasets:
+            dataset_weight = default_weight
+            if info["use_alternative_weight"]:
+                dataset_weight = alternative_weight
+
             if table_metric == "efficiency":
                 numerator_cut = splt.cut.AndCuts([efficiency_numerator_cut, bin_cut, info["extra_cut"]])
                 denominator_cut = splt.cut.AndCuts([base_cut, bin_cut, info["extra_cut"]])
@@ -572,8 +598,8 @@ def run_yield_table(cfg: dict[str, Any], output_format: str = "text") -> str:
                 numerator_cut = splt.cut.AndCuts([base_cut, bin_cut, info["extra_cut"]])
                 denominator_cut = splt.cut.NoCut()
 
-            num = info["dataset"].estimate_yield(numerator_cut, weight)
-            den = info["dataset"].estimate_yield(denominator_cut, weight) if table_metric == "efficiency" else 0.0
+            num = info["dataset"].estimate_yield(numerator_cut, dataset_weight)
+            den = info["dataset"].estimate_yield(denominator_cut, dataset_weight) if table_metric == "efficiency" else 0.0
             num_values.append(float(num))
             den_values.append(float(den))
         numerator_rows.append(num_values)

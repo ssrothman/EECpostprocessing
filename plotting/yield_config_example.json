@@ -15,6 +15,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
+      "use_alternative_weight": true,
       "isstack": true,
       "isprebinned": false
     },
@@ -27,6 +28,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
+      "use_alternative_weight": false,
       "isstack": true,
       "isprebinned": false
     }
@@ -62,6 +64,7 @@
     "250 <= Jpt"
   ],
   "weight_variable": "wt_nominal",
+  "alternative_weight": "wt_nominal",
   "totals": [
     {
       "label": "MC Total",

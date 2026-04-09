@@ -103,7 +103,8 @@
       "location" : "scratch-submit",
       "isstack" : true,
       "isprebinned" : false,
-      "nocount" : true
+      "nocount" : true,
+      "use_alternative_weight" : true
     }
   ],
   "base_cuts": [
@@ -140,6 +141,7 @@
     "[250,400]",
     "[400,inf]"
   ],
+  "alternative_weight" : "wt_nominal",
   "weight_variable": "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
   "totals": [
     {
