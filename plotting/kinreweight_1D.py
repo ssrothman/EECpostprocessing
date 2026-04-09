@@ -5,16 +5,67 @@ import matplotlib.pyplot as plt
 import numpy as np
 import hist
 from correctionlib import CorrectionSet, schemav2
-from plotting.load_datasets import build_pq_dataset_stack
+from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack
 from scipy.interpolate import UnivariateSpline
+from simonplot.plottables.Datasets import DatasetStack
 from simonplot.util.histplot import simon_histplot_ratio
 
 RUNTAG = 'Mar_01_2026'
-OUTPUT_DIR = Path('ANplots') / 'kinreweight' / RUNTAG
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+BASE_OUTPUT_DIR = Path('ANplots') / 'kinreweight' / RUNTAG
+BASE_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+MC_MODES = ['nominal', 'herwig_signal']
 
 TAIL_REGULARIZATION_LAST_N_POINTS = 3
 TAIL_REGULARIZATION_FRACTION_FALLBACK = 0.2
+
+
+def get_output_dir(mc_mode):
+    if mc_mode == 'nominal':
+        outdir = BASE_OUTPUT_DIR
+    else:
+        outdir = BASE_OUTPUT_DIR / mc_mode
+    outdir.mkdir(parents=True, exist_ok=True)
+    return outdir
+
+
+def build_mc_stack_for_mode(mc_mode):
+    if mc_mode == 'nominal':
+        return build_pq_dataset_stack(
+            'BasicConfig',
+            RUNTAG,
+            'allMC',
+            'nominal',
+            'events',
+            location='scratch-submit',
+        )
+
+    if mc_mode == 'herwig_signal':
+        bkg = build_pq_dataset_stack(
+            'BasicConfig',
+            RUNTAG,
+            'allBKG',
+            'nominal',
+            'events',
+            location='scratch-submit',
+        )
+        herwig_signal = build_pq_dataset(
+            'BasicConfig',
+            RUNTAG,
+            'Herwig_inclusive',
+            'nominal',
+            'events',
+            location='scratch-submit',
+        )
+        return DatasetStack(
+            key='allMC_herwig_signal',
+            color='#D62728',
+            label='MC signal+background (Herwig signal)',
+            datasets=[bkg, herwig_signal],
+            showstack=True,
+        )
+
+    raise ValueError(f'Unsupported mc_mode: {mc_mode}')
 
 def fit_ratio_splines(x, y, yerr, smoothing_scales=None, label='nominal'):
     """Fit smoothing splines to a ratio with optional label for diagnostics."""
@@ -251,15 +302,11 @@ def smoothing_tag(smoothing):
     return f"{smoothing:.3g}".replace('.', 'p')
 
 
-def main():
-    dset_MC = build_pq_dataset_stack(
-        configsuite='BasicConfig',
-        runtag=RUNTAG,
-        dataset='allMC',
-        objsyst='nominal',
-        table='events',
-        location='scratch-submit',
-    )
+def run_for_mode(mc_mode):
+    output_dir = get_output_dir(mc_mode)
+    print(f'\n=== Running 1D Zpt reweighting for mode: {mc_mode} ===')
+
+    dset_MC = build_mc_stack_for_mode(mc_mode)
 
     dset_DATA = build_pq_dataset_stack(
         configsuite='BasicConfig',
@@ -341,7 +388,7 @@ def main():
     H_DATA = dset_DATA.fill_hist(var1, cut, wt, ax)
 
     _, ratio, ratioerr = simon_histplot_ratio(H_DATA, H_MC)
-    ratio_plot_path = OUTPUT_DIR / 'data_mc_ratio.png'
+    ratio_plot_path = output_dir / 'data_mc_ratio.png'
     plt.savefig(ratio_plot_path)
     plt.clf()
 
@@ -390,7 +437,7 @@ def main():
         shift_corrections[variant] = {'correction': corr, 'edges': edges, 'values': values}
         
     # Plot diagnostics with all variants
-    fit_plot_path = OUTPUT_DIR / 'data_mc_ratio_fit_options.png'
+    fit_plot_path = output_dir / 'data_mc_ratio_fit_options.png'
     save_fit_diagnostic(centers, ratio, ratioerr, shifted_best_fits, fit_plot_path)
 
     # Export one fit-options style figure per smoothing value.
@@ -407,7 +454,7 @@ def main():
             )
             for variant in ['nominal', 'up', 'down']
         }
-        per_smoothing_path = OUTPUT_DIR / f"data_mc_ratio_fit_options_s{ smoothing_tag(smoothing) }.png"
+        per_smoothing_path = output_dir / f"data_mc_ratio_fit_options_s{ smoothing_tag(smoothing) }.png"
         save_fit_diagnostic(
             centers,
             ratio,
@@ -419,12 +466,12 @@ def main():
     # Export option 2: shifted ratio
     corrections_list_shift = [shift_corrections[v]['correction'] for v in ['nominal', 'up', 'down']]
     correction_set_shift = schemav2.CorrectionSet(schema_version=2, corrections=corrections_list_shift)
-    json_path_shift = OUTPUT_DIR / 'zpt_reweight_shifted_ratio.json'
+    json_path_shift = output_dir / 'zpt_reweight_shifted_ratio.json'
     json_path_shift.write_text(correction_set_shift.model_dump_json(indent=2) + '\n')
         
     # Export original nominal for reference
     correction_set_nom = schemav2.CorrectionSet(schema_version=2, corrections=[correction_nom])
-    json_path_nom = OUTPUT_DIR / 'zpt_reweight.json'
+    json_path_nom = output_dir / 'zpt_reweight.json'
     json_path_nom.write_text(correction_set_nom.model_dump_json(indent=2) + '\n')
     
     # Test round-trip
@@ -439,6 +486,11 @@ def main():
             print(f'  x={point:.4f} -> nom={val_nom:.6f} up={val_up:.6f} dn={val_dn:.6f}')
         except Exception as e:
             print(f'  x={point:.4f} -> ERROR: {e}')
+
+
+def main():
+    for mc_mode in MC_MODES:
+        run_for_mode(mc_mode)
 
 
 if __name__ == '__main__':
