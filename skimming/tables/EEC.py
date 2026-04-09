@@ -5,7 +5,7 @@ from skimming.objects import EEC
 from skimming.objects.AllObjects import AllObjects
 from coffea.analysis_tools import PackedSelection
 from skimming.selections.PackedJetSelection import PackedJetSelection
-from typing import Any, Literal, assert_never
+from typing import Any, Literal
 import pyarrow as pa
 
 from skimming.tables.common import add_common_vars, add_event_id, add_weight_variations, broadcast_all, to_pa_table
@@ -62,7 +62,7 @@ class EECgenericTable:
             elif whichEECobj == 'untransfered':
                 theEECs = objs.UntransferedGenEEC
             else:
-                assert_never(whichEECobj)
+                raise ValueError(f"Unknown EEC obj: {whichEECobj}")
 
             thejets = objs.GenJets
             iReco = theEECs.jetidx_reco
@@ -74,7 +74,7 @@ class EECgenericTable:
             elif whichEECobj == 'untransfered':
                 theEECs = objs.UntransferedRecoEEC
             else:
-                assert_never(whichEECobj)
+                raise ValueError(f"Unknown EEC obj: {whichEECobj}")
 
             thejets = objs.RecoJets
             iReco = theEECs.jetidx_reco

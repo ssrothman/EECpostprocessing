@@ -1,4 +1,5 @@
 import awkward as ak
+from typing import Optional
 
 class GenericObjectContainer:
     def __init__(self, events : ak.Array, mandatory_names : dict, optional_names):
@@ -7,7 +8,7 @@ class GenericObjectContainer:
         self._optional_nametable = optional_names
 
     #override getattr to provide access to objects by name
-    def __getattr__(self, name : str) -> ak.Array | None:
+    def __getattr__(self, name : str) -> Optional[ak.Array]:
         if name in self._mandatory_nametable:
             objname = self._mandatory_nametable[name]
             result : ak.Array = ak.materialize(self._events[objname])

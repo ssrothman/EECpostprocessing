@@ -1,7 +1,7 @@
 import awkward  as ak
 import numpy as np
 import warnings
-from typing import Tuple, assert_never
+from typing import Tuple, List, Union
 
 class Electrons:
     def __init__(self,
@@ -9,7 +9,7 @@ class Electrons:
                  name : str,
                  minPt : float,
                  maxEta : float,
-                 IDflags : list[str | Tuple[str, int]],
+                 IDflags : List[Union[str, Tuple[str, int]]],
                  maxDXY : float,
                  maxDZ : float):
         self._name = name
@@ -45,7 +45,7 @@ class Muons:
                  padTo : int,
                  minPt : float,
                  maxEta : float,
-                 IDflags : list[str | Tuple[str, int]],
+                 IDflags : List[Union[str, Tuple[str, int]]],
                  maxDXY : float,
                  maxDZ : float):
         
