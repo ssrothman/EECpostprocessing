@@ -2,6 +2,340 @@
     "TO DO" : [
         {
             "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false,
+                    "label_override" : "Reweighted MC",
+                    "color_override" : "blue"
+                  },
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false,
+                    "label_override" : "Raw MC",
+                    "color_override" : "red"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "jets",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Jpt",
+                "Jeta"
+            ],
+            "override_filenames" : [
+                "Jpt_2Dreweight",
+                "Jeta_2Dreweight"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinreweight/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Zy"
+            ],
+            "override_filenames" : [
+                "Zy_2Dreweight_pT500to1000"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)",
+                "cut::TwoSidedCut('Zpt', 500, 1000)"
+            ],
+            "override_cuttext" : "500 < pT(Z) < 1000 GeV",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinreweight/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Zy"
+            ],
+            "override_filenames" : [
+                "Zy_2Dreweight_pT0to50"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)",
+                "cut::TwoSidedCut('Zpt', 0, 50)"
+            ],
+            "override_cuttext" : "0 < pT(Z) < 50 GeV",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinreweight/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Zy"
+            ],
+            "override_filenames" : [
+                "Zy_2Dreweight_pT50to100"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)",
+                "cut::TwoSidedCut('Zpt', 50, 100)"
+            ],
+            "override_cuttext" : "50 < pT(Z) < 100 GeV",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinreweight/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Zy"
+            ],
+            "override_filenames" : [
+                "Zy_2Dreweight_pT100to200"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)",
+                "cut::TwoSidedCut('Zpt', 100, 200)"
+            ],
+            "override_cuttext" : "100 < pT(Z) < 200 GeV",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinreweight/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Zy"
+            ],
+            "override_filenames" : [
+                "Zy_2Dreweight_pT200to500"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)",
+                "cut::TwoSidedCut('Zpt', 200, 500)"
+            ],
+            "override_cuttext" : "200 < pT(Z) < 500 GeV",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinreweight/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+       
+        
+        {
+            "datasets" : [
                   {
                     "key": "MC",
                     "label": "MC",
@@ -39,7 +373,7 @@
                 "Zy_2Dreweight"
             ],
             "weights" : [
-                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt'), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
                 "wt_nominal"
             ],
             "cut" : [

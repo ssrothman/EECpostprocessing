@@ -1,13 +1,11 @@
 {
   "meta": {
-    "table_name": "lep3_efficiency",
-    "output_file": "ANplots/yields/lep3_efficiency.txt",
+    "table_name": "events_yield_final_reweighted",
+    "output_file": "ANplots/yields/events_yield_final_reweighted.txt",
     "target_lumi": 59.81,
-    "float_format": "%.2f",
-    "latex_bins_label" : "Jet $p_{T}$ bin [GeV]"
+    "float_format": "%.0f"
   },
-  "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC ",
-  "table_metric" : "efficiency",
+  "row_order" : "Signal | Background | TotalMC || DATA",
   "datasets": [
     {
       "key": "ZZ",
@@ -27,7 +25,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "WW",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": false,
@@ -39,7 +37,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "WZ",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": false,
@@ -51,7 +49,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "TT",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": false,
@@ -63,7 +61,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "ST",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": true,
@@ -75,7 +73,7 @@
       "configsuite": "BasicConfig",
       "runtag": "Mar_01_2026",
       "name": "Pythia_HTsum",
-      "table": "jets",
+      "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
       "isstack": true,
@@ -87,7 +85,7 @@
       "configsuite" : "BasicConfig",
       "runtag" : "Mar_01_2026",
       "name" : "DATA",
-      "table" : "jets",
+      "table" : "events",
       "objsyst" : "DATA",
       "location" : "scratch-submit",
       "isstack" : true,
@@ -96,40 +94,18 @@
     }
   ],
   "base_cuts": [
-  ],
-  "alternative_cut" : [
     "cut::EqualsCut('nMu', 2)",
-    "cut::EqualsCut('nEle', 0)"
+    "cut::EqualsCut('nEle', 0)",
+    "cut::LessThanCut('numMediumB', 2)",
+    "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
   ],
   "bins": [
-    [
-      "cut::TwoSidedCut('Jpt', 30, 50)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 50, 90)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 90, 150)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 150, 250)"
-    ],
-    [
-      "cut::TwoSidedCut('Jpt', 250, 400)"
-    ],
-    [
-      "cut::GreaterThanCut('Jpt', 400)"
-    ]
+    []
   ],
   "bin_labels": [
-    "[30,50]",
-    "[50,90]",
-    "[90,150]",
-    "[150,250]",
-    "[250,400]",
-    "[400,inf]"
+    "Events"
   ],
-  "weight_variable": "wt_nominal",
+  "weight_variable": "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
   "totals": [
     {
       "label": "Background",

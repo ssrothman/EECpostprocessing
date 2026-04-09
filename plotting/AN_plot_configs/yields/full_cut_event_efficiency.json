@@ -5,7 +5,7 @@
     "target_lumi": 59.81,
     "float_format": "%.2f"
   },
-  "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC || DATA",
+  "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC ",
   "table_metric" : "efficiency",
   "datasets": [
     {

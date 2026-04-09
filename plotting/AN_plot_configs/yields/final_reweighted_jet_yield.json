@@ -1,13 +1,24 @@
 {
   "meta": {
-    "table_name": "lep3_efficiency",
-    "output_file": "ANplots/yields/lep3_efficiency.txt",
+    "table_name": "jets_yield_final_reweighted",
+    "output_file": "ANplots/yields/jets_yield_final_reweighted.txt",
     "target_lumi": 59.81,
-    "float_format": "%.2f",
+    "float_format": "%.0f",
     "latex_bins_label" : "Jet $p_{T}$ bin [GeV]"
   },
-  "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC ",
-  "table_metric" : "efficiency",
+  "row_order" : "Signal | Background | TotalMC || DATA",
+  "bin_splits" : [
+    {
+      "label" : "Low pT",
+      "bins" : [0, 1, 2],
+      "bins_group_label" : "Jet $p_{T}$ bin [GeV]"
+    },
+    {
+      "label" : "High pT",
+      "bins" : [3, 4, 5],
+      "bins_group_label" : "Jet $p_{T}$ bin [GeV]"
+    }
+  ],
   "datasets": [
     {
       "key": "ZZ",
@@ -96,10 +107,10 @@
     }
   ],
   "base_cuts": [
-  ],
-  "alternative_cut" : [
     "cut::EqualsCut('nMu', 2)",
-    "cut::EqualsCut('nEle', 0)"
+    "cut::EqualsCut('nEle', 0)",
+    "cut::LessThanCut('numMediumB', 2)",
+    "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
   ],
   "bins": [
     [
@@ -129,7 +140,7 @@
     "[250,400]",
     "[400,inf]"
   ],
-  "weight_variable": "wt_nominal",
+  "weight_variable": "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
   "totals": [
     {
       "label": "Background",

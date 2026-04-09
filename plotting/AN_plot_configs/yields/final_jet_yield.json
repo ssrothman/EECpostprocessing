@@ -6,7 +6,7 @@
     "float_format": "%.0f",
     "latex_bins_label" : "Jet $p_{T}$ bin [GeV]"
   },
-  "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC || DATA",
+  "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC ",
   "bin_splits" : [
     {
       "label" : "Low pT",
