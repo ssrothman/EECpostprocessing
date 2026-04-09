@@ -96,7 +96,7 @@
                     "genWeight" : "genWeight"
                 },
                 "optional_names" : {
-                    "LHE_HT" : "LHE_HT"
+                    "LHE_HT" : "LHE.HT"
                 }
             },
             "MConly" : false

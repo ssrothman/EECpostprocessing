@@ -7,6 +7,16 @@ class GenericObjectContainer:
         self._mandatory_nametable = mandatory_names
         self._optional_nametable = optional_names
 
+    def _navigate(self, path : str) -> Optional[ak.Array]:
+        """Navigate a dot-separated field path in events (e.g. 'LHE.HT')."""
+        parts = path.split('.')
+        obj = self._events
+        for part in parts:
+            if not hasattr(obj, part):
+                return None
+            obj = getattr(obj, part)
+        return ak.materialize(obj)
+
     #override getattr to provide access to objects by name
     def __getattr__(self, name : str) -> Optional[ak.Array]:
         if name in self._mandatory_nametable:
@@ -15,10 +25,7 @@ class GenericObjectContainer:
             return result
         elif name in self._optional_nametable:
             objname = self._optional_nametable[name]
-            if hasattr(self._events, objname):
-                result : ak.Array = ak.materialize(self._events[objname])
-                return result
-            else:
-                return None
+            result = self._navigate(objname)
+            return result
         else:
             raise AttributeError(f"Object {name} not found in GenericObjectContainer")
