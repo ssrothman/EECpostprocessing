@@ -7,7 +7,7 @@ echo "Starting job $JOB_INDEX"
 echo "Running on host $(hostname)"
 
 source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-opt/setup.sh
-unset PYTHONHOME
+export PYTHONHOME=$(python -c "import sys; print(sys.base_prefix)")
 unset PYTHONPATH
 source /afs/cern.ch/user/d/dponman/EECpostproc/venv/bin/activate
 export PYTHONPATH=/afs/cern.ch/user/d/dponman/EECpostproc:$PYTHONPATH
