@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 import warnings
 import awkward as ak
 import numpy as np
@@ -19,8 +19,8 @@ class SimpleJets:
                  minJetID : int,
                  minPUID : int,
                  PUID_ptthreshold : float,
-                 index_by : ak.Array | None = None,
-                 reshape_by : ak.Array | None = None):
+                 index_by : Optional[ak.Array] = None,
+                 reshape_by : Optional[ak.Array] = None):
         
         self._name = name
         self._jets : ak.Array = ak.materialize(
