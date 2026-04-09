@@ -18,67 +18,43 @@ INPUT_1D_KEY = 'zpt_reweight'
 
 ZPT_BINS = np.asarray([
     0.0,
-    0.1,
     0.2,
-    0.3,
     0.4,
-    0.5,
     0.6,
-    0.7,
     0.8,
-    0.9,
     1.0,
-    1.1,
     1.2,
-    1.3,
     1.4,
-    1.5,
     1.6,
-    1.7,
     1.8,
-    1.9,
     2.0,
-    2.1,
     2.2,
     2.4,
-    2.6,
-    2.8,
-    3.0,
     4.0,
 ])
 
 ABSY_BINS = np.asarray([
     0.0,
-    0.1,
     0.2,
-    0.3,
     0.4,
-    0.5,
     0.6,
-    0.7,
     0.8,
-    0.9,
     1.0,
-    1.1,
     1.2,
-    1.3,
     1.4,
-    1.5,
     1.6,
-    1.7,
     1.8,
-    1.9,
     2.0,
-    2.1,
     2.2,
-    2.3,
     2.4,
 ])
 
-S_FZY = [0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0]
+S_FZY = [2.0, 4.0, 8.0, 16.0, 32.0, 64.0]
 S_ALPHA = [0.1, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0]
 MIN_WEIGHT = 0.05
 MAX_WEIGHT = 5.0
+FZY_AIC_SMOOTH_TOLERANCE = 2.0
+FZY_MIN_SMOOTHING = 16.0
 
 
 def weighted_mean(y, yerr):
@@ -174,6 +150,42 @@ def evaluate_linear_fit(fit, x):
     return fit['spline'](x)
 
 
+def enforce_monotonic(values, mode='auto'):
+    y = np.asarray(values, dtype=float)
+    if len(y) < 2:
+        return y.copy(), 'none'
+
+    dy = np.diff(y)
+    trend = float(np.nanmedian(dy)) if np.any(np.isfinite(dy)) else 0.0
+
+    if mode == 'auto':
+        mode = 'non-decreasing' if trend >= 0 else 'non-increasing'
+
+    if mode == 'non-decreasing':
+        ymono = np.maximum.accumulate(y)
+    elif mode == 'non-increasing':
+        ymono = np.minimum.accumulate(y)
+    else:
+        raise ValueError(f'Unsupported monotonic mode: {mode}')
+
+    return ymono, mode
+
+
+def evaluate_result_curve(result, x):
+    x = np.asarray(x, dtype=float)
+    return np.interp(x, result['curve_x'], result['curve_y'])
+
+
+def select_smoothest_near_best(models, aic_tolerance):
+    if len(models) == 0:
+        raise ValueError('No spline models available for selection')
+    min_aic = min(item['aic'] for item in models)
+    candidates = [item for item in models if item['aic'] <= min_aic + float(aic_tolerance)]
+    if len(candidates) == 0:
+        return models[0]
+    return sorted(candidates, key=lambda item: item['smoothing'], reverse=True)[0]
+
+
 def compute_ratio_and_uncertainty(h_data, h_mc):
     data = np.asarray(h_data.values(), dtype=float)
     data_var = np.asarray(h_data.variances(), dtype=float)
@@ -207,8 +219,22 @@ def derive_zy_shape(zy_centers, ratio_map, ratioerr_map, valid_map):
     yvals = np.asarray(yvals, dtype=float)
     yerrs = np.asarray(yerrs, dtype=float)
 
-    best, all_models = fit_log_spline(zy_centers, yvals, yerrs, S_FZY, label='fzy')
-    shape = np.clip(evaluate_log_fit(best, zy_centers), 1e-3, None)
+    best_raw, all_models = fit_log_spline(zy_centers, yvals, yerrs, S_FZY, label='fzy')
+    best = select_smoothest_near_best(all_models, FZY_AIC_SMOOTH_TOLERANCE)
+    smooth_floor_candidates = [item for item in all_models if item['smoothing'] >= FZY_MIN_SMOOTHING]
+    if len(smooth_floor_candidates) > 0:
+        best_floor = sorted(smooth_floor_candidates, key=lambda item: item['aic'])[0]
+        best = best_floor
+
+    if best['smoothing'] != best_raw['smoothing']:
+        print(
+            'f(Zy) smoothness override: '
+            f"AIC-best s={best_raw['smoothing']:.3g}, "
+            f"selected smoother s={best['smoothing']:.3g} "
+            f"within dAIC<={FZY_AIC_SMOOTH_TOLERANCE:.2f}"
+        )
+    raw_shape = np.clip(evaluate_log_fit(best, zy_centers), 1e-3, None)
+    shape, mono_mode = enforce_monotonic(raw_shape, mode='auto')
     return {
         'best': best,
         'all': all_models,
@@ -216,6 +242,9 @@ def derive_zy_shape(zy_centers, ratio_map, ratioerr_map, valid_map):
         'points_y': yvals,
         'points_yerr': yerrs,
         'shape': shape,
+        'curve_x': zy_centers,
+        'curve_y': shape,
+        'mono_mode': mono_mode,
     }
 
 
@@ -268,6 +297,7 @@ def derive_alpha(logzpt_centers, zy_shape, ratio_map, ratioerr_map, valid_map):
     pad = max(0.1, 0.25 * (hi - lo + 1e-6))
     alpha_eval = np.clip(alpha_eval, lo - pad, hi + pad)
     alpha_eval = np.clip(alpha_eval, -3.0, 3.0)
+    alpha_eval, mono_mode = enforce_monotonic(alpha_eval, mode='auto')
 
     return {
         'best': best,
@@ -276,6 +306,9 @@ def derive_alpha(logzpt_centers, zy_shape, ratio_map, ratioerr_map, valid_map):
         'points_y': alpha_points,
         'points_yerr': alpha_errors,
         'alpha': alpha_eval,
+        'curve_x': logzpt_centers,
+        'curve_y': alpha_eval,
+        'mono_mode': mono_mode,
     }
 
 
@@ -322,7 +355,15 @@ def plot_zy_shape_fit(result, path):
 
     fig, ax = plt.subplots(figsize=(9, 6))
     ax.errorbar(x, y, yerr=yerr, fmt='o', ms=5, capsize=2, label='Per-bin |Zy| ratio points')
-    ax.plot(xx, evaluate_log_fit(result['best'], xx), linewidth=2.3, label=f"Best spline s={result['best']['smoothing']:.3g}")
+    ax.plot(
+        xx,
+        evaluate_result_curve(result, xx),
+        linewidth=2.3,
+        label=(
+            f"Monotonic model s={result['best']['smoothing']:.3g}, "
+            f"mode={result['mono_mode']}"
+        ),
+    )
     ax.axhline(1.0, color='gray', linestyle='--', linewidth=1)
     ax.set_xlabel('|Zy|')
     ax.set_ylabel('Data / MC')
@@ -342,7 +383,15 @@ def plot_alpha_fit(result, path):
 
     fig, ax = plt.subplots(figsize=(9, 6))
     ax.errorbar(x, y, yerr=yerr, fmt='o', ms=5, capsize=2, label='Per-bin alpha points')
-    ax.plot(xx, evaluate_linear_fit(result['best'], xx), linewidth=2.3, label=f"Best spline s={result['best']['smoothing']:.3g}")
+    ax.plot(
+        xx,
+        evaluate_result_curve(result, xx),
+        linewidth=2.3,
+        label=(
+            f"Monotonic model s={result['best']['smoothing']:.3g}, "
+            f"mode={result['mono_mode']}"
+        ),
+    )
     ax.axhline(0.0, color='gray', linestyle='--', linewidth=1)
     ax.set_xlabel('log10(Zpt)')
     ax.set_ylabel('alpha(Zpt)')
@@ -582,8 +631,8 @@ def main():
         OUTPUT_DIR / 'closure_heatmap_nominal.png',
         'Closure DATA / (MC * w2D)',
         'Closure',
-        vmin=0.6,
-        vmax=1.4,
+        vmin=0.90,
+        vmax=1.10,
         cmap='coolwarm',
     )
 

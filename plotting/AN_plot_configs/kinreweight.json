@@ -34,6 +34,63 @@
                 "Zy"
             ],
             "override_filenames" : [
+                "Zpt_2Dreweight",
+                "Zmass_2Dreweight",
+                "Zy_2Dreweight"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt'), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinreweight/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+
+
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Zpt",
+                "Zmass",
+                "Zy"
+            ],
+            "override_filenames" : [
                 "Zpt_1Dreweight",
                 "Zmass_1Dreweight",
                 "Zy_1Dreweight"
