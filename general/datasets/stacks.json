@@ -23,6 +23,34 @@
             "color" : "#D62728",
             "label" : "MC signal+background"
         },
+        "allMC_pythia_inclusive" : {
+            "dsets" : [
+                "ZZ",
+                "WW",
+                "WZ",
+                "TT",
+                "Pythia_inclusive"
+            ],
+            "stacks" : [
+                "ST"
+            ],
+            "color" : "#17BECF",
+            "label" : "MC signal+background (Pythia inclusive)"
+        },
+        "allMC_herwig_inclusive" : {
+            "dsets" : [
+                "ZZ",
+                "WW",
+                "WZ",
+                "TT",
+                "Herwig_inclusive"
+            ],
+            "stacks" : [
+                "ST"
+            ],
+            "color" : "#2CA02C",
+            "label" : "MC signal+background (Herwig inclusive)"
+        },
         "ST" : {
             "dsets" : [
                 "ST_t",
