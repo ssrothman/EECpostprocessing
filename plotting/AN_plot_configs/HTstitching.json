@@ -9,7 +9,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "local-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 },
                 {
                     "configsuite" : "BasicConfig",
@@ -18,7 +18,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "local-submit",
-                    "isstack" : false
+                    "dsetkind": "pq"
                 }
             ],
             "variables" : [
@@ -46,7 +46,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "local-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 },
                 {
                     "configsuite" : "BasicConfig",
@@ -55,7 +55,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "local-submit",
-                    "isstack" : false
+                    "dsetkind": "pq"
                 }
             ],
             "variables" : [

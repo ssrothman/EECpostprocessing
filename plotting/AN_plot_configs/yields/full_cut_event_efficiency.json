@@ -17,8 +17,7 @@
       "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "WW",
@@ -29,8 +28,7 @@
       "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "WZ",
@@ -41,8 +39,7 @@
       "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "TT",
@@ -53,8 +50,7 @@
       "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "ST",
@@ -65,8 +61,7 @@
       "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": true,
-      "isprebinned": false
+      "dsetkind": "pq_stack"
     },
     {
       "key": "Signal",
@@ -77,8 +72,7 @@
       "table": "events",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": true,
-      "isprebinned": false
+      "dsetkind": "pq_stack"
     },
     {
       "key" : "DATA",
@@ -89,8 +83,7 @@
       "table" : "events",
       "objsyst" : "DATA",
       "location" : "scratch-submit",
-      "isstack" : true,
-      "isprebinned" : false,
+      "dsetkind": "pq_stack",
       "nocount" : true
     }
   ],

@@ -9,7 +9,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -50,7 +50,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "Gen-level $\\mu^\\pm$, matched with reco-level $h^\\pm$",
                     "extra_cuts" : [
@@ -65,7 +65,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "Gen-level $\\mu^\\pm$, matched with reco-level $e^\\pm$",
                     "extra_cuts" : [
@@ -80,7 +80,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "Gen-level $\\mu^\\pm$, matched with reco-level $\\mu^\\pm$",
                     "extra_cuts" : [
@@ -118,7 +118,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "Gen-level $e^\\pm$, matched with reco-level $h^\\pm$",
                     "extra_cuts" : [
@@ -133,7 +133,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "Gen-level $e^\\pm$, matched with reco-level $e^\\pm$",
                     "extra_cuts" : [
@@ -148,7 +148,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "Gen-level $e^\\pm$, matched with reco-level $\\mu^\\pm$",
                     "extra_cuts" : [
@@ -186,7 +186,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "Gen-level $h^\\pm$, matched with reco-level $h^\\pm$",
                     "extra_cuts" : [
@@ -201,7 +201,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "Gen-level $h^\\pm$, matched with reco-level $e^\\pm$",
                     "extra_cuts" : [
@@ -216,7 +216,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "Gen-level $h^\\pm$, matched with reco-level $\\mu^\\pm$",
                     "extra_cuts" : [
@@ -254,7 +254,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "$30 < p_{T}^{gen} < 100$ GeV",
                     "extra_cuts" : [
@@ -268,7 +268,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "$100 < p_{T}^{gen} < 200$ GeV",
                     "extra_cuts" : [
@@ -282,7 +282,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "orange",
                     "label_override" : "$ 200 < p_{T}^{gen} < 500$ GeV",
                     "extra_cuts" : [
@@ -296,7 +296,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "$p_{T}^{gen} > 500$ GeV",
                     "extra_cuts" : [
@@ -331,7 +331,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -365,7 +365,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "$30 < p_{T}^{gen} < 100$ GeV",
                     "extra_cuts" : [
@@ -379,7 +379,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "$100 < p_{T}^{gen} < 200$ GeV",
                     "extra_cuts" : [
@@ -393,7 +393,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "orange",
                     "label_override" : "$ 200 < p_{T}^{gen} < 500$ GeV",
                     "extra_cuts" : [
@@ -407,7 +407,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "$p_{T}^{gen} > 500$ GeV",
                     "extra_cuts" : [
@@ -443,7 +443,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -485,7 +485,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -526,7 +526,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
                     "extra_cuts" : [
@@ -540,7 +540,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
                     "extra_cuts" : [
@@ -554,7 +554,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "yellow",
                     "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
                     "extra_cuts" : [
@@ -568,7 +568,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "orange",
                     "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
                     "extra_cuts" : [
@@ -582,7 +582,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
                     "extra_cuts" : [
@@ -596,7 +596,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "purple",
                     "label_override" : "$10 < p_{T}^{gen} < 20$ GeV",
                     "extra_cuts" : [
@@ -610,7 +610,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "brown",
                     "label_override" : "$20 < p_{T}^{gen} < 50$ GeV",
                     "extra_cuts" : [
@@ -647,7 +647,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "$0 < \\Delta R < 0.02$",
                     "extra_cuts" : [
@@ -661,7 +661,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "$0.02 < \\Delta R < 0.04$",
                     "extra_cuts" : [
@@ -675,7 +675,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "yellow",
                     "label_override" : "$0.04 < \\Delta R < 0.06$",
                     "extra_cuts" : [
@@ -689,7 +689,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "orange",
                     "label_override" : "$0.06 < \\Delta R < 0.08$",
                     "extra_cuts" : [
@@ -703,7 +703,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "$0.08 < \\Delta R < 0.1$",
                     "extra_cuts" : [
@@ -744,7 +744,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "$0 < \\Delta R < 0.02$",
                     "extra_cuts" : [
@@ -758,7 +758,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "$0.02 < \\Delta R < 0.04$",
                     "extra_cuts" : [
@@ -772,7 +772,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "yellow",
                     "label_override" : "$0.04 < \\Delta R < 0.06$",
                     "extra_cuts" : [
@@ -786,7 +786,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "orange",
                     "label_override" : "$0.06 < \\Delta R < 0.08$",
                     "extra_cuts" : [
@@ -800,7 +800,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "$0.08 < \\Delta R < 0.1$",
                     "extra_cuts" : [
@@ -841,7 +841,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
                     "extra_cuts" : [
@@ -855,7 +855,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
                     "extra_cuts" : [
@@ -869,7 +869,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "yellow",
                     "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
                     "extra_cuts" : [
@@ -883,7 +883,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "orange",
                     "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
                     "extra_cuts" : [
@@ -897,7 +897,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
                     "extra_cuts" : [
@@ -941,7 +941,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -999,7 +999,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "blue",
                     "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
                     "extra_cuts" : [
@@ -1013,7 +1013,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "magenta",
                     "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
                     "extra_cuts" : [
@@ -1027,7 +1027,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "yellow",
                     "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
                     "extra_cuts" : [
@@ -1041,7 +1041,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "orange",
                     "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
                     "extra_cuts" : [
@@ -1055,7 +1055,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "red",
                     "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
                     "extra_cuts" : [

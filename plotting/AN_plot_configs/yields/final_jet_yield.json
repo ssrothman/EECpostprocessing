@@ -29,8 +29,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "WW",
@@ -41,8 +40,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "WZ",
@@ -53,8 +51,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "TT",
@@ -65,8 +62,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": false,
-      "isprebinned": false
+      "dsetkind": "pq"
     },
     {
       "key": "ST",
@@ -77,8 +73,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": true,
-      "isprebinned": false
+      "dsetkind": "pq_stack"
     },
     {
       "key": "Signal",
@@ -89,8 +84,7 @@
       "table": "jets",
       "objsyst": "nominal",
       "location": "scratch-submit",
-      "isstack": true,
-      "isprebinned": false
+      "dsetkind": "pq_stack"
     },
     {
       "key" : "DATA",
@@ -101,8 +95,7 @@
       "table" : "jets",
       "objsyst" : "DATA",
       "location" : "scratch-submit",
-      "isstack" : true,
-      "isprebinned" : false,
+      "dsetkind": "pq_stack",
       "nocount" : true
     }
   ],

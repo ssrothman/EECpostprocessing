@@ -11,8 +11,7 @@
                     "table": "parts",
                     "objsyst": "nominal",
                     "location": "scratch-submit",
-                    "isstack": true,
-                    "isprebinned": false
+                    "dsetkind": "pq_stack"
                   },
                   {
                     "key" : "DATA",
@@ -23,8 +22,7 @@
                     "table" : "parts",
                     "objsyst" : "DATA",
                     "location" : "scratch-submit",
-                    "isstack" : true,
-                    "isprebinned" : false,
+                    "dsetkind": "pq_stack",
                     "nocount" : true
                   }
             ],
@@ -77,8 +75,7 @@
                     "table": "events",
                     "objsyst": "nominal",
                     "location": "scratch-submit",
-                    "isstack": true,
-                    "isprebinned": false
+                    "dsetkind": "pq_stack"
                   },
                   {
                     "key" : "DATA",
@@ -89,8 +86,7 @@
                     "table" : "events",
                     "objsyst" : "DATA",
                     "location" : "scratch-submit",
-                    "isstack" : true,
-                    "isprebinned" : false,
+                    "dsetkind": "pq_stack",
                     "nocount" : true
                   }
             ],
@@ -167,8 +163,7 @@
                     "table": "jets",
                     "objsyst": "nominal",
                     "location": "scratch-submit",
-                    "isstack": true,
-                    "isprebinned": false
+                    "dsetkind": "pq_stack"
                   },
                   {
                     "key" : "DATA",
@@ -179,8 +174,7 @@
                     "table" : "jets",
                     "objsyst" : "DATA",
                     "location" : "scratch-submit",
-                    "isstack" : true,
-                    "isprebinned" : false,
+                    "dsetkind": "pq_stack",
                     "nocount" : true
                   }
             ],

@@ -9,7 +9,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "black",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -47,7 +47,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "No cuts",
                     "color_override" : "blue",
                     "extra_cuts" : [
@@ -60,7 +60,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "From PV flag > 0",
                     "color_override" : "magenta",
                     "extra_cuts" : [
@@ -74,7 +74,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "From PV flag > 1",
                     "color_override" : "orange",
                     "extra_cuts" : [
@@ -88,7 +88,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "From PV flag > 2",
                     "color_override" : "red",
                     "extra_cuts" : [
@@ -123,7 +123,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "No puupi weight cuts",
                     "color_override" : "blue",
                     "extra_cuts" : [
@@ -136,7 +136,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "puppi weight > 0.5",
                     "color_override" : "magenta",
                     "extra_cuts" : [
@@ -150,7 +150,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "puppi weight > 0.9",
                     "color_override" : "orange",
                     "extra_cuts" : [
@@ -164,7 +164,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "puppi weight > 0.99",
                     "color_override" : "red",
                     "extra_cuts" : [
@@ -199,7 +199,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "No puupi weight cuts",
                     "color_override" : "blue",
                     "extra_cuts" : [
@@ -212,7 +212,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "puppi weight > 0.5",
                     "color_override" : "magenta",
                     "extra_cuts" : [
@@ -226,7 +226,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "puppi weight > 0.9",
                     "color_override" : "orange",
                     "extra_cuts" : [
@@ -240,7 +240,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "puppi weight > 0.99",
                     "color_override" : "red",
                     "extra_cuts" : [
@@ -276,7 +276,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "black",
                     "label_override" : "No vertexing cuts",
                     "extra_cuts" : [
@@ -312,7 +312,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "color_override" : "black",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -344,7 +344,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "No PV cuts",
                     "color_override" : "blue",
                     "extra_cuts" : [
@@ -357,7 +357,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "|dz| < 0.05",
                     "color_override" : "magenta",
                     "extra_cuts" : [
@@ -371,7 +371,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "|dz| < 0.1",
                     "color_override" : "yellow",
                     "extra_cuts" : [
@@ -385,7 +385,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "|dz| < 0.2",
                     "color_override" : "orange",
                     "extra_cuts" : [
@@ -399,7 +399,7 @@
                     "table" : "parts",
                     "objsyst" : "NO_PVCUT",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "label_override" : "|dz| < 0.4",
                     "color_override" : "red",
                     "extra_cuts" : [

@@ -9,7 +9,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No b veto",
                     "color_override" : "red",
                     "extra_cuts" : [
@@ -23,7 +23,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "Loose b veto",
                     "color_override" : "orange",
                     "extra_cuts" : [
@@ -37,7 +37,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "Medium b veto",
                     "color_override" : "blue",
                     "extra_cuts" : [
@@ -51,7 +51,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "Tight b veto",
                     "color_override" : "green",
                     "extra_cuts" : [
@@ -88,7 +88,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 }
@@ -129,7 +129,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 }
@@ -164,7 +164,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 },
                 {
                     "configsuite" : "BasicConfig",
@@ -173,7 +173,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false
+                    "dsetkind": "pq"
                 },
                 {
                     "configsuite" : "BasicConfig",
@@ -182,7 +182,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false
+                    "dsetkind": "pq"
                 },
                 {
                     "configsuite" : "BasicConfig",
@@ -191,7 +191,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false
+                    "dsetkind": "pq"
                 },
                 {
                     "configsuite" : "BasicConfig",
@@ -200,7 +200,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false
+                    "dsetkind": "pq"
                 },
                 {
                     "configsuite" : "BasicConfig",
@@ -209,7 +209,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 }
             ],
             "variables" : [
@@ -268,7 +268,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 20$ GeV",
                     "color_override" : "#1F77B4"
                 },
@@ -279,7 +279,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 15$ GeV",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -293,7 +293,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 10$ GeV",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -307,7 +307,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 5$ GeV",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -340,7 +340,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 20$ GeV",
                     "color_override" : "#1F77B4"
                 },
@@ -351,7 +351,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 15$ GeV",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -365,7 +365,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 10$ GeV",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -379,7 +379,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "$|M_{\\mu\\mu} - M_{Z}| < 5$ GeV",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -412,7 +412,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 }
@@ -445,7 +445,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 }
@@ -476,7 +476,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 }
             ],
             "variables" : [
@@ -509,7 +509,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 }
             ],
             "variables" : [
@@ -540,7 +540,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 }
             ],
             "variables" : [
@@ -568,7 +568,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true
+                    "dsetkind": "pq_stack"
                 }
             ],
             "variables" : [
@@ -598,7 +598,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -609,7 +609,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nEle == 0",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -642,7 +642,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -653,7 +653,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nEle == 0",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -686,7 +686,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -697,7 +697,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nMu == 2",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -730,7 +730,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -741,7 +741,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nMu == 2",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -774,7 +774,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -785,7 +785,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nLooseB < 3",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -799,7 +799,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nLooseB < 2",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -813,7 +813,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nLooseB == 0",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -846,7 +846,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -857,7 +857,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nLooseB < 3",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -871,7 +871,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nLooseB < 2",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -885,7 +885,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "nLooseB == 0",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -918,7 +918,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -929,7 +929,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET/Zpt < 0.1",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -943,7 +943,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET/Zpt < 1",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -957,7 +957,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET/Zpt < 10",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -990,7 +990,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -1001,7 +1001,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET/Zpt < 0.1",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -1015,7 +1015,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET/Zpt < 1",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -1029,7 +1029,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET/Zpt < 10",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -1062,7 +1062,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -1073,7 +1073,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET < 25 GeV",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -1087,7 +1087,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET < 50 GeV",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -1101,7 +1101,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET < 100 GeV",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -1134,7 +1134,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "No cut",
                     "color_override" : "#1F77B4"
                 },
@@ -1145,7 +1145,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET < 25 GeV",
                     "color_override" : "#2CA02C",
                     "extra_cuts" : [
@@ -1159,7 +1159,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET < 50 GeV",
                     "color_override" : "#FF7F0E",
                     "extra_cuts" : [
@@ -1173,7 +1173,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "label_override" : "MET < 100 GeV",
                     "color_override" : "#D62728",
                     "extra_cuts" : [
@@ -1206,7 +1206,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "no_count" : true
                 },
                 {
@@ -1216,7 +1216,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true
                 },
                 {
@@ -1226,7 +1226,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true
                 },
                 {
@@ -1236,7 +1236,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true
                 },
                 {
@@ -1246,7 +1246,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true
                 },
                 {
@@ -1256,7 +1256,7 @@
                     "table" : "events",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : true,
+                    "dsetkind": "pq_stack",
                     "no_count" : true
                 }
             ],

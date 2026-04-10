@@ -228,8 +228,15 @@ def _validate_config(cfg: dict[str, Any]) -> None:
         "name",
         "table",
         "objsyst",
-        "isstack",
+        "dsetkind",
     ]
+    valid_dsetkinds = {
+        "pq",
+        "pq_stack",
+        "prebinned",
+        "prebinned_stack",
+        "prebinned_root_histogram",
+    }
     dataset_keys: list[str] = []
     use_alternative_weight_requested = False
     for i, dscfg in enumerate(cfg["datasets"]):
@@ -241,6 +248,12 @@ def _validate_config(cfg: dict[str, Any]) -> None:
         if dscfg["key"] in dataset_keys:
             raise ValueError(f"Duplicate dataset key: {dscfg['key']}")
         dataset_keys.append(dscfg["key"])
+        if not isinstance(dscfg["dsetkind"], str):
+            raise ValueError(f"datasets[{i}].dsetkind must be a string")
+        if dscfg["dsetkind"] not in valid_dsetkinds:
+            raise ValueError(
+                f"datasets[{i}].dsetkind must be one of {sorted(valid_dsetkinds)}"
+            )
 
         extra_cuts = dscfg.get("extra_cuts", [])
         if not isinstance(extra_cuts, list):

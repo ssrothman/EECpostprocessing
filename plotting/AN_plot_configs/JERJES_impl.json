@@ -9,7 +9,7 @@
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Nominal",
                     "color_override" : "black"
@@ -21,7 +21,7 @@
                     "table" : "parts",
                     "objsyst" : "CH_UP",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Track energy scale up",
                     "color_override" : "red"
@@ -33,7 +33,7 @@
                     "table" : "parts",
                     "objsyst" : "CH_DN",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Track energy scale down",
                     "color_override" : "blue"
@@ -67,7 +67,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Nominal",
                     "color_override" : "black"
@@ -79,7 +79,7 @@
                     "table" : "jets",
                     "objsyst" : "JER_UP",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "JER Up",
                     "color_override" : "red"
@@ -91,7 +91,7 @@
                     "table" : "jets",
                     "objsyst" : "JER_DN",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "JER Down",
                     "color_override" : "blue"
@@ -124,7 +124,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Corrected JER",
                     "color_override" : "red"
@@ -135,7 +135,7 @@
                     "table" : "jets",
                     "objsyst" : "NO_JER",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Raw JER",
                     "color_override" : "blue"
@@ -168,7 +168,7 @@
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Nominal",
                     "color_override" : "black"
@@ -180,7 +180,7 @@
                     "table" : "jets",
                     "objsyst" : "JES_UP",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "JES Up",
                     "color_override" : "red"
@@ -192,7 +192,7 @@
                     "table" : "jets",
                     "objsyst" : "JES_DN",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "JES Down",
                     "color_override" : "blue"
@@ -225,7 +225,7 @@
                     "table" : "jets",
                     "objsyst" : "NO_JER",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Corrected",
                     "color_override" : "red"
@@ -237,7 +237,7 @@
                     "table" : "jets",
                     "objsyst" : "NO_JEC",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind": "pq",
                     "no_count" : true,
                     "label_override" : "Raw",
                     "color_override" : "blue"
