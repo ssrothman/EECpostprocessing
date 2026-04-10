@@ -40,7 +40,7 @@
             "variables" : ["Jpt"],
             "weights" : ["wt_nominal"],
             "cut" : [],
-            "binning" : "explicit:[40,100,200,340,520,740,1000]",
+            "binning" : "explicit:[40,100,200,340,520,740,1000,1500,2500,5000]",
             "plotspath" : "plots/HT_v6",
             "plotsprefix" : "",
             "driver" : "plot_histogram",

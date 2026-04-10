@@ -68,9 +68,9 @@ os.makedirs(args.output, exist_ok=True)
 hep.style.use('CMS')
 
 for i, (jlo, jhi) in enumerate(JPT_BINS):
-    fig, (ax, ax_gen, ax_reco) = plt.subplots(
-        3, 1, figsize=(10, 8),
-        gridspec_kw={'height_ratios': [3, 1, 1]},
+    fig, (ax, ax_ratio) = plt.subplots(
+        2, 1, figsize=(10, 13),
+        gridspec_kw={'height_ratios': [10, 3]},
         sharex=True
     )
 
@@ -95,25 +95,23 @@ for i, (jlo, jhi) in enumerate(JPT_BINS):
     ax.set_xscale('log')
     if i > 0:
         ax.set_yscale('log')
-    ax.set_ylabel('A.U.')
+    ax.set_ylabel('A.U.', fontsize=11)
     ax.legend()
+    ax.tick_params(axis='both', labelsize=10)
     hep.cms.label(ax=ax, data=False, text='Private', com=13)
 
     gen_ratio  = np.where(unf_norm != 0, gen_norm  / unf_norm, np.nan)
     reco_ratio = np.where(unf_norm != 0, reco_norm / unf_norm, np.nan)
 
-    hep.histplot(gen_ratio,  r_edges, ax=ax_gen,  color=C_GEN,  linestyle='--')
-    ax_gen.axhline(1.0, color=C_UNF, linestyle='-', linewidth=0.8)
-    ax_gen.set_xscale('log')
-    ax_gen.set_ylabel('Gen / Unf')
-    ax_gen.set_ylim(0.5, 1.5)
-
-    hep.histplot(reco_ratio, r_edges, ax=ax_reco, color=C_RECO, linestyle=':')
-    ax_reco.axhline(1.0, color=C_UNF, linestyle='-', linewidth=0.8)
-    ax_reco.set_xscale('log')
-    ax_reco.set_xlabel('$\\Delta R$')
-    ax_reco.set_ylabel('Reco / Unf')
-    ax_reco.set_ylim(0.5, 1.5)
+    hep.histplot(gen_ratio,  r_edges, ax=ax_ratio, color=C_GEN,  linestyle='--', label='Gen / Unf')
+    hep.histplot(reco_ratio, r_edges, ax=ax_ratio, color=C_RECO, linestyle=':',  label='Reco / Unf')
+    ax_ratio.axhline(1.0, color=C_UNF, linestyle='-', linewidth=0.8)
+    ax_ratio.set_xscale('log')
+    ax_ratio.set_xlabel('$\\Delta R$', fontsize=11)
+    ax_ratio.set_ylabel('Ratio to Unfolded', fontsize=11)
+    ax_ratio.tick_params(axis='both', labelsize=10)
+    ax_ratio.set_ylim(0.5, 1.5)
+    ax_ratio.legend(fontsize=10)
 
     fig.tight_layout()
     fname = os.path.join(args.output, f'unfolded_Jpt{jlo}-{jhi}.png')
