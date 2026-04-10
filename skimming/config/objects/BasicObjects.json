@@ -3,11 +3,11 @@
         "JECTARGET" : "RecoJets",
         "Muons" : {
             "class" : "Muons",
-            "params" : {
+            "params-common" : {
                 "name" : "Muon",
                 "padTo" : 2,
                 "roccor" : false,
-                "roccorThreshold" : 0.0,
+                "roccorThreshold" : -1.0,
                 "minPt" : 15.0,
                 "maxEta" : 2.4,
                 "IDflags" : [
@@ -16,6 +16,10 @@
                 ],
                 "maxDXY" : 0.5,
                 "maxDZ" : 0.2
+            },
+            "params-YESROCCOR" : {
+                "roccor" : true,
+                "roccorThreshold" : 200.0
             },
             "MConly" : false
         },
