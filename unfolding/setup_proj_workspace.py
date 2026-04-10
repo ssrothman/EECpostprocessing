@@ -15,7 +15,7 @@ pythia_v6 : dsspec = {
     'isMC'         : True,
 }
 
-WORKSPACE = 'proj_unfold_workspace'
+WORKSPACE = '/eos/user/d/dponman/proj_unfold_workspace'
 OBJSYST   = 'NOM'
 WTSYST    = 'nominal'
 

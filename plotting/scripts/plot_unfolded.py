@@ -7,7 +7,7 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--workspace', type=str, default='proj_unfold_workspace')
+parser.add_argument('--workspace', type=str, default='/eos/user/d/dponman/proj_unfold_workspace')
 parser.add_argument('--output',    type=str, default='plots/proj')
 args = parser.parse_args()
 

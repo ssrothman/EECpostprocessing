@@ -8,7 +8,7 @@ from unfolding.histogram import Histogram
 from unfolding.loss import Loss
 from unfolding.minimizer import Minimizer
 
-WORKSPACE = 'proj_unfold_workspace'
+WORKSPACE = '/eos/user/d/dponman/proj_unfold_workspace'
 
 # --- load workspace ---
 print("Loading reco histogram...")
