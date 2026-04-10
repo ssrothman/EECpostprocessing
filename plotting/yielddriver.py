@@ -507,22 +507,7 @@ def _render_table_latex(
     label_source: str | None = None,
     bins_group_label: str | None = None,
 ) -> str:
-    lines = [
-        r"\begin{table}[htbp]",
-        r"\centering",
-        _render_tabular_latex(headers, rows, bins_group_label=bins_group_label),
-    ]
-
-    if caption:
-        lines.append(rf"\caption{{{_escape_latex(caption)}}}")
-
-    label_key = label_source if label_source else "yield_table"
-    label_key = re.sub(r"[^a-zA-Z0-9]+", "_", label_key).strip("_").lower()
-    if not label_key:
-        label_key = "yield_table"
-    lines.append(rf"\label{{tab:{label_key}}}")
-    lines.append(r"\end{table}")
-    return "\n".join(lines)
+    return _render_tabular_latex(headers, rows, bins_group_label=bins_group_label)
 
 
 def _build_datasets(cfg: dict[str, Any]):
@@ -768,12 +753,7 @@ def run_yield_table(cfg: dict[str, Any], output_format: str = "text") -> str:
                 tabular_blocks.append("\n".join(block_lines))
 
             block_sep = "\n\n\\vspace{0.8em}\n\n"
-            lines = [r"\begin{table}[htbp]", r"\centering", block_sep.join(tabular_blocks)]
-            if "table_name" in meta:
-                lines.append(rf"\caption{{{_escape_latex(str(meta['table_name']))}}}")
-            lines.append(rf"\label{{tab:{re.sub(r'[^a-zA-Z0-9]+', '_', label_source).strip('_').lower() or 'yield_table'}}}")
-            lines.append(r"\end{table}")
-            output_text = "\n".join(lines).rstrip() + "\n"
+            output_text = block_sep.join(tabular_blocks).rstrip() + "\n"
     else:
         if split_specs is None:
             output_blocks = []
