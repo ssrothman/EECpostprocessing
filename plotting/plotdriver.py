@@ -1,21 +1,23 @@
-from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack, load_prebinned_dataset, build_prebinned_dataset_stack
+from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack, load_prebinned_dataset, build_prebinned_dataset_stack, load_prebinned_root_histogram
 import simonplot as splt
 import json
 import os
 
 
 def build_dataset_from_dscfg(dscfg, all_same_objsyst, all_same_extracut, dsetcut):
-    if dscfg['isstack']:
-        if dscfg.get('isprebinned', False):
-            factory = build_prebinned_dataset_stack
-        else:
-            factory = build_pq_dataset_stack
+    if dscfg['dsetkind'] == 'prebinned_stack':
+        factory = build_prebinned_dataset_stack
+    elif dscfg['dsetkind'] == 'prebinned':
+        factory = load_prebinned_dataset
+    elif dscfg['dsetkind'] == 'prebinned_root_histogram':
+        factory = load_prebinned_root_histogram
+    elif dscfg['dsetkind'] == 'pq_stack':
+        factory = build_pq_dataset_stack
+    elif dscfg['dsetkind'] == 'pq':
+        factory = build_pq_dataset
     else:
-        if dscfg.get('isprebinned', False):
-            factory = load_prebinned_dataset
-        else:
-            factory = build_pq_dataset
-
+        raise ValueError(f"Unknown dsetkind {dscfg['dsetkind']} in dataset config!")
+    
     extrakey = ''
     if not all_same_objsyst:
         extrakey += dscfg['objsyst'] + '-'
@@ -36,6 +38,9 @@ def build_dataset_from_dscfg(dscfg, all_same_objsyst, all_same_extracut, dsetcut
 
     if 'nocov' in dscfg:
         extraargs['nocov'] = dscfg['nocov']
+
+    if 'path' in dscfg:
+        extraargs['path'] = dscfg['path']
 
     return factory(
         configsuite=dscfg['configsuite'],

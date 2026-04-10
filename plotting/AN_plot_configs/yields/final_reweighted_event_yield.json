@@ -2,7 +2,7 @@
   "meta": {
     "table_name": "events_yield_final_reweighted",
     "output_file": "ANplots/yields/events_yield_final_reweighted.txt",
-    "target_lumi": 59.81,
+    "target_lumi": 59.54,
     "float_format": "%.0f"
   },
   "row_order" : "Signal | Background | TotalMC || DATA",

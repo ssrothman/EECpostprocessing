@@ -2,7 +2,7 @@
   "meta": {
     "table_name": "mediumB_efficiency",
     "output_file": "ANplots/yields/mediumB_efficiency.txt",
-    "target_lumi": 59.81,
+    "target_lumi": 59.54,
     "float_format": "%.2f",
     "latex_bins_label" : "Jet $p_{T}$ bin [GeV]"
   },

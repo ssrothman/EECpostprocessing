@@ -2,7 +2,7 @@
   "meta": {
     "table_name": "events_yield_final",
     "output_file": "ANplots/yields/events_yield_final.txt",
-    "target_lumi": 59.81,
+    "target_lumi": 59.54,
     "float_format": "%.0f"
   },
   "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC ",

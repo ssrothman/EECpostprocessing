@@ -1,0 +1,226 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "parts",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "charge",
+                "dxy",
+                "dz",
+                "puppiWeight",
+                "fromPV",
+                "var::RatioVariable('pt', 'Jpt')",
+                "pt",
+                "eta",
+                "phi"
+            ],
+            "override_filenames" : [
+                "charge",
+                "dxy",
+                "dz",
+                "puppiWeight",
+                "fromPV",
+                "pt_over_Jpt",
+                "pt",
+                "eta",
+                "phi"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinematics/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "rho",
+                "MET",
+                "MET_phi",
+                "numLooseB",
+                "numMediumB",
+                "numTightB",
+                "numJets",
+                "Zpt",
+                "Zy",
+                "Zmass",
+                "Zphi",
+                "leadingMuPt",
+                "leadingMuEta",
+                "leadingMuDxy",
+                "leadingMuDz",
+                "leadingMuCharge",
+                "subleadingMuPt",
+                "subleadingMuEta",
+                "subleadingMuDxy",
+                "subleadingMuDz",
+                "subleadingMuCharge"
+            ],
+            "override_filenames" : [
+                "rho",
+                "MET",
+                "MET_phi",
+                "numLooseB",
+                "numMediumB",
+                "numTightB",
+                "numJets",
+                "Zpt",
+                "Zy",
+                "Zmass",
+                "Zphi",
+                "leadingMuPt",
+                "leadingMuEta",
+                "leadingMuDxy",
+                "leadingMuDz",
+                "leadingMuCharge",
+                "subleadingMuPt",
+                "subleadingMuEta",
+                "subleadingMuDxy",
+                "subleadingMuDz",
+                "subleadingMuCharge"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinematics/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "isstack": true,
+                    "isprebinned": false
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "jets",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "isstack" : true,
+                    "isprebinned" : false,
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Jpt",
+                "Jeta",
+                "Jphi",
+                "passLooseB",
+                "passMediumB",
+                "passTightB",
+                "flav",
+                "nConstituents",
+                "nPassingConstituents"
+            ],
+            "override_filenames" : [
+                "Jpt",
+                "Jeta",
+                "Jphi",
+                "passLooseB",
+                "passMediumB",
+                "passTightB",
+                "flav",
+                "nConstituents",
+                "nPassingConstituents"
+            ],
+            "weights" : [
+                "var::ProductVariable(var::CorrectionlibVariable([var::LogVariable('Zpt', 10), var::AbsVariable('Zy')], 'ANplots/kinreweight_2D/Mar_01_2026/zptabsy_reweight_2d.json', 'zptabsy_reweight_nominal'), var::ProductVariable('wt_nominal', var::CorrectionlibVariable([var::LogVariable('Zpt', 10)], 'ANplots/kinreweight/Mar_01_2026/zpt_reweight.json', 'zpt_reweight')))",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinematics/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        }
+    ]
+}

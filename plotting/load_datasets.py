@@ -7,7 +7,7 @@ import os
 import json
 import numpy as np
 
-from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
+from simonplot.plottables.PrebinnedDatasets import PrebinnedRootHistogramDataset, ValCovPairDataset
 from simonpy.AbitraryBinning import ArbitraryBinning
 
 def build_prebinned_dataset_stack(configsuite : str,
@@ -109,6 +109,42 @@ def build_pq_dataset_stack(configsuite : str,
         datasets = dsets,
         showstack = showStack
     )
+
+def load_prebinned_root_histogram(path : str,
+                                  runtag : str,
+                                  dataset : str,
+                                  
+                                  label_override : str | None = None,
+                                  color_override : str | None = None,
+
+                                  extra_key : str | None = None,
+
+                                  configsuite : str = 'ignored',
+                                  objsyst : str = 'ignored',
+                                  table : str = 'ignored',
+                                  location : str = 'ignored',):
+    dsetcfg = lookup_dataset(runtag, dataset)
+
+    color = color_override if color_override is not None else dsetcfg['color']
+    label = label_override if label_override is not None else dsetcfg['label']
+
+    thekey = dataset
+    if extra_key is not None:
+        thekey += '-' + extra_key
+
+    theds = PrebinnedRootHistogramDataset(
+        key = thekey,
+        path = path,
+        color = color,
+        label = label,
+        isMC = 'xsec' in dsetcfg
+    )
+    if 'xsec' in dsetcfg:
+        theds.set_xsec(dsetcfg['xsec'])
+    elif 'lumi' in dsetcfg:
+        theds.set_lumi(dsetcfg['lumi'])
+
+    return theds
 
 def load_prebinned_dataset(configsuite : str,
                            runtag : str,

@@ -2,7 +2,7 @@
   "meta": {
     "table_name": "full_cut_event_efficiency",
     "output_file": "ANplots/yields/full_cut_event_efficiency.txt",
-    "target_lumi": 59.81,
+    "target_lumi": 59.54,
     "float_format": "%.2f"
   },
   "row_order" : "WW WZ ZZ TT ST | Signal | Background | TotalMC ",

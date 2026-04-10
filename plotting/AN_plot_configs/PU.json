@@ -1,0 +1,148 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind" : "pq_stack",
+                    "label_override" : "nominal",
+                    "color_override" : "green"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind" : "pq_stack",
+                    "label_override" : "Up",
+                    "color_override" : "red"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind" : "pq_stack",
+                    "label_override" : "Down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "nTrueInt"
+            ],
+            "override_filenames" : [
+                "nTrueInt_PUupdn"
+            ],
+            "weights" : [
+                "wt_nominal",
+                "wt_PUUp",
+                "wt_PUDown"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/PU/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind" : "pq_stack",
+                    "label_override" : "nominal",
+                    "color_override" : "green"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind" : "pq_stack",
+                    "label_override" : "Up",
+                    "color_override" : "red"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind" : "pq_stack",
+                    "label_override" : "Down",
+                    "color_override" : "blue"
+                },
+                {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "pq_stack",
+                    "nocount" : true
+                }
+            ],
+            "variables" : [
+                "rho"
+            ],
+            "override_filenames" : [
+                "rho_PUupdn"
+            ],
+            "weights" : [
+                "wt_nominal",
+                "wt_PUUp",
+                "wt_PUDown",
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/PU/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        }
+    ]
+}
