@@ -1,0 +1,92 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC_pythia_inclusive",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Rochester corrections",
+                    "color_override" : "blue"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC_pythia_inclusive",
+                    "table": "events",
+                    "objsyst": "NOROCCOR",
+                    "location": "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "No Rochester corrections",
+                    "color_override" : "red"
+                },
+                {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "events",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "nocount" : true
+                }
+            ],
+            "variables" : [
+                "Zpt",
+                "Zy",
+                "Zmass",
+                "Zphi",
+                "leadingMuPt",
+                "leadingMuEta",
+                "leadingMuDxy",
+                "leadingMuDz",
+                "leadingMuCharge",
+                "subleadingMuPt",
+                "subleadingMuEta",
+                "subleadingMuDxy",
+                "subleadingMuDz",
+                "subleadingMuCharge"
+            ],
+            "override_filenames" : [
+                "Zpt",
+                "Zy",
+                "Zmass",
+                "Zphi",
+                "leadingMuPt",
+                "leadingMuEta",
+                "leadingMuDxy",
+                "leadingMuDz",
+                "leadingMuCharge",
+                "subleadingMuPt",
+                "subleadingMuEta",
+                "subleadingMuDxy",
+                "subleadingMuDz",
+                "subleadingMuCharge"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/roccor/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        }
+    ]
+}
