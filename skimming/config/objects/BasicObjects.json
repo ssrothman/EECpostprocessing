@@ -3,6 +3,7 @@
         "JECTARGET" : "RecoJets",
         "Muons" : {
             "class" : "Muons",
+            "params" : {},
             "params-common" : {
                 "name" : "Muon",
                 "padTo" : 2,
