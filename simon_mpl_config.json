@@ -134,7 +134,8 @@
         "DeltaPhi(psi123_type1_psi456_type1)" : "$\\Delta \\psi$",
         "psi456_type1" : "$\\psi_{456}$",
         "psi123_type1" : "$\\psi_{123}$",
-        "ABS-deltaPsi_type1" : "$|\\Delta \\psi|$"
+        "ABS-deltaPsi_type1" : "$|\\Delta \\psi|$",
+        "nMatchesGT0_rate" : "Gen matching efficiency"
     },
     "auto_logx_patterns" : [
         "*MET",

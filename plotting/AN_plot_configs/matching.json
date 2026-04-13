@@ -7,9 +7,459 @@
                     "runtag" : "Feb_22_2026",
                     "name" : "Pythia_inclusive",
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
-                    "location" : "scratch-submit",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
                     "dsetkind": "pq",
+                    "color_override" : "k",
+                    "label_override" : "",
+                    "extra_cuts" : [
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::ProfileVariable('matchPt', var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 'percentile', 68)"
+            ],
+            "extras" : [
+                "func::TrackAngularResolution(0.0003, 0.003)"
+            ],
+            "override_filenames" : [
+                "dR_68th_percentile_vs_pt_with_fit_loose"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true,
+            "force_range" : [0.5, 100],
+            "logy" : false
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "k",
+                    "label_override" : "",
+                    "extra_cuts" : [
+                        
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::ProfileVariable('matchPt', var::RelativeResolutionVariable('matchPt','pt'), 'percentile-range', [16, 84])"
+            ],
+            "extras" : [
+                "func::TrackPtResolution(0.03, 0.001)"
+            ],
+            "override_filenames" : [
+                "dpt_68th_percentile_vs_pt_with_fit_loose"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true,
+            "force_range" : [0.5, 500],
+            "logy" : false
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "k",
+                    "label_override" : "",
+                    "extra_cuts" : [
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::ProfileVariable('matchPt', var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi'), 'percentile', 99)"
+            ],
+            "extras" : [
+                "func::TrackAngularResolution(0.01, 0.01)"
+            ],
+            "override_filenames" : [
+                "dR_99th_percentile_vs_pt_with_fit_loose"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true,
+            "force_range" : [0.5, 100],
+            "logy" : false
+        },
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "blue",
+                    "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 0, 0.5)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "magenta",
+                    "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 0.5, 1)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "yellow",
+                    "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 1, 2)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "orange",
+                    "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 2, 5)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "red",
+                    "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 5, 10)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "purple",
+                    "label_override" : "$10 < p_{T}^{gen} < 20$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 10, 20)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "brown",
+                    "label_override" : "$20 < p_{T}^{gen} < 50$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 20, 50)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::DeltaRVariable('matchEta', 'matchPhi', 'eta', 'phi')"
+            ],
+            "override_filenames" : [
+                "dR_binned_by_pt_loose"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true
+        },
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "blue",
+                    "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 0, 0.5)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "magenta",
+                    "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 0.5, 1)"
+                    ]
+                },
+                {
+                   "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "yellow",
+                    "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 1, 2)"
+                    ]
+                },
+                {
+                   "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "orange",
+                    "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 2, 5)"
+                    ]
+                },
+                {
+                   "configsuite" : "BasicConfig",
+                    "runtag" : "Feb_22_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "local-submit",
+                    "dsetkind": "pq",
+                    "color_override" : "red",
+                    "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut('matchPt', 5, 10)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "override_filenames" : [
+                "dpt_binned_by_pt_loose"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "force_range" : [-0.2, 0.2],
+            "nopad" : true
+        },
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "$|\\eta| < 0.7$",
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::AbsVariable('Jeta'), 0.7)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "$|\\eta| > 0.7$",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('Jeta'), 0.7)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable('matched', 'Jpt')"
+            ],
+            "override_filenames" : [
+                "jet_matching_efficiency_vs_pt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true
+        },
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "$|\\eta| < 0.7$",
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::AbsVariable('eta'), 0.7)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "$0.7 < |\\eta| < 1.4$",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0.7, 1.4)"
+                    ]
+                },
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "green",
+                    "label_override" : "$|\\eta| > 1.4$",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('eta'), 1.4)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), 'pt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_vs_pt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/matching/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "nopad" : true
+        },
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -29,8 +479,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)"
             ],
             "binning" : "auto",
@@ -45,12 +493,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "Gen-level $\\mu^\\pm$, matched with reco-level $h^\\pm$",
                     "extra_cuts" : [
@@ -60,12 +509,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "Gen-level $\\mu^\\pm$, matched with reco-level $e^\\pm$",
                     "extra_cuts" : [
@@ -75,12 +525,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "Gen-level $\\mu^\\pm$, matched with reco-level $\\mu^\\pm$",
                     "extra_cuts" : [
@@ -113,12 +564,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "Gen-level $e^\\pm$, matched with reco-level $h^\\pm$",
                     "extra_cuts" : [
@@ -128,12 +580,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "Gen-level $e^\\pm$, matched with reco-level $e^\\pm$",
                     "extra_cuts" : [
@@ -143,12 +596,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "Gen-level $e^\\pm$, matched with reco-level $\\mu^\\pm$",
                     "extra_cuts" : [
@@ -181,12 +635,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "Gen-level $h^\\pm$, matched with reco-level $h^\\pm$",
                     "extra_cuts" : [
@@ -196,12 +651,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "Gen-level $h^\\pm$, matched with reco-level $e^\\pm$",
                     "extra_cuts" : [
@@ -211,12 +667,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "Gen-level $h^\\pm$, matched with reco-level $\\mu^\\pm$",
                     "extra_cuts" : [
@@ -249,12 +706,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$30 < p_{T}^{gen} < 100$ GeV",
                     "extra_cuts" : [
@@ -263,12 +721,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "$100 < p_{T}^{gen} < 200$ GeV",
                     "extra_cuts" : [
@@ -277,12 +736,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "orange",
                     "label_override" : "$ 200 < p_{T}^{gen} < 500$ GeV",
                     "extra_cuts" : [
@@ -291,12 +751,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$p_{T}^{gen} > 500$ GeV",
                     "extra_cuts" : [
@@ -326,46 +787,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
-                    "color_override" : "k",
-                    "label_override" : "",
-                    "extra_cuts" : [
-                        
-                    ]
-                }
-            ],
-            "variables" : [
-                "var::RateVariable('matched', 'matchedPt')"
-            ],
-            "override_filenames" : [
-                "jet_matching_efficiency_vs_pt"
-            ],
-            "weights" : [
-                "wt_nominal"
-            ],
-            "cut" : [
-            ],
-            "binning" : "auto",
-            "plotspath" : "ANplots/matching/",
-            "plotsprefix" : "",
-            "driver" : "plot_histogram",
-            "nopad" : true
-        },
-        {
-            "datasets" : [
-                {
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
-                    "table" : "jets",
-                    "objsyst" : "nominal",
-                    "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$30 < p_{T}^{gen} < 100$ GeV",
                     "extra_cuts" : [
@@ -374,12 +802,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "$100 < p_{T}^{gen} < 200$ GeV",
                     "extra_cuts" : [
@@ -388,12 +817,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "orange",
                     "label_override" : "$ 200 < p_{T}^{gen} < 500$ GeV",
                     "extra_cuts" : [
@@ -402,12 +832,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$p_{T}^{gen} > 500$ GeV",
                     "extra_cuts" : [
@@ -438,12 +869,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -464,8 +896,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)"
             ],
             "binning" : "auto",
@@ -480,12 +910,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -505,8 +936,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)"
             ],
             "binning" : "auto",
@@ -521,12 +950,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
                     "extra_cuts" : [
@@ -535,12 +965,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
                     "extra_cuts" : [
@@ -549,12 +980,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "yellow",
                     "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
                     "extra_cuts" : [
@@ -563,12 +995,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "orange",
                     "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
                     "extra_cuts" : [
@@ -577,12 +1010,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
                     "extra_cuts" : [
@@ -591,12 +1025,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "purple",
                     "label_override" : "$10 < p_{T}^{gen} < 20$ GeV",
                     "extra_cuts" : [
@@ -605,12 +1040,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "brown",
                     "label_override" : "$20 < p_{T}^{gen} < 50$ GeV",
                     "extra_cuts" : [
@@ -628,8 +1064,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)"
             ],
             "binning" : "auto",
@@ -642,12 +1076,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$0 < \\Delta R < 0.02$",
                     "extra_cuts" : [
@@ -656,12 +1091,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "$0.02 < \\Delta R < 0.04$",
                     "extra_cuts" : [
@@ -670,12 +1106,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "yellow",
                     "label_override" : "$0.04 < \\Delta R < 0.06$",
                     "extra_cuts" : [
@@ -684,12 +1121,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "orange",
                     "label_override" : "$0.06 < \\Delta R < 0.08$",
                     "extra_cuts" : [
@@ -698,12 +1136,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$0.08 < \\Delta R < 0.1$",
                     "extra_cuts" : [
@@ -721,8 +1160,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)",
                 "cut::TwoSidedCut('matchPt', 0, 0.5)"
             ],
@@ -739,12 +1176,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$0 < \\Delta R < 0.02$",
                     "extra_cuts" : [
@@ -753,12 +1191,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "$0.02 < \\Delta R < 0.04$",
                     "extra_cuts" : [
@@ -767,12 +1206,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "yellow",
                     "label_override" : "$0.04 < \\Delta R < 0.06$",
                     "extra_cuts" : [
@@ -781,12 +1221,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "orange",
                     "label_override" : "$0.06 < \\Delta R < 0.08$",
                     "extra_cuts" : [
@@ -795,12 +1236,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$0.08 < \\Delta R < 0.1$",
                     "extra_cuts" : [
@@ -818,8 +1260,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)",
                 "cut::TwoSidedCut('matchPt', 0.5, 1.0)"
             ],
@@ -836,12 +1276,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
                     "extra_cuts" : [
@@ -850,12 +1291,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
                     "extra_cuts" : [
@@ -864,12 +1306,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "yellow",
                     "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
                     "extra_cuts" : [
@@ -878,12 +1321,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "orange",
                     "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
                     "extra_cuts" : [
@@ -892,12 +1336,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
                     "extra_cuts" : [
@@ -921,8 +1366,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)"
             ],
             "binning" : "auto",
@@ -936,12 +1379,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "k",
                     "label_override" : "",
                     "extra_cuts" : [
@@ -978,8 +1422,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)"
             ],
             "binning" : "auto",
@@ -994,12 +1436,13 @@
             "datasets" : [
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$0 < p_{T}^{gen} < 0.5$ GeV",
                     "extra_cuts" : [
@@ -1008,12 +1451,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "magenta",
                     "label_override" : "$0.5 < p_{T}^{gen} < 1$ GeV",
                     "extra_cuts" : [
@@ -1022,12 +1466,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "yellow",
                     "label_override" : "$1 < p_{T}^{gen} < 2$ GeV",
                     "extra_cuts" : [
@@ -1036,12 +1481,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "orange",
                     "label_override" : "$2 < p_{T}^{gen} < 5$ GeV",
                     "extra_cuts" : [
@@ -1050,12 +1496,13 @@
                 },
                 {
                     "configsuite" : "BasicConfig",
-                    "runtag" : "Feb_22_2026",
-                    "name" : "Pythia_inclusive",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "never_resolve" : true,
                     "table" : "parts",
-                    "objsyst" : "NO_PVCUT",
+                    "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$5 < p_{T}^{gen} < 10$ GeV",
                     "extra_cuts" : [
@@ -1073,8 +1520,6 @@
                 "wt_nominal"
             ],
             "cut" : [
-                "cut::GreaterThanCut('puppiWeight', 0.99)",
-                "cut::LessThanCut(var::AbsVariable('dz'), 0.2)",
                 "cut::EqualsCut('nMatches', 1)"
             ],
             "binning" : "auto",
