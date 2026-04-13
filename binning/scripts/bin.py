@@ -7,7 +7,9 @@ parser = argparse.ArgumentParser(description='binscript for scaleout processing.
 parser.add_argument("runtag", type=str, help="Runtag to process")
 parser.add_argument("dataset", type=str, help="Dataset to process")
 parser.add_argument("objsyst", type=str, help="Object systematic variation to process")
-parser.add_argument('table', type=str, help='Table name')
+parser.add_argument('table', type=str, nargs='?', default=None, help='Table name')
+parser.add_argument('--tables', type=str, nargs='+', default=None,
+                    help='Table names to process in sequence')
 
 parser.add_argument("--location", type=str, 
                     help="Location to write output to",
@@ -31,6 +33,13 @@ parser.add_argument('--cov', action='store_true', help='Covariance computation')
 
 args = parser.parse_args()
 
+if args.table is not None and args.tables is not None:
+    parser.error("Specify either positional table or --tables, not both")
+if args.table is None and args.tables is None:
+    parser.error("Must specify a table (positional) or --tables")
+
+tables = args.tables if args.tables is not None else [args.table]
+
 # imports
 import json
 from binning.main import build_hist, build_transfer_config, fill_cov, fill_hist
@@ -43,114 +52,121 @@ import pyarrow.dataset as ds
 import numpy as np
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 
-if args.bincfg is None:
-    args.bincfg = '_'.join(args.table.split('_')[:-1])
+def run_table(table: str):
+    bincfg_name = args.bincfg
+    if bincfg_name is None:
+        bincfg_name = '_'.join(table.split('_')[:-1])
 
-# load binning config
-binpkgpath = os.path.dirname(os.path.dirname(__file__))
-bincfgpath = os.path.join(
-    binpkgpath,
-    'config',
-    args.bincfg
-)
-with open(bincfgpath + '.json') as f:
-    bincfg = json.load(f)
-
-if args.table.endswith('Reco'):
-    thebinning = bincfg['reco']
-elif args.table.endswith('Gen'):
-    thebinning = bincfg['gen']
-elif args.table.endswith('transfer'):
-    thebinning = build_transfer_config(
-        bincfg['gen'],
-        bincfg['reco']
+    # load binning config
+    binpkgpath = os.path.dirname(os.path.dirname(__file__))
+    bincfgpath = os.path.join(
+        binpkgpath,
+        'config',
+        bincfg_name
     )
-else:
-    raise NotImplementedError("Only gen, reco, transfer can be pre-binned!")
+    with open(bincfgpath + '.json') as f:
+        bincfg = json.load(f)
 
-fs, skimpath = lookup_skim_path(
-    args.location,
-    args.config_suite,
-    args.runtag,
-    args.dataset,
-    args.objsyst,
-    args.table
-)
+    if table.endswith('Reco'):
+        thebinning = bincfg['reco']
+    elif table.endswith('Gen'):
+        thebinning = bincfg['gen']
+    elif table.endswith('transfer'):
+        thebinning = build_transfer_config(
+            bincfg['gen'],
+            bincfg['reco']
+        )
+    else:
+        raise NotImplementedError("Only gen, reco, transfer can be pre-binned!")
 
-H, prebinned = build_hist(thebinning)
-dataset = ds.dataset(skimpath, format='parquet', filesystem=fs)
-
-if args.table.endswith('transfer'):
-    itemwt = 'wt_reco'
-    ab = ArbitraryGenRecoBinning()
-    Hreco, prebinned_reco = build_hist(bincfg['reco'])
-    Hgen, prebinned_gen = build_hist(bincfg['gen'])
-    ab.setup_from_histograms(
-        Hreco,
-        Hgen
+    fs, skimpath = lookup_skim_path(
+        args.location,
+        args.config_suite,
+        args.runtag,
+        args.dataset,
+        args.objsyst,
+        table
     )
-else:
-    itemwt = 'wt'
-    ab = ArbitraryBinning()
-    ab.setup_from_histogram(H)
 
-if args.cov:
-    thefun = fill_cov
-else:
-    thefun = fill_hist
+    H, prebinned = build_hist(thebinning)
+    dataset = ds.dataset(skimpath, format='parquet', filesystem=fs)
 
-result = thefun(
-    H, prebinned,
-    dataset,
-    'wt_%s' % args.evtwt,
-    itemwt = itemwt,
-    statN = args.statN,
-    statK = args.statK,
-    reweight = None #for now
-)
+    if table.endswith('transfer'):
+        itemwt = 'wt_reco'
+        ab = ArbitraryGenRecoBinning()
+        Hreco, prebinned_reco = build_hist(bincfg['reco'])
+        Hgen, prebinned_gen = build_hist(bincfg['gen'])
+        ab.setup_from_histograms(
+            Hreco,
+            Hgen
+        )
+    else:
+        itemwt = 'wt'
+        ab = ArbitraryBinning()
+        ab.setup_from_histogram(H)
 
-_, outpath = get_hist_path(
-    args.location,
-    args.config_suite,
-    args.runtag,
-    args.dataset,
-    args.objsyst,
-    args.evtwt,
-    args.table,
-    args.cov,
-    args.statN,
-    args.statK
-)
+    if args.cov:
+        thefun = fill_cov
+    else:
+        thefun = fill_hist
 
-if args.cov:
-    halfshape = result.shape[:len(result.shape)//2]
-    thelen = np.prod(halfshape)
-    output = result.reshape((thelen, thelen)) # type: ignore
-else:
-    output = result.values(flow=True).ravel() # type: ignore
-    
-print("Writing result to", outpath)
-with fs.open(outpath, 'wb') as f:
-    np.save(f, output)
+    result = thefun(
+        H, prebinned,
+        dataset,
+        'wt_%s' % args.evtwt,
+        itemwt = itemwt,
+        statN = args.statN,
+        statK = args.statK,
+        reweight = None #for now
+    )
 
-_, bincfg_path = get_hist_bincfg_path(
-    args.location,
-    args.config_suite,
-    args.runtag,
-    args.dataset,
-    args.objsyst,
-    args.table
-)
+    _, outpath = get_hist_path(
+        args.location,
+        args.config_suite,
+        args.runtag,
+        args.dataset,
+        args.objsyst,
+        args.evtwt,
+        table,
+        args.cov,
+        args.statN,
+        args.statK
+    )
 
-if fs.exists(bincfg_path):
-    oldbinning = type(ab)() # use same type as ab [either ArbitraryBinning or ArbitraryGenRecoBinning]
+    if args.cov:
+        halfshape = result.shape[:len(result.shape)//2]
+        thelen = np.prod(halfshape)
+        output = result.reshape((thelen, thelen)) # type: ignore
+    else:
+        output = result.values(flow=True).ravel() # type: ignore
+        
+    print("Writing result to", outpath)
+    with fs.open(outpath, 'wb') as f:
+        np.save(f, output)
 
-    with fs.open(bincfg_path, 'r') as f:
-        oldbinning.from_dict(json.load(f))
-    
-    if oldbinning != ab:
-        raise RuntimeError("Binning config mismatch for existing bincfg at %s" % bincfg_path)
-else:
-    print("Writing binning config to", bincfg_path)
-    with fs.open(bincfg_path, 'w') as f:
-        json.dump(ab.to_dict(), f, indent=4)
+    _, bincfg_path = get_hist_bincfg_path(
+        args.location,
+        args.config_suite,
+        args.runtag,
+        args.dataset,
+        args.objsyst,
+        table
+    )
+
+    if fs.exists(bincfg_path):
+        oldbinning = type(ab)() # use same type as ab [either ArbitraryBinning or ArbitraryGenRecoBinning]
+
+        with fs.open(bincfg_path, 'r') as f:
+            oldbinning.from_dict(json.load(f))
+        
+        if oldbinning != ab:
+            raise RuntimeError("Binning config mismatch for existing bincfg at %s" % bincfg_path)
+    else:
+        print("Writing binning config to", bincfg_path)
+        with fs.open(bincfg_path, 'w') as f:
+            json.dump(ab.to_dict(), f, indent=4)
+
+
+for table in tables:
+    print("Processing table", table)
+    run_table(table)
