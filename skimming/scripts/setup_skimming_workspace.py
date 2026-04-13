@@ -50,6 +50,14 @@ _ALL_RES4TRIANGLE_TABLES = [
     "EECres4Obs:False,triangle,untransfered",
     "EECres4Transfer:triangle"
 ]
+
+_ALL_RES4RECO_TABLES = [
+    "EECres4Obs:False,tee,total",
+    "EECres4Obs:False,dipole,total",
+    "EECres4Obs:False,triangle,total",
+
+]
+
 _ALL_RES4_TABLES = _ALL_RES4TEE_TABLES + _ALL_RES4DIPOLE_TABLES + _ALL_RES4TRIANGLE_TABLES
 
 if args.tables == ['allKinematics']:
@@ -62,6 +70,8 @@ elif args.tables == ['allRes4dipole']:
     args.tables = _ALL_RES4DIPOLE_TABLES
 elif args.tables == ['allRes4triangle']:
     args.tables = _ALL_RES4TRIANGLE_TABLES
+elif args.tables == ['allRes4reco']:
+    args.tables = _ALL_RES4RECO_TABLES
 
 from skimming.config.load_config import load_config
 thecfg = load_config(args.config_suite)
