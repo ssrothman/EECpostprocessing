@@ -1,3 +1,5 @@
+from codecs import lookup
+
 import torch
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse
@@ -6,7 +8,8 @@ import numpy as np
 import os
 import json
 from general.fslookup.skim_path import lookup_skim_path
-from unfolding.specs import dsspec
+from general.datasets.datasets import lookup_count, lookup_dataset
+from unfolding.specs import dsspec, whichhistspec, histspec
 
 class Histogram:
     def __init__(self, values : np.ndarray, covmat : np.ndarray, invcov : np.ndarray, binning : ArbitraryBinning):
@@ -17,6 +20,32 @@ class Histogram:
 
         self._device = 'numpy'
         
+    def imult(self, w : float) -> "Histogram":
+        self._values *= w
+        self._covmat *= w * w
+        self._invcov /= w * w
+
+        return self
+
+    def iadd(self, other : "Histogram", w : float = 1.0, skip_invcov : bool = False) -> "Histogram":
+        assert self._binning == other._binning
+        assert isinstance(self._values, np.ndarray) and isinstance(other._values, np.ndarray)
+        assert isinstance(self._covmat, np.ndarray) and isinstance(other._covmat, np.ndarray)
+
+        self._values += w * other._values
+        self._covmat += w * w * other._covmat
+        if not skip_invcov:
+            self._invcov = smart_inverse(self._covmat, False)
+        else:
+            self._invcov = np.zeros_like(self._covmat)
+
+        return self
+
+    def compute_invcov(self):
+        print("Inverting covariance matrix...")
+        assert isinstance(self._covmat, np.ndarray)
+        self._invcov = smart_inverse(self._covmat, False)
+
     @property
     def values(self) -> np.ndarray | torch.Tensor:
         return self._values 
@@ -38,35 +67,112 @@ class Histogram:
         return self._device
 
     @classmethod
-    def from_dataset(cls, cfg: dsspec, what: str, wtsyst: str, objsyst: str) -> "Histogram":
-        fs, skimpath = lookup_skim_path(
-            cfg['location'],
-            cfg['config_suite'],
-            cfg['runtag'],
-            cfg['dataset'], 
-            objsyst,
-            what
-        )
-        
-        valspath = skimpath + '_BINNED_%s.npy' % wtsyst
-        covpath = skimpath + '_BINNED_covmat_%s.npy' % wtsyst
-        binningpath = skimpath + '_bincfg.json'
+    def from_dataset(cls, cfg: dsspec, histcfg: whichhistspec, whichhist : str, skip_invcov : bool = False) -> "Histogram":
+        if cfg['isStack']:
+            stackcfg = lookup_dataset(
+                'stacks',
+                cfg['dataset']
+            )
 
-        print("Reading", valspath, "...")
+            subHs = []
 
-        with fs.open(valspath, 'rb') as f:
-            values = np.load(f)
-        with fs.open(covpath, 'rb') as f:
-            covmat = np.load(f)
+            for subdset in stackcfg['dsets']:
+                subcfg = cfg.copy()
+                subcfg.update({
+                    'dataset' : subdset,
+                    'isStack' : False
+                })
+                subHs.append(
+                    cls.from_dataset(
+                        subcfg,
+                        histcfg,
+                        whichhist=whichhist,
+                        skip_invcov=True
+                    )
+                )
 
-        binning = ArbitraryBinning()
-        with fs.open(binningpath, 'r') as f:
-            binning.from_dict(json.load(f))
+            for substack in stackcfg['stacks']:
+                subcfg = cfg.copy()
+                subcfg.update({
+                    'dataset' : substack,
+                    'isStack' : True
+                })
+                subHs.append(
+                    cls.from_dataset(
+                        subcfg,
+                        histcfg,
+                        whichhist=whichhist,
+                        skip_invcov=True
+                    )
+                )
+            
+            H = subHs[0]
+            for subH in subHs[1:]:
+                H.iadd(subH, skip_invcov=True)
 
-        print("Inverting covariance matrix...")
-        invcov = smart_inverse(covmat, False)
+            if not skip_invcov:
+                H.compute_invcov()
 
-        return cls(values, covmat, invcov, binning)
+            return H
+        else:
+            fs, skimpath = lookup_skim_path(
+                cfg['location'],
+                cfg['config_suite'],
+                cfg['runtag'],
+                cfg['dataset'], 
+                histcfg['objsyst'],
+                cfg['what'] + '_' + whichhist
+            )
+            
+
+            valspath = skimpath + '_BINNED_%s' % histcfg['wtsyst']
+            covpath = skimpath + '_BINNED_covmat_%s' % histcfg['wtsyst']
+            
+            if cfg['statN'] > 0:
+                valspath += '_%dstat%d' % (cfg['statN'], cfg['statK'])
+                covpath += '_%dstat%d' % (cfg['statN'], cfg['statK'])
+
+            valspath += '.npy'
+            covpath += '.npy'
+
+            binningpath = skimpath + '_bincfg.json'
+
+            print("Reading", valspath, "...")
+
+            with fs.open(valspath, 'rb') as f:
+                values = np.load(f)
+            with fs.open(covpath, 'rb') as f:
+                covmat = np.load(f)
+
+            binning = ArbitraryBinning()
+            with fs.open(binningpath, 'r') as f:
+                binning.from_dict(json.load(f))
+
+            if cfg['isMC']:
+                xsec = lookup_dataset(
+                    cfg['runtag'],
+                    cfg['dataset']
+                )['xsec']
+                count = lookup_count(
+                    cfg['location'],
+                    cfg['config_suite'],
+                    cfg['runtag'],
+                    cfg['dataset'],
+                    histcfg['objsyst']
+                )
+
+                wt = 1000 * xsec * cfg['target_lumi'] / count 
+                print("\txsec weight:", wt)
+                values *= wt
+                covmat *= wt * wt
+
+            if not skip_invcov:
+                print("Inverting covariance matrix...")
+                invcov = smart_inverse(covmat, False)
+            else:
+                invcov = np.zeros_like(covmat)
+
+            return cls(values, covmat, invcov, binning)
 
     @classmethod
     def from_disk(cls, where: str) -> "Histogram":
