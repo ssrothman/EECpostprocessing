@@ -5,11 +5,11 @@
                 {
                     "configsuite" : "EvtMCprojConfig",
                     "runtag" : "v6",
-                    "name" : "DYJetsToLL_Pythia",
+                    "name" : "DYJetsToLL_Pythia_HTsum",
                     "table" : "jets",
                     "objsyst" : "NOM",
                     "location" : "dylan-lxplus-eos",
-                    "isstack" : false,
+                    "isstack" : true,
                     "no_count" : true
                 }
             ],
@@ -29,11 +29,11 @@
                 {
                     "configsuite" : "EvtMCprojConfig",
                     "runtag" : "v6",
-                    "name" : "DYJetsToLL_Pythia",
+                    "name" : "DYJetsToLL_Pythia_HTsum",
                     "table" : "jets",
                     "objsyst" : "NOM",
                     "location" : "dylan-lxplus-eos",
-                    "isstack" : false,
+                    "isstack" : true,
                     "no_count" : true
                 }
             ],
