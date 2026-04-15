@@ -1,0 +1,94 @@
+{
+    "stacks" : {
+        "DYJetsToLL_Pythia_HTsum" : {
+            "dsets" : [
+                "DYJetsToLL_Pythia_HT70to100",
+                "DYJetsToLL_Pythia_HT100to200",
+                "DYJetsToLL_Pythia_HT200to400",
+                "DYJetsToLL_Pythia_HT400to600",
+                "DYJetsToLL_Pythia_HT600to800",
+                "DYJetsToLL_Pythia_HT800to1200",
+                "DYJetsToLL_Pythia_HT1200to2500",
+                "DYJetsToLL_Pythia_HT2500toInf"
+            ],
+            "stacks" : [],
+            "color" : "darkred",
+            "label" : "DY Jets (Pythia8)"
+        }
+    },
+    "v6" : {
+        "base" : "crab/v6/2018/DYJetsToLL_Pythia",
+        "DYJetsToLL_Pythia_HT70to100" : {
+            "tag"      : "DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 70-100",
+            "color"    : "blue",
+            "xsec"     : 159.1
+        },
+        "DYJetsToLL_Pythia_HT100to200" : {
+            "tag"      : "DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 100-200",
+            "color"    : "green",
+            "xsec"     : 159.4
+        },
+        "DYJetsToLL_Pythia_HT200to400" : {
+            "tag"      : "DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 200-400",
+            "color"    : "red",
+            "xsec"     : 43.60
+        },
+        "DYJetsToLL_Pythia_HT400to600" : {
+            "tag"      : "DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 400-600",
+            "color"    : "purple",
+            "xsec"     : 5.918
+        },
+        "DYJetsToLL_Pythia_HT600to800" : {
+            "tag"      : "DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 600-800",
+            "color"    : "brown",
+            "xsec"     : 1.439
+        },
+        "DYJetsToLL_Pythia_HT800to1200" : {
+            "tag"      : "DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 800-1200",
+            "color"    : "pink",
+            "xsec"     : 0.6462
+        },
+        "DYJetsToLL_Pythia_HT1200to2500" : {
+            "tag"      : "DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 1200-2500",
+            "color"    : "gray",
+            "xsec"     : 0.1514
+        },
+        "DYJetsToLL_Pythia_HT2500toInf" : {
+            "tag"      : "DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Pythia8); HT 2500-inf",
+            "color"    : "black",
+            "xsec"     : 0.003395
+        }
+    }
+}
