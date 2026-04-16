@@ -4,6 +4,15 @@ from unfolding.specs import DetectorModelProtocol
 import numpy as np
 import torch
 
+def same_device(device1, device2):
+    if device1 == device2:
+        return True
+    if device1 == 'cuda' and device2.startswith('cuda'):
+        return True
+    if device2 == 'cuda' and device1.startswith('cuda'):
+        return True
+    return False
+
 class Loss:
     def __init__(self, 
                  reco : Histogram, 
@@ -131,15 +140,15 @@ class Loss:
                 raise TypeError("gen and theta must be of the same type")
             if self.reco.device == 'numpy':
                 raise TypeError("reco must be in torch mode when gen is a torch tensor")
-            if self.model.device != self.reco.device:
+            if not same_device(self.model.device, self.reco.device):
                 print("model device:", self.model.device)
                 print("reco device:", self.reco.device)
                 raise TypeError("model and reco must be on the same device when gen is a torch tensor")
-            if str(gen.device) != self.model.device:
+            if not same_device(str(gen.device), self.model.device):
                 print("gen device:", gen.device)
                 print("model device:", self.model.device)
                 raise TypeError("gen and model must be on the same device when gen is a torch tensor")
-            if str(theta.device) != self.model.device:
+            if not same_device(str(theta.device), self.model.device):
                 print("theta device:", theta.device)
                 print("model device:", self.model.device)
                 raise TypeError("theta and model must be on the same device when gen is a torch tensor")
