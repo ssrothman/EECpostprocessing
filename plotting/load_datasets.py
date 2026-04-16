@@ -1,5 +1,5 @@
 from general.datasets import datasets
-from general.datasets.datasets import lookup_dataset, cfg
+from general.datasets.datasets import lookup_count, lookup_dataset, cfg
 from general.fslookup.skim_path import lookup_skim_path
 from simonplot.plottables import ParquetDataset
 from simonplot.plottables.Datasets import DatasetStack
@@ -22,6 +22,8 @@ def build_prebinned_dataset_stack(configsuite : str,
                                   color_override : str | None = None,
                                   extra_key : str | None = None,
                                   nocov : bool = False,
+                                  statN : int = -1,
+                                  statK : int = -1,
                                   showStack : bool = True) -> DatasetStack:
     
     stackcfg = cfg['stacks'][dataset]
@@ -36,6 +38,8 @@ def build_prebinned_dataset_stack(configsuite : str,
             table,
             location,
             nocov = nocov,
+            statN = statN,
+            statK = statK,
         ))
     for dset in stackcfg['stacks']:
         dsets.append(build_prebinned_dataset_stack(
@@ -48,6 +52,8 @@ def build_prebinned_dataset_stack(configsuite : str,
             location,
             no_count=no_count,
             nocov = nocov,
+            statN = statN,
+            statK = statK,
         ))
 
     thekey = dataset
@@ -156,6 +162,8 @@ def load_prebinned_dataset(configsuite : str,
                            label_override : str | None = None,
                            color_override : str | None = None,
                            extra_key : str | None = None,
+                           statN : int = -1,
+                           statK : int = -1,
                            nocov : bool = False) -> ValCovPairDataset:
     
     dsetcfg = lookup_dataset(runtag, dataset)
@@ -169,8 +177,16 @@ def load_prebinned_dataset(configsuite : str,
         table
     )
 
-    valpath = tablepath + '_BINNED_%s.npy' % wtsyst
-    covpath = tablepath + '_BINNED_covmat_%s.npy' % wtsyst
+    valpath = tablepath + '_BINNED_%s' % wtsyst
+    covpath = tablepath + '_BINNED_covmat_%s' % wtsyst
+
+    if statN > 0:
+        valpath += '_%dstat%d' % (statN, statK)
+        covpath += '_%dstat%d' % (statN, statK)
+
+    valpath += '.npy'
+    covpath += '.npy'
+
     binningpath = tablepath + '_bincfg.json'
 
     vals = np.load(fs.open(valpath, 'rb'))
@@ -240,19 +256,15 @@ def build_pq_dataset(configsuite : str,
     )
 
     if not no_count:
-        countfs, countpath = lookup_skim_path(
-            location,
-            configsuite,
-            runtag,
-            dataset,
-            objsyst,
-            'count'
+        pqds.override_num_events(
+            lookup_count(
+                location, 
+                configsuite,
+                runtag, 
+                dataset, 
+                objsyst
+            )
         )
-
-        with countfs.open(os.path.join(countpath, 'merged.json'), 'r') as f:
-            countdict = json.load(f)
-
-        pqds.override_num_events(countdict['n_events'])
         
     if 'lumi' in dsetcfg:
         pqds.set_lumi(dsetcfg['lumi'])
