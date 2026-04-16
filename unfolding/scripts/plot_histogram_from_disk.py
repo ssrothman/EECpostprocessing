@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from unfolding.histogram import Histogram
-
+import os.path
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -21,8 +21,7 @@ def main() -> None:
         raise NotADirectoryError(f"Histogram path is not a directory: {histogram_dir}")
 
     histogram = Histogram.from_disk(str(histogram_dir))
-    histogram.plot(output_folder=str(histogram_dir))
-
+    histogram.plot(output_folder=os.path.join(str(histogram_dir), 'plots'))
 
 if __name__ == "__main__":
     main()
