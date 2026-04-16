@@ -2,6 +2,7 @@ import json
 import os
 from general.fslookup.files import get_rootfiles
 from general.fslookup.location_lookup import location_lookup
+from general.fslookup.skim_path import lookup_skim_path
 from simonpy.dictmerge import merge_dict
 
 all_files = os.listdir(os.path.dirname(__file__))
@@ -45,3 +46,23 @@ def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
         )
     
     return allfiles, location
+
+def lookup_count(location : str, 
+                 configsuite : str,
+                 runtag : str,
+                 dataset : str,
+                 objsyst : str) -> int | float:
+    countfs, countpath = lookup_skim_path(
+        location,
+        configsuite,
+        runtag,
+        dataset,
+        objsyst,
+        'count'
+    )
+
+    with countfs.open(os.path.join(countpath, 'merged.json'), 'r') as f:
+        countdict = json.load(f)
+
+    return countdict['n_events']
+
