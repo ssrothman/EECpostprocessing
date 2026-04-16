@@ -4,6 +4,13 @@ from general.fslookup.skim_path import lookup_skim_path
 from unfolding.specs import dsspec, detectormodelspec, whichsystspec, systspec
 import numpy as np
 import torch
+import hist
+from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
+from simonplot import plot_histogram, draw_matrix
+from simonplot.binning import PrebinnedBinning
+from simonplot.cut import NoopOperation
+from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
+from simonplot.variable import BasicPrebinnedVariable, ConstantVariable
 from unfolding.io import read_hist
 
 def hist_from_syst(spec : systspec, updn : str | None) -> whichsystspec:
@@ -21,6 +28,16 @@ def hist_from_syst(spec : systspec, updn : str | None) -> whichsystspec:
             'objsyst' : 'nominal',
             'wtsyst' : thename
         }
+
+def get_transfer_binning(dset : dsspec) -> ArbitraryGenRecoBinning:
+    binning = read_hist(
+        dset, 
+        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'},
+        'transfer',
+        False
+    )[-1]
+    return binning
+
 
 def get_model_matrices(dset : dsspec, hist : whichsystspec):
         t = read_hist(
@@ -99,7 +116,8 @@ class DetectorModel:
                  transferVariations : np.ndarray,
                  transferVarIndices : np.ndarray,
                  gammaVariations : np.ndarray,
-                 rhoVariations : np.ndarray):
+                 rhoVariations : np.ndarray,
+                 binning : ArbitraryGenRecoBinning):
         
         self._transfer0 = transfer0
         self._gamma0 = gamma0
@@ -109,6 +127,8 @@ class DetectorModel:
         self._transferVarIndices = transferVarIndices
         self._gammaVariations = gammaVariations
         self._rhoVariations = rhoVariations 
+
+        self._binning = binning
 
         self._device = 'numpy'
 
@@ -162,6 +182,169 @@ class DetectorModel:
     @property
     def nReco(self) -> int:
         return self._nReco
+
+    @property
+    def binning(self) -> ArbitraryGenRecoBinning:
+        return self._binning
+
+    def _as_numpy(self, values: np.ndarray | torch.Tensor) -> np.ndarray:
+        if isinstance(values, np.ndarray):
+            return values
+
+        assert isinstance(values, torch.Tensor)
+        return values.detach().cpu().numpy()
+
+    def _make_2d_binning(self, ny: int, nx: int, y_name: str, x_name: str) -> ArbitraryBinning:
+        H = hist.Hist(
+            hist.axis.Regular(ny, 0.0, float(ny), name=y_name),
+            hist.axis.Regular(nx, 0.0, float(nx), name=x_name),
+        )
+        binning = ArbitraryBinning()
+        binning.setup_from_histogram(H)
+        return binning
+
+    def _make_cov_dataset(self, key: str, cov: np.ndarray, binning: ArbitraryBinning) -> ValCovPairDataset:
+        return ValCovPairDataset(
+            key=key,
+            color=None,
+            label=None,
+            data=(None, cov),  # type: ignore[arg-type]
+            binning=binning,
+            isMC=True,
+        )
+
+    def plot(self, output_folder: str | None = None, extratext: str | None = None) -> None:
+        base_prefix = 'detectormodel'
+
+        transfer0 = self._as_numpy(self._transfer0)
+        gamma0 = self._as_numpy(self._gamma0)
+        rho0 = self._as_numpy(self._rho0)
+        gamma_var = self._as_numpy(self._gammaVariations)
+        rho_var = self._as_numpy(self._rhoVariations)
+        transfer_var = self._as_numpy(self._transferVariations)
+
+        variable = BasicPrebinnedVariable()
+        cut = NoopOperation()
+        weight = ConstantVariable(1.0)
+        plot_binning = PrebinnedBinning()
+
+        gamma_cov = np.diag(np.zeros(len(gamma0), dtype=gamma0.dtype))
+        rho_cov = np.diag(np.zeros(len(rho0), dtype=rho0.dtype))
+
+        gamma_dataset = ValCovPairDataset(
+            key=f'{base_prefix}_gamma0',
+            color=None,
+            label=None,
+            data=(gamma0, gamma_cov),
+            binning=self.binning.genbinning,
+            isMC=True,
+        )
+        rho_dataset = ValCovPairDataset(
+            key=f'{base_prefix}_rho0',
+            color=None,
+            label=None,
+            data=(rho0, rho_cov),
+            binning=self.binning.recobinning,
+            isMC=True,
+        )
+        # TODO: Re-enable 2D transfer plots once dedicated gen/reco matrix binning is finalized.
+        # transfer_dataset = self._make_cov_dataset(
+        #     key=f'{base_prefix}_transfer0',
+        #     cov=transfer0,
+        #     binning=self._make_2d_binning(transfer0.shape[0], transfer0.shape[1], 'reco_bin', 'gen_bin'),
+        # )
+
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            gamma_dataset,
+            plot_binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_gamma_nominal',
+            no_lumi_normalization=True,
+        )
+
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            rho_dataset,
+            plot_binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_rho_nominal',
+            no_lumi_normalization=True,
+        )
+
+        # draw_matrix(
+        #     variable,
+        #     cut,
+        #     transfer_dataset,
+        #     plot_binning,
+        #     extratext=extratext,
+        #     sym=False,
+        #     logc=False,
+        #     output_folder=output_folder,
+        #     override_filename=f'{base_prefix}_transfer_matrix_nominal',
+        # )
+
+        # if self._nSyst > 0:
+        #     gamma_var_dataset = self._make_cov_dataset(
+        #         key=f'{base_prefix}_gamma_variations',
+        #         cov=gamma_var,
+        #         binning=self._make_2d_binning(gamma_var.shape[0], gamma_var.shape[1], 'syst', 'gen_bin'),
+        #     )
+        #     rho_var_dataset = self._make_cov_dataset(
+        #         key=f'{base_prefix}_rho_variations',
+        #         cov=rho_var,
+        #         binning=self._make_2d_binning(rho_var.shape[0], rho_var.shape[1], 'syst', 'reco_bin'),
+        #     )
+
+        #     draw_matrix(
+        #         variable,
+        #         cut,
+        #         gamma_var_dataset,
+        #         plot_binning,
+        #         extratext=extratext,
+        #         sym=True,
+        #         logc=False,
+        #         output_folder=output_folder,
+        #         override_filename=f'{base_prefix}_gamma_variations',
+        #     )
+
+        #     draw_matrix(
+        #         variable,
+        #         cut,
+        #         rho_var_dataset,
+        #         plot_binning,
+        #         extratext=extratext,
+        #         sym=True,
+        #         logc=False,
+        #         output_folder=output_folder,
+        #         override_filename=f'{base_prefix}_rho_variations',
+        #     )
+
+        # if self._nTransferSyst > 0:
+        #     transfer_var_maxabs = np.max(np.abs(transfer_var), axis=0)
+        #     transfer_var_maxabs_dataset = self._make_cov_dataset(
+        #         key=f'{base_prefix}_transfer_variations_maxabs',
+        #         cov=transfer_var_maxabs,
+        #         binning=self._make_2d_binning(transfer_var_maxabs.shape[0], transfer_var_maxabs.shape[1], 'reco_bin', 'gen_bin'),
+        #     )
+
+        #     draw_matrix(
+        #         variable,
+        #         cut,
+        #         transfer_var_maxabs_dataset,
+        #         plot_binning,
+        #         extratext=extratext,
+        #         sym=False,
+        #         logc=True,
+        #         output_folder=output_folder,
+        #         override_filename=f'{base_prefix}_transfer_variations_maxabs',
+        #     )
 
     @overload
     def _gamma(self, theta: torch.Tensor) -> torch.Tensor:
@@ -284,9 +467,12 @@ class DetectorModel:
             transferVariations = np.stack(transferVariations, axis=0)
             transferVarIndices = np.array(transferVarIndices, dtype=int)
 
+        binning = get_transfer_binning(cfg['dset'])
+
         return cls(t0, gamma0, rho0, 
                    transferVariations, transferVarIndices,
-                   gammaVariations, rhoVariations)
+                   gammaVariations, rhoVariations,
+                   binning)
     
     @classmethod
     def from_disk(cls, path : str) -> "DetectorModel":
@@ -294,6 +480,7 @@ class DetectorModel:
         for arrname in cls._arrays:
             with open(os.path.join(path, f'{arrname}.npy'), 'rb') as f:
                 arrays[arrname] = np.load(f)
+        arrays['binning'] = ArbitraryGenRecoBinning().load_from_file(os.path.join(path, 'binning.json'))
         return cls(**arrays)
     
     def dump_to_disk(self, where : str):
@@ -302,6 +489,7 @@ class DetectorModel:
             arr = getattr(self, f'_{arrname}')
             with open(os.path.join(where, f'{arrname}.npy'), 'wb') as f:
                 np.save(f, arr)
+        self._binning.dump_to_file(os.path.join(where, 'binning.json'))
 
     def to_torch(self):
         if self._device != 'numpy':
