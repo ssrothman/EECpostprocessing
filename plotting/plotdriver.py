@@ -30,10 +30,10 @@ def build_dataset_from_dscfg(dscfg, all_same_objsyst, all_same_extracut, dsetcut
     if 'never_resolve' in dscfg:
         extraargs['showStack'] = not dscfg['never_resolve']
 
-    if not dscfg.get('isprebinned', False):
+    if not 'prebinned' in dscfg['dsetkind']:
         extraargs['no_count'] = dscfg.get('no_count', False) or dscfg.get('nocount', False) # support both spellings of this option for now
 
-    if dscfg.get('isprebinned', False):
+    if 'prebinned' in dscfg['dsetkind']:
         extraargs['wtsyst'] = dscfg.get('wtsyst', 'nominal')
 
     if 'nocov' in dscfg:
@@ -41,6 +41,10 @@ def build_dataset_from_dscfg(dscfg, all_same_objsyst, all_same_extracut, dsetcut
 
     if 'path' in dscfg:
         extraargs['path'] = dscfg['path']
+
+    if 'statN' in dscfg and 'statK' in dscfg:
+        extraargs['statN'] = dscfg['statN']
+        extraargs['statK'] = dscfg['statK']
 
     return factory(
         configsuite=dscfg['configsuite'],
