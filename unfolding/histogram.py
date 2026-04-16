@@ -3,7 +3,7 @@ from codecs import lookup
 import torch
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse
-from typing import TypedDict
+from typing import Literal, TypedDict
 import numpy as np
 import os
 import json
@@ -80,7 +80,7 @@ class Histogram:
         return self._device
 
     @classmethod
-    def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : str) -> "Histogram":
+    def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen']) -> "Histogram":
         values, covmat, binning = read_hist(
             cfg,
             histcfg,
@@ -127,6 +127,7 @@ class Histogram:
         values = self._as_numpy(self._values)
         covmat = self._as_numpy(self._covmat)
         invcov = self._as_numpy(self._invcov)
+        invcov_cov = invcov @ covmat
 
         variable = BasicPrebinnedVariable()
         cut = NoopOperation()
@@ -156,6 +157,14 @@ class Histogram:
             color=None,
             label=None,
             data=(values, invcov),
+            binning=self._binning,
+            isMC=True,
+        )
+        invcov_cov_dataset = ValCovPairDataset(
+            key=f'{base_prefix}_invcov_times_cov',
+            color=None,
+            label=None,
+            data=(values, invcov_cov),
             binning=self._binning,
             isMC=True,
         )
@@ -194,6 +203,18 @@ class Histogram:
             logc=True,
             output_folder=output_folder,
             override_filename=f'{base_prefix}_inverse_covariance_matrix',
+        )
+
+        draw_matrix(
+            variable,
+            cut,
+            invcov_cov_dataset,
+            binning,
+            extratext=extratext,
+            sym=True,
+            logc=False,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_inverse_covariance_times_covariance_matrix',
         )
 
         corr_variable = CorrelationFromCovariance(variable)
