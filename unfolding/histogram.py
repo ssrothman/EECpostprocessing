@@ -7,9 +7,15 @@ from typing import TypedDict
 import numpy as np
 import os
 import json
+from simonplot import plot_histogram, draw_matrix
+from simonplot.binning import PrebinnedBinning
+from simonplot.cut import NoopOperation
+from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
+from simonplot.variable import BasicPrebinnedVariable, ConstantVariable, CorrelationFromCovariance
 from general.fslookup.skim_path import lookup_skim_path
 from general.datasets.datasets import lookup_count, lookup_dataset
-from unfolding.specs import dsspec, whichhistspec, histspec
+from unfolding.io import read_hist
+from unfolding.specs import dsspec, whichsystspec, histspec
 
 class Histogram:
     def __init__(self, values : np.ndarray, covmat : np.ndarray, invcov : np.ndarray, binning : ArbitraryBinning):
@@ -20,6 +26,13 @@ class Histogram:
 
         self._device = 'numpy'
         
+    def _as_numpy(self, values: np.ndarray | torch.Tensor) -> np.ndarray:
+        if isinstance(values, np.ndarray):
+            return values
+
+        assert isinstance(values, torch.Tensor)
+        return values.detach().cpu().numpy()
+
     def imult(self, w : float) -> "Histogram":
         self._values *= w
         self._covmat *= w * w
@@ -67,112 +80,18 @@ class Histogram:
         return self._device
 
     @classmethod
-    def from_dataset(cls, cfg: dsspec, histcfg: whichhistspec, whichhist : str, skip_invcov : bool = False) -> "Histogram":
-        if cfg['isStack']:
-            stackcfg = lookup_dataset(
-                'stacks',
-                cfg['dataset']
-            )
+    def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : str) -> "Histogram":
+        values, covmat, binning = read_hist(
+            cfg,
+            histcfg,
+            whichhist,
+            read_cov=True
+        )
 
-            subHs = []
+        print("Inverting covariance matrix...")
+        invcov = smart_inverse(covmat, False)
 
-            for subdset in stackcfg['dsets']:
-                subcfg = cfg.copy()
-                subcfg.update({
-                    'dataset' : subdset,
-                    'isStack' : False
-                })
-                subHs.append(
-                    cls.from_dataset(
-                        subcfg,
-                        histcfg,
-                        whichhist=whichhist,
-                        skip_invcov=True
-                    )
-                )
-
-            for substack in stackcfg['stacks']:
-                subcfg = cfg.copy()
-                subcfg.update({
-                    'dataset' : substack,
-                    'isStack' : True
-                })
-                subHs.append(
-                    cls.from_dataset(
-                        subcfg,
-                        histcfg,
-                        whichhist=whichhist,
-                        skip_invcov=True
-                    )
-                )
-            
-            H = subHs[0]
-            for subH in subHs[1:]:
-                H.iadd(subH, skip_invcov=True)
-
-            if not skip_invcov:
-                H.compute_invcov()
-
-            return H
-        else:
-            fs, skimpath = lookup_skim_path(
-                cfg['location'],
-                cfg['config_suite'],
-                cfg['runtag'],
-                cfg['dataset'], 
-                histcfg['objsyst'],
-                cfg['what'] + '_' + whichhist
-            )
-            
-
-            valspath = skimpath + '_BINNED_%s' % histcfg['wtsyst']
-            covpath = skimpath + '_BINNED_covmat_%s' % histcfg['wtsyst']
-            
-            if cfg['statN'] > 0:
-                valspath += '_%dstat%d' % (cfg['statN'], cfg['statK'])
-                covpath += '_%dstat%d' % (cfg['statN'], cfg['statK'])
-
-            valspath += '.npy'
-            covpath += '.npy'
-
-            binningpath = skimpath + '_bincfg.json'
-
-            print("Reading", valspath, "...")
-
-            with fs.open(valspath, 'rb') as f:
-                values = np.load(f)
-            with fs.open(covpath, 'rb') as f:
-                covmat = np.load(f)
-
-            binning = ArbitraryBinning()
-            with fs.open(binningpath, 'r') as f:
-                binning.from_dict(json.load(f))
-
-            if cfg['isMC']:
-                xsec = lookup_dataset(
-                    cfg['runtag'],
-                    cfg['dataset']
-                )['xsec']
-                count = lookup_count(
-                    cfg['location'],
-                    cfg['config_suite'],
-                    cfg['runtag'],
-                    cfg['dataset'],
-                    histcfg['objsyst']
-                )
-
-                wt = 1000 * xsec * cfg['target_lumi'] / count 
-                print("\txsec weight:", wt)
-                values *= wt
-                covmat *= wt * wt
-
-            if not skip_invcov:
-                print("Inverting covariance matrix...")
-                invcov = smart_inverse(covmat, False)
-            else:
-                invcov = np.zeros_like(covmat)
-
-            return cls(values, covmat, invcov, binning)
+        return cls(values, covmat, invcov, binning)
 
     @classmethod
     def from_disk(cls, where: str) -> "Histogram":
@@ -198,6 +117,110 @@ class Histogram:
             np.save(f, self._invcov)
         with open(os.path.join(where, 'bincfg.json'), 'w') as f:
             json.dump(self._binning.to_dict(), f, indent=4)
+
+    def plot(
+        self,
+        output_folder: str | None = None,
+        extratext: str | None = None,
+    ) -> None:
+        
+        values = self._as_numpy(self._values)
+        covmat = self._as_numpy(self._covmat)
+        invcov = self._as_numpy(self._invcov)
+
+        variable = BasicPrebinnedVariable()
+        cut = NoopOperation()
+        weight = ConstantVariable(1.0)
+        binning = PrebinnedBinning()
+
+        base_prefix = 'histogram'
+
+        values_dataset = ValCovPairDataset(
+            key=f'{base_prefix}_values',
+            color=None,
+            label=None,
+            data=(values, covmat),
+            binning=self._binning,
+            isMC=True,
+        )
+        cov_dataset = ValCovPairDataset(
+            key=f'{base_prefix}_cov',
+            color=None,
+            label=None,
+            data=(values, covmat),
+            binning=self._binning,
+            isMC=True,
+        )
+        invcov_dataset = ValCovPairDataset(
+            key=f'{base_prefix}_invcov',
+            color=None,
+            label=None,
+            data=(values, invcov),
+            binning=self._binning,
+            isMC=True,
+        )
+
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            values_dataset,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_values_histogram',
+            no_lumi_normalization=True,
+        )
+
+        draw_matrix(
+            variable,
+            cut,
+            cov_dataset,
+            binning,
+            extratext=extratext,
+            sym=True,
+            logc=True,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_covariance_matrix',
+        )
+
+        draw_matrix(
+            variable,
+            cut,
+            invcov_dataset,
+            binning,
+            extratext=extratext,
+            sym=True,
+            logc=True,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_inverse_covariance_matrix',
+        )
+
+        corr_variable = CorrelationFromCovariance(variable)
+
+        draw_matrix(
+            corr_variable,
+            cut,
+            cov_dataset,
+            binning,
+            extratext=extratext,
+            sym=True,
+            logc=False,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_covariance_correlation_matrix',
+        )
+
+        draw_matrix(
+            corr_variable,
+            cut,
+            invcov_dataset,
+            binning,
+            extratext=extratext,
+            sym=True,
+            logc=False,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_inverse_covariance_correlation_matrix',
+        )
 
 
     def to_torch(self):
@@ -263,3 +286,5 @@ class Histogram:
         self._invcov = self._invcov.detach()
 
         return self
+
+    

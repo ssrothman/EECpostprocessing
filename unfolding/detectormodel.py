@@ -1,68 +1,72 @@
 import os
 from typing import overload
 from general.fslookup.skim_path import lookup_skim_path
-from unfolding.specs import dsspec, detectormodelspec
+from unfolding.specs import dsspec, detectormodelspec, whichsystspec, systspec
 import numpy as np
 import torch
+from unfolding.io import read_hist
 
-def load_hist_from_dataset(dset:dsspec, objsyst, what:str) -> np.ndarray:
-    fs, path = lookup_skim_path(
-        dset['location'],
-        dset['config_suite'],
-        dset['runtag'],
-        dset['dataset'], 
-        objsyst,
-        what
-    )
-    with fs.open(path, 'rb') as f:
-        arr =  np.load(f)
-    return arr
+def hist_from_syst(spec : systspec, updn : str | None) -> whichsystspec:
+    thename = spec['name']
+    if updn is not None:
+        thename += updn
+    
+    if spec['isobjsyst']:
+        return {
+            'objsyst' : thename,
+            'wtsyst' : 'nominal'
+        }
+    else:
+        return {
+            'objsyst' : 'nominal',
+            'wtsyst' : thename
+        }
 
-def get_model_matrices(dset : dsspec, syst : str, isobjsyst : bool, what : str):
-        if isobjsyst:
-            wtsyst = 'nominal'
-            objsyst = syst
-        else:
-            objsyst = 'nominal'
-            wtsyst = syst
-        
-        t = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_transfer_BINNED_%s.npy' % (what, wtsyst)
-        )
+def get_model_matrices(dset : dsspec, hist : whichsystspec):
+        t = read_hist(
+            dset, hist, 
+            'transfer',
+            False
+        )[0]
 
-        umG = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_unmatchedGen_BINNED_%s.npy' % (what, wtsyst)
-        )
-        utG = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_untransferedGen_BINNED_%s.npy' % (what, wtsyst)
-        )
+        umG = read_hist(
+            dset, hist, 
+            'unmatchedGen',
+            False
+        )[0]
+        utG = read_hist(
+            dset, hist, 
+            'untransferedGen',
+            False
+        )[0]
         bkgG = umG + utG
 
-        totG = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_totalGen_BINNED_%s.npy' % (what, wtsyst)
-        )
+        totG = read_hist(
+            dset, hist, 
+            'totalGen',
+            False
+        )[0]
 
         Gdenom = np.where(totG == 0, 1.0, totG)
         gamma = bkgG / Gdenom
 
-        umR = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_unmatchedReco_BINNED_%s.npy' % (what, wtsyst)
-        )
-        utR = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_untransferedReco_BINNED_%s.npy' % (what, wtsyst)
-        )
+        umR = read_hist(
+            dset, hist, 
+            'unmatchedReco',
+            False
+        )[0]
+        utR = read_hist(
+            dset, hist, 
+            'untransferedReco',
+            False
+        )[0]
         bkgR = umR + utR
 
-        totR = load_hist_from_dataset(
-            dset, objsyst, 
-            '%s_totalReco_BINNED_%s.npy' % (what, wtsyst)
-        )
+        totR = read_hist(
+            dset, hist, 
+            'totalReco',
+            False
+        )[0]
 
         Rdenom = totR - bkgR
         Rdenom = np.where(Rdenom == 0, 1.0, Rdenom)
@@ -223,12 +227,13 @@ class DetectorModel:
         return reco
 
     @classmethod
-    def from_dataset(cls, dset : dsspec, cfg : detectormodelspec, what : str) -> "DetectorModel":
+    def from_dataset(cls, cfg : detectormodelspec) -> "DetectorModel":
         t0, gamma0, rho0 = get_model_matrices(
-            dset,
-            'nominal',
-            False,
-            what
+            cfg['dset'],
+            {
+                'objsyst' : 'nominal',
+                'wtsyst' : 'nominal'
+            }
         )
 
         gammaVariations = []
@@ -239,27 +244,22 @@ class DetectorModel:
         for syst in cfg['systematics']:
             if syst['onesided']:
                 t_up, gamma_up, rho_up = get_model_matrices(
-                    dset,
-                    syst['name'],
-                    syst['isobjsyst'],
-                    what
+                    cfg['dset'],
+                    hist_from_syst(syst, None),
                 )
                 dT = t_up - t0
                 dGamma = gamma_up - gamma0
                 dRho = rho_up - rho0
             else:
                 t_up, gamma_up, rho_up = get_model_matrices(
-                    dset,
-                    syst['name'] + "Up",
-                    syst['isobjsyst'],
-                    what
+                    cfg['dset'] ,
+                    hist_from_syst(syst, "Up")
                 )
                 t_dn, gamma_dn, rho_dn = get_model_matrices(
-                    dset,
-                    syst['name'] + "Down",
-                    syst['isobjsyst'],
-                    what
+                    cfg['dset'],
+                    hist_from_syst(syst, "Down")
                 )
+
                 dT = 0.5 * (t_up - t_dn)
                 dGamma = 0.5 * (gamma_up - gamma_dn)
                 dRho = 0.5 * (rho_up - rho_dn)

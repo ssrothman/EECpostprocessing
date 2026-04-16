@@ -11,6 +11,15 @@ class dsspec(TypedDict):
     runtag: str
     dataset: str
     isMC: bool
+    target_lumi : float
+    isStack : bool
+    statN : int
+    statK : int
+    what : str
+
+class whichsystspec(TypedDict):
+    wtsyst : str
+    objsyst : str
 
 class systspec(TypedDict):
     name : str
@@ -20,7 +29,17 @@ class systspec(TypedDict):
 
 class detectormodelspec(TypedDict):
     systematics : List[systspec]
-    
+    dset : dsspec
+    what : str
+
+class histspec(TypedDict):
+    dset : dsspec
+    hist : whichsystspec
+
+class unfoldingworkspacespec(TypedDict):
+    data : histspec
+    model : detectormodelspec
+
 class DetectorModelProtocol(Protocol):
     @property
     def nSyst(self) -> int:
