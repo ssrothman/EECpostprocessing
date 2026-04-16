@@ -1,0 +1,154 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "pq"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA_2018A",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq",
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "wt"
+            ],
+            "override_filenames" : [
+                "EECwt_tee"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "Tee configuration",
+            "binning" : "auto",
+            "plotspath" : "ANplots/EECintegration/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "logx" : true,
+            "logy" : true,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "res4dipole_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "pq"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA_2018A",
+                    "table" : "res4dipole_totalReco",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq",
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "wt"
+            ],
+            "override_filenames" : [
+                "EECwt_dipole"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "Dipole configuration",
+            "binning" : "auto",
+            "plotspath" : "ANplots/EECintegration/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "logx" : true,
+            "logy" : true,
+            "density" : true
+        },
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "res4triangle_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "pq"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA_2018A",
+                    "table" : "res4triangle_totalReco",
+                    "objsyst" : "DATA",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq",
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "wt"
+            ],
+            "override_filenames" : [
+                "EECwt_triangle"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+            ],
+            "override_cuttext" : "Triangle configuration",
+            "binning" : "auto",
+            "plotspath" : "ANplots/EECintegration/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "logx" : true,
+            "logy" : true,
+            "density" : true
+        }
+    ]
+}

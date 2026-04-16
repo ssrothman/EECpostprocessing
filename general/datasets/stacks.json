@@ -75,6 +75,16 @@
             "color" : "#1F77B4",
             "label" : "MC background"
         },
+        "diboson" : {
+            "dsets" : [
+                "WW",
+                "WZ",
+                "ZZ"
+            ],
+            "stacks" : [],
+            "color" : "#17BECF",
+            "label" : "Diboson"
+        },
         "Pythia_HTsum" : {
             "dsets" : [
                 "Pythia_HT-0to70",

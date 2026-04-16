@@ -1,0 +1,397 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "key": "Pythia_HTsum",
+                    "label": "Pythia_HTsum",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "pq_stack"
+                },
+                {
+                    "key" : "TT",
+                    "label" : "TT",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "TT",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq",
+                    "nocount" : true
+                },
+                {
+                    "key" : "ST",
+                    "label" : "ST",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "ST",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "nocount" : true
+                },
+                {
+                    "key" : "diboson",
+                    "label" : "diboson",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "diboson",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind": "pq_stack",
+                    "nocount" : true
+                }
+            ],
+            "variables" : [
+                "Jpt"
+            ],
+            "override_filenames" : [
+                "Jpt"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "density" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "signal",
+                    "label": "signal",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt']), ['r', 'c'], ['r'])"
+            ],
+            "override_filenames" : [
+                "res4tee_signal"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation({'R' : [0.4, 0.5]}, ['r', 'c'])"
+            ],
+            "override_cuttext" : "",
+            "binning" : "prebinned",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "signal",
+                    "label": "signal",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                },
+                {
+                    "key": "WW",
+                    "label": "WW",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "WW",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned",
+                    "statN" : 2,
+                    "statK" : 0
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt']), ['r', 'c'], ['r'])"
+            ],
+            "override_filenames" : [
+                "res4tee_signal_vs_WW"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation({'R' : [0.4, 0.5]}, ['r', 'c'])"
+            ],
+            "override_cuttext" : "",
+            "binning" : "prebinned",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "signal",
+                    "label": "signal",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                },
+                {
+                    "key": "WZ",
+                    "label": "WZ",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "WZ",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned",
+                    "statN" : 2,
+                    "statK" : 0
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt']), ['r', 'c'], ['r'])"
+            ],
+            "override_filenames" : [
+                "res4tee_signal_vs_WZ"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation({'R' : [0.4, 0.5]}, ['r', 'c'])"
+            ],
+            "override_cuttext" : "",
+            "binning" : "prebinned",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "signal",
+                    "label": "signal",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                },
+                {
+                    "key": "ZZ",
+                    "label": "ZZ",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "ZZ",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned",
+                    "statN" : 2,
+                    "statK" : 0
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt']), ['r', 'c'], ['r'])"
+            ],
+            "override_filenames" : [
+                "res4tee_signal_vs_ZZ"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation({'R' : [0.4, 0.5]}, ['r', 'c'])"
+            ],
+            "override_cuttext" : "",
+            "binning" : "prebinned",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "signal",
+                    "label": "signal",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                },
+                {
+                    "key": "TT",
+                    "label": "TT",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "TT",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned",
+                    "statN" : 2,
+                    "statK" : 0
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt']), ['r', 'c'], ['r'])"
+            ],
+            "override_filenames" : [
+                "res4tee_signal_vs_TT"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation({'R' : [0.4, 0.5]}, ['r', 'c'])"
+            ],
+            "override_cuttext" : "",
+            "binning" : "prebinned",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "signal",
+                    "label": "signal",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                },
+                {
+                    "key": "ST",
+                    "label": "ST",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "ST",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt']), ['r', 'c'], ['r'])"
+            ],
+            "override_filenames" : [
+                "res4tee_signal_vs_ST"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation({'R' : [0.4, 0.5]}, ['r', 'c'])"
+            ],
+            "override_cuttext" : "",
+            "binning" : "prebinned",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "signal",
+                    "label": "signal",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_HTsum",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                },
+                {
+                    "key": "allBKG",
+                    "label": "allBKG",
+                    "configsuite": "BasicConfig",
+                    "never_resolve" : true,
+                    "runtag": "Mar_01_2026",
+                    "name": "allBKG",
+                    "table": "res4tee_totalReco",
+                    "objsyst": "nominal",
+                    "location": "scratch-submit",
+                    "dsetkind": "prebinned_stack",
+                    "statN" : 2,
+                    "statK" : 0
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt']), ['r', 'c'], ['r'])"
+            ],
+            "override_filenames" : [
+                "res4tee_signal_vs_allBKG"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation({'R' : [0.4, 0.5]}, ['r', 'c'])"
+            ],
+            "override_cuttext" : "",
+            "binning" : "prebinned",
+            "plotspath" : "ANplots/EECbkg/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        }
+    ]
+}
