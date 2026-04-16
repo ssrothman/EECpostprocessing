@@ -480,7 +480,8 @@ class DetectorModel:
         for arrname in cls._arrays:
             with open(os.path.join(path, f'{arrname}.npy'), 'rb') as f:
                 arrays[arrname] = np.load(f)
-        arrays['binning'] = ArbitraryGenRecoBinning().load_from_file(os.path.join(path, 'binning.json'))
+        arrays['binning'] = ArbitraryGenRecoBinning()
+        arrays['binning'].load_from_file(os.path.join(path, 'binning.json'))
         return cls(**arrays)
     
     def dump_to_disk(self, where : str):

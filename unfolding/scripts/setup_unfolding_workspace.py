@@ -14,6 +14,7 @@ Hreco = Histogram.from_dataset(
     cfg['data']['hist'],
     'totalReco'
 )
+Hreco.compute_invcov() # precompute the inverse covariance matrix for the reco histogram
 
 Hreco.dump_to_disk('reco')
 
@@ -23,7 +24,12 @@ if cfg['data']['dset']['isMC']:
         cfg['data']['hist'],
         'totalGen'
     )
+    Hgen.compute_invcov() # precompute the inverse covariance matrix for the gen histogram
+    Hgen.compute_sqrt() # precompute the sqrt of the covariance matrix for the gen
+                        # used for bootstrapping the forward covariance matrix
+
     Hgen.dump_to_disk('gen')
+
 
 model = DetectorModel.from_dataset(
     cfg['model']
