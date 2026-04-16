@@ -10,19 +10,27 @@ from typing import Literal
 @overload
 def read_hist(dset : dsspec, 
               hist : whichsystspec,
-              whichhist : str,
+              whichhist : Literal['transfer', 'totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'],
               read_cov : Literal[True]) -> tuple[np.ndarray, np.ndarray, ArbitraryBinning]:
     ...
+
+@overload
+def read_hist(dset : dsspec,
+              hist : whichsystspec,
+              whichhist : Literal['transfer'],
+              read_cov : Literal[False]) -> tuple[np.ndarray, ArbitraryGenRecoBinning]:
+    ...
+
 @overload
 def read_hist(dset : dsspec, 
               hist : whichsystspec,
-              whichhist : str,
+              whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'],
               read_cov : Literal[False]) -> tuple[np.ndarray, ArbitraryBinning]:
     ...
 
 def read_hist(dset : dsspec, 
               hist : whichsystspec,
-              whichhist : str,
+              whichhist : Literal['transfer', 'totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'],
               read_cov : bool):
     
     if dset['isStack']:
