@@ -66,6 +66,8 @@ parser.add_argument('--files_per_job', type=int, help="Number of input files per
                      default=5)
 parser.add_argument('--runtag', type=str, help="Datasets runtag",
                     default='Apr_23_2025')
+parser.add_argument('--output-location', type=str, help="Output location for skimmed files",
+                    default='xrootd-submit')
 parser.add_argument('--nocheck', action='store_true', help="Skip checking for existing outputs before setting up workspaces")
 args = parser.parse_args()
 
@@ -73,7 +75,7 @@ import os
 import subprocess
 
 def setup_and_stage(dset, objsyst, table):
-    cmd = 'setup_skimming_workspace.py skim_%s_%s_%s %s %s %s --tables %s --output-location xrootd-submit --config-suite %s' % (
+    cmd = 'setup_skimming_workspace.py skim_%s_%s_%s %s %s %s --tables %s --output-location %s --config-suite %s' % (
         dset,
         objsyst,
         table,
@@ -81,6 +83,7 @@ def setup_and_stage(dset, objsyst, table):
         dset,
         objsyst,
         table,
+        args.output_location,
         args.config_suite
     )
     if args.nocheck:
