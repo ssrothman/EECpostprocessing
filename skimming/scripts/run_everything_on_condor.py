@@ -75,6 +75,7 @@ import os
 import subprocess
 
 def setup_and_stage(dset, objsyst, table):
+    print(f"Setting up: {dset} / {objsyst} / {table}")
     cmd = 'setup_skimming_workspace.py skim_%s_%s_%s %s %s %s --tables %s --output-location %s --config-suite %s' % (
         dset,
         objsyst,
@@ -95,6 +96,7 @@ def setup_and_stage(dset, objsyst, table):
         raise RuntimeError("Workspace setup failed")
 
     if not os.path.exists('skim_%s_%s_%s'%(dset, objsyst, table)):
+        print(f"  -> outputs already exist, skipping")
         return # if workspace setup didn't do anything,
                     # it's because all the desired outputs already exist! 
                     # so we can skip staging too.
@@ -113,11 +115,12 @@ def setup_and_stage(dset, objsyst, table):
     if output.returncode != 0:
         print(output.stderr.decode())
         raise RuntimeError("Staging to condor failed")
+    print(f"  -> staged and submitted")
 
 for smc in args.signal_mc:
     for table in args.tables:
         for objsyst in args.objsysts:
-            if table == 'count' and objsyst != 'nominal':
+            if table == 'count' and objsyst != args.objsysts[0]:
                 continue
             setup_and_stage(smc, objsyst, table)
 
