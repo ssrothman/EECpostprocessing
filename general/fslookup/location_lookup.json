@@ -13,6 +13,6 @@
     ],
     "xrootd-submit" : [
         "submit55.mit.edu",
-        "/store/user/srothman/EEC_v2"
+        "/data/group/cms/store/user/srothman/EEC_v2"
     ]
 }
