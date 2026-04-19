@@ -51,6 +51,18 @@ _ALL_RES4TRIANGLE_TABLES = [
     "EECres4Transfer:triangle"
 ]
 
+_ALL_RES4TEE_RECO_TABLES = [
+    "EECres4Obs:False,tee,total",
+]
+
+_ALL_RES4DIPOLE_RECO_TABLES = [
+    "EECres4Obs:False,dipole,total",
+]
+
+_ALL_RES4TRIANGLE_RECO_TABLES = [
+    "EECres4Obs:False,triangle,total",
+]
+
 _ALL_RES4RECO_TABLES = [
     "EECres4Obs:False,tee,total",
     "EECres4Obs:False,dipole,total",
@@ -63,13 +75,25 @@ _ALL_RES4_TABLES = _ALL_RES4TEE_TABLES + _ALL_RES4DIPOLE_TABLES + _ALL_RES4TRIAN
 if args.tables == ['allKinematics']:
     args.tables = _ALL_KINEMATICS_TABLES
 elif args.tables == ['allRes4']:
-    args.tables = _ALL_RES4_TABLES
+    if args.objsyst == 'DATA':
+        args.tables = _ALL_RES4RECO_TABLES
+    else:
+        args.tables = _ALL_RES4_TABLES
 elif args.tables == ['allRes4tee']:
-    args.tables = _ALL_RES4TEE_TABLES
+    if args.objsyst == 'DATA':
+        args.tables = _ALL_RES4TEE_RECO_TABLES
+    else:
+        args.tables = _ALL_RES4TEE_TABLES
 elif args.tables == ['allRes4dipole']:
-    args.tables = _ALL_RES4DIPOLE_TABLES
+    if args.objsyst == 'DATA':
+        args.tables = _ALL_RES4DIPOLE_RECO_TABLES
+    else:
+        args.tables = _ALL_RES4DIPOLE_TABLES
 elif args.tables == ['allRes4triangle']:
-    args.tables = _ALL_RES4TRIANGLE_TABLES
+    if args.objsyst == 'DATA':
+        args.tables = _ALL_RES4TRIANGLE_RECO_TABLES
+    else:
+        args.tables = _ALL_RES4TRIANGLE_TABLES
 elif args.tables == ['allRes4reco']:
     args.tables = _ALL_RES4RECO_TABLES
 
