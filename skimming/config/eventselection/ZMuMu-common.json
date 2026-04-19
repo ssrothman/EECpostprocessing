@@ -16,7 +16,7 @@
             "Zs" : {
                 "massWindow" : 20.0,
                 "polemass" : 91.1876,
-                "minpt" : 0.0,
+                "minpt" : -1,
                 "maxY" : -1
             },
             "global" : {

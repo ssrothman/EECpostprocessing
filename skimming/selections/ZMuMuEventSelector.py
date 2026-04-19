@@ -179,6 +179,16 @@ class ZMuMuEventSelector:
                 "maxNumBtag",
                 nBtag <= gcfg['maxNumBtag']
             )
+        if gcfg['maxNumMu'] >= 0:
+            selection.add(
+                'maxNumMu',
+                ak.num(objects.Muons.muons.pt, axis=1) <= gcfg['maxNumMu']
+            )
+        if gcfg['maxNumEle'] >= 0:
+            selection.add(
+                'maxNumEle',
+                ak.num(objects.Electrons.electrons.pt, axis=1) <= gcfg['maxNumEle']
+            )
         if gcfg['noiseFilters']:
             filtermask = np.ones(len(objects.event), dtype=bool)
             for flag in gcfg['noiseFilters']:

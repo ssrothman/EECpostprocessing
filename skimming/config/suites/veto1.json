@@ -1,0 +1,15 @@
+{
+    "configs" : [
+        "objects/BasicObjects.json",
+        "eventselection/ZMuMu-common.json",
+        "eventselection/BkgVeto-Yes.json",
+        "jetselection/StandardJetSelection.json",
+        "corrections/btag.json",
+        "corrections/JERC.json",
+        "weights/common.json",
+        "weights/btagSF-No.json",
+        "weights/Zreweight-No.json"
+    ],
+    "configsuite_name" : "VetoConfig1",
+    "configsuite_comments" : "Basic Z->mumu skimming configuration, with background veto, but no btagging SFs, nor kinematic reweighting. Useful for derivation of btagging SFs, Z reweighting factors."
+}

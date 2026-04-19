@@ -2,9 +2,14 @@
     "eventsel" : { 
         "params" : {
             "global" : {
-                "maxMETpt" : 50.0,
+                "maxMETpt" : -1,
                 "maxNumBtag" : 1,
-                "maxNumBtag_level" : "Loose"
+                "maxNumBtag_level" : "Medium",
+                "maxNumMu" : 2,
+                "maxNumEle" : 0
+            },
+            "Zs" : {
+                "massWindow" : 15.0
             }
         }
     }
