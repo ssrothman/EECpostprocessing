@@ -3,7 +3,6 @@ from typing import Any, List, Sequence
 import hist
 from tqdm import tqdm
 import numpy as np
-import directcov
 import pyarrow.dataset as ds
 import pyarrow.compute as pc
 from correctionlib import Correction 
@@ -192,7 +191,8 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
              statN : int = -1,
              statK : int = -1,
              reweight : Correction | None = None) -> np.ndarray:
-    
+    import directcov
+
     iterator = build_iterator(
         dset, H.axes.name,
         weightname, itemwt,
