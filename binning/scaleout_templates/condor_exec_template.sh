@@ -12,12 +12,11 @@ source env.sh
 
 cd ../
 
-for i in $(seq 0 $((FILES_PER_JOB - 1))); do
-    index=$((FILES_PER_JOB * JOB_INDEX + i))
-    echo "Processing file with index $index"
-    if [ $index -ge NFILES ]; then
-        echo "Index $index exceeds total files NFILES, skipping."
+for i in $(seq 0 $((COMMANDS_PER_JOB - 1))); do
+    index=$((COMMANDS_PER_JOB * JOB_INDEX + i))
+    if [ $index -ge NCOMMANDS ]; then
+        echo "Index $index exceeds total commands NCOMMANDS, skipping."
         continue
     fi
-    python skimscript.py $index
+    python binscript.py $index
 done
