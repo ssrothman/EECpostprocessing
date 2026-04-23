@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
 import argparse
+from glob import glob as glob_files
+import subprocess
+
 parser = argparse.ArgumentParser(description="Resubmit failed HTCONDOR jobs for a skimming workspace")
 parser.add_argument("where", type=str, help="Directory of workspace to resubmit")
 parser.add_argument('--resub-idle', action='store_true', help="Also resubmit idle jobs")
 parser.add_argument('--no-resub-running', action='store_true', help="Do not resubmit running jobs")
 parser.add_argument('--exec', action='store_true', help="Directly execute condor_submit command after preparing resubmission scripts")
 parser.add_argument('--skip-still-running', action='store_true', help="Skip workspaces that still have running jobs")
+parser.add_argument('--dont-check-singularity', action='store_true', help="Don't check the .err files for singularity errors")
 args = parser.parse_args()
 
 #first, discover the condor cluster id 
@@ -22,27 +26,13 @@ for fn in condorlogs:
 if len(clusterids) == 0:
     raise RuntimeError("No condor logs found in workspace")
 elif len(clusterids) > 1:
-    import warnings
     print("WARNING: Multiple cluster IDs found in condor logs. Using most recent (ie largest job number).")
     clusterid = max(clusterids)
 else:
     clusterid = clusterids.pop()
 
-# get exit codes for completed jobs
-cmd = "condor_history %d -format '%%v\t' Args -format '%%v\n' ExitCode" % clusterid
-import subprocess
-result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True, cwd=args.where)
-lines = result.stdout.split("\n")
 failed_jobs = set()
-for line in lines:
-    if line.strip() == "":
-        continue
-    parts = line.split("\t")
-    procid = int(parts[0])
-    exitcode = int(parts[1])
-    if exitcode != 0:
-        failed_jobs.add(procid)
-print("Failed jobs", failed_jobs)
+all_jobs = set()
 
 # get info on running or held jobs
 #condor_q 
@@ -61,6 +51,9 @@ for line in lines:
         continue
     parts = line.split("\t")
     procid = int(parts[0])
+
+    all_jobs.add(procid)
+
     jobstatus = int(parts[1])
     if jobstatus == 1 or jobstatus == 0:
         idle_jobs.add(procid)
@@ -112,7 +105,65 @@ if len(suspended_jobs) > 0:
     failed_jobs.update(suspended_jobs)
     print("Also resubmitting suspended jobs: ", suspended_jobs)
 
+# get exit codes for completed jobs
+cmd = "condor_history %d -format '%%v\t' Args -format '%%v\n' ExitCode" % clusterid
+result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True, cwd=args.where)
+lines = result.stdout.split("\n")
+for line in lines:
+    if line.strip() == "":
+        continue
+    parts = line.split("\t")
+    procid = int(parts[0])
+    all_jobs.add(procid)
+    if parts[1] == 'undefined':
+        exitcode = 999 # if exit code is undefined, treat as failed (probably removed by condor_q, but not guaranteed)
+    else:
+        exitcode = int(parts[1])
+
+    if exitcode != 0:
+        failed_jobs.add(procid)
+print("Failed jobs", failed_jobs)
+
+
 #now, sort the failed jobs into ranges for resubmission
+if not args.dont_check_singularity:
+    '''
+    Plan: use grep (or something similar but pythonic) to check the files name condor/*_<clusterid>_<procid>.err for the string 
+    "FATAL:   While checking container encryption: could not open image"  
+
+    Where <cluserid> is the clusterid we found above, and <procid> is the procid of the failed job. 
+    If that string is found, condor attempted to schedule the job on a broken/unsupported node,
+    and the job should be resubmitted to hopefully land on a different node.
+    '''
+
+    singularity_error = "could not open image /cvmfs"
+
+    singularity_failed_jobs = set()
+    for procid in sorted(all_jobs):
+        err_glob = os.path.join(args.where, "condor", "*_%d_%d.err" % (clusterid, procid))
+        err_files = glob_files(err_glob)
+        if len(err_files) == 0:
+            #print("WARNING: No .err file found for cluster/procid %d/%d. Skipping singularity error check for this job." % (clusterid, procid))
+            singularity_failed_jobs.add(procid) # if we can't find the .err file, we have to assume the worst and resubmit, since we don't know if it failed due to singularity or not
+            continue
+        if len(err_files) > 1:
+            print("ERROR: Multiple .err files match cluster/procid %d/%d:" % (clusterid, procid))
+            for err_file in err_files:
+                print("  ", err_file)
+            raise RuntimeError("Ambiguous .err files for cluster/procid")
+
+        found_singularity_error = False
+        with open(err_files[0], "r", encoding="utf-8", errors="ignore") as f:
+            if singularity_error in f.read():
+                found_singularity_error = True
+
+        if found_singularity_error:
+            singularity_failed_jobs.add(procid)
+
+    if len(singularity_failed_jobs) > 0:
+        failed_jobs.update(singularity_failed_jobs)
+        print("Jobs with singularity image-open errors: ", sorted(singularity_failed_jobs))
+
 if len(failed_jobs) == 0:
     print("All jobs succeeded! Nothing to resubmit.")
     exit(0)
@@ -120,8 +171,7 @@ if len(failed_jobs) == 0:
 print("Final list of jobs to resubmit: ", failed_jobs)
 
 #next, find the most recent condor submission details and make a modified copy for resubmission
-import glob
-submit_files = glob.glob('condor_submit*.sh', root_dir=args.where)
+submit_files = glob_files('condor_submit*.sh', root_dir=args.where)
 if len(submit_files) == 0:
     raise RuntimeError("No condor template files found in workspace")
 

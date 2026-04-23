@@ -183,6 +183,9 @@ def main() -> int:
 	n_targets = len(target_files)
 
 	if args.tables:
+		from skimming.tables.expand_tables import expand_tables, table_names
+
+		args.tables = table_names(expand_tables(args.tables))
 		results = [
 			check_one_table(
 				runtag=args.runtag,

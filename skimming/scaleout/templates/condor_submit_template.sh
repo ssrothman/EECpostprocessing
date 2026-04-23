@@ -1,7 +1,7 @@
 universe                  = vanilla 
 executable                = condor_exec.sh
 arguments                 = $(Process)
-request_memory            = 2gb
+request_memory            = 4gb
 request_cpus              = 1
 should_transfer_files     = YES
 output                    = condor/NAME_$(CLUSTER)_$(Process).out
