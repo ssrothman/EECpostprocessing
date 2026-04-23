@@ -136,11 +136,8 @@ def read_hist(dset : dsspec,
                 dset['dataset']
             )['xsec']
             count = lookup_count(
-                dset['location'],
-                dset['config_suite'],
                 dset['runtag'],
                 dset['dataset'],
-                'nominal'
             )
 
             wt = 1000 * xsec * dset['target_lumi'] / count 

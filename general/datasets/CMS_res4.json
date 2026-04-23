@@ -8,7 +8,8 @@
             "flags" : {},
             "label" : "$WW$",
             "color" : "#1F77B4",
-            "xsec" : 118.7
+            "xsec" : 118.7,
+            "eventcount" : 15679122.618164062
         },
         "WZ" : {
             "tag" : "WZ/WZ_TuneCP5_13TeV-pythia8",
@@ -17,7 +18,8 @@
             "flags" : {},
             "label" : "$WZ$",
             "color" : "#17BECF",
-            "xsec" : 47.13
+            "xsec" : 47.13,
+            "eventcount" : 7949000.0
         },
         "ZZ" : {
             "tag" : "ZZ/ZZ_TuneCP5_13TeV-pythia8",
@@ -26,7 +28,8 @@
             "flags" : {},
             "label" : "$ZZ$",
             "color" : "#9467BD",
-            "xsec" : 16.523
+            "xsec" : 16.523,
+            "eventcount" : 3526000.0
         },
         "TT" : {
             "tag" : "TT/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8",
@@ -35,7 +38,8 @@
             "flags" : {},
             "label" : "$t\\bar{t}\\rightarrow 2\\ell 2\\nu$",
             "color" : "#D62728",
-            "xsec" : 88.51
+            "xsec" : 88.51,
+            "eventcount" : 10528968707.210938
         },
         "ST_t" : {
             "tag" : "ST/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
@@ -44,7 +48,8 @@
             "flags" : {},
             "label" : "t-channel single $t$",
             "color" : "#FF7F0E",
-            "xsec" : 134.2
+            "xsec" : 134.2,
+            "eventcount" : 23768965322.029724
         },
         "ST_t_anti" : {
             "tag" : "ST/ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
@@ -53,7 +58,8 @@
             "flags" : {},
             "label" : "t-channel single $\\bar{t}$",
             "color" : "#FFB000",
-            "xsec" : 80.0
+            "xsec" : 80.0,
+            "eventcount" : 7122218658.628067
         },
         "ST_tW" : {
             "tag" : "ST/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
@@ -62,7 +68,8 @@
             "flags" : {},
             "label" : "single $tW$",
             "color" : "#A65628",
-            "xsec" : 39.65
+            "xsec" : 39.65,
+            "eventcount" : 258137371.00476074
         },
         "ST_tW_anti" : {
             "tag" : "ST/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
@@ -71,7 +78,8 @@
             "flags" : {},
             "label" : "single $\\bar{t}W$",
             "color" : "#C97C3B",
-            "xsec" : 39.65
+            "xsec" : 39.65,
+            "eventcount" : 255866401.5626526
         },
         "Pythia_inclusive" : {
             "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/",
@@ -80,7 +88,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; Inclusive",
             "color" : "#2CA02C",
-            "xsec" : 6077.22
+            "xsec" : 6077.22,
+            "eventcount" : 86645967.0
         },
         "Herwig_inclusive" : {
             "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/",
@@ -89,7 +98,8 @@
             "flags" : {},
             "label" : "Herwig $Z\\rightarrow\\ell\\ell$; Inclusive",
             "color" : "#00A651",
-            "xsec" : 6077.22
+            "xsec" : 6077.22,
+            "eventcount" : 29306537.7890625
         },
         "Pythia_HT-0to70" : {
             "tag" : "DYJetsToLL/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/",
@@ -98,7 +108,8 @@
             "flags" : { "genHT" : 70 },
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-0to70",
             "color" : "#D9F2D0",
-            "xsec" : 6077.22
+            "xsec" : 6077.22,
+            "eventcount" : 86501152.0
         },
         "Pythia_HT-70to100" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-70to100_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -107,7 +118,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-70to100",
             "color" : "#AEE5A1",
-            "xsec" : 159.1
+            "xsec" : 159.1,
+            "eventcount" : 17004433.0
         },
         "Pythia_HT-100to200" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -116,7 +128,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-100to200",
             "color" : "#82D37B",
-            "xsec" : 159.4
+            "xsec" : 159.4,
+            "eventcount" : 25999832.0
         },
         "Pythia_HT-200to400" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-200to400_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -125,7 +138,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-200to400",
             "color" : "#54C45F",
-            "xsec" : 43.60
+            "xsec" : 43.60,
+            "eventcount" : 18312500.0
         },
         "Pythia_HT-400to600" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -134,7 +148,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-400to600",  
             "color" : "#2FAE53",
-            "xsec" : 5.918
+            "xsec" : 5.918,
+            "eventcount" : 8903460.0
         },
         "Pythia_HT-600to800" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-600to800_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -143,7 +158,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-600to800",
             "color" : "#1F9645",
-            "xsec" : 1.439
+            "xsec" : 1.439,
+            "eventcount" : 7033476.0
         },
         "Pythia_HT-800to1200" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -152,7 +168,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-800to1200",
             "color" : "#007F33",
-            "xsec" : 0.6462
+            "xsec" : 0.6462,
+            "eventcount" : 6670884.0
         },
         "Pythia_HT-1200to2500" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-1200to2500_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -161,7 +178,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-1200to2500",
             "color" : "#006B3B",
-            "xsec" : 0.1514
+            "xsec" : 0.1514,
+            "eventcount" : 6166852.0
         },
         "Pythia_HT-2500toInf" : {
             "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-2500toInf_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
@@ -170,7 +188,8 @@
             "flags" : {},
             "label" : "Pythia $Z\\rightarrow\\ell\\ell$; HT-2500toInf",
             "color" : "#005224",
-            "xsec" : 0.003395
+            "xsec" : 0.003395,
+            "eventcount" : 1978203.0
         },
         "DATA_2018A" : {
             "tag" : [

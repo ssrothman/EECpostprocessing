@@ -255,14 +255,11 @@ def build_pq_dataset(configsuite : str,
         filesystem=fs,
     )
 
-    if not no_count:
+    if not no_count and objsyst != 'DATA':
         pqds.override_num_events(
             lookup_count(
-                location, 
-                configsuite,
                 runtag, 
                 dataset, 
-                objsyst
             )
         )
         

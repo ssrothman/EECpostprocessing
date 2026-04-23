@@ -47,6 +47,7 @@ def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
     
     return allfiles, location
 
+'''
 def lookup_count(location : str, 
                  configsuite : str,
                  runtag : str,
@@ -65,4 +66,8 @@ def lookup_count(location : str,
         countdict = json.load(f)
 
     return countdict['n_events']
+'''
 
+def lookup_count(runtag : str, dataset : str) -> int | float:
+    dsetcfg = cfg[runtag][dataset]
+    return dsetcfg['eventcount']
