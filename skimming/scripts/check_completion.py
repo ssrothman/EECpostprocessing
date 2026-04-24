@@ -163,6 +163,7 @@ def main() -> int:
 		action="store_true",
 		help="Exit with code 1 when incomplete (useful for automation)",
 	)
+	parser.add_argument('--target-files-from-file', type=str, default=None, help="Path to a text file containing the list of target files (one per line). If provided, this overrides the target file list obtained from get_target_files().")
 
 	args = parser.parse_args()
 
@@ -174,13 +175,18 @@ def main() -> int:
 
 	objsyst = resolve_objsyst(args.dataset, args.objsyst)
 
-	exclude_dropped = not args.include_dropped
-	target_files, _ = get_target_files(
-		args.runtag,
-		args.dataset,
-		exclude_dropped=exclude_dropped,
-	)
-	n_targets = len(target_files)
+	if args.target_files_from_file is None:
+		exclude_dropped = not args.include_dropped
+		target_files, _ = get_target_files(
+			args.runtag,
+			args.dataset,
+			exclude_dropped=exclude_dropped,
+		)
+		n_targets = len(target_files)
+	else:
+		with open(args.target_files_from_file, 'r') as f:
+			target_files = [line.strip() for line in f if line.strip()]
+		n_targets = len(target_files)
 
 	if args.tables:
 		from skimming.tables.expand_tables import expand_tables, table_names

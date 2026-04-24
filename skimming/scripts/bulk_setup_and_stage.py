@@ -57,6 +57,8 @@ parser.add_argument('--tables', type=str, nargs='+', help="List of table variati
                     ])
 parser.add_argument('--files_per_job', type=int, help="Number of input files per job",
                      default=100)
+parser.add_argument('--mem', type=str, help="Requested memory per job",
+                    default='4gb')
 parser.add_argument('--runtag', type=str, help="Datasets runtag",
                     default='Mar_01_2026')
 
@@ -99,7 +101,7 @@ def setup_and_stage(dset, objsyst, table):
                     # so we can skip staging too.
                     
 
-    cmd = 'stage_to_%s.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --exec' % (
+    cmd = 'stage_to_%s.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --mem %s --exec' % (
         args.stage,
         dset,
         objsyst,
@@ -107,7 +109,8 @@ def setup_and_stage(dset, objsyst, table):
         dset,
         objsyst,
         table,
-        args.files_per_job
+        args.files_per_job,
+        args.mem
     )
     output = subprocess.run(cmd, shell=True, capture_output=True)
     print(output.stdout.decode())

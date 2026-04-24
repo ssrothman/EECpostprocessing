@@ -11,6 +11,7 @@ parser.add_argument('--no-resub-running', action='store_true', help="Do not resu
 parser.add_argument('--exec', action='store_true', help="Directly execute condor_submit command after preparing resubmission scripts")
 parser.add_argument('--skip-still-running', action='store_true', help="Skip workspaces that still have running jobs")
 parser.add_argument('--dont-check-singularity', action='store_true', help="Don't check the .err files for singularity errors")
+parser.add_argument('--mem', type=str, default=None, help="Override request_memory for the resubmission submit file")
 args = parser.parse_args()
 
 #first, discover the condor cluster id 
@@ -210,6 +211,15 @@ sed_command = "sed -i 's/queue .*/queue index from %s /g' %s" % (
     new_template
 )
 subprocess.run(sed_command, shell=True, check=True)
+
+if args.mem is not None:
+    if args.mem.strip() == "":
+        raise RuntimeError("--mem must not be empty")
+    sed_command = "sed -i 's/^request_memory.*/request_memory            = %s/g' %s" % (
+        args.mem,
+        new_template
+    )
+    subprocess.run(sed_command, shell=True, check=True)
 
 if args.exec:
     cmd = "condor_submit %s" % os.path.basename(new_template)

@@ -1,4 +1,4 @@
-def stage_via_condor(working_dir, name, files_per_job=1):
+def stage_via_condor(working_dir, name, files_per_job=1, mem='4gb'):
     import os
     import subprocess
     import shutil
@@ -26,7 +26,7 @@ def stage_via_condor(working_dir, name, files_per_job=1):
 
     subprocess.run([
         'sed', '-i',
-        f's|NAME|{name}|g; s|NJOBS|{njobs}|g; s|WORKINGDIR|{working_dir}|g; s|FILES_PER_JOB|{files_per_job}|g; s|NFILES|{nfiles}|g',
+        f's|NAME|{name}|g; s|NJOBS|{njobs}|g; s|MEM|{mem}|g; s|WORKINGDIR|{working_dir}|g; s|FILES_PER_JOB|{files_per_job}|g; s|NFILES|{nfiles}|g',
         condor_sub_path
     ], check=True)
     subprocess.run([

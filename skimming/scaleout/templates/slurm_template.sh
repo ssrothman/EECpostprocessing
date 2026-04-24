@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=8gb
+#SBATCH --mem=MEM
 #SBATCH --partition=submit
 #SBATCH --job-name=NAME
 #SBATCH --array=0-NJOBS

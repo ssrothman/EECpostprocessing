@@ -3,6 +3,7 @@
 import argparse
 parser = argparse.ArgumentParser(description="Resubmit failed SLURM jobs for a skimming workspace")
 parser.add_argument("where", type=str, help="Directory of workspace to resubmit")
+parser.add_argument('--mem', type=str, default=None, help="Override --mem value in the resubmission script")
 args = parser.parse_args()
 
 #first, discover the slurm array id 
@@ -89,6 +90,15 @@ sed_command = "sed -i 's/.*--array.*/%s/g' %s" % (
     new_template
 )
 subprocess.run(sed_command, shell=True, check=True)
+
+if args.mem is not None:
+    if args.mem.strip() == "":
+        raise RuntimeError("--mem must not be empty")
+    sed_command = "sed -i 's/^#SBATCH --mem=.*/#SBATCH --mem=%s/g' %s" % (
+        args.mem,
+        new_template
+    )
+    subprocess.run(sed_command, shell=True, check=True)
 
 print("Resubmission script created.")
 print("Submit with: ")

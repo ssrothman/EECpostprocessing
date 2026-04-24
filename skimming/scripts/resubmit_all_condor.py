@@ -9,6 +9,7 @@ parser.add_argument('--no-resub-running', action='store_true', help="Do not resu
 parser.add_argument("--skip-still-running", action='store_true', help="Skip workspaces that still have running jobs")
 parser.add_argument('--exec', action='store_true', help="Directly execute condor_submit command after preparing resubmission scripts")
 parser.add_argument('--dont-check-singularity', action='store_true', help="Don't check the .err files for singularity errors")
+parser.add_argument('--mem', type=str, default=None, help="Override request_memory for each resubmission submit file")
 parser.add_argument('-j', type=int, default=1, help="Number of parallel resubmissions to do (default: 1)")
 args = parser.parse_args()
 
@@ -28,6 +29,8 @@ def run_command(wd):
         cmd += ' --exec'
     if args.dont_check_singularity: 
         cmd += ' --dont-check-singularity'
+    if args.mem is not None:
+        cmd += ' --mem %s' % args.mem
     output = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     return wd, output.returncode, output.stdout, output.stderr
 

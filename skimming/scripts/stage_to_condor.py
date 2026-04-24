@@ -6,13 +6,18 @@ parser.add_argument("where", type=str, help="Directory of workspace to stage")
 parser.add_argument("name", type=str, help='condor job name')
 parser.add_argument('--files-per-job', type=int, default=1,
                     help='Number of input files to process per job (default: 1)')
+parser.add_argument('--mem', type=str, default='4gb',
+                    help='Requested memory per job (default: 4gb)')
 parser.add_argument('--exec', action='store_true',
                     help='If set, actually execute the condor staging (otherwise just create scripts)')
 args = parser.parse_args()
 
 from skimming.scaleout.condor import stage_via_condor
 import os
-stage_via_condor(args.where, args.name, args.files_per_job)
+if args.mem.strip() == '':
+    raise RuntimeError("--mem must not be empty")
+
+stage_via_condor(args.where, args.name, args.files_per_job, mem=args.mem)
 
 if args.exec:
     cmd = 'condor_submit condor_submit.sh'
