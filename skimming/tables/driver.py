@@ -84,13 +84,18 @@ class TableDriver:
         result = table_obj.run_table(
             objs, evtsel, jetsel, weights
         )
+        print("Ran table:", table_obj.name)
         if isinstance(result, dict):
             import json
+            print("Dumping result as JSON")
             with self._fs.open(destination + ".json", "w") as f:
                 json.dump(result, f, indent=4)
         else:
             import pyarrow.parquet as pq
-            pq.write_table(result, destination + ".parquet", filesystem=self._fs)
+            print("Dumping result as Parquet")
+            with self._fs.open(destination + ".parquet", "wb") as f:
+                print("file opened...")
+                pq.write_table(result, f)
 
     def run_tables(self,
                    objs,
