@@ -1,11 +1,23 @@
 import json
 import fsspec
 import os
+import hashlib
+import socket
+import time
 
 # Load the location lookup map
 # wrt this file
 with open(os.path.join(os.path.dirname(__file__), 'location_lookup.json')) as f:
     lookupmap = json.load(f)
+
+if 'xrootd-submit' in lookupmap:
+    # if we have an xrootd-submit entry, add a hack 
+    # to randomly assign to one of the submit gateways
+    # the hostid should be submit%d.mit.edu 
+    # where %d is randomly between 50 and 59 (inclusive)
+
+    lookupmap['xrootd-submit'][0] = f"submit{50 + (time.time_ns() % 10)}.mit.edu"
+    print("[Info] Updated xrootd-submit hostid to:", lookupmap['xrootd-submit'][0])
 
 def location_lookup(location : str):
     hostid, rootpath = lookupmap[location]
