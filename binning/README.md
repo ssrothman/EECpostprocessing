@@ -61,7 +61,7 @@ python binning/scripts/bin.py \
 	--location local-submit \
 	--config-suite BasicConfig \
 	--bincfg res4tee \
-	--evtwt nominal \
+	--wtsyst nominal \
 	--statN -1 --statK -1
 ```
 
@@ -75,6 +75,55 @@ Outputs:
 
 - Histogram arrays are saved as `.npy` in a `*_BINNED` directory next to the input tables.
 - A `*_bincfg.json` with the serialized binning is stored alongside output to ensure compatibility.
+
+Scaleout workspace contents:
+
+- `commands.txt`: one low-level `bin.py` command per line
+- `binscript.py`: command-by-index runner used by schedulers
+
+## Scaleout Setup
+
+Use `setup_binning_workspace.py` as the single workspace-generation entry point. It handles the bulk-style dataset/systematic expansion directly.
+
+Example with MC expanded over `--objsysts` and `--wtsysts`:
+
+```bash
+python binning/scripts/setup_binning_workspace.py \
+	/path/to/workspace \
+	Apr_19_2026 \
+	--mc Pythia_inclusive Herwig_inclusive \
+	--objsysts nominal JES_UP \
+	--tables res4tee_totalReco \
+	--wtsysts nominal wtvar_up
+```
+
+Example with both MC and data:
+
+```bash
+python binning/scripts/setup_binning_workspace.py \
+	/path/to/workspace \
+	Apr_19_2026 \
+	--mc Pythia_inclusive WW WZ \
+	--data DATA_2018A DATA_2018B \
+	--objsysts nominal JES_UP \
+	--tables res4tee_totalReco \
+	--wtsysts nominal
+```
+
+Expansion behavior:
+
+- `--mc`: expanded over all `--objsysts` and all `--wtsysts`
+- `--data`: always uses `objsyst=DATA` and `wtsyst=nominal`
+
+Internally, the workspace is built from explicit `(dataset, objsyst, wtsyst)` triples, so each command line is fully specified before it is written to `commands.txt`.
+
+Run/stage with:
+
+- `binning/scripts/run_binning_workspace_local.py`
+- `binning/scripts/stage_binning_to_slurm.py`
+- `binning/scripts/stage_binning_to_condor.py`
+
+When running locally, each command writes combined stdout/stderr to `logs/command_<index>.log` inside the workspace.
 
 ## Binning Configuration
 
