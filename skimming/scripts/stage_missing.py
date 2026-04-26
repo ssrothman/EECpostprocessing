@@ -57,8 +57,8 @@ def choose_next_suffix(workspace: str, scheduler: str) -> int:
         target_files_missing = os.path.join(workspace, f"target_files_missing_{idx}.txt")
         skimscript_missing = os.path.join(workspace, f"skimscript_missing_{idx}.py")
         submit_missing = os.path.join(workspace, f"submit_{scheduler}_missing_{idx}")
-        # Also check for alternative extension (.sh for slurm, .sub for condor)
-        ext = ".sh" if scheduler == "slurm" else ".sub"
+        # Also check for alternative extension (.sh for slurm/local, .sub for condor)
+        ext = ".sub" if scheduler == "condor" else ".sh"
         submit_missing_ext = os.path.join(workspace, f"submit_{scheduler}_missing_{idx}{ext}")
         condor_exec_missing = os.path.join(workspace, f"condor_exec_missing_{idx}.sh")
         if not any(
@@ -256,6 +256,35 @@ def make_missing_condor_submit(
     return submit_name, exec_name
 
 
+def make_missing_local_submit(
+    workspace: str,
+    suffix: int,
+    nfiles: int,
+    skimscript_name: str,
+) -> str:
+    """Create a local bash script that runs all missing jobs sequentially."""
+    submit_name = f"submit_local_missing_{suffix}.sh"
+    submit_path = os.path.join(workspace, submit_name)
+
+    lines = [
+        "#!/usr/bin/env bash",
+        "set -euo pipefail",
+        "",
+        f"for i in $(seq 0 {nfiles - 1}); do",
+        f"    python {skimscript_name} \"$i\"",
+        "done",
+        "",
+    ]
+
+    with open(submit_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    st = os.stat(submit_path)
+    os.chmod(submit_path, st.st_mode | 0o111)
+
+    return submit_name
+
+
 def make_missing_submit_script(
     workspace: str,
     name: str,
@@ -298,8 +327,9 @@ def main() -> None:
     scheduler_group = parser.add_mutually_exclusive_group(required=True)
     scheduler_group.add_argument("--slurm", action="store_true", help="Submit to SLURM")
     scheduler_group.add_argument("--condor", action="store_true", help="Submit to Condor")
+    scheduler_group.add_argument("--local", action="store_true", help="Write a local bash loop script")
     
-    parser.add_argument("--exec", action="store_true", help="Submit the generated script (sbatch for SLURM, condor_submit for Condor)")
+    parser.add_argument("--exec", action="store_true", help="Submit/run the generated script (sbatch, condor_submit, or bash)")
     parser.add_argument(
         "--keep-temp-check-files",
         action="store_true",
@@ -317,7 +347,12 @@ def main() -> None:
         raise RuntimeError("--mem must not be empty")
 
     # Determine scheduler (exactly one must be specified due to required mutually_exclusive_group)
-    scheduler = "condor" if args.condor else "slurm"
+    if args.condor:
+        scheduler = "condor"
+    elif args.local:
+        scheduler = "local"
+    else:
+        scheduler = "slurm"
 
     metadata, tables = infer_workspace_metadata(workspace)
 
@@ -353,8 +388,10 @@ def main() -> None:
         # Create directories for scheduler-specific outputs
         if scheduler == "slurm":
             os.makedirs(os.path.join(workspace, "slurm"), exist_ok=True)
-        else:  # condor
+        elif scheduler == "condor":
             os.makedirs(os.path.join(workspace, "condor"), exist_ok=True)
+        else:  # local
+            os.makedirs(os.path.join(workspace, "local"), exist_ok=True)
 
         target_name = make_missing_target_file(workspace, suffix, missing_files)
         skimscript_name = make_missing_skimscript(workspace, suffix)
@@ -390,7 +427,7 @@ def main() -> None:
                 print("Submit with:")
                 print("  sbatch %s" % os.path.join(workspace, submit_name))
         
-        else:  # condor
+        elif scheduler == "condor":
             submit_name, exec_name = make_missing_condor_submit(
                 workspace=workspace,
                 name=job_name,
@@ -418,6 +455,28 @@ def main() -> None:
             else:
                 print("Submit with:")
                 print("  condor_submit %s" % os.path.join(workspace, submit_name))
+
+        else:  # local
+            submit_name = make_missing_local_submit(
+                workspace=workspace,
+                suffix=suffix,
+                nfiles=len(missing_files),
+                skimscript_name=skimscript_name,
+            )
+            print("Created missing-file local artifacts:")
+            print("  ", target_name)
+            print("  ", skimscript_name)
+            print("  ", submit_name)
+
+            if args.exec:
+                print("Running local missing-file script...")
+                cmd = ["bash", submit_name]
+                output = subprocess.run(cmd, cwd=workspace)
+                if output.returncode != 0:
+                    raise RuntimeError("Failed to execute local missing-file script")
+            else:
+                print("Run with:")
+                print("  bash %s" % os.path.join(workspace, submit_name))
 
     finally:
         if not args.keep_temp_check_files:

@@ -30,11 +30,19 @@ parser.add_argument(
     default=1,
     help="Parallel workers passed to check_missing_files.py in each workspace (default: 1)",
 )
+parser.add_argument(
+    "--filter",
+    nargs="+",
+    default=None,
+    metavar="SUBSTR",
+    help="One or more substrings; each must be present in the workspace folder name",
+)
 
 # Mutually exclusive scheduler options
 scheduler_group = parser.add_mutually_exclusive_group(required=True)
 scheduler_group.add_argument("--slurm", action="store_true", help="Submit to SLURM")
 scheduler_group.add_argument("--condor", action="store_true", help="Submit to Condor")
+scheduler_group.add_argument("--local", action="store_true", help="Write and run local bash loop scripts")
 
 parser.add_argument(
     "--name-prefix",
@@ -45,7 +53,7 @@ parser.add_argument(
 parser.add_argument(
     "--exec",
     action="store_true",
-    help="Submit generated scripts (sbatch for SLURM, condor_submit for Condor)",
+    help="Submit generated scripts (sbatch, condor_submit, or bash for local)",
 )
 parser.add_argument(
     "--keep-temp-check-files",
@@ -107,6 +115,8 @@ def run_one_workspace(workspace: str, scheduler: str) -> tuple[str, int, str, st
     # Add scheduler flag
     if scheduler == "condor":
         cmd.append("--condor")
+    elif scheduler == "local":
+        cmd.append("--local")
     else:
         cmd.append("--slurm")
 
@@ -125,11 +135,22 @@ subdirs = os.listdir(args.where)
 workspaces = []
 for sd in sorted(subdirs):
     fullpath = os.path.join(args.where, sd)
+    if args.filter and any(substr not in sd for substr in args.filter):
+        continue
     if is_workspace(fullpath):
         workspaces.append(fullpath)
 
+# randomize the order of the workspaces to avoid overloading the scheduler with similar jobs at the same time if the input directory is sorted in some way (e.g. by dataset or date)
+import random
+random.shuffle(workspaces)
+
 # Determine scheduler
-scheduler = "condor" if args.condor else "slurm"
+if args.condor:
+    scheduler = "condor"
+elif args.local:
+    scheduler = "local"
+else:
+    scheduler = "slurm"
 
 if len(workspaces) == 0:
     print("No skimming workspaces found in %s" % args.where)

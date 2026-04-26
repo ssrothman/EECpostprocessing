@@ -45,6 +45,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Check completion for all workspaces in a given path.")
     parser.add_argument('path', type=str, help='Path to check for completion')
     parser.add_argument('-j', '--jobs', type=int, default=1, help='Number of worker processes')
+    parser.add_argument(
+        '--filter',
+        nargs='+',
+        default=None,
+        metavar='SUBSTR',
+        help='One or more substrings; each must be present in the workspace folder name',
+    )
+    parser.add_argument('--print-as-completed', action='store_true', help='Print output of each workspace as it is completed')
     args = parser.parse_args()
 
     all_subpaths = os.listdir(args.path)
@@ -53,6 +61,9 @@ def main() -> int:
     for subpath in all_subpaths:
         full_subpath = os.path.join(args.path, subpath)
         if not os.path.isdir(full_subpath):
+            continue
+
+        if args.filter and any(substr not in subpath for substr in args.filter):
             continue
 
         if not os.path.exists(os.path.join(full_subpath, 'target_files.txt')):
@@ -73,6 +84,10 @@ def main() -> int:
             if exitcode != 0:
                 incomplete_count += 1
                 failures.append((subpath, stdout))
+                if args.print_as_completed:
+                    print(f"Checked workspace {subpath} with exit code {exitcode}.")
+                    print(stdout)
+
             progress.set_postfix(incomplete=incomplete_count)
 
     if failures:
