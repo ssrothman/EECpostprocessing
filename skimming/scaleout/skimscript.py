@@ -1,5 +1,7 @@
 import argparse
+from ast import pattern
 import os
+import re
 
 from general.fslookup.location_lookup import lookup_hostid
 
@@ -29,6 +31,18 @@ if input_file is None:
 # load config
 with open("./config.json") as f:
     config = json.load(f)
+
+#check if we are running on a submit host
+#if we are, the hostname will be of the form submit%d.mit.edu
+#use `re` to check this
+import re
+pattern = r"submit\d+\.mit\.edu"
+hostname = os.uname().nodename
+if re.match(pattern, hostname) and config['output_location'] == 'xrootd-submit':
+    # if we are running on a submit host and the input location is xrootd-submit,
+    # we can actually get the input from the local filesystem
+    print("[Info] Changing output location to local-submit because we are running on a submit node")
+    config['output_location'] = 'local-submit'
 
 # setup output location and filesystem
 targetfs, rootpath = location_lookup(config['output_location'])
