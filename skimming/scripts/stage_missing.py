@@ -271,7 +271,7 @@ def make_missing_local_submit(
         "set -euo pipefail",
         "",
         f"for i in $(seq 0 {nfiles - 1}); do",
-        f"    python {skimscript_name} \"$i\"",
+        f"    python {skimscript_name} \"$i\" 2>&1 | tee local/skim_missing_{suffix}_$i.log",
         "done",
         "",
     ]

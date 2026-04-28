@@ -42,6 +42,9 @@ _ALL_HT_DATASETS = [
 if args.mc == ['allHT']:
     args.mc = _ALL_HT_DATASETS
 
+from skimming.tables.expand_tables import expand_tables, table_names
+args.tables = table_names(expand_tables(args.tables))
+
 from binning.scaleout.setup_workspace import setup_binning_workspace
 
 dataset_objsyst_wtsyst_triples: list[tuple[str, str, str]] = []

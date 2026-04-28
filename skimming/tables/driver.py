@@ -91,6 +91,10 @@ class TableDriver:
             with self._fs.open(destination + ".json", "w") as f:
                 json.dump(result, f, indent=4)
         else:
+            print(len(result), "rows")
+            if len(result) == 0:
+                print("WARNING: result is empty for table", table_obj.name)
+                result = result.select([])  # create empty table with correct schema
             import pyarrow.parquet as pq
             print("Dumping result as Parquet")
             with self._fs.open(destination + ".parquet", "wb") as f:

@@ -8,6 +8,7 @@ from general.fslookup.location_lookup import lookup_hostid
 parser = argparse.ArgumentParser(description="Skim script for scaleout processing.")
 
 parser.add_argument('i', type=int, help="Input file index")
+parser.add_argument('--override-location', type=str, default=None, help='Override the output location')
 
 args = parser.parse_args()
 
@@ -32,17 +33,9 @@ if input_file is None:
 with open("./config.json") as f:
     config = json.load(f)
 
-#check if we are running on a submit host
-#if we are, the hostname will be of the form submit%d.mit.edu
-#use `re` to check this
-import re
-pattern = r"submit\d+\.mit\.edu"
-hostname = os.uname().nodename
-if re.match(pattern, hostname) and config['output_location'] == 'xrootd-submit':
-    # if we are running on a submit host and the input location is xrootd-submit,
-    # we can actually get the input from the local filesystem
-    print("[Info] Changing output location to local-submit because we are running on a submit node")
-    config['output_location'] = 'local-submit'
+if args.override_location is not None:
+    print(f"[Info] Overriding output location to {args.override_location}")
+    config['output_location'] = args.override_location
 
 # setup output location and filesystem
 targetfs, rootpath = location_lookup(config['output_location'])

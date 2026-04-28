@@ -37,6 +37,13 @@ parser.add_argument(
     metavar="SUBSTR",
     help="One or more substrings; each must be present in the workspace folder name",
 )
+parser.add_argument(
+    "--anti-filter",
+    nargs="+",
+    default=None,
+    metavar="SUBSTR",
+    help="One or more substrings; workspaces containing any of these are excluded",
+)
 
 # Mutually exclusive scheduler options
 scheduler_group = parser.add_mutually_exclusive_group(required=True)
@@ -66,6 +73,11 @@ parser.add_argument(
     help="Tell stage_missing to use each workspace target_files.txt for missing-file checks",
 )
 parser.add_argument(
+    "--only-new",
+    action="store_true",
+    help="Skip workspaces that already have slurm/ or condor/ subdirectories",
+)
+parser.add_argument(
     "-j",
     type=int,
     default=1,
@@ -87,6 +99,13 @@ def is_workspace(path: str) -> bool:
         and os.path.exists(os.path.join(path, "config.json"))
         and os.path.exists(os.path.join(path, "skimscript.py"))
         and os.path.exists(os.path.join(path, "target_files.txt"))
+    )
+
+
+def has_existing_submission_dir(path: str) -> bool:
+    return any(
+        os.path.isdir(os.path.join(path, scheduler_dir))
+        for scheduler_dir in ("slurm", "condor")
     )
 
 
@@ -137,7 +156,12 @@ for sd in sorted(subdirs):
     fullpath = os.path.join(args.where, sd)
     if args.filter and any(substr not in sd for substr in args.filter):
         continue
+    if args.anti_filter and any(substr in sd for substr in args.anti_filter):
+        continue
     if is_workspace(fullpath):
+        if args.only_new and has_existing_submission_dir(fullpath):
+            print("Skipping already-submitted workspace %s" % fullpath)
+            continue
         workspaces.append(fullpath)
 
 # randomize the order of the workspaces to avoid overloading the scheduler with similar jobs at the same time if the input directory is sorted in some way (e.g. by dataset or date)

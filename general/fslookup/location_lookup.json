@@ -14,5 +14,9 @@
     "xrootd-submit" : [
         "submit55.mit.edu",
         "/data/group/cms/store/user/srothman/EEC_v2"
+    ],
+    "xrootd-submit-override" : [
+        "submit55.mit.edu",
+        "/data/group/cms/store/user/srothman/EEC_v2"
     ]
 }
