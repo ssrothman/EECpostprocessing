@@ -33,7 +33,7 @@
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "Herwig Z+glu; nospin 2",
+            "label": "Herwig Z+glu; no hard nor soft spin corr.",
             "xsec": 1.0,
             "color": "magenta"
         },
@@ -51,7 +51,7 @@
             "location": "simon-LPC",
             "era": "skip",
             "flags": {},
-            "label": "Pythia Z+glu; no spin corr.",
+            "label": "Pythia Z+glu; no hard spin corr.",
             "xsec": 1.0,
             "color": "orangered"
         }

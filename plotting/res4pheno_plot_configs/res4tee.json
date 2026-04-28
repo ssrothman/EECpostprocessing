@@ -9,9 +9,8 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
                     "no_count" : true,
-                    "isprebinned" : true,
+                    "dsetkind" : "prebinned",
                     "nocov" : false
                 },
                 {
@@ -21,9 +20,8 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 }
             ],
@@ -55,21 +53,20 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 },
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "Feb_15_2026",
-                    "name" : "herwig_glu_nospin_6X",
+                    "name" : "herwig_glu_nospin_5Xand6X",
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned_stack",
+                    "never_resolve" : true,
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 }
             ],
@@ -101,21 +98,20 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 },
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "Feb_15_2026",
-                    "name" : "herwig_glu_nospin_6X",
+                    "name" : "herwig_glu_nospin_5Xand6X",
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned_stack",
+                    "never_resolve" : true,
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 },
                 {
@@ -125,9 +121,8 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 }
             ],
@@ -162,9 +157,8 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
                     "no_count" : true,
-                    "isprebinned" : true,
+                    "dsetkind" : "prebinned",
                     "nocov" : false
                 },
                 {
@@ -174,9 +168,8 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 }
             ],
@@ -207,21 +200,20 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 },
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "Feb_15_2026",
-                    "name" : "herwig_glu_nospin_6X",
+                    "name" : "herwig_glu_nospin_5Xand6X",
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned_stack",
+                    "never_resolve" : true,
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 }
             ],
@@ -252,21 +244,20 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 },
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "Feb_15_2026",
-                    "name" : "herwig_glu_nospin_6X",
+                    "name" : "herwig_glu_nospin_5Xand6X",
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned_stack",
+                    "never_resolve" : true,
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 },
                 {
@@ -276,9 +267,8 @@
                     "table" : "res4tee_totalReco",
                     "objsyst" : "nominal",
                     "location" : "scratch-submit",
-                    "isstack" : false,
+                    "dsetkind" : "prebinned",
                     "no_count" : true,
-                    "isprebinned" : true,
                     "nocov" : false
                 }
             ],

@@ -7,7 +7,7 @@
             ],
             "stacks" : [],
             "color" : "#9467BD",
-            "label" : "Herwig Z+glu; nospin 1"
+            "label" : "Herwig Z+glu; no hard spin corr."
         },
         "allMC" : {
             "dsets" : [
