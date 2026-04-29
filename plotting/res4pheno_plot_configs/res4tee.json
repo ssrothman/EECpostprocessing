@@ -1,5 +1,451 @@
 {
+    "override_simonplot_config" : {
+        "cms_label" : ""
+    },
     "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu_nospin",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "comparison" : "ratio",
+                    "label" : "ratio",
+                    "dsetkind" : "prebinned_comparison",
+                    "key" : "key",
+                    "thevariable" : "var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt', 'R'])"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "pythia_glu",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "comparison" : "ratio",
+                    "label" : "ratio",
+                    "dsetkind" : "prebinned_comparison",
+                    "key" : "key",
+                    "thevariable" : "var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt', 'R'])"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned_stack",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "comparison" : "ratio",
+                    "label" : "ratio",
+                    "dsetkind" : "prebinned_comparison",
+                    "key" : "key",
+                    "thevariable" : "var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt', 'R'])"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_8X",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "comparison" : "ratio",
+                    "label" : "ratio",
+                    "dsetkind" : "prebinned_comparison",
+                    "key" : "key",
+                    "thevariable" : "var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt', 'R'])"
+                },
+                {
+                    "dataset1" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_5Xand6X",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned_stack",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "dataset2" : {
+                        "configsuite" : "GenonlyConfig",
+                        "runtag" : "Feb_15_2026",
+                        "name" : "herwig_glu_nospin_8X",
+                        "table" : "res4tee_totalReco",
+                        "objsyst" : "nominal",
+                        "location" : "scratch-submit",
+                        "dsetkind" : "prebinned",
+                        "no_count" : true,
+                        "nocov" : false    
+                    },
+                    "comparison" : "ratio",
+                    "label" : "ratio",
+                    "dsetkind" : "prebinned_comparison",
+                    "key" : "key",
+                    "thevariable" : "var::NormalizePerBlock(var::BasicPrebinnedVariable(), ['Jpt', 'R'])"
+                }
+            ],
+            "variables" : [
+                "var::BasicPrebinnedVariable()"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5]}, clipemptyflow=['r', 'c'])"
+            ],
+            "override_cbarlabel" : [
+                "nominal / no hard spin corr.",
+                "pythia / herwig",
+                "nominal / no hard spin corr.",
+                "nominal / no hard nor soft spin corr.",
+                "no hard spin corr. / no hard nor soft spin corr."
+            ],
+            "extratext" : [
+                "Pythia Z + glu",
+                "Z + glu",
+                "Herwig Z + glu",
+                "Herwig Z + glu",
+                "Herwig Z + glu"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "sym" : true,
+            "plotsprefix" : "",
+            "driver" : "draw_radial_histogram",
+            "override_filenames" : [
+                "pythia_glu_nominal_vs_nospin_2D",
+                "pythia_glu_vs_herwig_glu_2D",
+                "herwig_glu_nominal_vs_5X6X_2D",
+                "herwig_glu_nominal_vs_8X_2D",
+                "herwig_glu_5X6X_vs_8X_2D"
+            ]
+        },
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned_stack",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu_nospin",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::DivideOutProfile(var::BasicPrebinnedVariable(), ['r'])"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "draw_radial_histogram",
+            "extratext" : [
+                "Herwig Z + glu [nominal]",
+                "Herwig Z + glu [no hard spin corr.]",
+                "Herwig Z + glu [no hard nor soft spin corr.]",
+                "Pythia Z + glu [nominal]",
+                "Pythia Z + glu [no hard spin corr.]"
+            ],
+            "override_filenames" : [
+                "herwig_glu_2D_profile",
+                "herwig_glu_5X6X_2D_profile",
+                "herwig_glu_8X_2D_profile",
+                "pythia_glu_2D_profile",
+                "pythia_glu_nospin_2D_profile"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned_stack",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu_nospin",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::WithJacobian(var::BasicPrebinnedVariable(), ['r', 'c'], ['r'])"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "draw_radial_histogram",
+            "extratext" : [
+                "Herwig Z + glu [nominal]",
+                "Herwig Z + glu [no hard spin corr.]",
+                "Herwig Z + glu [no hard nor soft spin corr.]",
+                "Pythia Z + glu [nominal]",
+                "Pythia Z + glu [no hard spin corr.]"
+            ],
+            "override_filenames" : [
+                "herwig_glu_2D_jac",
+                "herwig_glu_5X6X_2D_jac",
+                "herwig_glu_8X_2D_jac",
+                "pythia_glu_2D_jac",
+                "pythia_glu_nospin_2D_jac"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_5Xand6X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned_stack",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "herwig_glu_nospin_8X",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Feb_15_2026",
+                    "name" : "pythia_glu_nospin",
+                    "table" : "res4tee_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "scratch-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicPrebinnedVariable()"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::SliceOperation(edges={'Jpt' : [1200,2000], 'R':[0.4, 0.5]}, clipemptyflow=['r', 'c'])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "res4_pheno_plots/res4tee/",
+            "plotsprefix" : "",
+            "driver" : "draw_radial_histogram",
+            "override_filenames" : [
+                "herwig_glu_2D_raw",
+                "herwig_glu_5X6X_2D_raw",
+                "herwig_glu_8X_2D_raw",
+                "pythia_glu_2D_raw",
+                "pythia_glu_nospin_2D_raw"
+            ],
+            "extratext" : [
+                "Herwig Z + glu [nominal]",
+                "Herwig Z + glu [no hard spin corr.]",
+                "Herwig Z + glu [no hard nor soft spin corr.]",
+                "Pythia Z + glu [nominal]",
+                "Pythia Z + glu [no hard spin corr.]"
+            ]
+        },
         {
             "datasets" : [
                 {

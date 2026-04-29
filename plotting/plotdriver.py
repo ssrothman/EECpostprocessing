@@ -1,11 +1,96 @@
+from email.utils import collapse_rfc2231_value
+
 from plotting.load_datasets import build_pq_dataset, build_pq_dataset_stack, load_prebinned_dataset, build_prebinned_dataset_stack, load_prebinned_root_histogram
 import simonplot as splt
+from simonplot.binning.Binning import PrebinnedBinning
+from simonplot.cut.CutBase import PrebinnedOperationBase
 import json
 import os
+import numpy as np
 
+from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
+from simonplot.typing.Protocols import PrebinnedVariableProtocol, VariableProtocol
+from simonplot.util.evaluate import evaluate_on_dataset
+
+def build_prebinned_comparison_dataset(dscfg1 : dict, dscfg2 : dict, func : str, thevariable : PrebinnedVariableProtocol, key : str | None= None, color : str | None= None, label : str | None = None):
+    dset1= build_dataset_from_dscfg(
+        dscfg1,
+        True,
+        True,
+        splt.cut.NoCut()
+    )
+
+    dset2 = build_dataset_from_dscfg(
+        dscfg2,
+        True,
+        True,
+        splt.cut.NoCut()
+    )
+
+    if dset1.binning != dset2.binning:
+        raise ValueError("Cannot build a comparison dataset from two datasets with different binnings!")
+    if dset1.isMC != dset2.isMC:
+        raise ValueError("Cannot build a comparison dataset from two datasets where one is MC and the other is not!")
+    
+    val1, cov1 = evaluate_on_dataset(dset1, thevariable, splt.cut.NoopOperation())
+    val2, cov2 = evaluate_on_dataset(dset2, thevariable, splt.cut.NoopOperation())
+
+    print(func)
+
+    # assume the two datasets are uncorrelated, so we add the covariance matrices
+    if func == 'sum':
+        newval = val1 + val2
+        newcov = cov1 + cov2
+    elif func == 'difference':
+        newval = val1 - val2
+        newcov = cov1 + cov2
+    elif func == 'product':
+        newval = val1 * val2
+        newcov = np.outer(val2, val2) * cov1 + np.outer(val1, val1) * cov2
+    elif func == 'ratio':
+        newval = val1 / val2
+        newcov = np.outer(1/val2, 1/val2) * cov1 + np.outer(val1/(val2*val2), val1/(val2*val2)) * cov2
+    else:
+        raise ValueError(f"Unsupported func {func} for building comparison dataset! Supported funcs are: 'sum', 'difference', 'product', and 'ratio'.")
+    
+
+    if key is None:
+        thekey = f"{dset1.key}_{func}_{dset2.key}"
+    else:
+        thekey = key
+
+    if label is None:
+        thelabel = f"{dset1.label} {func} {dset2.label}"
+    else:       
+        thelabel = label
+
+    if color is None:
+        thecolor = dset1.color
+    else:        
+        thecolor = color
+    
+    result = ValCovPairDataset(
+        key = thekey,
+        label = thelabel,
+        color = thecolor,
+        data = (newval, newcov),
+        binning = dset1.binning,
+        isMC = dset1.isMC
+    )
+    return result
 
 def build_dataset_from_dscfg(dscfg, all_same_objsyst, all_same_extracut, dsetcut):
-    if dscfg['dsetkind'] == 'prebinned_stack':
+    if dscfg['dsetkind'] == 'prebinned_comparison':
+        return build_prebinned_comparison_dataset(
+            dscfg['dataset1'],
+            dscfg['dataset2'],
+            dscfg['comparison'],
+            thevariable = parse_var(dscfg['thevariable']), # type: ignore
+            key=dscfg.get('key', None),
+            color=dscfg.get('color_override', None),
+            label=dscfg.get('label_override', None)
+        )
+    elif dscfg['dsetkind'] == 'prebinned_stack':
         factory = build_prebinned_dataset_stack
     elif dscfg['dsetkind'] == 'prebinned':
         factory = load_prebinned_dataset
@@ -110,7 +195,7 @@ def run_plots(cfg):
         else:
             dsetcuts.append(splt.cut.NoCut())
 
-        if 'comparison' in dscfg:
+        if dscfg['dsetkind'] == 'unbinned_comparison':
             dset1 = build_dataset_from_dscfg(
                 dscfg['dataset1'],
                 all_same_objsyst,
@@ -219,6 +304,47 @@ def run_plots(cfg):
                 density=cfg.get('density', False),
                 override_filename=cfg.get('override_filenames', [None]*len(variables))[i],
                 extra_stuff=extra_stuff
+            )
+    elif cfg['driver'] == 'draw_radial_histogram':
+        if len(variables) != 1:
+            raise RuntimeError("draw_radial_histogram only supports exactly one variable")
+        if not isinstance(binning, PrebinnedBinning):
+            raise RuntimeError("draw_radial_histogram only supports prebinned binning")
+
+        if isinstance(cut, list):
+            if len(cut) != 1:
+                raise RuntimeError("draw_radial_histogram only supports exactly one cut")
+            radial_cut = cut[0]
+        else:
+            radial_cut = cut
+
+        override_filenames = cfg.get('override_filenames', [])
+
+        override_cbarlabels = cfg.get('override_cbarlabel', [])
+
+        extratexts = cfg.get('extratext', [])
+
+        for i, dataset in enumerate(datasets):
+            if not isinstance(radial_cut, PrebinnedOperationBase):
+                raise RuntimeError("draw_radial_histogram only supports prebinned cuts")
+
+            radial_override = override_filenames[i] if i < len(override_filenames) else None
+            cbarlabel = override_cbarlabels[i] if i < len(override_cbarlabels) else None
+            extratext = extratexts[i] if i < len(extratexts) else None
+
+            print(f"Plotting radial variable {variables[0].key} for dataset {dataset.key}")
+            splt.draw_radial_histogram(
+                variables[0],
+                radial_cut,
+                dataset,
+                binning,
+                extratext=extratext,
+                logc=cfg.get('logc', None),
+                sym=cfg.get('sym', None),
+                override_cbarlabel=cbarlabel,
+                output_folder=cfg['plotspath'],
+                output_prefix=cfg['plotsprefix'],
+                override_filename=radial_override,
             )
     else:
         raise NotImplementedError(f"Plotting driver {cfg['driver']} not implemented yet in this driver script!")
