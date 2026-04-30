@@ -12,6 +12,8 @@ from skimming.selections.PackedJetSelection import PackedJetSelection
 from typing import Any
 
 import os.path
+import hashlib
+import tempfile
 
 table_classes = {
     "AK4JetKinematicsTable": AK4JetKinematicsTable,
@@ -88,8 +90,23 @@ class TableDriver:
         if isinstance(result, dict):
             import json
             print("Dumping result as JSON")
-            with self._fs.open(destination + ".json", "w") as f:
-                json.dump(result, f, indent=4)
+            # Atomic write: temp file + rename
+            temp_dest = destination + ".tmp"
+            try:
+                with self._fs.open(temp_dest, "w") as f:
+                    json.dump(result, f, indent=4)
+                # Verify by reading back
+                with self._fs.open(temp_dest, "r") as f:
+                    _ = json.load(f)
+                print("JSON validation passed, moving to final destination")
+                self._fs.mv(temp_dest, destination + ".json")
+            except Exception as e:
+                print(f"ERROR writing/validating JSON for {table_obj.name}: {e}")
+                try:
+                    self._fs.rm(temp_dest)
+                except:
+                    pass
+                raise
         else:
             print(len(result), "rows")
             if len(result) == 0:
@@ -97,9 +114,39 @@ class TableDriver:
                 result = result.select([])  # create empty table with correct schema
             import pyarrow.parquet as pq
             print("Dumping result as Parquet")
-            with self._fs.open(destination + ".parquet", "wb") as f:
-                print("file opened...")
-                pq.write_table(result, f)
+            
+            # Atomic write: temp file + rename + validation
+            temp_dest = destination + ".tmp"
+            final_dest = destination + ".parquet"
+            try:
+                with self._fs.open(temp_dest, "wb") as f:
+                    pq.write_table(result, f)
+                    if hasattr(f, 'flush'):
+                        f.flush()
+                
+                # Validate by reading back the metadata
+                print("Validating written Parquet file...")
+                with self._fs.open(temp_dest, "rb") as f:
+                    pf = pq.ParquetFile(f)
+                    actual_rows = pf.metadata.num_rows
+                    if actual_rows != len(result):
+                        raise ValueError(
+                            f"Row count mismatch: wrote {len(result)} rows, "
+                            f"but read back {actual_rows} rows"
+                        )
+                    # Try to read a small sample to verify data integrity
+                    _ = pf.read_row_group(0)  # Read first row group
+                
+                print(f"Parquet validation passed ({actual_rows} rows), moving to final destination")
+                self._fs.mv(temp_dest, final_dest)
+                
+            except Exception as e:
+                print(f"ERROR writing/validating Parquet for {table_obj.name}: {e}")
+                try:
+                    self._fs.rm(temp_dest)
+                except:
+                    pass
+                raise
 
     def run_tables(self,
                    objs,

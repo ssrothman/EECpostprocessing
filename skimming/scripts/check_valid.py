@@ -13,6 +13,7 @@ import os
 import re
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, List, Sequence
 from tqdm import tqdm
 
@@ -46,7 +47,7 @@ def infer_output_path(workspace: str) -> tuple[Any, str, Sequence[str]]:
     full_output_path = os.path.join(basepath, output_path)
     return fs, full_output_path, tables
 
-def try_build_dataset(fs : Any, path: str, rm: bool = False) -> List[str]:
+def try_build_dataset(fs : Any, path: str, rm: bool = False, j: int = 1) -> List[str]:
     try:
         dset = ds.dataset(path, filesystem=fs, format="parquet")
         # force a scan of fragments to provoke errors
@@ -74,23 +75,46 @@ def try_build_dataset(fs : Any, path: str, rm: bool = False) -> List[str]:
         print(repr(e))
         raise
 
-    fails = []
+    def check_fragment(fragment_path: str) -> None:
+        # Read metadata to check structural validity.
+        pf = pq.ParquetFile(fragment_path, filesystem=fs)
+        _ = pf.metadata
 
+        # Try to read first row group to detect page-level corruption.
+        # Metadata can be valid even if data pages are corrupted.
+        _ = pf.read_row_group(0)
+
+    fails = []
     iterator = tqdm(fragments, desc="Checking parquet files", unit="file", total=len(fragments))
-    for frag in iterator:
-        try:
-            # attempt to open the fragment as a Parquet file to check for corruption
-            _ = pq.read_metadata(frag.path, filesystem=fs)
-            # Access metadata/schema to force reading footer
-        except Exception as e:
-            fails.append(frag.path)
-            iterator.set_postfix_str(f"Fails: {len(fails)}")
+
+    if len(fragments) == 0:
+        return fails
+
+    if j > 1:
+        with ThreadPoolExecutor(max_workers=j) as executor:
+            future_to_fragment = {executor.submit(check_fragment, frag.path): frag.path for frag in fragments}
+            for future in as_completed(future_to_fragment):
+                frag_path = future_to_fragment[future]
+                try:
+                    future.result()
+                except Exception:
+                    fails.append(frag_path)
+                iterator.update(1)
+                iterator.set_postfix_str(f"Fails: {len(fails)}")
+    else:
+        for frag in iterator:
+            try:
+                check_fragment(frag.path)
+            except Exception:
+                fails.append(frag.path)
+                iterator.set_postfix_str(f"Fails: {len(fails)}")
 
     return fails
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check parquet validity for a skimming workspace")
     parser.add_argument("workspace", nargs="?", default=".", help="Skimming workspace directory (default: current dir)")
+    parser.add_argument("-j", type=int, default=1, help="Parallel workers for parquet file validation (default: 1)")
     parser.add_argument('--rm', action='store_true', help="Remove bad parquet files in addition to just reporting them")
     
     # Stage missing options
@@ -148,7 +172,7 @@ def main() -> None:
             continue
         print(f"Checking table: {table}")
         table_path = os.path.join(out_path, table)
-        fails.extend(try_build_dataset(fs, table_path, rm=args.rm))
+        fails.extend(try_build_dataset(fs, table_path, rm=args.rm, j=args.j))
 
     if fails:
         print(f"FAILED: The following files failed to build:")

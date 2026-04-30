@@ -7,6 +7,7 @@ from general.fslookup.hist_lookup import get_hist_path, get_hist_bincfg_path
 from typing import Any
 import os.path
 import json
+import uuid
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 import pyarrow.dataset as ds
 import numpy as np
@@ -48,6 +49,7 @@ def run_table(args : Any, table: str):
     )
 
     H, prebinned = build_hist(thebinning)
+    print("Reading dataset from", skimpath)
     dataset = ds.dataset(skimpath, format='parquet', filesystem=fs)
 
     if table.endswith('transfer'):
@@ -100,8 +102,24 @@ def run_table(args : Any, table: str):
     )
 
     print("Writing result to", outpath)
-    with fs.open(outpath, 'wb') as f:
-        np.save(f, output)
+    tmp_outpath = f"{outpath}.tmp.{uuid.uuid4().hex}"
+    try:
+        with fs.open(tmp_outpath, 'wb') as f:
+            np.save(f, output)
+
+        # Validate by reading back from the temporary file.
+        with fs.open(tmp_outpath, 'rb') as f:
+            loaded_output = np.load(f, allow_pickle=False)
+        if loaded_output.shape != output.shape or loaded_output.dtype != output.dtype:
+            raise RuntimeError("Validation failed for temporary histogram output at %s" % tmp_outpath)
+
+        if fs.exists(outpath):
+            fs.rm(outpath)
+        fs.mv(tmp_outpath, outpath)
+    except Exception:
+        if fs.exists(tmp_outpath):
+            fs.rm(tmp_outpath)
+        raise
 
     _, bincfg_path = get_hist_bincfg_path(
         args.location,
@@ -122,5 +140,20 @@ def run_table(args : Any, table: str):
             raise RuntimeError("Binning config mismatch for existing bincfg at %s" % bincfg_path)
     else:
         print("Writing binning config to", bincfg_path)
-        with fs.open(bincfg_path, 'w') as f:
-            json.dump(ab.to_dict(), f, indent=4)
+        tmp_bincfg_path = f"{bincfg_path}.tmp.{uuid.uuid4().hex}"
+        bincfg_dict = ab.to_dict()
+        try:
+            with fs.open(tmp_bincfg_path, 'w') as f:
+                json.dump(bincfg_dict, f, indent=4)
+
+            # Validate by reading back from the temporary file.
+            with fs.open(tmp_bincfg_path, 'r') as f:
+                loaded_bincfg = json.load(f)
+            if loaded_bincfg != bincfg_dict:
+                raise RuntimeError("Validation failed for temporary bincfg output at %s" % tmp_bincfg_path)
+
+            fs.mv(tmp_bincfg_path, bincfg_path)
+        except Exception:
+            if fs.exists(tmp_bincfg_path):
+                fs.rm(tmp_bincfg_path)
+            raise

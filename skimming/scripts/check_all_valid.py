@@ -24,6 +24,7 @@ def run_one_workspace(workspace: str, rm: bool = False, stage_missing: bool = Fa
                       exec_flag: bool = False, keep_temp_check_files: bool = False) -> tuple[str, int, str, str]:
     script_path = os.path.join(os.path.dirname(__file__), "check_valid.py")
     cmd = [sys.executable, script_path, workspace]
+    cmd.extend(["-j", str(check_j)])
     if rm:
         cmd.append("--rm")
     if stage_missing:
@@ -87,7 +88,7 @@ def main() -> None:
         "--check-j",
         type=int,
         default=1,
-        help="Parallel workers for check_missing_files.py (default: 1)",
+        help="Parallel workers for check_valid.py (-j) and check_missing_files.py when staging (default: 1)",
     )
     parser.add_argument(
         "--target-files-from-workspace",
