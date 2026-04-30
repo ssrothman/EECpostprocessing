@@ -37,7 +37,7 @@ def location_lookup(location : str):
         fs = fsspec.filesystem('file')
     else:
         from fsspec_xrootd import XRootDFileSystem
-        fs = XRootDFileSystem(hostid, timeout=300) # long timeout to avoid issues with large / slow transfers. does this work ? lol
+        fs = XRootDFileSystem(hostid, timeout=500) # long timeout to avoid issues with large / slow transfers. does this work ? lol
     
     return fs, rootpath
 

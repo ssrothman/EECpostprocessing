@@ -4,6 +4,7 @@ def stage_via_condor(
     commands_per_job: int = 1,
     mem: str = "4G",
     cpus: int = 1,
+    commands_file: str = "commands.txt",
 ):
     import os
     import subprocess
@@ -15,7 +16,8 @@ def stage_via_condor(
     if commands_per_job <= 0:
         raise ValueError("commands_per_job must be > 0")
 
-    with open(os.path.join(working_dir, "commands.txt")) as f:
+    commands_path = os.path.join(working_dir, commands_file)
+    with open(commands_path) as f:
         ncommands = sum(1 for line in f if line.strip())
 
     njobs = max(1, (ncommands + commands_per_job - 1) // commands_per_job)
@@ -43,7 +45,8 @@ def stage_via_condor(
                 f"s|WORKINGDIR|{working_dir}|g; "
                 f"s|COMMANDS_PER_JOB|{commands_per_job}|g; "
                 f"s|NCOMMANDS|{ncommands}|g; "
-                f"s|NJOBS|{njobs}|g"
+                f"s|NJOBS|{njobs}|g; "
+                f"s|COMMANDS_FILE|{commands_file}|g"
             ),
             condor_submit_path,
         ],
@@ -56,7 +59,8 @@ def stage_via_condor(
             (
                 f"s|WORKINGDIR|{working_dir}|g; "
                 f"s|COMMANDS_PER_JOB|{commands_per_job}|g; "
-                f"s|NCOMMANDS|{ncommands}|g"
+                f"s|NCOMMANDS|{ncommands}|g; "
+                f"s|COMMANDS_FILE|{commands_file}|g"
             ),
             condor_exec_path,
         ],

@@ -26,7 +26,7 @@ for i in $(seq 0 $((COMMANDS_PER_JOB - 1))); do
 		continue
 	fi
 
-	command=$(sed -n "$((index + 1))p" commands.txt)
+	command=$(sed -n "$((index + 1))p" COMMANDS_FILE)
 	echo "Running command index $index: $command"
 	/bin/bash -lc "$command"
 done

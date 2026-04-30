@@ -1,6 +1,7 @@
 #!/usr/bin/env -S python
 
 import argparse
+import numpy as np
 
 parser = argparse.ArgumentParser(description='Build histogram outputs for one or more tables.')
 
@@ -31,6 +32,8 @@ parser.add_argument('--cov', action='store_true', help='Covariance computation')
 
 parser.add_argument('--nocheck', action='store_true', help='Skip checks for existing output')
 
+parser.add_argument('--justcheck', action='store_true', help='Just check for existing output, do not run anything')
+parser.add_argument('--validate-existing', action='store_true', help='Validate existing output (does nothing if --nocheck is specified)')
 args = parser.parse_args()
 
 if args.table is not None and args.tables is not None:
@@ -60,13 +63,33 @@ if not args.nocheck:
             args.statN,
             args.statK
         )
+        print("looking for", path)
         if fs.exists(path):
-            print("Output already exists for table %s at %s, skipping (use --nocheck to override)" % (table, path))
-            continue
+            if args.validate_existing:
+                with fs.open(path, 'rb') as f:
+                    try:
+                        _ = np.load(f)
+                        print("Output already exists for table %s at %s, skipping (use --nocheck to override)" % (table, path))
+                        continue
+                    except Exception as e:
+                        print("Error occurred while loading existing output for table %s at %s: %s" % (table, path, str(e)))
+            
+            else:
+                print("Output already exists for table %s at %s, skipping (use --nocheck to override)" % (table, path))
+                continue
         else:
             tables_to_run.append(table)
 else:
     tables_to_run = tables
+
+if args.justcheck:
+    if len(tables_to_run) == 0:
+        exit(0)
+    else:
+        print("Tables that need to be run:")
+        for table in tables_to_run:
+            print(table)
+        exit(1)
 
 for table in tables_to_run:
     print("Processing table", table)

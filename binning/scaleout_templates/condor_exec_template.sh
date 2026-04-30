@@ -18,5 +18,5 @@ for i in $(seq 0 $((COMMANDS_PER_JOB - 1))); do
         echo "Index $index exceeds total commands NCOMMANDS, skipping."
         continue
     fi
-    python binscript.py $index
+    python binscript.py --commands-file COMMANDS_FILE $index
 done
