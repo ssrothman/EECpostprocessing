@@ -47,7 +47,7 @@ def infer_output_path(workspace: str) -> tuple[Any, str, Sequence[str]]:
     full_output_path = os.path.join(basepath, output_path)
     return fs, full_output_path, tables
 
-def try_build_dataset(fs : Any, path: str, rm: bool = False, j: int = 1) -> List[str]:
+def try_build_dataset(fs : Any, path: str, rm: bool = False, j: int = 1, read_mode: str = "full") -> List[str]:
     try:
         dset = ds.dataset(path, filesystem=fs, format="parquet")
         # force a scan of fragments to provoke errors
@@ -79,14 +79,20 @@ def try_build_dataset(fs : Any, path: str, rm: bool = False, j: int = 1) -> List
         # Read metadata to check structural validity.
         pf = pq.ParquetFile(fragment_path, filesystem=fs)
         _ = pf.metadata
-
-        # Try to read first row group to detect page-level corruption.
+        # Read according to requested mode.
         # Metadata can be valid even if data pages are corrupted.
-        #_ = pf.read_row_group(0)
-        _ = pq.read_table(fragment_path, filesystem=fs)
+        if read_mode == "metadata-only":
+            return
+        if read_mode == "first-row-group":
+            # Try to read only the first row group
+            _ = pf.read_row_group(0)
+        else:
+            # Default: full table read to surface deeper corruption
+            _ = pq.read_table(fragment_path, filesystem=fs)
 
     fails = []
     iterator = tqdm(fragments, desc="Checking parquet files", unit="file", total=len(fragments))
+    iterator.set_postfix_str(f"Fails: {len(fails)}")
 
     if len(fragments) == 0:
         return fails
@@ -110,6 +116,8 @@ def try_build_dataset(fs : Any, path: str, rm: bool = False, j: int = 1) -> List
                 fails.append(frag.path)
                 iterator.set_postfix_str(f"Fails: {len(fails)}")
 
+    iterator.close()
+
     return fails
 
 def main() -> None:
@@ -117,6 +125,27 @@ def main() -> None:
     parser.add_argument("workspace", nargs="?", default=".", help="Skimming workspace directory (default: current dir)")
     parser.add_argument("-j", type=int, default=1, help="Parallel workers for parquet file validation (default: 1)")
     parser.add_argument('--rm', action='store_true', help="Remove bad parquet files in addition to just reporting them")
+    parser.add_argument(
+        "--tables",
+        nargs="+",
+        help="Specify one or more table names to check (overrides workspace config tables)",
+    )
+    read_group = parser.add_mutually_exclusive_group()
+    read_group.add_argument(
+        "--full-read",
+        action="store_true",
+        help="Perform a full table read for each parquet fragment (default)",
+    )
+    read_group.add_argument(
+        "--read-first-row-group",
+        action="store_true",
+        help="Read only the first row group of each parquet fragment (faster)",
+    )
+    read_group.add_argument(
+        "--metadata-only",
+        action="store_true",
+        help="Only inspect parquet metadata without reading row groups or full tables",
+    )
     
     # Stage missing options
     parser.add_argument('--stage-missing', action='store_true', help="After validation, stage missing files using stage_missing.py")
@@ -166,6 +195,22 @@ def main() -> None:
 
     fs, out_path, tables = infer_output_path(workspace)
 
+    # If the user provided table names on the CLI, prefer those over workspace config
+    if args.tables:
+        # support comma-separated single argument as well
+        if len(args.tables) == 1 and "," in args.tables[0]:
+            tables = [t.strip() for t in args.tables[0].split(",") if t.strip()]
+        else:
+            tables = args.tables
+
+    # Determine read mode
+    if args.read_first_row_group:
+        read_mode = "first-row-group"
+    elif args.metadata_only:
+        read_mode = "metadata-only"
+    else:
+        read_mode = "full"
+
     fails = []
 
     for table in tables:
@@ -173,7 +218,7 @@ def main() -> None:
             continue
         print(f"Checking table: {table}")
         table_path = os.path.join(out_path, table)
-        fails.extend(try_build_dataset(fs, table_path, rm=args.rm, j=args.j))
+        fails.extend(try_build_dataset(fs, table_path, rm=args.rm, j=args.j, read_mode=read_mode))
 
     if fails:
         print(f"FAILED: The following files failed to build:")

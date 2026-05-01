@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 import argparse
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 import json
 import subprocess
@@ -76,9 +76,10 @@ def main() -> int:
 
     failures = []
     incomplete_count = 0
-    with ProcessPoolExecutor(max_workers=args.jobs) as executor:
+    with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = {executor.submit(check_one_workspace, subpath): subpath for subpath in to_do}
         progress = tqdm(as_completed(futures), total=len(futures))
+        progress.set_postfix(incomplete=incomplete_count)
         for future in progress:
             subpath, stdout, exitcode = future.result()
             if exitcode != 0:
@@ -89,6 +90,7 @@ def main() -> int:
                     print(stdout)
 
             progress.set_postfix(incomplete=incomplete_count)
+        progress.close()
 
     if failures:
         print("Incomplete workspaces:")

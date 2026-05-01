@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 import random
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
 
@@ -158,7 +158,7 @@ def main() -> None:
     max_workers = max(1, args.j)
     failures = []
     results = []
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_workspace = {
             executor.submit(
                 run_one_workspace, 

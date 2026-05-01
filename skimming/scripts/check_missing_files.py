@@ -4,7 +4,7 @@ import argparse
 import os.path
 import json
 import fcntl
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from tqdm import tqdm
 
@@ -115,7 +115,7 @@ def check_one_table(table) -> tuple[set[str], set[str]]:
     missing_files = set()
 
     max_workers = max(1, args.j)
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_target_file = {executor.submit(get_expected_name, target_file, hostid, uniqueid_cache): target_file for target_file in target_files}
         for future in tqdm(as_completed(future_to_target_file), total=len(target_files)):
             target_file, expected_name, computed_uniqueid = future.result()

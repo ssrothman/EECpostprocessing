@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 import shlex
+import sys
 from collections import defaultdict
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -36,6 +37,31 @@ def iter_log_pairs(slurm_dir: Path) -> Iterable[tuple[Path, Path]]:
     for out_path in sorted(slurm_dir.glob("*.out")):
         err_path = out_path.with_suffix(".err")
         yield out_path, err_path
+
+
+def iter_condor_logs(condor_dir: Path) -> Iterable[tuple[Path, Optional[Path]]]:
+    # Condor produces three files per job: *.log (submission/meta), *.out (stdout), *.err (stderr).
+    # If a job never ran, *.out and *.err will not exist; skip those entries since they can't
+    # be used to detect corruption.
+    for log in sorted(condor_dir.glob("*.log")):
+        stem = log.stem
+        out_path = condor_dir / f"{stem}.out"
+        err_path = condor_dir / f"{stem}.err"
+        if not out_path.exists() and not err_path.exists():
+            # job never ran or still pending
+            continue
+
+        if out_path.exists():
+            yield out_path, (err_path if err_path.exists() else None)
+        else:
+            # Out missing but err present
+            yield err_path, None
+
+
+def iter_local_logs(local_dir: Path) -> Iterable[tuple[Path, Optional[Path]]]:
+    # Local runs typically write combined logs under a logs/ directory as command_*.log
+    for log in sorted(local_dir.glob("command_*.log")):
+        yield log, None
 
 
 def parse_command_context(command_line: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
@@ -97,16 +123,27 @@ def summarize_error(text: str, limit: int = 6) -> str:
     return " | ".join(lines[-limit:])
 
 
-def parse_workspace_logs(workspace: Path, slurm_dir_name: str) -> list[CorruptionFinding]:
-    slurm_dir = workspace / slurm_dir_name
-    if not slurm_dir.exists():
-        raise FileNotFoundError(f"SLURM log directory not found: {slurm_dir}")
+def parse_workspace_logs(workspace: Path, mode: str, dir_name: str) -> list[CorruptionFinding]:
+    log_dir = workspace / dir_name
+    if not log_dir.exists():
+        raise FileNotFoundError(f"Log directory not found: {log_dir}")
 
     findings: list[CorruptionFinding] = []
 
-    for out_path, err_path in iter_log_pairs(slurm_dir):
+    if mode == "slurm":
+        iterator = iter_log_pairs(log_dir)
+    elif mode == "condor":
+        iterator = iter_condor_logs(log_dir)
+    elif mode == "local":
+        iterator = iter_local_logs(log_dir)
+    else:
+        raise ValueError(f"Unknown mode: {mode}")
+
+    for out_path, err_path in iterator:
         out_text = out_path.read_text(errors="replace")
-        err_text = err_path.read_text(errors="replace") if err_path.exists() else ""
+        err_text = ""
+        if err_path is not None and err_path.exists():
+            err_text = err_path.read_text(errors="replace")
         combined_text = f"{out_text}\n{err_text}"
         matched_patterns = detect_corruption(combined_text)
         if not matched_patterns:
@@ -115,7 +152,8 @@ def parse_workspace_logs(workspace: Path, slurm_dir_name: str) -> list[Corruptio
         command_blocks: list[tuple[Optional[int], str]] = []
         current_command_index = None
 
-        for line in out_text.splitlines():
+        # command lines may appear in combined logs; search combined text
+        for line in combined_text.splitlines():
             match = RUN_COMMAND_RE.match(line)
             if match is not None:
                 current_command_index = int(match.group("index"))
@@ -137,7 +175,7 @@ def parse_workspace_logs(workspace: Path, slurm_dir_name: str) -> list[Corruptio
                     break
 
         if dataset is None or objsyst is None or table is None:
-            for line in out_text.splitlines():
+            for line in combined_text.splitlines():
                 match = READING_DATASET_RE.match(line)
                 if match is not None:
                     dataset, objsyst, table = extract_context_from_path(match.group("path"))
@@ -168,30 +206,72 @@ def parse_workspace_logs(workspace: Path, slurm_dir_name: str) -> list[Corruptio
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Scan a binning workspace's SLURM logs for datasets with corrupted input files."
+        description="Scan a binning workspace's logs for datasets with corrupted input files."
     )
     parser.add_argument(
         "workspace",
         type=Path,
         help="Path to the binning workspace containing the slurm/ directory",
     )
+    parser.add_argument("--slurm", action="store_true", help="Parse SLURM-style logs")
+    parser.add_argument("--condor", action="store_true", help="Parse Condor-style logs")
+    parser.add_argument("--local", action="store_true", help="Parse local combined logs")
+
     parser.add_argument(
         "--slurm-dir",
         default="slurm",
         help="Name of the directory containing SLURM logs (default: slurm)",
     )
     parser.add_argument(
+        "--condor-dir",
+        default="condor",
+        help="Name of the directory containing Condor logs (default: condor)",
+    )
+    parser.add_argument(
+        "--local-dir",
+        default="logs",
+        help="Name of the directory containing local combined logs (default: logs)",
+    )
+    json_short_group = parser.add_mutually_exclusive_group()
+    json_short_group.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON instead of a human summary",
     )
+    json_short_group.add_argument(
+        "--short",
+        action="store_true",
+        help="Print sorted list of (dataset, objsyst, table) triples and exit",
+    )
     args = parser.parse_args()
 
-    findings = parse_workspace_logs(args.workspace, args.slurm_dir)
+    selected_modes: list[tuple[str, str]] = []
+    if args.slurm:
+        selected_modes.append(("slurm", args.slurm_dir))
+    if args.condor:
+        selected_modes.append(("condor", args.condor_dir))
+    if args.local:
+        selected_modes.append(("local", args.local_dir))
+
+    if not selected_modes:
+        raise ValueError("At least one log type must be selected: --slurm, --condor, or --local")
+
+    findings: list[CorruptionFinding] = []
+    for mode, dir_name in selected_modes:
+        try:
+            findings.extend(parse_workspace_logs(args.workspace, mode, dir_name))
+        except FileNotFoundError:
+            print(f"Warning: log directory not found for mode {mode}: {args.workspace / dir_name}", file=sys.stderr)
+            continue
 
     by_triple: dict[tuple[str, str, str], list[CorruptionFinding]] = defaultdict(list)
     for finding in findings:
         by_triple[(finding.dataset, finding.objsyst, finding.table)].append(finding)
+
+    if args.short:
+        for dataset, objsyst, table in sorted(by_triple):
+            print(f"({dataset}, {objsyst}, {table})")
+        return 0
 
     if args.json:
         print(

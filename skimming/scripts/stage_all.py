@@ -4,7 +4,7 @@ import argparse
 import os
 import subprocess
 import sys
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser(
@@ -155,7 +155,7 @@ def main() -> None:
     max_workers = max(1, args.j)
     failures = []
     submitted_jobs = []
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_workspace = {executor.submit(run_one_workspace, ws, scheduler): ws for ws in workspaces}
         for future in tqdm(as_completed(future_to_workspace), total=len(future_to_workspace)):
             workspace = future_to_workspace[future]

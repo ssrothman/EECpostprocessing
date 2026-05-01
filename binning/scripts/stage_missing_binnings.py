@@ -16,7 +16,7 @@ import glob
 import os
 import shlex
 import subprocess
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
 def read_commands(path):
@@ -142,7 +142,7 @@ def main():
     jobs = args.jobs or (os.cpu_count() or 4)
 
     results = []
-    with ProcessPoolExecutor(max_workers=jobs) as ex:
+    with ThreadPoolExecutor(max_workers=jobs) as ex:
         futs = {ex.submit(check_one_command, cmd): cmd for cmd in cmds}
         iterator = tqdm(as_completed(futs), total=len(futs), desc="Checking commands")
         for fut in iterator:
@@ -154,6 +154,7 @@ def main():
                 rc = 2
                 out = str(e)
             results.append((original_cmd, rc, out))
+        iterator.close()
 
     missing_commands = []
     all_missing_tables = []
