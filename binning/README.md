@@ -122,6 +122,7 @@ Run/stage with:
 - `binning/scripts/run_binning_workspace_local.py`
 - `binning/scripts/stage_binning_to_slurm.py`
 - `binning/scripts/stage_binning_to_condor.py`
+- `binning/scripts/find_corrupted_binning_datasets.py` to scan `slurm/` logs for corrupted input files
 
 When running locally, each command writes combined stdout/stderr to `logs/command_<index>.log` inside the workspace.
 

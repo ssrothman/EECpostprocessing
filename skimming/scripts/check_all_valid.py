@@ -17,7 +17,6 @@ def is_workspace(path: str) -> bool:
         and os.path.exists(os.path.join(path, "target_files.txt"))
     )
 
-
 def run_one_workspace(workspace: str, rm: bool = False, stage_missing: bool = False, 
                       files_per_job: int = 1, mem: str = "4gb", check_j: int = 1,
                       target_files_from_workspace: bool = False, scheduler: str = "slurm",

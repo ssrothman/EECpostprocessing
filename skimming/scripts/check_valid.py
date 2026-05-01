@@ -82,7 +82,8 @@ def try_build_dataset(fs : Any, path: str, rm: bool = False, j: int = 1) -> List
 
         # Try to read first row group to detect page-level corruption.
         # Metadata can be valid even if data pages are corrupted.
-        _ = pf.read_row_group(0)
+        #_ = pf.read_row_group(0)
+        _ = pq.read_table(fragment_path, filesystem=fs)
 
     fails = []
     iterator = tqdm(fragments, desc="Checking parquet files", unit="file", total=len(fragments))
