@@ -126,6 +126,8 @@ def run_table(args : Any, table: str):
         finalcheck = checksum_file(outpath, fs)
 
         if tmpcheck != finalcheck:
+            print("tmp checksum:", tmpcheck)
+            print("final checksum:", finalcheck)
             raise RuntimeError("Validation failed for histogram output after copying to final location at %s" % outpath)
         
         fs.rm(tmp_outpath)

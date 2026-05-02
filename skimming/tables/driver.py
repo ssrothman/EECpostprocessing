@@ -172,6 +172,8 @@ class TableDriver:
                 finalcheck = checksum_file(final_dest, self._fs)
 
                 if tmpcheck != finalcheck:
+                    print("tmp checksum:", tmpcheck)
+                    print("final checksum:", finalcheck)
                     raise ValueError("Checksum mismatch after copying to final destination")
                 
                 # cleanup temp file
