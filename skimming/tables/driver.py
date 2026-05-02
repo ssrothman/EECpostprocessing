@@ -90,8 +90,9 @@ class TableDriver:
         if isinstance(result, dict):
             import json
             print("Dumping result as JSON")
-            # Atomic write: temp file + rename
+            # Atomic write: temp file + copy + validation
             temp_dest = destination + ".tmp"
+            final_dest = destination + ".json"
             try:
                 with self._fs.open(temp_dest, "w") as f:
                     json.dump(result, f, indent=4)
@@ -99,7 +100,24 @@ class TableDriver:
                 with self._fs.open(temp_dest, "r") as f:
                     _ = json.load(f)
                 print("JSON validation passed, moving to final destination")
-                self._fs.mv(temp_dest, destination + ".json")
+                
+                # mv is not supported on all filesystems, so we do a copy + delete
+                with self._fs.open(temp_dest, "r") as src:
+                    with self._fs.open(final_dest, "w") as dst:
+                        dst.write(src.read())
+                        if hasattr(dst, 'flush'):
+                            dst.flush()
+                
+                # validate after copying to final destination
+                # use checksums
+                tmpcheck = self._fs.checksum(temp_dest)
+                finalcheck = self._fs.checksum(final_dest)
+                if tmpcheck != finalcheck:
+                    raise ValueError("Checksum mismatch after copying JSON to final destination")
+                
+                # cleanup temp file
+                self._fs.rm(temp_dest)
+
             except Exception as e:
                 print(f"ERROR writing/validating JSON for {table_obj.name}: {e}")
                 try:
@@ -120,6 +138,7 @@ class TableDriver:
             final_dest = destination + ".parquet"
             try:
                 with self._fs.open(temp_dest, "wb") as f:
+                    print("Writing Parquet file to temporary location:", temp_dest)
                     pq.write_table(result, f)
                     if hasattr(f, 'flush'):
                         f.flush()
@@ -134,12 +153,38 @@ class TableDriver:
                             f"Row count mismatch: wrote {len(result)} rows, "
                             f"but read back {actual_rows} rows"
                         )
-                    # Try to read a small sample to verify data integrity
-                    _ = pf.read_row_group(0)  # Read first row group
+                    # Try to read the file to ensure it's not corrupted
+                    _ = pf.read()  
                 
                 print(f"Parquet validation passed ({actual_rows} rows), moving to final destination")
-                self._fs.mv(temp_dest, final_dest)
+
+                # mv is not supported on all filesystems, so we do a copy + delete
+                with self._fs.open(temp_dest, "rb") as src:
+                    with self._fs.open(final_dest, "wb") as dst:
+                        dst.write(src.read())
+                        if hasattr(dst, 'flush'):
+                            dst.flush()
+
+                # validate again after copying to final destination
+                # use checksums
+                import fsspec.implementations.local
+                from simonpy.checksum import checksum_file
+                if isinstance(self._fs, fsspec.implementations.local.LocalFileSystem):
+                    # default fsspec checksum implementation is not an actual checksum
+                    # so we compute our own
+                    tmpcheck = checksum_file(temp_dest)
+                    finalcheck = checksum_file(final_dest)
+                else:
+                    #xrootd filesystem has a genuine checksum implementation, so we can use that
+                    tmpcheck = self._fs.checksum(temp_dest)
+                    finalcheck = self._fs.checksum(final_dest)
+
+                if tmpcheck != finalcheck:
+                    raise ValueError("Checksum mismatch after copying to final destination")
                 
+                # cleanup temp file
+                self._fs.rm(temp_dest)
+
             except Exception as e:
                 print(f"ERROR writing/validating Parquet for {table_obj.name}: {e}")
                 try:

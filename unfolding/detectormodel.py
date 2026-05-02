@@ -16,7 +16,12 @@ from unfolding.io import read_hist
 def hist_from_syst(spec : systspec, updn : str | None) -> whichsystspec:
     thename = spec['name']
     if updn is not None:
-        thename += updn
+        if spec['isobjsyst']:
+            if 'DOWN' in updn.upper():
+                updn = 'DN'
+            thename += '_' + updn.upper()
+        else:
+            thename += updn
     
     if spec['isobjsyst']:
         return {

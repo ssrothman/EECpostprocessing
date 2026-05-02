@@ -113,9 +113,27 @@ def run_table(args : Any, table: str):
         if loaded_output.shape != output.shape or loaded_output.dtype != output.dtype:
             raise RuntimeError("Validation failed for temporary histogram output at %s" % tmp_outpath)
 
-        if fs.exists(outpath):
-            fs.rm(outpath)
-        fs.mv(tmp_outpath, outpath)
+        # Copy to final location (xrootd-compatible alternative to mv)
+        with fs.open(tmp_outpath, 'rb') as src:
+            with fs.open(outpath, 'wb') as dst:
+                dst.write(src.read())
+        
+        # validate again after copying to final location
+        import fsspec.implementations.local
+        from simonpy.checksum import checksum_file
+        if isinstance(fs, fsspec.implementations.local.LocalFileSystem):
+            # default fsspec checksum implementation is not an actual checksum
+            # so we compute our own
+            tmpcheck = checksum_file(tmp_outpath)
+            finalcheck = checksum_file(outpath)
+        else:
+            #xrootd filesystem has a genuine checksum implementation, so we can use that
+            tmpcheck = fs.checksum(tmp_outpath)
+            finalcheck = fs.checksum(outpath)
+        if tmpcheck != finalcheck:
+            raise RuntimeError("Validation failed for histogram output after copying to final location at %s" % outpath)
+        
+        fs.rm(tmp_outpath)
     except Exception:
         if fs.exists(tmp_outpath):
             fs.rm(tmp_outpath)
@@ -152,7 +170,19 @@ def run_table(args : Any, table: str):
             if loaded_bincfg != bincfg_dict:
                 raise RuntimeError("Validation failed for temporary bincfg output at %s" % tmp_bincfg_path)
 
-            fs.mv(tmp_bincfg_path, bincfg_path)
+            # Copy to final location (xrootd-compatible alternative to mv)
+            with fs.open(tmp_bincfg_path, 'r') as src:
+                with fs.open(bincfg_path, 'w') as dst:
+                    dst.write(src.read()) # type: ignore
+
+            # validate again after copying
+            with fs.open(bincfg_path, 'r') as f:
+                loaded_bincfg = json.load(f)
+            if loaded_bincfg != bincfg_dict:
+                raise RuntimeError("Validation failed for bincfg after copying to final location at %s" % bincfg_path)
+            
+            fs.rm(tmp_bincfg_path)
+
         except Exception:
             if fs.exists(tmp_bincfg_path):
                 fs.rm(tmp_bincfg_path)

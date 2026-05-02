@@ -13,7 +13,7 @@ max_idle                  = 100
 x509userproxy             = /home/submit/srothman/myticket
 +AccountingGroup          = "analysis.srothman"
 +JobFlavour               = "espresso"
-+SingularityImage         = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask-almalinux9:2025.12.0-py3.12"
++SingularityImage         = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask-almalinux9:2026.4.0-py3.12"
 Transfer_Input_Files      = "binscript.py,COMMANDS_FILE"
 Transfer_Output_Files     = ""
 Requirements              = ( BOSCOCluster =!= "t3serv008.mit.edu" && BOSCOCluster =!= "ce03.cmsaf.mit.edu" && BOSCOCluster =!= "eofe8.mit.edu")
