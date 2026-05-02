@@ -121,15 +121,10 @@ def run_table(args : Any, table: str):
         # validate again after copying to final location
         import fsspec.implementations.local
         from simonpy.checksum import checksum_file
-        if isinstance(fs, fsspec.implementations.local.LocalFileSystem):
-            # default fsspec checksum implementation is not an actual checksum
-            # so we compute our own
-            tmpcheck = checksum_file(tmp_outpath)
-            finalcheck = checksum_file(outpath)
-        else:
-            #xrootd filesystem has a genuine checksum implementation, so we can use that
-            tmpcheck = fs.checksum(tmp_outpath)
-            finalcheck = fs.checksum(outpath)
+
+        tmpcheck = checksum_file(tmp_outpath, fs)
+        finalcheck = checksum_file(outpath, fs)
+
         if tmpcheck != finalcheck:
             raise RuntimeError("Validation failed for histogram output after copying to final location at %s" % outpath)
         

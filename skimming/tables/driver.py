@@ -167,17 +167,9 @@ class TableDriver:
 
                 # validate again after copying to final destination
                 # use checksums
-                import fsspec.implementations.local
                 from simonpy.checksum import checksum_file
-                if isinstance(self._fs, fsspec.implementations.local.LocalFileSystem):
-                    # default fsspec checksum implementation is not an actual checksum
-                    # so we compute our own
-                    tmpcheck = checksum_file(temp_dest)
-                    finalcheck = checksum_file(final_dest)
-                else:
-                    #xrootd filesystem has a genuine checksum implementation, so we can use that
-                    tmpcheck = self._fs.checksum(temp_dest)
-                    finalcheck = self._fs.checksum(final_dest)
+                tmpcheck = checksum_file(temp_dest, self._fs)
+                finalcheck = checksum_file(final_dest, self._fs)
 
                 if tmpcheck != finalcheck:
                     raise ValueError("Checksum mismatch after copying to final destination")
