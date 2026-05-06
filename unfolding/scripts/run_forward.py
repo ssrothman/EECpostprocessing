@@ -66,6 +66,12 @@ def main() -> None:
         default=12345,
         help="Random seed for bootstrap sampling (default: 12345)",
     )
+    parser.add_argument(
+        '--device', 
+        type=str,
+        default='cpu',
+        help="Device to run the computation on (default: cpu)"
+    )
     args = parser.parse_args()
 
     gen_dir = Path(args.gen_path).expanduser().resolve()
@@ -85,7 +91,7 @@ def main() -> None:
     model = DetectorModel.from_disk(str(model_dir))
     nuisances = _load_nuisances(nuisances_path, model.nSyst)
 
-    fwd = forward_hist(gen, nuisances, model, nboot=args.nboot, seed=args.seed)
+    fwd = forward_hist(gen, nuisances, model, nboot=args.nboot, seed=args.seed, device=args.device)
     fwd.dump_to_disk(str(output_dir))
 
     print(f"Saved forward histogram to: {output_dir}")

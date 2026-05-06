@@ -17,21 +17,24 @@ def _ensure_device(array, device : str):
         else:
             pass #already torch
 
-        array.to(device)
+        array = array.to(device)
 
     return array
 
 
-def forward_values(gen : Histogram, nuisances : np.ndarray | torch.Tensor, model : DetectorModelProtocol):
-    gen.to(model.device)
-    nuisances = _ensure_device(nuisances, model.device)
-    
-    return model.forward(gen.values, nuisances) # type: ignore
+def forward_values(gen : Histogram, nuisances : np.ndarray | torch.Tensor, model : DetectorModelProtocol, device : str):
+    gen.to(device)
+    model.to(device)
+    nuisances = _ensure_device(nuisances, device)
+
+    result = model.forward(gen.values, nuisances) # type: ignore
+    if isinstance(result, torch.Tensor):
+        result = result.cpu().numpy()
+
+    return result
 
 def bootstrap_forward_cov(gen : Histogram, nuisances : np.ndarray | torch.Tensor, model : DetectorModelProtocol,
-                          nboot : int, seed : int | None):
-    gen.to(model.device)
-    nuisances = _ensure_device(nuisances, model.device)
+                          nboot : int, seed : int | None, device : str):
 
     vals0 = gen.values
     nuisances0 = nuisances
@@ -54,33 +57,33 @@ def bootstrap_forward_cov(gen : Histogram, nuisances : np.ndarray | torch.Tensor
 
     # check that gen.L is reasonable
     test = gen.L @ gen.L.T
-    print("gen.L @ gen.L.T:", test.sum())
-    print("gen.cov:", gen.covmat.sum())
 
     vals_boot = multivariate_gaussian_rvs(vals0, gen.L, nboot) # shape (nboot, ngen)
     I = np.eye(nuisances0.shape[0])
     nuisances_boot = multivariate_gaussian_rvs(nuisances0, I, nboot) # shape (nboot, nnuis)
 
-    print("Sampled gen values and nuisances")
     print(vals_boot.shape)
     print(nuisances_boot.shape)
 
-    fwd_nominal = forward_values(gen, nuisances, model)
+    fwd_nominal = forward_values(gen, nuisances, model, device)
+    fwd_nominal = _ensure_device(fwd_nominal, device)
 
     fwd = np.empty((nboot, fwd_nominal.shape[0]), dtype=np.float32)
+
+    fwd = _ensure_device(fwd, device)
+    vals_boot = _ensure_device(vals_boot, device)
+    nuisances_boot = _ensure_device(nuisances_boot, device)
+    model.to(device)
+
     for i in tqdm(range(nboot)):
         fwd[i, :] = model.forward(vals_boot[i], nuisances_boot[i])
 
-    if isinstance(fwd, torch.Tensor):
-        fwd = fwd.cpu().numpy()
-
-    print("Ran batched forward??")
-    print(fwd.shape)
-
     fwd_diff = fwd - fwd_nominal[None, :] # shape (nboot, nfwd)
     cov_fwd = fwd_diff.T @ fwd_diff / (nboot - 1) # shape (nfwd, nfwd)
-    print(cov_fwd.shape)
-    print("cov_fwd.sum():", cov_fwd.sum())
+
+    if isinstance(cov_fwd, torch.Tensor):
+        cov_fwd = cov_fwd.cpu().numpy()
+
     return cov_fwd
 
 def hessian_forward_cov(gen : Histogram, nuisances : np.ndarray | torch.Tensor, model : DetectorModelProtocol):
@@ -99,10 +102,10 @@ def hessian_forward_cov(gen : Histogram, nuisances : np.ndarray | torch.Tensor, 
     return np.zeros((gen.values.shape[0], gen.values.shape[0]))
 
 def forward_hist(gen : Histogram, nuisances : np.ndarray | torch.Tensor, model : DetectorModelProtocol,
-                 nboot : int, seed : int) -> Histogram:
+                 nboot : int, seed : int, device : str) -> Histogram:
     
     print("Forward hist")
-    covmat = bootstrap_forward_cov(gen, nuisances, model, nboot, seed)
-    values = forward_values(gen, nuisances, model)
+    covmat = bootstrap_forward_cov(gen, nuisances, model, nboot, seed, device)
+    values = forward_values(gen, nuisances, model, device)
 
     return Histogram(values, covmat, gen.binning)

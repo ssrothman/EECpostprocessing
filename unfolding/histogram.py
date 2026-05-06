@@ -1,9 +1,6 @@
-from codecs import lookup
-
-import torch
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse, smart_sqrt
-from typing import Literal, TypedDict
+from typing import Any, Literal, Sequence, TypedDict
 import numpy as np
 import os
 import json
@@ -59,11 +56,10 @@ class Histogram:
             assert self._eigvecs.shape[0] == self._covmat.shape[0]
             assert self._eigvecs.shape[1] == self._covmat.shape[1]
 
-    def _as_numpy(self, values: np.ndarray | torch.Tensor) -> np.ndarray:
+    def _as_numpy(self, values) -> np.ndarray:
         if isinstance(values, np.ndarray):
             return values
 
-        assert isinstance(values, torch.Tensor)
         return values.detach().cpu().numpy()
 
     def imult(self, w : float) -> "Histogram":
@@ -116,33 +112,47 @@ class Histogram:
         self._L, self._Linv = smart_sqrt(self._covmat)
 
     @property
-    def values(self) -> np.ndarray | torch.Tensor:
+    def values(self) -> Any:
         return self._values 
     
     @property
-    def covmat(self) -> np.ndarray | torch.Tensor:
+    def covmat(self) -> Any:
         return self._covmat
     
     @property
-    def invcov(self) -> np.ndarray | torch.Tensor:
+    def invcov(self) -> Any:
         if self._invcov is None:
             self.compute_invcov()
         assert self._invcov is not None, "This should be impossible!"
         return self._invcov
     
     @property
-    def L(self) -> np.ndarray | torch.Tensor:
+    def L(self) -> np.ndarray:
         if self._L is None:
             self.compute_sqrt()
         assert self._L is not None, "This should be impossible!"
         return self._L
     
     @property
-    def Linv(self) -> np.ndarray | torch.Tensor:
+    def Linv(self) -> np.ndarray:
         if self._Linv is None:
             self.compute_sqrt()
         assert self._Linv is not None, "This should be impossible!"
         return self._Linv
+
+    @property
+    def eigvals(self) -> np.ndarray:
+        if self._eigvals is None:
+            self.compute_invcov()
+        assert self._eigvals is not None, "This should be impossible!"
+        return self._eigvals
+
+    @property
+    def eigvecs(self) -> np.ndarray:
+        if self._eigvecs is None:
+            self.compute_invcov()
+        assert self._eigvecs is not None, "This should be impossible!"
+        return self._eigvecs
 
     @property
     def binning(self) -> ArbitraryBinning:
@@ -216,6 +226,65 @@ class Histogram:
         if self._eigvecs is not None:
             with open(os.path.join(where, 'eigvecs.npy'), 'wb') as f:
                 np.save(f, self._eigvecs)
+
+    @classmethod
+    def compare(
+        cls,
+        hist_l : Sequence['Histogram'],
+        labels_l : Sequence[str],
+        output_folder : str | None = None,
+        extratext : str | None = None
+    ) -> None:
+        
+        variable = BasicPrebinnedVariable()
+        cut = NoopOperation()
+        weight = ConstantVariable(1.0)
+        binning = PrebinnedBinning()
+
+        val_datasets_l = []
+        err_datasets_l = []
+        for i, hist in enumerate(hist_l):
+            val_datasets_l.append(ValCovPairDataset(
+                key=f'hist_{i}',
+                color=None,
+                label=labels_l[i],
+                data=(hist.values, hist.covmat),
+                binning=hist._binning,
+                isMC=True,
+            ))
+            err_datasets_l.append(ValCovPairDataset(
+                key=f'hist_{i}_err',
+                color=None,
+                label=labels_l[i],
+                data=(np.sqrt(np.diag(hist.covmat)), np.zeros_like(hist.covmat)),
+                binning=hist._binning,
+                isMC=True,
+            ))
+            
+        
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            val_datasets_l,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            no_lumi_normalization=True,
+            override_filename='values_comparison',
+        )
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            err_datasets_l,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            no_lumi_normalization=True,
+            override_filename='errs_comparison',
+            override_ylabel='Error [sqrt diag(cov)]'
+        )
 
     def plot(
         self,
@@ -347,6 +416,7 @@ class Histogram:
 
 
     def to_torch(self):
+        import torch
         if self._device != 'numpy':
             return self
         
@@ -367,6 +437,7 @@ class Histogram:
             return self
         else:
             self._device = 'numpy'
+            import torch
 
             assert isinstance(self._values, torch.Tensor)
             assert isinstance(self._covmat, torch.Tensor)
@@ -386,6 +457,8 @@ class Histogram:
 
             self._device = device
 
+            import torch
+
             assert isinstance(self._values, torch.Tensor)
             assert isinstance(self._covmat, torch.Tensor)
             assert isinstance(self._invcov, torch.Tensor)
@@ -399,7 +472,9 @@ class Histogram:
     def detach(self):
         if self._device == 'numpy':
             return self
-        
+
+        import torch
+
         assert isinstance(self._values, torch.Tensor)
         assert isinstance(self._covmat, torch.Tensor)
         assert isinstance(self._invcov, torch.Tensor)
@@ -410,4 +485,194 @@ class Histogram:
 
         return self
 
+class NuisanceTreatment:
+    profile : np.ndarray # indices of nuisnaces to profile
+    fix : np.ndarray     # indices of nuisnaces to fix
+    fixvals : np.ndarray # values to fix the nuisnaces to
+    num : int
+
+    def __init__(self, profile: np.ndarray, fix: np.ndarray, fixvals: np.ndarray, num : int):
+        self.profile = np.asarray(profile)
+        self.fix = np.asarray(fix)
+        self.fixvals = np.asarray(fixvals)
+        self.num = num
+
+        allindices = np.sort(np.concatenate([self.profile, self.fix]))
+        if not (allindices == np.arange(num)).all():
+            raise ValueError("Need to use every possible index exactly once")
+
+
+class UnfoldedHistogram:
+    def __init__(self, x : np.ndarray, baseline : np.ndarray, 
+                 hessian : np.ndarray,
+                 binning : ArbitraryBinning,
+                 invhess : np.ndarray | None = None,
+                 eigvals : np.ndarray | None = None,
+                 eigvecs : np.ndarray | None = None,
+                 L : np.ndarray | None = None,
+                 Linv : np.ndarray | None = None):
+        
+        self._x = x
+        self._baseline = baseline
+        self._hessian = hessian
+        self._binning = binning
+        self._eigvals = eigvals
+        self._eigvecs = eigvecs
+        self._L = L
+        self._Linv = Linv
+        self._invhess = invhess
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def baseline(self):
+        return self._baseline
+
+    @property
+    def hessian(self):
+        return self._hessian
+
+    @property
+    def binning(self):
+        return self._binning
     
+    @property
+    def invhess(self):
+        if self._invhess is None:
+            self.compute_invhess()
+        return self._invhess
+    
+    @property
+    def L(self):
+        if self._L is None:
+            self.compute_sqrt()
+        return self._L
+    
+    @property
+    def Linv(self):
+        if self._Linv is None:
+            self.compute_sqrt()
+        return self._Linv
+    
+    @property
+    def eigvals(self):
+        if self._eigvals is None:
+            self.compute_invhess()
+        return self._eigvals
+    
+    @property
+    def eigvecs(self):
+        if self._eigvecs is None:
+            self.compute_invhess()
+        return self._eigvecs
+
+    def compute_invhess(self):
+        print("Inverting Hessian matrix...")
+        assert isinstance(self._hessian, np.ndarray)
+        self._invhess, self._eigvals, self._eigvecs = smart_inverse(self._hessian, True)
+
+    def compute_sqrt(self):
+        print("Computing sqrt of Hessian matrix...")
+        assert isinstance(self._hessian, np.ndarray)
+        self._L, self._Linv = smart_sqrt(self._hessian)
+
+    def to_basic_histogram(self, nuisance_treatment : NuisanceTreatment):
+        from simonpy.stats import marginalize, condition
+
+        if nuisance_treatment.num != self._x.shape[0] - self._baseline.shape[0]:
+            raise ValueError("Number of nuisances does not match")
+        
+        x = self._x.copy()
+        invhess = self.invhess
+        assert invhess is not None
+        invhess = invhess.copy()
+
+        # profile over requested nuisnaces
+        for iprof in nuisance_treatment.profile:
+            x, invhess = marginalize(x, invhess, iprof, iprof+1)
+
+        # condition on requested nuisance values
+        for ifix, vfix in zip(nuisance_treatment.fix, nuisance_treatment.fixvals):
+            x, invhess = condition(x, invhess, ifix, ifix+1, vfix)
+
+        # apply multiplication by baseline
+        x *= self._baseline
+        invhess = invhess * np.outer(self._baseline, self._baseline)
+
+        return Histogram(x, invhess, self._binning)
+        
+    @classmethod 
+    def from_minimization_result(cls, where:str) -> 'UnfoldedHistogram':
+        # Load the results from a minimization
+        with open(os.path.join(where, 'result', 'x.npy'), 'rb') as f:
+            x = np.load(f)
+
+        with open(os.path.join(where, 'result', 'hessian.npy'), 'rb') as f:
+            hessian = np.load(f)
+
+        with open(os.path.join(where, 'baseline.npy'), 'rb') as f:
+            baseline = np.load(f)
+
+        binning = ArbitraryBinning()
+        binning.load_from_file(os.path.join(where, 'binning.json'))
+
+        return cls(x, baseline, hessian, binning=binning)
+
+    @classmethod
+    def from_disk(cls, where:str) -> 'UnfoldedHistogram':
+        with open(os.path.join(where, 'x.npy'), 'rb') as f:
+            x = np.load(f)
+        with open(os.path.join(where, 'baseline.npy'), 'rb') as f:
+            baseline = np.load(f)
+        with open(os.path.join(where, 'hessian.npy'), 'rb') as f:
+            hessian = np.load(f)
+        binning = ArbitraryBinning()
+        binning.load_from_file(os.path.join(where, 'binning.json'))
+
+        extras = {}
+
+        if os.path.exists(os.path.join(where, 'invhess.npy')):
+            with open(os.path.join(where, 'invhess.npy'), 'rb') as f:
+                extras['invhess'] = np.load(f)
+        if os.path.exists(os.path.join(where, 'eigvals.npy')):
+            with open(os.path.join(where, 'eigvals.npy'), 'rb') as f:
+                extras['eigvals'] = np.load(f)
+        if os.path.exists(os.path.join(where, 'eigvecs.npy')):
+            with open(os.path.join(where, 'eigvecs.npy'), 'rb') as f:
+                extras['eigvecs'] = np.load(f)
+        if os.path.exists(os.path.join(where, 'L.npy')):
+            with open(os.path.join(where, 'L.npy'), 'rb') as f:
+                extras['L'] = np.load(f)
+        if os.path.exists(os.path.join(where, 'Linv.npy')):
+            with open(os.path.join(where, 'Linv.npy'), 'rb') as f:
+                extras['Linv'] = np.load(f)
+
+        return cls(x, baseline, hessian, binning=binning, **extras)
+    
+    def dump_to_disk(self, where: str):
+        os.makedirs(where, exist_ok=True)
+        with open(os.path.join(where, 'x.npy'), 'wb') as f:
+            np.save(f, self._x)
+        with open(os.path.join(where, 'baseline.npy'), 'wb') as f:
+            np.save(f, self._baseline)
+        with open(os.path.join(where, 'hessian.npy'), 'wb') as f:
+            np.save(f, self._hessian)
+        self._binning.dump_to_file(os.path.join(where, 'binning.json'))
+
+        if self._invhess is not None:
+            with open(os.path.join(where, 'invhess.npy'), 'wb') as f:
+                np.save(f, self._invhess)
+        if self._eigvals is not None:
+            with open(os.path.join(where, 'eigvals.npy'), 'wb') as f:
+                np.save(f, self._eigvals)
+        if self._eigvecs is not None:
+            with open(os.path.join(where, 'eigvecs.npy'), 'wb') as f:
+                np.save(f, self._eigvecs)
+        if self._L is not None:
+            with open(os.path.join(where, 'L.npy'), 'wb') as f:
+                np.save(f, self._L)
+        if self._Linv is not None:
+            with open(os.path.join(where, 'Linv.npy'), 'wb') as f:
+                np.save(f, self._Linv)

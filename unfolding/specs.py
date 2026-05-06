@@ -5,6 +5,8 @@ from typing import Protocol, TypedDict, List, overload
 import torch
 import numpy as np
 
+from simonpy.AbitraryBinning import ArbitraryGenRecoBinning
+
 class dsspec(TypedDict):
     location: str
     config_suite: str
@@ -55,6 +57,10 @@ class DetectorModelProtocol(Protocol):
 
     @property
     def device(self) -> str:
+        ...
+
+    @property
+    def binning(self) -> ArbitraryGenRecoBinning:
         ...
 
     @overload
