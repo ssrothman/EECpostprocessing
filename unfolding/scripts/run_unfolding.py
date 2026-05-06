@@ -75,6 +75,12 @@ def main() -> None:
         default='zeros',
         help="Initialization for the nuisance parameters; can be 'zeros', 'random', or a path to a .npy file containing the initial vector (default: zeros). Ignored if --continue-from is set."
     )
+    parser.add_argument(
+        '--gtol',
+        type=float,
+        default=None,
+        help='Gradient tolerance for the minimization (default: None)'
+    )
     args = parser.parse_args()
 
     reco_dir = Path(args.reco_path).expanduser().resolve()
@@ -105,6 +111,8 @@ def main() -> None:
         "cpt_start": 0,
         "method_options": {},
     }
+    if args.gtol is not None:
+        mincfg['method_options']['gtol'] = args.gtol
 
     if args.continue_from and output_dir.exists():
         minimizer, x0 = Minimizer.continue_from(str(output_dir))
@@ -136,7 +144,7 @@ def main() -> None:
     result = minimizer(
         loss,
         x0=x0,
-        device=args.device,
+        device=args.device
     )
 
     if result is None:
