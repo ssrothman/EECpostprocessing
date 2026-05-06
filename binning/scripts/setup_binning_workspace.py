@@ -39,8 +39,78 @@ _ALL_HT_DATASETS = [
     'Pythia_HT-1200to2500',
     'Pythia_HT-2500toInf',
 ]
-if args.mc == ['allHT']:
-    args.mc = _ALL_HT_DATASETS
+_ALL_SIGNAL_DATASETS = [
+    *_ALL_HT_DATASETS,
+    "Pythia_inclusive",
+    "Herwig_inclusive"
+]
+_ALL_BACKGROUND_DATASETS = [
+    "ZZ",
+    "WZ",
+    "WW",
+    "TT",
+    "ST_t",
+    "ST_t_anti",
+    "ST_tW",
+    "ST_tW_anti",
+]
+if 'allHT' in args.mc:
+    args.mc.remove('allHT')
+    args.mc.extend(_ALL_HT_DATASETS)
+if 'allSignal' in args.mc:
+    args.mc.remove('allSignal')
+    args.mc.extend(_ALL_SIGNAL_DATASETS)
+if 'allBackground' in args.mc:
+    args.mc.remove('allBackground')
+    args.mc.extend(_ALL_BACKGROUND_DATASETS)
+
+
+
+_ALL_OBJSYSTS = [
+    "nominal",
+    "CH_UP",
+    "CH_DN",
+    "JER_UP",
+    "JER_DN",
+    "JES_UP",
+    "JES_DN",
+    "TRK_EFF"
+]
+if 'allObjsysts' in args.objsysts:
+    args.objsysts.remove('allObjsysts')
+    args.objsysts.extend(_ALL_OBJSYSTS)
+
+
+_ALL_WTSYSTS = [
+    "nominal",
+    "PUUp",
+    "PUDown",
+    "scale_7ptUp",
+    "scale_7ptDown",
+    "prefireUp",
+    "prefireDown",
+    "scale_3ptDown",
+    "scale_3ptUp",
+    "FSRDown",
+    "FSRUp",
+    "PDFUp",
+    "PDFDown",
+    "triggersfDown",
+    "triggersfUp",
+    "isosfUp",
+    "isosfDown",
+    "ISRUp",
+    "ISRDown",
+    "aSUp",
+    "aSDown",
+    "idsfDown",
+    "idsfUp",
+    "PDFaSUp",
+    "PDFaSDown"
+]
+if 'allWtsysts' in args.wtsysts:
+    args.wtsysts.remove('allWtsysts')
+    args.wtsysts.extend(_ALL_WTSYSTS)
 
 from skimming.tables.expand_tables import expand_tables, table_names
 args.tables = table_names(expand_tables(args.tables))
