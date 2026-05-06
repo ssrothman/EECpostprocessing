@@ -28,6 +28,7 @@ class systspec(TypedDict):
     isobjsyst : bool
     onesided : bool
     varytransfer : bool
+    label : str | None
 
 class detectormodelspec(TypedDict):
     systematics : List[systspec]
@@ -61,6 +62,10 @@ class DetectorModelProtocol(Protocol):
 
     @property
     def binning(self) -> ArbitraryGenRecoBinning:
+        ...
+
+    @property
+    def nuisance_names(self) -> list[str]:
         ...
 
     @overload

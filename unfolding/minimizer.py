@@ -182,6 +182,14 @@ class Minimizer:
         else:
             loss.model.binning.genbinning.dump_to_file(binningpath)
 
+        nuisance_names_path = os.path.join(self.cfg['logpath'], 'nuisance_names.txt')
+        if os.path.exists(nuisance_names_path):
+            pass
+        else:
+            with open(nuisance_names_path, 'w') as f:
+                for name in loss.model.nuisance_names:
+                    f.write(name + '\n')
+
         #ensure everything is `torch.Tensor`s
         loss = loss.to_torch()
         if isinstance(x0, np.ndarray):
