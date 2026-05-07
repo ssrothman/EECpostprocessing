@@ -96,8 +96,8 @@ def main() -> None:
 	parser.add_argument(
 		"--objects",
 		nargs="+",
-		default=["gen", "reco", "model"],
-		help="Objects to rebin from the workspace (default: gen reco model)",
+		default=["gen", "reco", "model", "mcgen"],
+		help="Objects to rebin from the workspace (default: gen reco model mcgen)",
 	)
 	args = parser.parse_args()
 

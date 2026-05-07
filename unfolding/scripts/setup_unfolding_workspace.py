@@ -35,3 +35,13 @@ model = DetectorModel.from_dataset(
     cfg['model']
 )
 model.dump_to_disk('model')
+
+mcgen = Histogram.from_dataset(
+    cfg['model']['dset'],
+    {
+        'wtsyst' : 'nominal',
+        'objsyst' : 'nominal'
+    },
+    'totalGen'
+)
+mcgen.dump_to_disk('mcgen')
