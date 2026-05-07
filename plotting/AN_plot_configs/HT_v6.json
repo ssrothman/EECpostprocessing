@@ -9,8 +9,7 @@
                     "table" : "jets",
                     "objsyst" : "NOM",
                     "location" : "dylan-lxplus-eos",
-                    "isstack" : true,
-                    "no_count" : true
+                    "isstack" : true
                 }
             ],
             "variables" : ["LHE_HT"],
@@ -20,7 +19,7 @@
             "plotspath" : "plots/HT_v6",
             "plotsprefix" : "",
             "driver" : "plot_histogram",
-            "no_lumi_normalization" : true,
+            "no_lumi_normalization" : false,
             "logx" : true,
             "override_filenames" : ["LHE_HT_v6"]
         },
@@ -34,7 +33,7 @@
                     "objsyst" : "NOM",
                     "location" : "dylan-lxplus-eos",
                     "isstack" : true,
-                    "no_count" : true
+                    "no_count" : false
                 }
             ],
             "variables" : ["Jpt"],
@@ -44,7 +43,7 @@
             "plotspath" : "plots/HT_v6",
             "plotsprefix" : "",
             "driver" : "plot_histogram",
-            "no_lumi_normalization" : true,
+            "no_lumi_normalization" : false,
             "logx" : true,
             "override_filenames" : ["Jpt_v6"]
         }

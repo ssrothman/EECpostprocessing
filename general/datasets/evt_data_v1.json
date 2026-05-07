@@ -1,0 +1,41 @@
+{
+    "data_v1" : {
+        "base" : "crab/data_v1/2018/SingleMuon",
+        "DATA_2018A" : {
+            "tag"      : "SingleMuon/2018A",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "Data 2018A",
+            "color"    : "black",
+            "lumi"     : 14.027
+        },
+        "DATA_2018B" : {
+            "tag"      : "SingleMuon/2018B",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "Data 2018B",
+            "color"    : "black",
+            "lumi"     : 7.060
+        },
+        "DATA_2018C" : {
+            "tag"      : "SingleMuon/2018C",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "Data 2018C",
+            "color"    : "black",
+            "lumi"     : 6.894
+        },
+        "DATA_2018D" : {
+            "tag"      : "SingleMuon/2018D",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "Data 2018D",
+            "color"    : "black",
+            "lumi"     : 31.742
+        }
+    }
+}

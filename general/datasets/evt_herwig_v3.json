@@ -1,0 +1,14 @@
+{
+    "herwig_v3" : {
+        "base" : "crab/herwig_v3/2018/DYJetsToLL",
+        "DYJetsToLL_Herwig" : {
+            "tag"      : "DYJetsToLL_M-50_TuneCH3_13TeV-madgraphMLM-herwig7/Herwig_inclusive",
+            "location" : "dylan-lxplus-eos",
+            "era"      : "skip",
+            "flags"    : {},
+            "label"    : "DY Jets (Herwig7)",
+            "color"    : "darkorange",
+            "xsec"     : 6077.22
+        }
+    }
+}

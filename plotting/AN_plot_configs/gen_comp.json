@@ -1,0 +1,166 @@
+{
+    "TO DO": [
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [40, 100]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt40-100",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [100, 200]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt100-200",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [200, 340]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt200-340",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [340, 520]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt340-520",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [520, 740]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt520-740",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [740, 1000]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt740-1000",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [1000, 1500]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt1000-1500",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [1500, 2500]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt1500-2500",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig", "table": "proj_Gen",  "objsyst": "NOM",  "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018A",        "table": "proj_Reco", "objsyst": "DATA", "wtsyst": "nominal", "location": "dylan-lxplus-eos", "prebinned": true, "isstack": false}
+            ],
+            "variables": ["var::BasicPrebinnedVariable()"],
+            "weights": ["var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)", "var::ConstantVariable(1.0)"],
+            "cut": [{"type": "slice", "edges": {"Jpt": [2500, 5000]}}],
+            "binning": "prebinned",
+            "plotspath": "plots/gen_comparison",
+            "plotsprefix": "EEC_Jpt2500-5000",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": true,
+            "logx": true,
+            "density": true,
+            "nopad": true
+        }
+    ]
+}
