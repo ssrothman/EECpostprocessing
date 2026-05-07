@@ -37,7 +37,6 @@ def narrow_axis(axis, narrow_to: List[int]):
     else:
         raise ValueError(f"Narrowing not supported for axis type: {type(axis)}")
     
-    print("Narrowed axis", axis.name, "from", axis, "to", theaxis)        
     return theaxis
 
 def rebin_axis(axis, rebin : int):
@@ -67,7 +66,6 @@ def rebin_axis(axis, rebin : int):
     else:
         raise ValueError(f"Rebinning not supported for axis type: {type(axis)}")
 
-    print("Rebinned axis", axis.name, "from", axis, "to", theaxis)        
     return theaxis
 
 def build_transfer_config(gencfg : List[dict], recocfg : List[dict]) -> List[dict]:
@@ -86,8 +84,6 @@ def build_hist(cfg : List[dict]):
     axes = []
     prebinned_edges = {}
     for axis_cfg in cfg:
-        print("Building axis named", axis_cfg['name'])
-
         axistype = axis_cfg['type']
         if '-' in axistype:
             axistype, subtype = axistype.split('-', 1)
@@ -116,10 +112,8 @@ def build_hist(cfg : List[dict]):
         
         if 'clamp' in axis_cfg and axis_cfg['clamp']:
             theaxis.clamp = True
-            print("setting clamp=True")
         else:
             theaxis.clamp = False
-            print("setting clamp=False")
 
         if subtype == 'Prebinned':
             prebinned_axis = theaxis
@@ -146,7 +140,9 @@ def build_hist(cfg : List[dict]):
     return H, prebinned_edges
 
 def get(batch, name : str):
-    return batch[name].to_numpy(zero_copy_only=False)
+    access = batch[name]
+    npresult = access.to_numpy(zero_copy_only=False)
+    return npresult
 
 def build_iterator(dset : ds.Dataset,
                     names : Sequence[str], 
@@ -212,6 +208,7 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
 
         iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
 
+
         values = [
             prebinned[name][get(batch, name)] if name in prebinned else get(batch, name) for name in H.axes.name
         ]
@@ -229,8 +226,10 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
                 indices[:,i] += 1
 
         weight = get(batch, weightname)
+
         if itemwt is not None:
             weight = weight * get(batch, itemwt)
+        
         if reweight is not None:
             rwin = {}
             for i, input in enumerate(reweight.inputs):
