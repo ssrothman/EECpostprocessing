@@ -1,3 +1,7 @@
+import hist
+
+#from simonplot.binning.Binning import PrebinnedBinningWithLookup
+from simonplot.plottables.PlotStuff import BoxSpec
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse, smart_sqrt
 from typing import Any, Literal, Sequence, TypedDict
@@ -7,7 +11,7 @@ import json
 from simonplot import plot_histogram, draw_matrix
 from simonplot.binning import PrebinnedBinning
 from simonplot.cut import NoopOperation
-from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
+from simonplot.plottables.PrebinnedDatasets import TransferMatrixDataset, ValCovPairDataset, CovNoValDataset, ValNoCovDataset
 from simonplot.variable import BasicPrebinnedVariable, ConstantVariable, CorrelationFromCovariance
 from general.fslookup.skim_path import lookup_skim_path
 from general.datasets.datasets import lookup_count, lookup_dataset
@@ -523,6 +527,7 @@ class UnfoldedHistogram:
     def __init__(self, x : np.ndarray, baseline : np.ndarray, 
                  hessian : np.ndarray,
                  binning : ArbitraryBinning,
+                 nuisance_names : list[str],
                  invhess : np.ndarray | None = None,
                  eigvals : np.ndarray | None = None,
                  eigvecs : np.ndarray | None = None,
@@ -538,6 +543,11 @@ class UnfoldedHistogram:
         self._L = L
         self._Linv = Linv
         self._invhess = invhess
+        self._nuisance_names = nuisance_names
+
+    @property
+    def nuisance_names(self):
+        return self._nuisance_names
 
     @property
     def x(self):
@@ -635,7 +645,10 @@ class UnfoldedHistogram:
         binning = ArbitraryBinning()
         binning.load_from_file(os.path.join(where, 'binning.json'))
 
-        return cls(x, baseline, hessian, binning=binning)
+        with open(os.path.join(where, 'nuisance_names.txt'), 'r') as f:
+            nuisance_names = [line.strip() for line in f]
+
+        return cls(x, baseline, hessian, binning=binning, nuisance_names=nuisance_names)
 
     @classmethod
     def from_disk(cls, where:str) -> 'UnfoldedHistogram':
@@ -647,6 +660,8 @@ class UnfoldedHistogram:
             hessian = np.load(f)
         binning = ArbitraryBinning()
         binning.load_from_file(os.path.join(where, 'binning.json'))
+        with open(os.path.join(where, 'nuisance_names.txt'), 'r') as f:
+            nuisance_names = [line.strip() for line in f]
 
         extras = {}
 
@@ -666,7 +681,7 @@ class UnfoldedHistogram:
             with open(os.path.join(where, 'Linv.npy'), 'rb') as f:
                 extras['Linv'] = np.load(f)
 
-        return cls(x, baseline, hessian, binning=binning, **extras)
+        return cls(x, baseline, hessian, binning=binning, nuisance_names=nuisance_names, **extras)
     
     def dump_to_disk(self, where: str):
         os.makedirs(where, exist_ok=True)
@@ -677,6 +692,9 @@ class UnfoldedHistogram:
         with open(os.path.join(where, 'hessian.npy'), 'wb') as f:
             np.save(f, self._hessian)
         self._binning.dump_to_file(os.path.join(where, 'binning.json'))
+        with open(os.path.join(where, 'nuisance_names.txt'), 'w') as f:
+            for name in self._nuisance_names:
+                f.write(name + '\n')
 
         if self._invhess is not None:
             with open(os.path.join(where, 'invhess.npy'), 'wb') as f:
@@ -693,3 +711,168 @@ class UnfoldedHistogram:
         if self._Linv is not None:
             with open(os.path.join(where, 'Linv.npy'), 'wb') as f:
                 np.save(f, self._Linv)
+
+    def plot(self, output_folder: str | None = None, extratext: str | None = None, covmats : bool = False) -> None:
+        if self.invhess is None:
+            self.compute_invhess()
+        
+        assert(isinstance(self._x, np.ndarray))
+        assert(isinstance(self.invhess, np.ndarray))
+
+        xprof = self._x[:self.baseline.shape[0]] * self._baseline
+        cov_prof = self.invhess[:self.baseline.shape[0], :self.baseline.shape[0]] * np.outer(self._baseline, self._baseline)
+
+        profdataset = ValCovPairDataset(
+            key='profiled',
+            color=None,
+            label='Unfolded [marginalized nuisances]',
+            data=(xprof, cov_prof),
+            binning=self._binning,
+            isMC=True,
+        )
+
+        variable = BasicPrebinnedVariable()
+        cut = NoopOperation()
+        weight = ConstantVariable(1.0)
+        binning = PrebinnedBinning()
+
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            profdataset,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename='unfolded_profiled',
+            no_lumi_normalization=True,
+        )
+
+        if covmats:
+            draw_matrix(
+                variable,
+                cut,
+                profdataset,  # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=True,
+                output_folder=output_folder,
+                override_filename='unfolded_profiled_covariance_matrix',
+            )
+
+        corr_variable = CorrelationFromCovariance(variable)
+
+        if covmats:
+            draw_matrix(
+                corr_variable,
+                cut,
+                profdataset,  # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=False,
+                output_folder=output_folder,
+                override_filename='unfolded_profiled_correlation_matrix',
+            )
+
+        theta = self._x[self.baseline.shape[0]:]
+        covtheta = self.invhess[self.baseline.shape[0]:, self.baseline.shape[0]:]
+        testH = hist.Hist(
+            hist.axis.Integer(0, len(self._nuisance_names), name='nuisance', underflow=False, overflow=False)
+        )
+        thetabinning = ArbitraryBinning()
+        thetabinning.setup_from_histogram(testH)
+        thetabinning.setup_label_lookup(
+            {'nuisance' : {i : self._nuisance_names[i] for i in range(len(self._nuisance_names))}}
+        )
+
+        covtheta_dataset = ValCovPairDataset(
+            key='nuisance_covariance',
+            color=None,
+            label="Posterior",
+            data=(theta, covtheta),
+            binning=thetabinning,
+            isMC=True,
+        )
+
+        gray_box = BoxSpec(-0.1, -1, len(self._nuisance_names)+0.2, 2, facecolor='gray', alpha=0.5, zorder=0, label='Prior')
+
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            covtheta_dataset,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename='nuisance_pulls',
+            no_lumi_normalization=True,
+            extra_stuff=[gray_box],
+            override_ylabel="Nuisance posteriors"
+        )
+        
+        if covmats:
+            draw_matrix(
+                variable,
+                cut,
+                covtheta_dataset,  # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=True,
+                output_folder=output_folder,
+                override_filename='unfolded_nuisance_covariance_matrix',
+            )
+            draw_matrix(
+                corr_variable,
+                cut,
+                covtheta_dataset,  # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=False,
+                output_folder=output_folder,
+                override_filename='unfolded_nuisance_correlation_matrix',
+            )
+
+        covbetatheta = self.invhess[:self.baseline.shape[0], self.baseline.shape[0]:] * self._baseline[:, None]
+
+        thetabetabinning = ArbitraryGenRecoBinning()
+        thetabetabinning.setup_from_binnings(self._binning, thetabinning)
+
+        covbetatheta_dataset = TransferMatrixDataset(
+            key='betatheta_covariance',
+            color=None,
+            label='Covariance between unfolded and nuisances',
+            data=covbetatheta,
+            binning=thetabetabinning,
+            isMC=True,
+        )
+        thetaerrs = np.sqrt(np.diag(covtheta))
+        betaerrs = np.sqrt(np.diag(cov_prof))
+        covbetatheta_dataset.setup_custom_diagonals(thetaerrs, betaerrs)
+
+        if covmats:
+            draw_matrix(
+                variable,
+                cut,
+                covbetatheta_dataset,  # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=True,
+                output_folder=output_folder,
+                override_filename='unfolded_betatheta_covariance_matrix',
+            )
+            draw_matrix(
+                corr_variable,
+                cut,
+                covbetatheta_dataset,  # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=True,
+                output_folder=output_folder,
+                override_filename='unfolded_betatheta_correlation_matrix',
+            )
