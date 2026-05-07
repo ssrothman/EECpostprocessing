@@ -1,5 +1,10 @@
 #!/usr/bin/env -S python
 
+try:
+    import directcov
+except ImportError:
+    print("Warning: the 'directcov' package (required for covariance computation) is not installed. Please install it to use the --cov option.")
+
 import argparse
 import numpy as np
 
