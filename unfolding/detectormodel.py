@@ -641,6 +641,65 @@ class DetectorModel:
             for name in self._nuisance_names:
                 f.write(name + '\n')
 
+    # NB this is an in-place operation
+    def rebin(self, rebinning_reco : dict | str, rebinning_gen : dict | str):
+        if self._arrays != ['transfer0', 'gamma0', 'rho0', 'transferVariations', 'transferVarIndices', 'gammaVariations', 'rhoVariations']:
+            raise NotImplementedError("Rebinning not implemented for this version of DetectorModel - please update the rebinning code if you have changed the arrays in the class")
+        
+        self.to('numpy')
+        assert(isinstance(self._binning, ArbitraryGenRecoBinning))
+        assert(isinstance(self._transfer0, np.ndarray))
+        assert(isinstance(self._gamma0, np.ndarray))
+        assert(isinstance(self._rho0, np.ndarray))
+        assert(isinstance(self._transferVariations, np.ndarray))
+        assert(isinstance(self._gammaVariations, np.ndarray))
+        assert(isinstance(self._rhoVariations, np.ndarray))
+
+        if isinstance(rebinning_reco, str):
+            import json
+            with open(rebinning_reco, 'r') as f:
+                rebinning_reco_dict : dict = json.load(f)
+        else:
+            rebinning_reco_dict = rebinning_reco
+        if isinstance(rebinning_gen, str):
+            import json
+            with open(rebinning_gen, 'r') as f:
+                rebinning_gen_dict : dict = json.load(f)
+        else:
+            rebinning_gen_dict = rebinning_gen
+
+        for iblock in range(len(rebinning_reco_dict['spec'])):
+            ogitems = list(rebinning_reco_dict['spec'][iblock].items())
+            for (axis, edges) in ogitems:
+                if not axis.endswith('_reco'):
+                    rebinning_reco_dict['spec'][iblock][axis + '_reco'] = edges
+                    del rebinning_reco_dict['spec'][iblock][axis]
+        for iblock in range(len(rebinning_gen_dict['spec'])):
+            ogitems = list(rebinning_gen_dict['spec'][iblock].items())
+            for (axis, edges) in ogitems:
+                if not axis.endswith('_gen'):
+                    rebinning_gen_dict['spec'][iblock][axis + '_gen'] = edges
+                    del rebinning_gen_dict['spec'][iblock][axis]
+
+        new_transfer_variations = []
+        for i in range(self._transferVariations.shape[0]):
+            new_transfer_variations.append(self._binning.rebin_transfer2d(self._transferVariations[i], rebinning_reco_dict, rebinning_gen_dict)[0])
+        self._transferVariations = np.stack(new_transfer_variations, axis=0)
+
+        new_gamma_variations = []
+        for i in range(self._gammaVariations.shape[0]):
+            new_gamma_variations.append(self._binning.rebin(self._gammaVariations[i], 'gen', rebinning_gen_dict)[0])
+        self._gammaVariations = np.stack(new_gamma_variations, axis=0)
+
+        new_rho_variations = []
+        for i in range(self._rhoVariations.shape[0]):
+            new_rho_variations.append(self._binning.rebin(self._rhoVariations[i], 'reco', rebinning_reco_dict)[0])
+        self._rhoVariations = np.stack(new_rho_variations, axis=0)
+
+        self._gamma0, _ = self._binning.rebin(self._gamma0, 'gen', rebinning_gen_dict)
+        self._rho0, _ = self._binning.rebin(self._rho0, 'reco', rebinning_reco_dict)
+        self._transfer0, self._binning = self._binning.rebin_transfer2d(self._transfer0, rebinning_reco_dict, rebinning_gen_dict)
+
     def to_torch(self):
         if self._device != 'numpy':
             return self

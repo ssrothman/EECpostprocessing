@@ -227,6 +227,23 @@ class Histogram:
             with open(os.path.join(where, 'eigvecs.npy'), 'wb') as f:
                 np.save(f, self._eigvecs)
 
+    # NB this is an in-place operation
+    def rebin(self, rebinning_spec : dict | str):
+        self.to('numpy')
+        assert(isinstance(self._values, np.ndarray))
+        assert(isinstance(self._covmat, np.ndarray))
+
+        self._values, _ = self._binning.rebin(self._values, rebinning_spec)
+        self._covmat, self._binning = self._binning.rebin_cov2d(self._covmat, rebinning_spec)
+
+        # I'm not sure if its possible to propagate the inverse covariance, eigendecomposition, or sqrt
+        # so for now to be conservative we just invalidate them
+        self._invcov = None
+        self._L = None
+        self._Linv = None
+        self._eigvals = None
+        self._eigvecs = None
+
     @classmethod
     def compare(
         cls,
@@ -355,7 +372,7 @@ class Histogram:
         draw_matrix(
             variable,
             cut,
-            cov_dataset,
+            cov_dataset, # type: ignore
             binning,
             extratext=extratext,
             sym=True,
@@ -367,7 +384,7 @@ class Histogram:
         draw_matrix(
             variable,
             cut,
-            invcov_dataset,
+            invcov_dataset, # type: ignore
             binning,
             extratext=extratext,
             sym=True,
@@ -379,7 +396,7 @@ class Histogram:
         draw_matrix(
             variable,
             cut,
-            invcov_cov_dataset,
+            invcov_cov_dataset, # type: ignore
             binning,
             extratext=extratext,
             sym=True,
@@ -393,7 +410,7 @@ class Histogram:
         draw_matrix(
             corr_variable,
             cut,
-            cov_dataset,
+            cov_dataset, # type: ignore
             binning,
             extratext=extratext,
             sym=True,
@@ -405,7 +422,7 @@ class Histogram:
         draw_matrix(
             corr_variable,
             cut,
-            invcov_dataset,
+            invcov_dataset, # type: ignore
             binning,
             extratext=extratext,
             sym=True,
