@@ -30,7 +30,7 @@
                 1.2, 1.5, 2.0, 3.0
             ],
             "underflow" : false,
-            "overflow" : false,
+            "overflow" : true,
             "clamp" : false
         },
         {
