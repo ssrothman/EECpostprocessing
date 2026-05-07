@@ -1,4 +1,12 @@
 {
+    "stacks" : {
+        "DATA_2018ABD" : {
+            "dsets" : ["DATA_2018A", "DATA_2018B", "DATA_2018D"],
+            "stacks" : [],
+            "color" : "black",
+            "label" : "Data"
+        }
+    },
     "data_v1" : {
         "base" : "crab/data_v1/2018/SingleMuon",
         "DATA_2018A" : {
@@ -18,15 +26,6 @@
             "label"    : "Data 2018B",
             "color"    : "black",
             "lumi"     : 7.060
-        },
-        "DATA_2018C" : {
-            "tag"      : "SingleMuon/2018C",
-            "location" : "dylan-lxplus-eos",
-            "era"      : "skip",
-            "flags"    : {},
-            "label"    : "Data 2018C",
-            "color"    : "black",
-            "lumi"     : 6.894
         },
         "DATA_2018D" : {
             "tag"      : "SingleMuon/2018D",

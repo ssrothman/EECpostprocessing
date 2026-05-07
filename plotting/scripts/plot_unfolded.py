@@ -4,11 +4,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mplhep as hep
 import os
+import json
 import argparse
 
+from general.fslookup.skim_path import lookup_skim_path
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--workspace', type=str, default='/eos/user/d/dponman/proj_unfold_workspace')
-parser.add_argument('--output',    type=str, default='plots/proj')
+parser.add_argument('--pythia-workspace', type=str, default='/eos/user/d/dponman/proj_unfold_workspace')
+parser.add_argument('--data-workspace',   type=str, default='/eos/user/d/dponman/proj_unfold_workspace_data')
+parser.add_argument('--herwig-workspace', type=str, default='/eos/user/d/dponman/proj_unfold_workspace_herwig')
+parser.add_argument('--output',           type=str, default='plots/proj')
 args = parser.parse_args()
 
 R_EDGES = np.array([
@@ -33,13 +38,58 @@ JPT_BINS = [
     (2500, 5000),
 ]
 
-x          = np.load(os.path.join(args.workspace, 'minimization', 'result', 'x.npy'))
-gen_values = np.load(os.path.join(args.workspace, 'gen',  'values.npy'))
-reco_values = np.load(os.path.join(args.workspace, 'reco', 'values.npy'))
-valid      = np.load(os.path.join(args.workspace, 'valid_bins.npy'))
+HT_BINS = [
+    ('DYJetsToLL_Pythia_HT70to100',    159.1),
+    ('DYJetsToLL_Pythia_HT100to200',   159.4),
+    ('DYJetsToLL_Pythia_HT200to400',   43.60),
+    ('DYJetsToLL_Pythia_HT400to600',   5.918),
+    ('DYJetsToLL_Pythia_HT600to800',   1.439),
+    ('DYJetsToLL_Pythia_HT800to1200',  0.6462),
+    ('DYJetsToLL_Pythia_HT1200to2500', 0.1514),
+    ('DYJetsToLL_Pythia_HT2500toInf',  0.003395),
+]
 
-unfolded = x * gen_values
+# --- load workspaces ---
+valid      = np.load(os.path.join(args.pythia_workspace, 'valid_bins.npy'))
+gen_values = np.load(os.path.join(args.pythia_workspace, 'gen', 'values.npy'))
 
+x_pythia = np.load(os.path.join(args.pythia_workspace, 'minimization', 'result', 'x.npy'))
+x_data   = np.load(os.path.join(args.data_workspace,   'minimization', 'result', 'x.npy'))
+x_herwig = np.load(os.path.join(args.herwig_workspace, 'minimization', 'result', 'x.npy'))
+
+data_reco   = np.load(os.path.join(args.data_workspace,   'reco', 'values.npy'))
+herwig_reco = np.load(os.path.join(args.herwig_workspace, 'reco', 'values.npy'))
+
+pythia_unfolded = x_pythia * gen_values
+data_unfolded   = x_data   * gen_values
+herwig_unfolded = x_herwig * gen_values
+
+# --- helpers ---
+def load_gen(config_suite, runtag, dataset, objsyst='NOM', wtsyst='nominal'):
+    fs, skimpath = lookup_skim_path(
+        'dylan-lxplus-eos', config_suite, runtag, dataset, objsyst, 'proj_Gen'
+    )
+    with fs.open(skimpath + '_BINNED_%s.npy' % wtsyst, 'rb') as f:
+        values = np.load(f)
+    return values[50:-50][valid]
+
+def load_n_events(config_suite, runtag, dataset, objsyst='NOM'):
+    fs, path = lookup_skim_path(
+        'dylan-lxplus-eos', config_suite, runtag, dataset, objsyst, 'count'
+    )
+    with fs.open(os.path.join(path, 'merged.json'), 'r') as f:
+        return json.load(f)['n_events']
+
+# --- Herwig gen ---
+herwig_gen = load_gen('EvtMCprojConfig', 'herwig_v3', 'DYJetsToLL_Herwig')
+
+# --- HT-stitched Pythia gen ---
+pythia_ht_gen = np.zeros(int(valid.sum()))
+for dataset, xsec in HT_BINS:
+    n_events = load_n_events('EvtMCprojConfig', 'v6', dataset)
+    pythia_ht_gen += (xsec / n_events) * load_gen('EvtMCprojConfig', 'v6', dataset)
+
+# --- jpt slicing ---
 # bin structure: Jpt slow index, R fast index (C-order)
 # first Jpt bin may be missing leading R bins (removed as NaN)
 n_first = int(valid.sum()) - 8 * 50
@@ -67,51 +117,57 @@ def norm(vals, edges):
 os.makedirs(args.output, exist_ok=True)
 hep.style.use('CMS')
 
+C_PYTHIA_GEN = '#3B2F2F'  # dark espresso
+C_HERWIG_GEN = '#8B5E3C'  # warm tan
+C_DATA_RECO  = '#2C2C2C'  # near black
+C_DATA_UNF   = '#1F77B4'  # blue
+C_HERWIG_UNF = '#E07B39'  # orange
+C_PYTHIA_UNF = '#6B8C6B'  # sage green
+
 for i, (jlo, jhi) in enumerate(JPT_BINS):
+    sl      = jpt_slices[i]
+    r_edges = jpt_r_edges[i]
+
+    curves = [
+        ('Pythia Gen (HT)',  norm(pythia_ht_gen[sl],    r_edges), C_PYTHIA_GEN, '-',  1.5),
+        ('Herwig Gen',       norm(herwig_gen[sl],        r_edges), C_HERWIG_GEN, '--', 1.2),
+        ('Data Reco',        norm(data_reco[sl],         r_edges), C_DATA_RECO,  ':',  1.2),
+        ('Data Unfolded',    norm(data_unfolded[sl],     r_edges), C_DATA_UNF,   '-',  1.5),
+        ('Herwig Unfolded',  norm(herwig_unfolded[sl],   r_edges), C_HERWIG_UNF, '-',  1.5),
+        ('Pythia Unfolded',  norm(pythia_unfolded[sl],   r_edges), C_PYTHIA_UNF, '--', 1.0),
+    ]
+
+    ref = curves[0][1]  # Pythia Gen (HT) as reference
+
     fig, (ax, ax_ratio) = plt.subplots(
         2, 1, figsize=(10, 13),
         gridspec_kw={'height_ratios': [10, 3]},
         sharex=True
     )
 
-    sl        = jpt_slices[i]
-    r_edges   = jpt_r_edges[i]
-    unf_vals  = unfolded[sl]
-    gen_vals  = gen_values[sl]
-    reco_vals = reco_values[sl]
-
-    unf_norm  = norm(unf_vals,  r_edges)
-    gen_norm  = norm(gen_vals,  r_edges)
-    reco_norm = norm(reco_vals, r_edges)
-
-    C_UNF  = '#3B2F2F'  # dark espresso
-    C_GEN  = '#8B5E3C'  # warm tan
-    C_RECO = '#6B8C6B'  # sage green
-
-    hep.histplot(unf_norm,  r_edges, ax=ax, label='Unfolded', color=C_UNF)
-    hep.histplot(gen_norm,  r_edges, ax=ax, label='MC Gen',   color=C_GEN,  linestyle='--')
-    hep.histplot(reco_norm, r_edges, ax=ax, label='Reco',     color=C_RECO, linestyle=':')
+    for label, vals, color, ls, lw in curves:
+        hep.histplot(vals, r_edges, ax=ax, label=label, color=color, linestyle=ls, linewidth=lw)
 
     ax.set_xscale('log')
     if i > 0:
         ax.set_yscale('log')
     ax.set_ylabel('A.U.', fontsize=11)
-    ax.legend()
+    ax.legend(fontsize=9)
     ax.tick_params(axis='both', labelsize=10)
-    hep.cms.label(ax=ax, data=False, text='Private', com=13)
+    hep.cms.label(ax=ax, data=True, text='Private', com=13)
 
-    gen_ratio  = np.where(unf_norm != 0, gen_norm  / unf_norm, np.nan)
-    reco_ratio = np.where(unf_norm != 0, reco_norm / unf_norm, np.nan)
+    for label, vals, color, ls, lw in curves[1:]:
+        ratio = np.where(ref != 0, vals / ref, np.nan)
+        hep.histplot(ratio, r_edges, ax=ax_ratio, label=label,
+                     color=color, linestyle=ls, linewidth=lw)
 
-    hep.histplot(gen_ratio,  r_edges, ax=ax_ratio, color=C_GEN,  linestyle='--', label='Gen / Unf')
-    hep.histplot(reco_ratio, r_edges, ax=ax_ratio, color=C_RECO, linestyle=':',  label='Reco / Unf')
-    ax_ratio.axhline(1.0, color=C_UNF, linestyle='-', linewidth=0.8)
+    ax_ratio.axhline(1.0, color=C_PYTHIA_GEN, linestyle='-', linewidth=0.8)
     ax_ratio.set_xscale('log')
-    ax_ratio.set_xlabel('$\\Delta R$', fontsize=11)
-    ax_ratio.set_ylabel('Ratio to Unfolded', fontsize=11)
+    ax_ratio.set_xlabel(r'$\Delta R$', fontsize=11)
+    ax_ratio.set_ylabel('Ratio to Pythia Gen', fontsize=11)
     ax_ratio.tick_params(axis='both', labelsize=10)
     ax_ratio.set_ylim(0.5, 1.5)
-    ax_ratio.legend(fontsize=10)
+    ax_ratio.legend(fontsize=9)
 
     fig.tight_layout()
     fname = os.path.join(args.output, f'unfolded_Jpt{jlo}-{jhi}.png')

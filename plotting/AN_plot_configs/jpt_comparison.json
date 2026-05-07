@@ -1,0 +1,22 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia_HTsum", "table": "jets", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true,  "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig",       "table": "jets", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": false, "no_count": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "jets", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true,  "no_count": true}
+            ],
+            "variables" : ["Jpt"],
+            "weights" : ["wt_nominal", "wt_nominal", "wt_nominal"],
+            "cut" : [],
+            "binning" : "explicit:[40,100,200,340,520,740,1000,1500,2500,5000]",
+            "plotspath" : "plots/comparison",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "no_lumi_normalization" : false,
+            "density" : true,
+            "logx" : true,
+            "override_filenames" : ["jpt_comparison"]
+        }
+    ]
+}
