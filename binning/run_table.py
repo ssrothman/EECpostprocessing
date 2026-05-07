@@ -1,4 +1,3 @@
-from __future__ import annotations
 from binning.main import build_hist, build_transfer_config, fill_cov, fill_hist
 from general.datasets.datasets import location_lookup
 from general.fslookup.location_lookup import lookup_hostid
@@ -82,8 +81,11 @@ def run_table(args : Any, table: str):
     )
 
     if args.cov:
+        print("RESULT SHAPE", result.shape)
         halfshape = result.shape[:len(result.shape)//2]
+        print("HALFSHAPE", halfshape)
         thelen = np.prod(halfshape)
+        print("THELEN", thelen)
         output = result.reshape((thelen, thelen)) # type: ignore
     else:
         output = result.values(flow=True).ravel() # type: ignore
