@@ -93,3 +93,36 @@ class DetectorModelProtocol(Protocol):
 
     def detach(self) -> "DetectorModelProtocol":
         ...
+
+
+class TreatedNuisance(TypedDict):
+    index : int
+    value : float | None
+    fixed : bool
+
+class NuisanceTreatment:
+    profile : np.ndarray # indices of nuisnaces to profile
+    fix : np.ndarray     # indices of nuisnaces to fix
+    fixvals : np.ndarray # values to fix the nuisnaces to
+    num : int
+
+    def __init__(self, profile: np.ndarray, fix: np.ndarray, fixvals: np.ndarray, num : int):
+        self.profile = np.asarray(profile)
+        self.fix = np.asarray(fix)
+        self.fixvals = np.asarray(fixvals)
+        self.num = num
+
+        allindices = np.sort(np.concatenate([self.profile, self.fix]))
+        if not (allindices == np.arange(num)).all():
+            raise ValueError("Need to use every possible index exactly once")
+
+        self.treated_nuisances = []
+        for iprof in profile:
+            self.treated_nuisances.append(TreatedNuisance(index=iprof, value=None, fixed=False))
+        for ifix, vfix in zip(fix, fixvals):
+            self.treated_nuisances.append(TreatedNuisance(index=ifix, value=vfix, fixed=True))
+        # sort the treatednuisances descending in index so that we apply the operations in the right order
+        self.treated_nuisances.sort(key=lambda x: x["index"], reverse=True)
+
+    def treatments(self) -> List[TreatedNuisance]:
+        return self.treated_nuisances

@@ -16,7 +16,7 @@ from simonplot.variable import BasicPrebinnedVariable, ConstantVariable, Correla
 from general.fslookup.skim_path import lookup_skim_path
 from general.datasets.datasets import lookup_count, lookup_dataset
 from unfolding.io import read_hist
-from unfolding.specs import dsspec, whichsystspec, histspec
+from unfolding.specs import NuisanceTreatment, dsspec, whichsystspec, histspec
 
 class Histogram:
     def __init__(self, values : np.ndarray, covmat : np.ndarray, binning : ArbitraryBinning,
@@ -506,23 +506,6 @@ class Histogram:
 
         return self
 
-class NuisanceTreatment:
-    profile : np.ndarray # indices of nuisnaces to profile
-    fix : np.ndarray     # indices of nuisnaces to fix
-    fixvals : np.ndarray # values to fix the nuisnaces to
-    num : int
-
-    def __init__(self, profile: np.ndarray, fix: np.ndarray, fixvals: np.ndarray, num : int):
-        self.profile = np.asarray(profile)
-        self.fix = np.asarray(fix)
-        self.fixvals = np.asarray(fixvals)
-        self.num = num
-
-        allindices = np.sort(np.concatenate([self.profile, self.fix]))
-        if not (allindices == np.arange(num)).all():
-            raise ValueError("Need to use every possible index exactly once")
-
-
 class UnfoldedHistogram:
     def __init__(self, x : np.ndarray, baseline : np.ndarray, 
                  hessian : np.ndarray,
@@ -616,13 +599,15 @@ class UnfoldedHistogram:
         assert invhess is not None
         invhess = invhess.copy()
 
-        # profile over requested nuisnaces
-        for iprof in nuisance_treatment.profile:
-            x, invhess = marginalize(x, invhess, iprof, iprof+1)
+        Nbeta = self._baseline.shape[0]
 
-        # condition on requested nuisance values
-        for ifix, vfix in zip(nuisance_treatment.fix, nuisance_treatment.fixvals):
-            x, invhess = condition(x, invhess, ifix, ifix+1, vfix)
+        for treatment in nuisance_treatment.treated_nuisances:
+            if treatment['fixed']:
+                print("Fixing nuisance", self._nuisance_names[treatment['index']], "to value", treatment['value'])
+                x, invhess = condition(x, invhess, Nbeta+treatment['index'], Nbeta+treatment['index']+1, treatment['value'])
+            else:
+                print("Marginalizing over nuisance", self._nuisance_names[treatment['index']])
+                x, invhess = marginalize(x, invhess, Nbeta+treatment['index'], Nbeta+treatment['index']+1)
 
         # apply multiplication by baseline
         x *= self._baseline

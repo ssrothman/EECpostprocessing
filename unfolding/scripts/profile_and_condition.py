@@ -16,7 +16,8 @@ from pathlib import Path
 import fasteigenpy as eigen
 import numpy as np
 
-from unfolding.histogram import Histogram, NuisanceTreatment, UnfoldedHistogram
+from unfolding.histogram import Histogram, UnfoldedHistogram
+from unfolding.specs import NuisanceTreatment
 
 def main() -> int:
 	parser = argparse.ArgumentParser(
@@ -77,35 +78,19 @@ def main() -> int:
 		print("Error: --fixvals must have the same number of entries as --fix", file=sys.stderr)
 		return 1
 
-	try:
-		nuisance_treatment = NuisanceTreatment(
-			profile=args.profile,
-			fix=args.fix,
-			fixvals=args.fixvals,
-			num=args.num,
-		)
-	except Exception as exc:
-		print(f"Error constructing NuisanceTreatment: {exc}", file=sys.stderr)
-		return 1
+	nuisance_treatment = NuisanceTreatment(
+		profile=args.profile,
+		fix=args.fix,
+		fixvals=args.fixvals,
+		num=args.num,
+	)
 
-	try:
-		unfolded_hist = UnfoldedHistogram.from_disk(str(input_dir))
-	except Exception as exc:
-		print(f"Error loading UnfoldedHistogram from {input_dir}: {exc}", file=sys.stderr)
-		return 1
+	unfolded_hist = UnfoldedHistogram.from_disk(str(input_dir))
 
-	try:
-		unfolded_hist.compute_invhess()
-		hist = unfolded_hist.to_basic_histogram(nuisance_treatment)
-	except Exception as exc:
-		print(f"Error building Histogram from {input_dir}: {exc}", file=sys.stderr)
-		return 1
+	unfolded_hist.compute_invhess()
+	hist = unfolded_hist.to_basic_histogram(nuisance_treatment)
 
-	try:
-		hist.dump_to_disk(str(output_dir))
-	except Exception as exc:
-		print(f"Error writing Histogram to {output_dir}: {exc}", file=sys.stderr)
-		return 1
+	hist.dump_to_disk(str(output_dir))
 
 	return 0
 
