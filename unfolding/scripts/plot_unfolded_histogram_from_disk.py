@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import fasteigenpy as eigen
 import argparse
 from pathlib import Path
 

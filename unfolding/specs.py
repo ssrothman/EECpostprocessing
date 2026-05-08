@@ -38,9 +38,10 @@ class detectormodelspec(TypedDict):
 class histspec(TypedDict):
     dset : dsspec
     hist : whichsystspec
+    name : str
 
 class unfoldingworkspacespec(TypedDict):
-    data : histspec
+    data : histspec | List[histspec]
     model : detectormodelspec
 
 class DetectorModelProtocol(Protocol):
