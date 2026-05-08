@@ -35,67 +35,100 @@ def hist_from_syst(spec : systspec, updn : str | None) -> whichsystspec:
             'wtsyst' : thename
         }
 
-def get_transfer_binning(dset : dsspec) -> ArbitraryGenRecoBinning:
-    binning = read_hist(
+def get_transfer_binning(dset : dsspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None) -> ArbitraryGenRecoBinning:
+    tmp, binning = read_hist(
         dset, 
         {'objsyst' : 'nominal', 'wtsyst' : 'nominal'},
         'transfer',
         False
-    )[-1]
+    )
+    utG = read_hist(
+        dset, 
+        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'}, 
+        'untransferedGen',
+        False
+    )[0]
+    utR = read_hist(
+        dset, 
+        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'}, 
+        'untransferedReco',
+        False
+    )[0]    
+    tmp = np.reshape(tmp, (len(utR), len(utG)))
+
+    if rebinning_reco is not None and rebinning_gen is not None:
+        binning = binning.rebin_transfer2d(tmp, rebinning_reco, rebinning_gen)[1]
+    elif rebinning_reco is not None or rebinning_gen is not None:
+        raise ValueError("Must provide both rebinning_reco and rebinning_gen or neither")
+
     return binning
 
 
-def get_model_matrices(dset : dsspec, hist : whichsystspec):
-        t = read_hist(
+def get_model_matrices(dset : dsspec, hist : whichsystspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None):
+        t, tbinning = read_hist(
             dset, hist, 
             'transfer',
             False
-        )[0]
+        )
 
-        umG = read_hist(
+        umG, gbinning = read_hist(
             dset, hist, 
             'unmatchedGen',
             False
-        )[0]
+        )
         utG = read_hist(
             dset, hist, 
             'untransferedGen',
             False
         )[0]
         bkgG = umG + utG
+        if rebinning_gen is not None:
+            bkgG = gbinning.rebin(bkgG, rebinning_gen)[0]
 
         totG = read_hist(
             dset, hist, 
             'totalGen',
             False
         )[0]
+        if rebinning_gen is not None:
+            totG = gbinning.rebin(totG, rebinning_gen)[0] 
 
         Gdenom = np.where(totG == 0, 1.0, totG)
         gamma = bkgG / Gdenom
 
-        umR = read_hist(
+        umR, rbinning = read_hist(
             dset, hist, 
             'unmatchedReco',
             False
-        )[0]
+        )
         utR = read_hist(
             dset, hist, 
             'untransferedReco',
             False
         )[0]
         bkgR = umR + utR
+        if rebinning_reco is not None:
+            bkgR = rbinning.rebin(bkgR, rebinning_reco)[0]
 
         totR = read_hist(
             dset, hist, 
             'totalReco',
             False
         )[0]
+        if rebinning_reco is not None:
+            totR = rbinning.rebin(totR, rebinning_reco)[0]
 
         Rdenom = totR - bkgR
         Rdenom = np.where(Rdenom == 0, 1.0, Rdenom)
         rho = bkgR / Rdenom
 
-        t = t.reshape(len(rho), len(gamma))
+        t = t.reshape(len(umR), len(umG))
+        print(t.shape)
+        if rebinning_reco is not None and rebinning_gen is not None:
+            t = tbinning.rebin_transfer2d(t, rebinning_reco, rebinning_gen)[0]
+        elif rebinning_reco is not None or rebinning_gen is not None:
+            raise ValueError("Must provide both rebinning_reco and rebinning_gen or neither")
+
         tdenom = totG - bkgG
         tdenom = np.where(tdenom == 0, 1.0, tdenom)
         t /= tdenom[None, :]
@@ -537,13 +570,15 @@ class DetectorModel:
         return reco
 
     @classmethod
-    def from_dataset(cls, cfg : detectormodelspec) -> "DetectorModel":
+    def from_dataset(cls, cfg : detectormodelspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None) -> "DetectorModel":
         t0, gamma0, rho0 = get_model_matrices(
             cfg['dset'],
             {
                 'objsyst' : 'nominal',
                 'wtsyst' : 'nominal'
-            }
+            },
+            rebinning_reco = rebinning_reco,
+            rebinning_gen = rebinning_gen
         )
 
         gammaVariations = []
@@ -562,6 +597,8 @@ class DetectorModel:
                 t_up, gamma_up, rho_up = get_model_matrices(
                     cfg['dset'],
                     hist_from_syst(syst, None),
+                    rebinning_reco = rebinning_reco,
+                    rebinning_gen = rebinning_gen
                 )
                 dT = t_up - t0
                 dGamma = gamma_up - gamma0
@@ -569,11 +606,15 @@ class DetectorModel:
             else:
                 t_up, gamma_up, rho_up = get_model_matrices(
                     cfg['dset'] ,
-                    hist_from_syst(syst, "Up")
+                    hist_from_syst(syst, "Up"),
+                    rebinning_reco = rebinning_reco,
+                    rebinning_gen = rebinning_gen
                 )
                 t_dn, gamma_dn, rho_dn = get_model_matrices(
                     cfg['dset'],
-                    hist_from_syst(syst, "Down")
+                    hist_from_syst(syst, "Down"),
+                    rebinning_reco = rebinning_reco,
+                    rebinning_gen = rebinning_gen
                 )
 
                 dT = 0.5 * (t_up - t_dn)
@@ -600,8 +641,12 @@ class DetectorModel:
             transferVariations = np.stack(transferVariations, axis=0)
             transferVarIndices = np.array(transferVarIndices, dtype=int)
 
-        binning = get_transfer_binning(cfg['dset'])
-
+        binning = get_transfer_binning(
+            cfg['dset'],
+            rebinning_reco = rebinning_reco,
+            rebinning_gen = rebinning_gen
+        )
+        
         # transform the binning s.t. all reco axes are named "*_reco"
         # and all gen axes are named "*_gen"
         for recoaxis in binning.recobinning.axis_names:
@@ -749,3 +794,51 @@ class DetectorModel:
             setattr(self, f'_{arrname}', arr_detached)
 
         return self
+
+    def getGoodX0(self, reco : np.ndarray, baseline : np.ndarray):
+        import fasteigenpy as eigen
+
+        print("Building good x0 guess by inverting transfer matrix...")
+        print("reco shape:", reco.shape)
+        print("\tsum:", reco.sum())
+        T = self._transfer0
+        print("T shape:", T.shape)
+        print("\tsum:", T.sum())
+
+        # rho = recoBkg / (reco - recoBkg) 
+        # -> recoBkg = rho * (reco - recoBkg)
+        # -> recoBkg = rho * reco - rho * recoBkg
+        # -> recoBkg * (1 + rho) = rho * reco
+        # -> recoBkg = rho * reco / (1 + rho)
+
+        recoBkgGuess = self._rho0 * reco / (1 + self._rho0)
+        Rpure = reco - recoBkgGuess
+        print("Rpure shape:", Rpure.shape)
+        print("\tsum:", Rpure.sum())
+        
+        if type(T) is torch.Tensor:
+            T = T.cpu().numpy()
+        if type(Rpure) is torch.Tensor:
+            Rpure = Rpure.cpu().numpy()
+        if type(reco) is torch.Tensor:
+            reco = reco.cpu().numpy()
+
+        codT = eigen.CompleteOrthogonalDecomposition(T)
+        Gpure = codT.solve(Rpure).squeeze()
+        print("Gpure shape:", Gpure.shape)
+        print("\tsum:", Gpure.sum())
+        
+        # gamma = genBkg / gen
+        # -> genBkg = gamma * gen
+        # -> (gen - genBkg) = gen - gamma * gen
+        # -> (gen - genBkg) = gen * (1 - gamma)
+        # -> gen = (gen - genBkg) / (1 - gamma)
+        beta0 = Gpure / (1 - self._gamma0)
+        print("beta0 shape:", beta0.shape)
+        print("\tsum:", beta0.sum())
+ 
+        x0 = beta0 / (baseline)
+        print("x0 shape:", x0.shape)
+        print("\tsum:", x0.sum())
+
+        return x0

@@ -167,7 +167,7 @@ class Histogram:
         return self._device
 
     @classmethod
-    def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen']) -> "Histogram":
+    def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'], rebinning : str | dict | None) -> "Histogram":
         values, covmat, binning = read_hist(
             cfg,
             histcfg,
@@ -175,7 +175,10 @@ class Histogram:
             read_cov=True
         )
 
-        return cls(values, covmat, binning)
+        result = cls(values, covmat, binning)
+        if rebinning is not None:
+            result.rebin(rebinning)
+        return result
 
     @classmethod
     def from_disk(cls, where: str) -> "Histogram":
@@ -606,8 +609,9 @@ class UnfoldedHistogram:
                 print("Fixing nuisance", self._nuisance_names[treatment['index']], "to value", treatment['value'])
                 x, invhess = condition(x, invhess, Nbeta+treatment['index'], Nbeta+treatment['index']+1, treatment['value'])
             else:
-                print("Marginalizing over nuisance", self._nuisance_names[treatment['index']])
+                print("Marginalizing over nuisance", self._nuisance_names[treatment['index']])      
                 x, invhess = marginalize(x, invhess, Nbeta+treatment['index'], Nbeta+treatment['index']+1)
+    
 
         # apply multiplication by baseline
         x *= self._baseline
@@ -696,6 +700,38 @@ class UnfoldedHistogram:
         if self._Linv is not None:
             with open(os.path.join(where, 'Linv.npy'), 'wb') as f:
                 np.save(f, self._Linv)
+
+    def _plot_valonly_histogram(self,
+                                output_folder : str | None, extratext : str | None, 
+                                variable : Any, cut : Any, weight : Any, binning : Any,
+                                data : list[np.ndarray], label : list[str], thebinning : Any,
+                                override_filename : str, override_ylabel : str | None = None,
+                                **kwargs):
+        datasets = []
+        for d, l in zip(data, label):
+            datasets.append(ValNoCovDataset(
+                key=l,
+                color=None,
+                label=l,
+                data=d,
+                binning=thebinning,
+                isMC=True,
+            ))
+        plot_histogram(
+            variable,
+            cut,
+            weight,
+            datasets,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename=override_filename,
+            no_lumi_normalization=True,
+            override_ylabel=override_ylabel,
+            no_ratiopad = True,
+            **kwargs
+        )
+
 
     def plot(self, output_folder: str | None = None, extratext: str | None = None, covmats : bool = False) -> None:
         if self.invhess is None:
@@ -794,7 +830,8 @@ class UnfoldedHistogram:
             override_filename='nuisance_pulls',
             no_lumi_normalization=True,
             extra_stuff=[gray_box],
-            override_ylabel="Nuisance posteriors"
+            override_ylabel="Nuisance posteriors",
+            logy=False
         )
         
         if covmats:
@@ -861,3 +898,129 @@ class UnfoldedHistogram:
                 output_folder=output_folder,
                 override_filename='unfolded_betatheta_correlation_matrix',
             )
+        
+        # time for nuisance contributions
+        from simonpy.stats import condition
+
+        xi = self._x.copy()
+        covxi = self.invhess.copy()
+        Nbeta = self._baseline.shape[0]
+        Ntheta = len(self._nuisance_names)
+
+        xi[:Nbeta] *= self._baseline
+        covxi[:Nbeta, :] *= self._baseline[:, None]
+        covxi[:, :Nbeta] *= self._baseline[None, :]
+
+        # "what if we never had nuisance parameters at all?" -> just condition on them all being 0
+        x_statonly = xi.copy()
+        cov_statonly = covxi.copy()
+        for i in reversed(list(range(Ntheta))):
+            x_statonly, cov_statonly = condition(x_statonly, cov_statonly, Nbeta+i, Nbeta+i+1, 0)
+
+        flux_statonly, shape_statonly, fluxbinning = self.binning.get_fluxes_shapes(x_statonly, ['Jpt_gen', 'R_gen'])
+        covflux_statonly, covshape_statonly, covfluxshape_statonly = self.binning.get_fluxes_shapes_cov2d(
+            flux_statonly, shape_statonly, cov_statonly, ['Jpt_gen', 'R_gen']
+        )
+
+        flux_total, shape_total, _ = self.binning.get_fluxes_shapes(xi[:Nbeta], ['Jpt_gen', 'R_gen'])
+        covflux_total, covshape_total, covfluxshape_total = self.binning.get_fluxes_shapes_cov2d(
+            flux_total, shape_total, covxi[:Nbeta, :Nbeta], ['Jpt_gen', 'R_gen']
+        )
+
+        # contribution from nuisance i is the difference between the statonly sollution 
+        # and the solution with ONLY nuisance i not conditioned out
+        val_contributions = []
+        cov_contributions = []
+        
+        flux_contributions = []
+        shape_contributions = []
+        covflux_contributions = []
+        covshape_contributions = []
+        covfluxshape_contributions = []
+
+        for i in range(Ntheta):
+            x_nui = xi.copy()
+            cov_nui = covxi.copy()
+
+            for j in reversed(list(range(Ntheta))):
+                if i == j:
+                    continue
+                x_nui, cov_nui = condition(x_nui, cov_nui, Nbeta+j, Nbeta+j+1, 0)
+
+            val_contributions.append(x_nui[:Nbeta] - x_statonly[:Nbeta])
+            cov_contributions.append(cov_nui[:Nbeta, :Nbeta] - cov_statonly[:Nbeta, :Nbeta])
+
+            fluxi, shapei, _ = self.binning.get_fluxes_shapes(x_nui[:Nbeta], ['Jpt_gen', 'R_gen'])
+            covfluxi, covshapei, covfluxshapei = self.binning.get_fluxes_shapes_cov2d(
+                fluxi, shapei, cov_nui[:Nbeta, :Nbeta], ['Jpt_gen', 'R_gen']
+            )
+            flux_contributions.append(fluxi - flux_statonly)
+            shape_contributions.append(shapei - shape_statonly)
+            covflux_contributions.append(covfluxi - covflux_statonly)
+            covshape_contributions.append(covshapei - covshape_statonly)
+            covfluxshape_contributions.append(covfluxshapei - covfluxshape_statonly)
+
+        # now we can plot the contributions
+        self._plot_valonly_histogram(
+            output_folder, extratext, variable, cut, weight, binning,
+            data=[x / x_statonly for x in val_contributions],
+            label=self.nuisance_names,
+            thebinning = self.binning,
+            override_filename='nuisance_contributions',
+            override_ylabel='Proportional shift in unfolded result from nuisance',
+            logy=False
+        )
+        self._plot_valonly_histogram(
+            output_folder, extratext, variable, cut, weight, binning,
+            data=[flux / flux_statonly for flux in flux_contributions],
+            label=self.nuisance_names,
+            thebinning = fluxbinning,
+            override_filename='nuisance_flux_contributions',
+            override_ylabel='Proportional shift in unfolded result from nuisance [flux per (pT, R) bin]',
+            logy=False
+        )
+        self._plot_valonly_histogram(
+            output_folder, extratext, variable, cut, weight, binning,
+            data=[shape / shape_statonly for shape in shape_contributions],
+            label=self.nuisance_names,
+            thebinning = self.binning,
+            override_filename='nuisance_shape_contributions',
+            override_ylabel='Proportional shift in unfolded result from nuisance [normalized per (pT, R) bin]',
+            logy=False
+        )
+
+        self._plot_valonly_histogram(
+            output_folder, extratext, variable, cut, weight, binning,
+            data=[np.sqrt(np.diag(cov))/x_statonly for cov in (cov_contributions + [cov_statonly, cov_prof])],
+            label=self.nuisance_names + ['Stat', 'Total'],
+            thebinning = self.binning,
+            override_filename='nuisance_err_contributions',
+            override_ylabel='$\\sigma/\\mu$ contribution from nuisance',
+            logy=True
+        )
+        self._plot_valonly_histogram(
+            output_folder, extratext, variable, cut, weight, binning,
+            data=[np.sqrt(np.diag(cov))/flux_statonly for cov in (covflux_contributions + [covflux_statonly, covflux_total])],
+            label=self.nuisance_names + ['Stat', 'Total'],
+            thebinning = fluxbinning,
+            override_filename='nuisance_flux_err_contributions',
+            override_ylabel='$\\sigma/\\mu$ contribution from nuisance [flux per (pT, R) bin]',
+            logy=True
+        )
+
+        # due to floating point rounding, it can happen that some of the contributions are very slightly negative
+        # it doesn't feel right to clip an uncertainty to zero
+        # -> take abs()
+        diagcov = [np.diag(cov) for cov in (covshape_contributions + [covshape_statonly, covshape_total])]
+        diagcov = [np.abs(diag) for diag in diagcov]
+        thedata = [np.sqrt(diag)/shape_statonly for diag in diagcov]
+
+        self._plot_valonly_histogram(
+            output_folder, extratext, variable, cut, weight, binning,
+            data=[np.sqrt(cov)/shape_statonly for cov in diagcov],
+            label=self.nuisance_names + ['Stat', 'Total'],
+            thebinning = self.binning,
+            override_filename='nuisance_shape_err_contributions',
+            override_ylabel='$\\sigma/\\mu$ contribution from nuisance [normalized per (pT, R) bin]',
+            logy=True
+        )
