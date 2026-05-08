@@ -54,6 +54,13 @@ _ALL_BACKGROUND_DATASETS = [
     "ST_tW",
     "ST_tW_anti",
 ]
+_ALL_DATA_DATASETS = [
+    "DATA_2018A",
+    "DATA_2018B",
+    "DATA_2018C",
+    "DATA_2018D"
+]
+
 if 'allHT' in args.mc:
     args.mc.remove('allHT')
     args.mc.extend(_ALL_HT_DATASETS)
@@ -64,7 +71,9 @@ if 'allBackground' in args.mc:
     args.mc.remove('allBackground')
     args.mc.extend(_ALL_BACKGROUND_DATASETS)
 
-
+if 'allData' in args.data:
+    args.data.remove('allData')
+    args.data.extend(_ALL_DATA_DATASETS)
 
 _ALL_OBJSYSTS = [
     "nominal",
