@@ -167,7 +167,7 @@ class Loss:
 
         cstr_term = thepkg.sum(thepkg.square(theta)) # type: ignore
 
-        result = err_term + cstr_term
+        result = 0.5*err_term + 0.5*cstr_term
     
         '''
         Apply penalty for negative values in the gen histogram
