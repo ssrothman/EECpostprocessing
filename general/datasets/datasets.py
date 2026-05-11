@@ -71,3 +71,7 @@ def lookup_count(location : str,
 def lookup_count(runtag : str, dataset : str) -> int | float:
     dsetcfg = cfg[runtag][dataset]
     return dsetcfg['eventcount']
+
+def lookup_xsec(runtag : str, dataset : str) -> float:
+    dsetcfg = cfg[runtag][dataset]
+    return dsetcfg['xsec']

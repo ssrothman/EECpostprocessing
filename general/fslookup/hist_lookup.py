@@ -1,4 +1,5 @@
 import os
+from typing import List
 from general.fslookup.skim_path import lookup_skim_path
 
 def get_hist_path(
@@ -11,7 +12,7 @@ def get_hist_path(
         table : str,
         cov : bool,
         statN : int,
-        statK : int
+        statK : int | List[int]
     ):
 
     fs, skimpath = lookup_skim_path(
@@ -34,7 +35,10 @@ def get_hist_path(
     thepath += '_%s' % evtwt
 
     if statN > 0:
-        thepath += '_%dstat%d' % (statN, statK)
+        if isinstance(statK, int):
+            statK = [statK]
+        statK_str = '+'.join(str(k) for k in statK)
+        thepath += '_%dstat%s' % (statN, statK_str)
 
     return fs, thepath + '.npy'
 
