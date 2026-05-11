@@ -31,7 +31,9 @@ if not args.skip_data:
         if args.only is not None and datacfg['name'] not in args.only:
             print(f"Skipping {datacfg['name']} since it's not in the --only list")
             continue
-        
+        else:
+            print("Setting up data histograms for", datacfg['name'])
+
         Hreco = Histogram.from_dataset(
             datacfg['dset'],
             datacfg['hist'],
@@ -56,6 +58,7 @@ if not args.skip_data:
             Hgen.dump_to_disk('%s_gen'%datacfg['name'])
 
 if not args.skip_model and not (args.only is not None and 'model' not in args.only):
+    print("Setting up detecor model")
     model = DetectorModel.from_dataset(
         cfg['model'],
         rebinning_reco = args.rebinning_reco,
@@ -63,12 +66,20 @@ if not args.skip_model and not (args.only is not None and 'model' not in args.on
     )
     model.dump_to_disk('model')
 
+    if 'mcgen' in cfg['model']:
+        mcgen_dset = cfg['model']['mcgen']
+    else:
+        mcgen_dset = {
+            'dset' : cfg['model']['dset'],
+            'hist' : {
+                'wtsyst' : 'nominal',
+                'objsyst' : 'nominal'
+            }
+        }
+
     mcgen = Histogram.from_dataset(
-        cfg['model']['dset'],
-        {
-            'wtsyst' : 'nominal',
-            'objsyst' : 'nominal'
-        },
+        mcgen_dset['dset'],
+        mcgen_dset['hist'],
         'totalGen',
         rebinning = args.rebinning_gen
     )
