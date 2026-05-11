@@ -17,7 +17,10 @@ import os
 import shlex
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import numpy as np
 from tqdm import tqdm
+
+from general.fslookup.hist_lookup import get_hist_path
 
 def read_commands(path):
     with open(path, 'r') as f:
@@ -25,48 +28,92 @@ def read_commands(path):
     # keep non-empty, non-comment lines
     return [l for l in lines if l and not l.lstrip().startswith('#')]
 
+def run_one_check(cmd:str, validate:bool):
+    # parse the command, and identify all the arguments
+    # and then rather than execute bin.py, just run the underlying logic
+    tokens = shlex.split(cmd)
+    runtag = tokens[1]
+    dataset = tokens[2]
+    objsyst = tokens[3]
+    wtsyst = tokens[4]
+    # then we have to search for --tables
+    if '--tables' in tokens:
+        idx = tokens.index('--tables')
+        tables = []
+        for t in tokens[idx+1:]:
+            if t.startswith('-'):
+                break
+            tables.append(t)
+    else:
+        tables = [tokens[5]]
 
-def make_check_command(cmd):
-    # remove any --nocheck tokens and add --justcheck and --validate-existing
-    toks = shlex.split(cmd)
-    toks = [t for t in toks if t != '--nocheck']
-    if '--justcheck' not in toks:
-        toks.append('--justcheck')
-    if '--validate-existing' not in toks:
-        toks.append('--validate-existing')
-    return toks
+    #and similarly search for --location, --config-suite, --statN (optinoal) --statK (optional)
+    if '--location' in tokens:
+        idx = tokens.index('--location')
+        location = tokens[idx+1]
+    else:
+        raise ValueError("Command does not contain --location: %s" % cmd)
+    if '--config-suite' in tokens:
+        idx = tokens.index('--config-suite')
+        config_suite = tokens[idx+1]
+    else:        
+        raise ValueError("Command does not contain --config-suite: %s" % cmd)
+    # statN and statK are optional, so we just look for them if they exist
+    if '--statN' in tokens:
+        idx = tokens.index('--statN')
+        statN = int(tokens[idx+1])
+    else:
+        statN = -1
+    if '--statK' in tokens:
+        idx = tokens.index('--statK')
+        statK = int(tokens[idx+1])
+    else:
+        statK = -1
+    
+    if '--cov' in tokens:
+        cov = True
+    else:
+        cov = False
 
+    # now we can just lookup the path to the binned .npy file
+    missing_tables = []
+    
+    for table in tables:
+        fs, path = get_hist_path(
+            location,
+            config_suite,
+            runtag,
+            dataset,
+            objsyst,
+            wtsyst,
+            table,
+            cov,
+            statN,
+            statK
+        )
+        if fs.exists(path):
+            if validate:
+                try:
+                    with fs.open(path, 'rb') as f:
+                        _ = np.load(f)
+                except Exception:
+                    missing_tables.append(table)
+        else:
+            missing_tables.append(table)
 
-def run_check(toks):
-    try:
-        proc = subprocess.run(toks, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        return proc.returncode, proc.stdout
-    except Exception as e:
-        return 2, str(e)
-
-
-def parse_missing_tables(output):
-    lines = output.splitlines()
-    tables = []
-    for i, l in enumerate(lines):
-        if l.strip() == 'Tables that need to be run:':
-            # collect following non-empty lines
-            for ll in lines[i+1:]:
-                s = ll.strip()
-                if not s:
-                    continue
-                tables.append(s)
-            break
-    return tables
-
-
+    # then we parse the missing tables back into a new command
+    if missing_tables:
+        new_cmd = rebuild_command_with_missing(cmd, missing_tables)
+        return (new_cmd, missing_tables)
+    else:
+        return (None, None)
+    
 def find_script_index(tokens):
     for i, t in enumerate(tokens):
         bn = os.path.basename(t)
         if bn == 'bin.py' or bn.endswith('bin.py'):
             return i
     return None
-
 
 def rebuild_command_with_missing(original_cmd, missing_tables):
     # Keep original command as much as possible, but replace the table list
@@ -116,17 +163,17 @@ def next_missing_filename():
     return f'commands_missing_{n}.txt'
 
 
-def check_one_command(cmd):
+def check_one_command(cmd, validate=False):
     """Check a single command for missing tables."""
-    toks = make_check_command(cmd)
-    rc, out = run_check(toks)
-    return (cmd, rc, out)
+    new_commands, missing_tables = run_one_check(cmd, validate)
+    return (new_commands, missing_tables)
 
 
 def main():
     parser = argparse.ArgumentParser(description='Stage missing binnings from commands.txt')
     parser.add_argument('-j', '--jobs', type=int, default=1, help='Parallel jobs (default: CPU count)')
     parser.add_argument('--commands-file', type=str, default='commands.txt', help='Commands file to read')
+    parser.add_argument('--validate-existing', action='store_true', help='Validate existing tables and report any that are corrupted')
 
     args = parser.parse_args()
 
@@ -141,50 +188,30 @@ def main():
 
     jobs = args.jobs or (os.cpu_count() or 4)
 
-    results = []
+    new_commands_accu = []  
     with ThreadPoolExecutor(max_workers=jobs) as ex:
-        futs = {ex.submit(check_one_command, cmd): cmd for cmd in cmds}
+        futs = {ex.submit(check_one_command, cmd, validate=args.validate_existing): cmd for cmd in cmds}
         iterator = tqdm(as_completed(futs), total=len(futs), desc="Checking commands")
+        iterator.set_postfix_str("Missing: 0")
         for fut in iterator:
             original_cmd = futs[fut]
-            try:
-                cmd, rc, out = fut.result()
-            except Exception as e:
-                cmd = original_cmd
-                rc = 2
-                out = str(e)
-            results.append((original_cmd, rc, out))
+            new_command, missing_tables = fut.result()
+            if new_command is not None:
+                new_commands_accu.append(new_command)
+                iterator.set_postfix_str(f"Missing: {len(new_commands_accu)}")
+
         iterator.close()
 
-    missing_commands = []
-    all_missing_tables = []
-    for original_cmd, rc, out in results:
-        if rc == 0:
-            # no missing tables for this command
-            continue
-        elif rc == 1:
-            tables = parse_missing_tables(out)
-            if tables:
-                all_missing_tables.extend(tables)
-                new_cmd = rebuild_command_with_missing(original_cmd, tables)
-                missing_commands.append(new_cmd)
-        else:
-            # unexpected error; include original command for manual inspection
-            print(f"Warning: command returned code {rc}")
-            print(f"error message: {out}")
-            print(f"original command was {original_cmd}")
-            missing_commands.append(original_cmd)
-
-    if not missing_commands:
+    if not new_commands_accu:
         print('No missing tables found.')
         return
     else:
         fname = next_missing_filename()
         with open(fname, 'w') as f:
-            for c in missing_commands:
+            for c in new_commands_accu:
                 f.write(c.rstrip() + '\n')
 
-        print("%d missing tables found across %d commands. Staged in %s" % (len(all_missing_tables), len(missing_commands), fname))
+        print("%d missing tables found across %d commands. Staged in %s" % (len(new_commands_accu), len(new_commands_accu), fname))
 
 if __name__ == '__main__':
     main()
