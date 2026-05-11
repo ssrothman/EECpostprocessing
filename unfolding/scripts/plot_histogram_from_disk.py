@@ -14,6 +14,12 @@ def main() -> None:
         "histogram_path",
         help="Path to a saved histogram directory containing values.npy/cov.npy/invcov.npy/bincfg.json",
     )
+    parser.add_argument(
+        '--pretty', action='store_true', help="Draw the pretty 2D radial plots"
+    )
+    parser.add_argument(
+        '--shapes', action='store_true', help="Normalize in (pT, R) blocks"
+    )
     args = parser.parse_args()
 
     histogram_dir = Path(args.histogram_path).expanduser().resolve()
@@ -21,7 +27,7 @@ def main() -> None:
         raise NotADirectoryError(f"Histogram path is not a directory: {histogram_dir}")
 
     histogram = Histogram.from_disk(str(histogram_dir))
-    histogram.plot(output_folder=os.path.join(str(histogram_dir), 'plots'))
+    histogram.plot(output_folder=os.path.join(str(histogram_dir), 'plots'), prettymatrices=args.pretty, shapes=args.shapes)
 
 if __name__ == "__main__":
     main()

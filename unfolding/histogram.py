@@ -1,7 +1,11 @@
 import hist
+from networkx import find_minimal_d_separator
 
 #from simonplot.binning.Binning import PrebinnedBinningWithLookup
+from simonplot.cut.PrebinnedCut import SliceOperation
+from simonplot.drivers import draw_radial_histogram
 from simonplot.plottables.PlotStuff import BoxSpec
+from simonplot.variable.PrebinnedVariable import NormalizePerBlock, WithJacobian
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse, smart_sqrt
 from typing import Any, Literal, Sequence, TypedDict
@@ -17,6 +21,16 @@ from general.fslookup.skim_path import lookup_skim_path
 from general.datasets.datasets import lookup_count, lookup_dataset
 from unfolding.io import read_hist
 from unfolding.specs import NuisanceTreatment, dsspec, whichsystspec, histspec
+
+def get_genreco_name(axnames, target):
+    if target+'_gen' in axnames:
+        return target+'_gen'
+    elif target+'_reco' in axnames:
+        return target+'_reco'
+    elif target in axnames:
+        return target
+    else:
+        raise ValueError("No axis found matching %s_gen, %s_reco, or %s" % (target, target, target))
 
 class Histogram:
     def __init__(self, values : np.ndarray, covmat : np.ndarray, binning : ArbitraryBinning,
@@ -166,6 +180,15 @@ class Histogram:
     def device(self) -> str:
         return self._device
 
+    def chi2(self, other : "Histogram") -> float:
+        diff : np.ndarray = self._as_numpy(self.values) - self._as_numpy(other.values)
+        cov : np.ndarray = self._as_numpy(self.covmat) + self._as_numpy(other.covmat)
+        invcov : np.ndarray = smart_inverse(cov, False)
+        result : float = np.linalg.multi_dot([diff, invcov, diff]).item()
+        print(result)
+        assert type(result) == float, "Chi2 should be a single number"
+        return result
+
     @classmethod
     def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'], rebinning : str | dict | None) -> "Histogram":
         values, covmat, binning = read_hist(
@@ -314,6 +337,8 @@ class Histogram:
         self,
         output_folder: str | None = None,
         extratext: str | None = None,
+        prettymatrices : bool = False,
+        shapes : bool = False
     ) -> None:
         
         if self.invcov is None:
@@ -324,12 +349,41 @@ class Histogram:
         invcov = self._as_numpy(self.invcov)
         invcov_cov = invcov @ covmat
 
-        variable = BasicPrebinnedVariable()
+        axnames = self.binning.axis_names
+
+        ptname = get_genreco_name(axnames, 'Jpt')            
+        Rname = get_genreco_name(axnames, 'R')
+        rname = get_genreco_name(axnames, 'r')
+        cname = get_genreco_name(axnames, 'c')
+
+        if shapes:
+            basevariable = NormalizePerBlock(
+                BasicPrebinnedVariable(),
+                [ptname, Rname]
+            )
+        else:
+            basevariable = BasicPrebinnedVariable()
+
+        basevariable = WithJacobian(
+            basevariable,
+            [rname, cname],
+            radial_coords=[rname],
+            clip_positiveinf = {
+                rname : 3.0, # for triangle
+                ptname : 1200 # pT overflow can clip to 1200 GeV
+            }, 
+            clip_negativeinf = {
+                ptname : 30.0 # pT underflow actually starts at 30 GeV
+            }
+        )
+
         cut = NoopOperation()
         weight = ConstantVariable(1.0)
         binning = PrebinnedBinning()
 
         base_prefix = 'histogram'
+        if shapes:
+            base_prefix += '_shapes'
 
         values_dataset = ValCovPairDataset(
             key=f'{base_prefix}_values',
@@ -365,7 +419,7 @@ class Histogram:
         )
 
         plot_histogram(
-            variable,
+            basevariable,
             cut,
             weight,
             values_dataset,
@@ -377,7 +431,7 @@ class Histogram:
         )
 
         draw_matrix(
-            variable,
+            basevariable,
             cut,
             cov_dataset, # type: ignore
             binning,
@@ -389,7 +443,7 @@ class Histogram:
         )
 
         draw_matrix(
-            variable,
+            basevariable,
             cut,
             invcov_dataset, # type: ignore
             binning,
@@ -401,7 +455,7 @@ class Histogram:
         )
 
         draw_matrix(
-            variable,
+            basevariable,
             cut,
             invcov_cov_dataset, # type: ignore
             binning,
@@ -412,7 +466,7 @@ class Histogram:
             override_filename=f'{base_prefix}_inverse_covariance_times_covariance_matrix',
         )
 
-        corr_variable = CorrelationFromCovariance(variable)
+        corr_variable = CorrelationFromCovariance(basevariable)
 
         draw_matrix(
             corr_variable,
@@ -437,6 +491,45 @@ class Histogram:
             output_folder=output_folder,
             override_filename=f'{base_prefix}_inverse_covariance_correlation_matrix',
         )
+
+        if prettymatrices:
+            axnames = self.binning.axis_names
+
+            ptname = get_genreco_name(axnames, 'Jpt')            
+            Rname = get_genreco_name(axnames, 'R')
+            rname = get_genreco_name(axnames, 'r')  
+            cname = get_genreco_name(axnames, 'c')          
+
+            ptedges = self.binning.axis_edges(ptname)
+            Redges = self.binning.axis_edges(Rname)
+
+            jacvar = WithJacobian(
+                BasicPrebinnedVariable(),
+                [rname, cname],
+                radial_coords=[rname],
+                clip_positiveinf = {rname : 3.0} # for Triangle
+            )
+
+            for ipt in range(len(ptedges)-1):
+                for iR in range(len(Redges)-1):
+                    cuti = SliceOperation(
+                        {
+                            ptname: (ptedges[ipt], ptedges[ipt+1]),
+                            Rname: (Redges[iR], Redges[iR+1])
+                        },
+                        []
+                    )
+                    draw_radial_histogram(
+                        jacvar,
+                        cuti,
+                        values_dataset, # type: ignore
+                        binning,
+                        extratext = extratext,
+                        logc = True,
+                        sym = False,
+                        output_folder = output_folder,
+                        override_filename = '%s_radial2D_pt%d_R%d' % (base_prefix, ipt, iR)
+                    )
 
 
     def to_torch(self):
