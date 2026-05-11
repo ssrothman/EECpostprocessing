@@ -2,10 +2,11 @@ from typing import overload, override
 
 from unfolding.specs import dsspec, whichsystspec
 import numpy as np
-from general.datasets.datasets import lookup_count, lookup_dataset, lookup_skim_path
+from general.datasets.datasets import lookup_count, lookup_dataset, lookup_skim_path, lookup_xsec
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 import json
 from typing import Literal
+from general.fslookup.hist_lookup import get_hist_path, get_hist_bincfg_path
 
 @overload
 def read_hist(dset : dsspec, 
@@ -33,128 +34,80 @@ def read_hist(dset : dsspec,
               whichhist : Literal['transfer', 'totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'],
               read_cov : bool):
     
-    if dset['isStack']:
-        stackcfg = lookup_dataset(
-            'stacks',
-            dset['dataset']
-        )
+    table = dset['what'] + '_' + whichhist
 
-        vals = []
-        covs = []
-        binnings = []
+    fs, valpath = get_hist_path(
+        dset['location'],
+        dset['config_suite'],
+        dset['runtag'],
+        dset['dataset'],
+        hist['objsyst'],
+        hist['wtsyst'],
+        table,
+        False,
+        dset['statN'],
+        dset['statK']
+    )
 
-        for subdset in stackcfg['dsets']:
-            subcfg = dset.copy()
-            subcfg.update({
-                'dataset' : subdset,
-                'isStack' : False
-            })
-            subH = read_hist(
-                subcfg,
-                hist,
-                whichhist=whichhist,
-                read_cov=read_cov
-            )
-            vals.append(subH[0])
-            binnings.append(subH[-1])
+    _, bincfgpath = get_hist_bincfg_path(
+        dset['location'],
+        dset['config_suite'],
+        dset['runtag'],
+        dset['dataset'],
+        hist['objsyst'],
+        table
+    )
 
-            if read_cov:
-                covs.append(subH[1])
+    with fs.open(valpath, 'rb') as f:
+        values = np.load(f)
 
-        for substack in stackcfg['stacks']:
-            subcfg = dset.copy()
-            subcfg.update({
-                'dataset' : substack,
-                'isStack' : True
-            })
-            subH = read_hist(
-                subcfg,
-                hist,
-                whichhist=whichhist,
-                read_cov=read_cov
-            )
-            vals.append(subH[0])
-            binnings.append(subH[-1])
-
-            if read_cov:
-                covs.append(subH[1])
-        
-        # check that all binnings are the same
-        for b in binnings[1:]:
-            if b != binnings[0]:
-                raise ValueError("Binnings of subdatasets do not match in stack %s" % dset['dataset'])
-            
-        val = vals[0]
-        for v in vals[1:]:
-            val += v
-
-        if not read_cov:
-            return val, binnings[0]
+    if dset['target_lumi'] > 0 and dset['isMC']:
+        # reweight by target lumi
+        if dset['isStack']: # stacks are already scaled to a luminosity of 1/fb
+            wt = dset['target_lumi']
         else:
-            cov = covs[0]
-            for c in covs[1:]:
-                cov += c
-            return val, cov, binnings[0]
-        
+            xsec = lookup_xsec(dset['runtag'], dset['dataset'])
+            count = lookup_count(dset['runtag'], dset['dataset'])
+            wt = 1000 * xsec * dset['target_lumi'] / count
     else:
-        fs, skimpath = lookup_skim_path(
-            dset['location'],
-            dset['config_suite'],
-            dset['runtag'],
-            dset['dataset'], 
-            hist['objsyst'],
-            dset['what'] + '_' + whichhist
-        )
-        
-        valspath = skimpath + '_BINNED_%s' % hist['wtsyst']
-        covpath = skimpath + '_BINNED_covmat_%s' % hist['wtsyst']
-        
-        if dset['statN'] > 0:
-            valspath += '_%dstat%d' % (dset['statN'], dset['statK'])
-            covpath += '_%dstat%d' % (dset['statN'], dset['statK'])
+        wt = 1.0
 
-        valspath += '.npy'
-        covpath += '.npy'
-
-        binningpath = skimpath + '_bincfg.json'
-
-        print("Reading", valspath, "...")
-        with fs.open(valspath, 'rb') as f:
-            values = np.load(f)
-
-        if whichhist == 'transfer':
-            binning = ArbitraryGenRecoBinning()
+    if dset['statN'] > 0:
+        if isinstance(dset['statK'], int):
+            wt *= dset['statN']
         else:
-            binning = ArbitraryBinning()
+            wt *= dset['statN'] / len(dset['statK'])
+    
+    values *= wt
 
-        with fs.open(binningpath, 'r') as f:
+    if read_cov and whichhist == 'transfer':
+        raise ValueError("Covariance matrices not supported for transfer histograms")
+    elif whichhist == 'transfer':
+        binning = ArbitraryGenRecoBinning()
+        with fs.open(bincfgpath, 'r') as f:
+            binning.from_dict(json.load(f))
+        return values, binning
+    else:
+        binning = ArbitraryBinning()
+        with fs.open(bincfgpath, 'r') as f:
             binning.from_dict(json.load(f))
 
-        if dset['isMC']:
-            xsec = lookup_dataset(
-                dset['runtag'],
-                dset['dataset']
-            )['xsec']
-            count = lookup_count(
+        if read_cov:
+            _, covpath = get_hist_path(
+                dset['location'],
+                dset['config_suite'],
                 dset['runtag'],
                 dset['dataset'],
+                hist['objsyst'],
+                hist['wtsyst'],
+                table,
+                True,
+                dset['statN'],
+                dset['statK']
             )
-
-            wt = 1000 * xsec * dset['target_lumi'] / count 
-            print("\txsec weight:", wt)
-            values *= wt
-        else:
-            wt = 1.0
-
-        if not read_cov:
-            return values, binning
-        
-        else:
             with fs.open(covpath, 'rb') as f:
                 covmat = np.load(f)
-
-            if dset['isMC']:
-                covmat *= wt * wt
-
+            covmat *= wt * wt
             return values, covmat, binning
-
+        else:
+            return values, binning
