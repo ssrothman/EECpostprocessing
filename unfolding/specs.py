@@ -16,7 +16,7 @@ class dsspec(TypedDict):
     target_lumi : float
     isStack : bool
     statN : int
-    statK : int
+    statK : int | List[int]
     what : str
 
 class whichsystspec(TypedDict):
@@ -33,7 +33,6 @@ class systspec(TypedDict):
 class detectormodelspec(TypedDict):
     systematics : List[systspec]
     dset : dsspec
-    what : str
 
 class histspec(TypedDict):
     dset : dsspec
