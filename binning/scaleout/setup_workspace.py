@@ -1,7 +1,7 @@
 import os
 import shlex
 import shutil
-from typing import Optional
+from typing import List, Optional
 
 from general.fslookup.hist_lookup import get_hist_path
 
@@ -54,7 +54,7 @@ def setup_binning_workspace(
     location: str,
     config_suite: str,
     statN: int,
-    statK: int,
+    statK_l: List[int],
     bincfg: Optional[str] = None,
     cov: bool = False,
     nocheck: bool = False,
@@ -66,37 +66,38 @@ def setup_binning_workspace(
 
     for dataset, objsyst, wtsyst in dataset_objsyst_wtsyst_triples:
         for table in tables:
-            if not nocheck:
-                fs, outpath = get_hist_path(
-                    location,
-                    config_suite,
-                    runtag,
-                    dataset,
-                    objsyst,
-                    wtsyst,
-                    table,
-                    cov,
-                    statN,
-                    statK,
-                )
-                if fs.exists(outpath):
-                    skipped_existing += 1
-                    continue
+            for statK in statK_l:
+                if not nocheck:
+                    fs, outpath = get_hist_path(
+                        location,
+                        config_suite,
+                        runtag,
+                        dataset,
+                        objsyst,
+                        wtsyst,
+                        table,
+                        cov,
+                        statN,
+                        statK,
+                    )
+                    if fs.exists(outpath):
+                        skipped_existing += 1
+                        continue
 
-            cmd = _build_command(
-                runtag=runtag,
-                dataset=dataset,
-                objsyst=objsyst,
-                wtsyst=wtsyst,
-                table=table,
-                location=location,
-                config_suite=config_suite,
-                statN=statN,
-                statK=statK,
-                bincfg=bincfg,
-                cov=cov,
-            )
-            commands.append(cmd)
+                cmd = _build_command(
+                    runtag=runtag,
+                    dataset=dataset,
+                    objsyst=objsyst,
+                    wtsyst=wtsyst,
+                    table=table,
+                    location=location,
+                    config_suite=config_suite,
+                    statN=statN,
+                    statK=statK,
+                    bincfg=bincfg,
+                    cov=cov,
+                )
+                commands.append(cmd)
 
     os.makedirs(working_dir, exist_ok=True)
 

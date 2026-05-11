@@ -18,7 +18,7 @@ parser.add_argument("--location", type=str, default="local-submit", help="Output
 parser.add_argument("--config-suite", type=str, default="BasicConfig", help="Configuration suite")
 
 parser.add_argument("--statN", type=int, default=-1, help="N for stat split (-1 to disable)")
-parser.add_argument("--statK", type=int, default=-1, help="K for stat split")
+parser.add_argument("--statK", type=int, default=[-1], help="K for stat split", nargs="+")
 
 parser.add_argument("--bincfg", type=str, default=None, help="Optional explicit binning config name")
 
@@ -149,7 +149,7 @@ ncommands = setup_binning_workspace(
     location=args.location,
     config_suite=args.config_suite,
     statN=args.statN,
-    statK=args.statK,
+    statK_l=args.statK,
     bincfg=args.bincfg,
     cov=args.cov,
     nocheck=args.nocheck,
