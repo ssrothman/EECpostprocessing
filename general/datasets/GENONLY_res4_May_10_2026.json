@@ -1,0 +1,462 @@
+{
+    "May_10_2026" : {
+        "base" : "",
+        "herwig_glu_1200" : {
+            "tag" : "herwig_glu_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; default [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_250" : {
+            "tag" : "herwig_glu_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; default [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_50" : {
+            "tag" : "herwig_glu_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; default [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_glu_nohad_1200" : {
+            "tag" : "herwig_glu_nohad_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no hadronization [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nohad_250" : {
+            "tag" : "herwig_glu_nohad_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no hadronization [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nohad_50" : {
+            "tag" : "herwig_glu_nohad_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no hadronization [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_glu_nohardspin_1200" : {
+            "tag" : "herwig_glu_nohardspin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no hard spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nohardspin_250" : {
+            "tag" : "herwig_glu_nohardspin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no hard spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nohardspin_50" : {
+            "tag" : "herwig_glu_nohardspin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no hard spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_glu_nosoftspin_1200" : {
+            "tag" : "herwig_glu_nosoftspin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no soft spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nosoftspin_250" : {
+            "tag" : "herwig_glu_nosoftspin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no soft spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nosoftspin_50" : {
+            "tag" : "herwig_glu_nosoftspin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no soft spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_glu_nospin_1200" : {
+            "tag" : "herwig_glu_nospin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nospin_250" : {
+            "tag" : "herwig_glu_nospin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_glu_nospin_50" : {
+            "tag" : "herwig_glu_nospin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+glu; no spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+
+
+
+        "herwig_q_1200" : {
+            "tag" : "herwig_q_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; default [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_250" : {
+            "tag" : "herwig_q_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; default [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_50" : {
+            "tag" : "herwig_q_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; default [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_q_nohad_1200" : {
+            "tag" : "herwig_q_nohad_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no hadronization [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nohad_250" : {
+            "tag" : "herwig_q_nohad_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no hadronization [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nohad_50" : {
+            "tag" : "herwig_q_nohad_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no hadronization [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_q_nohardspin_1200" : {
+            "tag" : "herwig_q_nohardspin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no hard spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nohardspin_250" : {
+            "tag" : "herwig_q_nohardspin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no hard spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nohardspin_50" : {
+            "tag" : "herwig_q_nohardspin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no hard spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_q_nosoftspin_1200" : {
+            "tag" : "herwig_q_nosoftspin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no soft spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nosoftspin_250" : {
+            "tag" : "herwig_q_nosoftspin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no soft spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nosoftspin_50" : {
+            "tag" : "herwig_q_nosoftspin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no soft spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "herwig_q_nospin_1200" : {
+            "tag" : "herwig_q_nospin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nospin_250" : {
+            "tag" : "herwig_q_nospin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "herwig_q_nospin_50" : {
+            "tag" : "herwig_q_nospin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Herwig Z+q; no spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+
+
+
+        "pythia_glu_1200" : {
+            "tag" : "pythia_glu_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; default [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_glu_250" : {
+            "tag" : "pythia_glu_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; default [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_glu_50" : {
+            "tag" : "pythia_glu_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; default [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "pythia_glu_nohad_1200" : {
+            "tag" : "pythia_glu_nohad_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; no hadronization [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_glu_nohad_250" : {
+            "tag" : "pythia_glu_nohad_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; no hadronization [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_glu_nohad_50" : {
+            "tag" : "pythia_glu_nohad_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; no hadronization [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "pythia_glu_nospin_1200" : {
+            "tag" : "pythia_glu_nospin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; no hard spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_glu_nospin_250" : {
+            "tag" : "pythia_glu_nospin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; no hard spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_glu_nospin_50" : {
+            "tag" : "pythia_glu_nospin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+glu; no hard spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+
+
+
+
+        "pythia_q_1200" : {
+            "tag" : "pythia_q_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; default [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_q_250" : {
+            "tag" : "pythia_q_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; default [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_q_50" : {
+            "tag" : "pythia_q_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; default [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "pythia_q_nohad_1200" : {
+            "tag" : "pythia_q_nohad_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; no hadronization [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_q_nohad_250" : {
+            "tag" : "pythia_q_nohad_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; no hadronization [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_q_nohad_50" : {
+            "tag" : "pythia_q_nohad_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; no hadronization [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+
+        "pythia_q_nospin_1200" : {
+            "tag" : "pythia_q_nospin_1200_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; no hard spin corr. [Zpt > 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_q_nospin_250" : {
+            "tag" : "pythia_q_nospin_250_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; no hard spin corr. [250 < Zpt < 1200 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        },
+        "pythia_q_nospin_50" : {
+            "tag" : "pythia_q_nospin_50_May_10_2026",
+            "location" : "simon-LPC",
+            "era" : "skip",
+            "flags" : {},
+            "label" : "Pythia Z+q; no hard spin corr. [50 < Zpt < 250 GeV]",
+            "xsec" : 1.0,
+            "color" : "blue"
+        }
+    }
+}

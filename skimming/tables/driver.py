@@ -110,8 +110,9 @@ class TableDriver:
                 
                 # validate after copying to final destination
                 # use checksums
-                tmpcheck = self._fs.checksum(temp_dest)
-                finalcheck = self._fs.checksum(final_dest)
+                from simonpy.checksum import checksum_file
+                tmpcheck = checksum_file(temp_dest, self._fs)
+                finalcheck = checksum_file(final_dest, self._fs)
                 if tmpcheck != finalcheck:
                     raise ValueError("Checksum mismatch after copying JSON to final destination")
                 

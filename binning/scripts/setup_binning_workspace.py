@@ -28,52 +28,10 @@ parser.add_argument("--nocheck", action="store_true", help="Skip existing-output
 
 args = parser.parse_args()
 
-_ALL_HT_DATASETS = [
-    'Pythia_HT-0to70',
-    'Pythia_HT-70to100',
-    'Pythia_HT-100to200',
-    'Pythia_HT-200to400',
-    'Pythia_HT-400to600',
-    'Pythia_HT-600to800',
-    'Pythia_HT-800to1200',
-    'Pythia_HT-1200to2500',
-    'Pythia_HT-2500toInf',
-]
-_ALL_SIGNAL_DATASETS = [
-    *_ALL_HT_DATASETS,
-    "Pythia_inclusive",
-    "Herwig_inclusive"
-]
-_ALL_BACKGROUND_DATASETS = [
-    "ZZ",
-    "WZ",
-    "WW",
-    "TT",
-    "ST_t",
-    "ST_t_anti",
-    "ST_tW",
-    "ST_tW_anti",
-]
-_ALL_DATA_DATASETS = [
-    "DATA_2018A",
-    "DATA_2018B",
-    "DATA_2018C",
-    "DATA_2018D"
-]
+from general.datasets.expand_datasets import expand_datasets
 
-if 'allHT' in args.mc:
-    args.mc.remove('allHT')
-    args.mc.extend(_ALL_HT_DATASETS)
-if 'allSignal' in args.mc:
-    args.mc.remove('allSignal')
-    args.mc.extend(_ALL_SIGNAL_DATASETS)
-if 'allBackground' in args.mc:
-    args.mc.remove('allBackground')
-    args.mc.extend(_ALL_BACKGROUND_DATASETS)
-
-if 'allData' in args.data:
-    args.data.remove('allData')
-    args.data.extend(_ALL_DATA_DATASETS)
+args.mc = expand_datasets(args.mc)
+args.data = expand_datasets(args.data)
 
 _ALL_OBJSYSTS = [
     "nominal",

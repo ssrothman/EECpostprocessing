@@ -5,9 +5,10 @@ from networkx import find_minimal_d_separator
 from simonplot.cut.PrebinnedCut import SliceOperation
 from simonplot.drivers import draw_radial_histogram
 from simonplot.plottables.PlotStuff import BoxSpec
-from simonplot.variable.PrebinnedVariable import NormalizePerBlock, WithJacobian
+from simonplot.variable.PrebinnedVariable import DivideOutProfile, NormalizePerBlock, WithJacobian
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse, smart_sqrt
+import simonplot as splt
 from typing import Any, Literal, Sequence, TypedDict
 import numpy as np
 import os
@@ -337,17 +338,15 @@ class Histogram:
         self,
         output_folder: str | None = None,
         extratext: str | None = None,
+        covmats : bool = True,
         prettymatrices : bool = False,
-        shapes : bool = False
+        projected_r_c_1D : bool = False,
+        projected_c_1D : bool = False,
+        transform : Literal['none', 'shapes', 'angular_modulation'] = 'none'
     ) -> None:
         
-        if self.invcov is None:
-            self.compute_invcov()
-        
-        values = self._as_numpy(self.values)
-        covmat = self._as_numpy(self.covmat)
-        invcov = self._as_numpy(self.invcov)
-        invcov_cov = invcov @ covmat
+        if transform not in ['none', 'shapes', 'angular_modulation']:
+            raise ValueError("Invalid transform option: %s" % transform)
 
         axnames = self.binning.axis_names
 
@@ -356,41 +355,51 @@ class Histogram:
         rname = get_genreco_name(axnames, 'r')
         cname = get_genreco_name(axnames, 'c')
 
-        if shapes:
+        plotbinning = self.binning.copy()
+        plotbinning.clip_flow_bins(ptname, negativeinf=30.0) # pT underflow actually starts at 30 GeV
+
+        if self.invcov is None:
+            self.compute_invcov()
+        
+        values = self._as_numpy(self.values)
+        covmat = self._as_numpy(self.covmat)
+        invcov = self._as_numpy(self.invcov)
+        invcov_cov = invcov @ covmat
+
+        if transform == 'shapes':
             basevariable = NormalizePerBlock(
                 BasicPrebinnedVariable(),
                 [ptname, Rname]
             )
+        elif transform == 'angular_modulation':
+            basevariable = DivideOutProfile(
+                BasicPrebinnedVariable(),
+                [ptname, Rname, rname]
+            )
         else:
             basevariable = BasicPrebinnedVariable()
 
-        basevariable = WithJacobian(
-            basevariable,
-            [rname, cname],
-            radial_coords=[rname],
-            clip_positiveinf = {
-                rname : 3.0, # for triangle
-                ptname : 1200 # pT overflow can clip to 1200 GeV
-            }, 
-            clip_negativeinf = {
-                ptname : 30.0 # pT underflow actually starts at 30 GeV
-            }
-        )
+        if transform != 'angular_modulation':
+            basevariable = WithJacobian(
+                basevariable,
+                [rname, cname],
+                radial_coords=[rname]
+            )
 
         cut = NoopOperation()
         weight = ConstantVariable(1.0)
         binning = PrebinnedBinning()
 
         base_prefix = 'histogram'
-        if shapes:
-            base_prefix += '_shapes'
+        if transform != 'none':
+            base_prefix += f'_{transform}'
 
         values_dataset = ValCovPairDataset(
             key=f'{base_prefix}_values',
             color=None,
             label=None,
             data=(values, covmat),
-            binning=self._binning,
+            binning=plotbinning,
             isMC=True,
         )
         cov_dataset = ValCovPairDataset(
@@ -398,7 +407,7 @@ class Histogram:
             color=None,
             label=None,
             data=(values, covmat),
-            binning=self._binning,
+            binning=plotbinning,
             isMC=True,
         )
         invcov_dataset = ValCovPairDataset(
@@ -406,7 +415,7 @@ class Histogram:
             color=None,
             label=None,
             data=(values, invcov),
-            binning=self._binning,
+            binning=plotbinning,
             isMC=True,
         )
         invcov_cov_dataset = ValCovPairDataset(
@@ -414,10 +423,86 @@ class Histogram:
             color=None,
             label=None,
             data=(values, invcov_cov),
-            binning=self._binning,
+            binning=plotbinning,
             isMC=True,
         )
 
+        if projected_r_c_1D:
+            assert(isinstance(basevariable,splt.variable.WithJacobian))
+
+            projcut = splt.cut.ProjectionOperation(
+                [rname, cname]
+            )
+            plot_histogram(
+                basevariable._var,  # type: ignore
+                projcut,
+                weight,
+                values_dataset,
+                binning,
+                extratext=extratext,
+                output_folder=output_folder,
+                override_filename=f'{base_prefix}_projected(r,c)_1D_histogram',
+                no_lumi_normalization=True,
+            )
+
+        if projected_c_1D:
+            projc_variable = splt.variable.BasicPrebinnedVariable()
+            if transform == 'angular_modulation':
+                raise ValueError("Angular modulation not supported when projecting out angular coordinate")
+            elif transform == 'shapes':
+                projc_variable = NormalizePerBlock(projc_variable, [])
+            elif transform == 'none':
+                pass
+            else:
+                raise ValueError("Invalid transform option: %s" % transform)
+
+            projc_variable = splt.variable.WithJacobian(
+                projc_variable,
+                [rname],
+                [rname]
+            )
+
+            Redges = plotbinning.axis_edges(Rname)
+            ptedges = plotbinning.axis_edges(ptname)
+            for iR in range(len(Redges)-1):
+                projcuts = []
+                labels = []
+                for ipt in range(1, len(ptedges)-1): # skip pT underflow bin
+                    projcuts.append(splt.cut.ProjectAndSliceOperation(
+                        [cname],
+                        {
+                            Rname: (Redges[iR], Redges[iR+1]),
+                            ptname : (ptedges[ipt], ptedges[ipt+1])
+                        },
+                        []
+                    ))
+                    if ptedges[ipt+1] == np.inf:
+                        labels.append("$%d < p_T$ [GeV]" % (ptedges[ipt]))
+                    else:
+                        labels.append("$%d < p_T $ [GeV] $ < %d$" % (ptedges[ipt], ptedges[ipt+1]))
+
+                extraextratext = '$%0.1f < R < %0.1f$' % (Redges[iR], Redges[iR+1])
+                if extratext is not None:
+                    itext = extraextratext + '\n' + extratext
+                else:
+                    itext = extraextratext
+                    
+                plot_histogram(
+                    projc_variable,
+                    projcuts,
+                    weight,
+                    values_dataset,
+                    binning,
+                    labels,
+                    extratext=itext,
+                    output_folder=output_folder,
+                    override_filename=f'{base_prefix}_projected(c)_1D_histogram_R{iR}',
+                    no_lumi_normalization=True,
+                    no_ratiopad=True,
+                    logx=True,
+                    logy=True
+                )
+            
         plot_histogram(
             basevariable,
             cut,
@@ -430,67 +515,69 @@ class Histogram:
             no_lumi_normalization=True,
         )
 
-        draw_matrix(
-            basevariable,
-            cut,
-            cov_dataset, # type: ignore
-            binning,
-            extratext=extratext,
-            sym=True,
-            logc=True,
-            output_folder=output_folder,
-            override_filename=f'{base_prefix}_covariance_matrix',
-        )
+        if covmats:
+            draw_matrix(
+                basevariable,
+                cut,
+                cov_dataset, # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=True,
+                output_folder=output_folder,
+                override_filename=f'{base_prefix}_covariance_matrix',
+            )
 
-        draw_matrix(
-            basevariable,
-            cut,
-            invcov_dataset, # type: ignore
-            binning,
-            extratext=extratext,
-            sym=True,
-            logc=True,
-            output_folder=output_folder,
-            override_filename=f'{base_prefix}_inverse_covariance_matrix',
-        )
+            draw_matrix(
+                basevariable,
+                cut,
+                invcov_dataset, # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=True,
+                output_folder=output_folder,
+                override_filename=f'{base_prefix}_inverse_covariance_matrix',
+            )
 
-        draw_matrix(
-            basevariable,
-            cut,
-            invcov_cov_dataset, # type: ignore
-            binning,
-            extratext=extratext,
-            sym=True,
-            logc=False,
-            output_folder=output_folder,
-            override_filename=f'{base_prefix}_inverse_covariance_times_covariance_matrix',
-        )
+            draw_matrix(
+                basevariable,
+                cut,
+                invcov_cov_dataset, # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=False,
+                output_folder=output_folder,
+                override_filename=f'{base_prefix}_inverse_covariance_times_covariance_matrix',
+            )
 
         corr_variable = CorrelationFromCovariance(basevariable)
 
-        draw_matrix(
-            corr_variable,
-            cut,
-            cov_dataset, # type: ignore
-            binning,
-            extratext=extratext,
-            sym=True,
-            logc=False,
-            output_folder=output_folder,
-            override_filename=f'{base_prefix}_covariance_correlation_matrix',
-        )
+        if covmats:
+            draw_matrix(
+                corr_variable,
+                cut,
+                cov_dataset, # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=False,
+                output_folder=output_folder,
+                override_filename=f'{base_prefix}_covariance_correlation_matrix',
+            )
 
-        draw_matrix(
-            corr_variable,
-            cut,
-            invcov_dataset, # type: ignore
-            binning,
-            extratext=extratext,
-            sym=True,
-            logc=False,
-            output_folder=output_folder,
-            override_filename=f'{base_prefix}_inverse_covariance_correlation_matrix',
-        )
+            draw_matrix(
+                corr_variable,
+                cut,
+                invcov_dataset, # type: ignore
+                binning,
+                extratext=extratext,
+                sym=True,
+                logc=False,
+                output_folder=output_folder,
+                override_filename=f'{base_prefix}_inverse_covariance_correlation_matrix',
+            )
 
         if prettymatrices:
             axnames = self.binning.axis_names
@@ -503,12 +590,13 @@ class Histogram:
             ptedges = self.binning.axis_edges(ptname)
             Redges = self.binning.axis_edges(Rname)
 
-            jacvar = WithJacobian(
-                BasicPrebinnedVariable(),
-                [rname, cname],
-                radial_coords=[rname],
-                clip_positiveinf = {rname : 3.0} # for Triangle
-            )
+            plotbinning.clip_flow_bins(rname, positiveinf=3.0) #  clip r overflow bin for triangle
+
+
+            if transform == 'angular_modulation':
+                # the slicing breaks the DivideOutProfile
+                assert(isinstance(basevariable, DivideOutProfile))
+                basevariable._axes = [rname]
 
             for ipt in range(len(ptedges)-1):
                 for iR in range(len(Redges)-1):
@@ -519,14 +607,16 @@ class Histogram:
                         },
                         []
                     )
+                    # if 'angular_modulation': want logc=False and sym=True
+                    # else want logc=True and sym=False
                     draw_radial_histogram(
-                        jacvar,
+                        basevariable,
                         cuti,
                         values_dataset, # type: ignore
                         binning,
                         extratext = extratext,
-                        logc = True,
-                        sym = False,
+                        logc = transform != 'angular_modulation',
+                        sym = transform == 'angular_modulation',
                         output_folder = output_folder,
                         override_filename = '%s_radial2D_pt%d_R%d' % (base_prefix, ipt, iR)
                     )

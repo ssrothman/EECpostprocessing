@@ -72,6 +72,11 @@ stage.add_argument('--slurm',  dest='stage', action='store_const', const='slurm'
 
 args = parser.parse_args()
 
+from general.datasets.expand_datasets import expand_datasets
+args.signal_mc = expand_datasets(args.signal_mc)
+args.background_mc = expand_datasets(args.background_mc)
+args.data = expand_datasets(args.data)
+
 import os
 import subprocess
 

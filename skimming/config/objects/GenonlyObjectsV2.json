@@ -48,7 +48,8 @@
                     "event" : "event",
                     "run" : "run",
                     "lumi" : "luminosityBlock",
-                    "genWeight" : "genWeight"
+                    "genWeight" : "genWeight",                   
+                    "LHE" : "LHE"
                 },
                 "optional_names" : {
                     "GenSplittingsHardSide" : "GenHardSideDeltaPsiTable",

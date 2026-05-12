@@ -37,15 +37,18 @@ class EventKinematicsTable:
         if objs.isMC and hasattr(objs, 'PileupInfo'):
             thevals['nTrueInt'] = objs.PileupInfo.nTrueInt[evtmask]
 
-        #global event properties
-        thevals['rho'] = objs.rho[evtmask]
-        thevals['MET'] = objs.MET.pt[evtmask]
-        thevals['MET_phi'] = objs.MET.phi[evtmask]
+        #global event properties (genonly events won't have rho, MET)
+        if hasattr(objs, 'rho'):
+            thevals['rho'] = objs.rho[evtmask]
+        if hasattr(objs, 'MET'):
+            thevals['MET'] = objs.MET.pt[evtmask]
+            thevals['MET_phi'] = objs.MET.phi[evtmask]
 
-        #btag multiplicities (for ttbar veto)
-        thevals['numLooseB'] = ak.sum(objs.AK4Jets.jets.passLooseB[evtmask], axis=-1)
-        thevals['numMediumB'] = ak.sum(objs.AK4Jets.jets.passMediumB[evtmask], axis=-1)
-        thevals['numTightB'] = ak.sum(objs.AK4Jets.jets.passTightB[evtmask], axis=-1)
+        #btag multiplicities (for ttbar veto) (again, not present in genonly events)
+        if hasattr(objs, 'AK4Jets'):
+            thevals['numLooseB'] = ak.sum(objs.AK4Jets.jets.passLooseB[evtmask], axis=-1)
+            thevals['numMediumB'] = ak.sum(objs.AK4Jets.jets.passMediumB[evtmask], axis=-1)
+            thevals['numTightB'] = ak.sum(objs.AK4Jets.jets.passTightB[evtmask], axis=-1)
 
         #jet multiplicities
         thevals['numJets'] = ak.sum(jetmask, axis=-1)[evtmask]
@@ -66,16 +69,20 @@ class EventKinematicsTable:
         thevals['leadingMuRawPt'] = leadmu.rawPt
         thevals['leadingMuEta'] = leadmu.eta
         thevals['leadingMuPhi'] = leadmu.phi
-        thevals['leadingMuDxy'] = leadmu.dxy
-        thevals['leadingMuDz'] = leadmu.dz
+        if hasattr(leadmu, 'dxy'):
+            thevals['leadingMuDxy'] = leadmu.dxy
+        if hasattr(leadmu, 'dz'):
+            thevals['leadingMuDz'] = leadmu.dz
         thevals['leadingMuCharge'] = leadmu.charge
 
         thevals['subleadingMuPt'] = subleadmu.pt
         thevals['subleadingMuRawPt'] = subleadmu.rawPt
         thevals['subleadingMuEta'] = subleadmu.eta
         thevals['subleadingMuPhi'] = subleadmu.phi
-        thevals['subleadingMuDxy'] = subleadmu.dxy
-        thevals['subleadingMuDz'] = subleadmu.dz
+        if hasattr(subleadmu, 'dxy'):
+            thevals['subleadingMuDxy'] = subleadmu.dxy
+        if hasattr(subleadmu, 'dz'):
+            thevals['subleadingMuDz'] = subleadmu.dz
         thevals['subleadingMuCharge'] = subleadmu.charge
 
         # third muon
@@ -85,20 +92,23 @@ class EventKinematicsTable:
         thevals['thirdMuPt'] = ak.fill_none(mu3s.pt[:,0], 0.0)
         thevals['thirdMuEta'] = ak.fill_none(mu3s.eta[:,0], -999.0)
         thevals['thirdMuPhi'] = ak.fill_none(mu3s.phi[:,0], -999.0)
-        thevals['thirdMuDxy'] = ak.fill_none(mu3s.dxy[:,0], -999.0)
-        thevals['thirdMuDz'] = ak.fill_none(mu3s.dz[:,0], -999.0)
+        if hasattr(mu3s, 'dxy'):
+            thevals['thirdMuDxy'] = ak.fill_none(mu3s.dxy[:,0], -999.0)
+        if hasattr(mu3s, 'dz'):
+            thevals['thirdMuDz'] = ak.fill_none(mu3s.dz[:,0], -999.0)
         thevals['thirdMuCharge'] = ak.fill_none(mu3s.charge[:,0], -999)  # Keep as -999 for charge
 
         # electrons
-        thevals['nEle'] = ak.num(objs.Electrons.electrons[evtmask], axis=1)
-        eles = objs.Electrons.electrons[evtmask]
-        eles = ak.pad_none(eles, 1, axis=1) # ensure at least one entry to avoid empty array issues
-        thevals['leadingElePt'] = ak.fill_none(eles.pt[:,0], 0.0)
-        thevals['leadingEleEta'] = ak.fill_none(eles.eta[:,0], -999.0)
-        thevals['leadingElePhi'] = ak.fill_none(eles.phi[:,0], -999.0)
-        thevals['leadingEleDxy'] = ak.fill_none(eles.dxy[:,0], -999.0)
-        thevals['leadingEleDz'] = ak.fill_none(eles.dz[:,0], -999.0)
-        thevals['leadingEleCharge'] = ak.fill_none(eles.charge[:,0], -999)
+        if hasattr(objs, 'Electrons'):
+            thevals['nEle'] = ak.num(objs.Electrons.electrons[evtmask], axis=1)
+            eles = objs.Electrons.electrons[evtmask]
+            eles = ak.pad_none(eles, 1, axis=1) # ensure at least one entry to avoid empty array issues
+            thevals['leadingElePt'] = ak.fill_none(eles.pt[:,0], 0.0)
+            thevals['leadingEleEta'] = ak.fill_none(eles.eta[:,0], -999.0)
+            thevals['leadingElePhi'] = ak.fill_none(eles.phi[:,0], -999.0)
+            thevals['leadingEleDxy'] = ak.fill_none(eles.dxy[:,0], -999.0)
+            thevals['leadingEleDz'] = ak.fill_none(eles.dz[:,0], -999.0)
+            thevals['leadingEleCharge'] = ak.fill_none(eles.charge[:,0], -999)
 
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(

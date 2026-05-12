@@ -8,6 +8,12 @@ _ALL_KINEMATICS_TABLES = [
     "CutflowTable",
     "SimonJetKinematicsTable",
 ]
+_ALL_GENONLY_KINEMATICS_TABLES = [
+    "EventKinematicsTable",
+    "ConstituentKinematicsTable",
+    "CutflowTable",
+    "SimonJetKinematicsTable",
+]
 _ALL_RES4TEE_TABLES = [
     "EECres4Obs:True,tee,total",
     "EECres4Obs:True,tee,unmatched",
@@ -36,18 +42,6 @@ _ALL_RES4TRIANGLE_TABLES = [
     "EECres4Transfer:triangle"
 ]
 
-_ALL_RES4TEE_RECO_TABLES = [
-    "EECres4Obs:False,tee,total",
-]
-
-_ALL_RES4DIPOLE_RECO_TABLES = [
-    "EECres4Obs:False,dipole,total",
-]
-
-_ALL_RES4TRIANGLE_RECO_TABLES = [
-    "EECres4Obs:False,triangle,total",
-]
-
 _ALL_RES4RECO_TABLES = [
     "EECres4Obs:False,tee,total",
     "EECres4Obs:False,dipole,total",
@@ -59,12 +53,25 @@ _ALL_RES4GEN_TABLES = [
     "EECres4Obs:True,dipole,total",
     "EECres4Obs:True,triangle,total",
 ]
+_ALL_GENSPLITTING_TABLES = [
+    "GenericTable:DeltaPsiSoftSide",
+    "GenericTable:DeltaPsiHardSide",
+    "GenericTable:GenSplittingsSoftSide",
+    "GenericTable:GenSplittingsHardSide"
+]
+_ALL_GENONLY_TABLES = _ALL_GENONLY_KINEMATICS_TABLES + _ALL_GENSPLITTING_TABLES + _ALL_RES4RECO_TABLES
 
 _ALL_RES4_TABLES = _ALL_RES4TEE_TABLES + _ALL_RES4DIPOLE_TABLES + _ALL_RES4TRIANGLE_TABLES
 
 def expand_one_table(tab : str) -> Sequence[str]:
     if tab == 'allKinematics':
         return _ALL_KINEMATICS_TABLES
+    elif tab == 'allGenonlyKinematics':
+        return _ALL_GENONLY_KINEMATICS_TABLES
+    elif tab == 'allGenonly':
+        return _ALL_GENONLY_TABLES
+    elif tab == 'allGensplitting':
+        return _ALL_GENSPLITTING_TABLES
     elif tab == 'allRes4':
         return _ALL_RES4_TABLES
     elif tab == 'allRes4tee':

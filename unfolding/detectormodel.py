@@ -65,12 +65,6 @@ def get_transfer_binning(dset : dsspec, rebinning_reco : str | dict | None, rebi
 
 
 def get_model_matrices(dset : dsspec, hist : whichsystspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None):
-        t, tbinning = read_hist(
-            dset, hist, 
-            'transfer',
-            False
-        )
-
         umG, gbinning = read_hist(
             dset, hist, 
             'unmatchedGen',
@@ -95,6 +89,7 @@ def get_model_matrices(dset : dsspec, hist : whichsystspec, rebinning_reco : str
 
         Gdenom = np.where(totG == 0, 1.0, totG)
         gamma = bkgG / Gdenom
+        gamma[gamma==1] = 0
 
         umR, rbinning = read_hist(
             dset, hist, 
@@ -117,10 +112,19 @@ def get_model_matrices(dset : dsspec, hist : whichsystspec, rebinning_reco : str
         )[0]
         if rebinning_reco is not None:
             totR = rbinning.rebin(totR, rebinning_reco)[0]
-
+        print("totR", totR.sum())
+        print("umR", umR.sum())
+        print("utR", utR.sum())
         Rdenom = totR - bkgR
-        Rdenom = np.where(Rdenom == 0, 1.0, Rdenom)
+        Rdenom = np.where(Rdenom <= 0, 1.0, Rdenom)
         rho = bkgR / Rdenom
+        print("rho", rho.sum())
+
+        t, tbinning = read_hist(
+            dset, hist, 
+            'transfer',
+            False
+        )
 
         t = t.reshape(len(umR), len(umG))
         print(t.shape)

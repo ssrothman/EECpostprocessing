@@ -35,6 +35,10 @@ def run_workspace_locally(
 ) -> list[int]:
     commands = _read_commands(working_dir, commands_file)
 
+    # shuffle commands list so we don't always run the same commands in the same order
+    import numpy as np
+    np.random.shuffle(commands)
+
     if len(commands) == 0:
         print("No commands to run.")
         return []
