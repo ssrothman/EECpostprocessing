@@ -3,7 +3,7 @@
         {
             "datasets" : [
                 {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia_HTsum", "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true,  "no_count": false},
-                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig",       "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": false, "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig_sum",       "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
                 {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "parts", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true,  "no_count": true}
             ],
             "variables" : ["pt"],
@@ -21,7 +21,7 @@
         {
             "datasets" : [
                 {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia_HTsum", "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true,  "no_count": false},
-                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig",       "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": false, "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig_sum",       "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
                 {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "parts", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true,  "no_count": true}
             ],
             "variables" : ["eta"],
@@ -38,7 +38,7 @@
         {
             "datasets" : [
                 {"configsuite": "EvtMCprojConfig",   "runtag": "v6",        "name": "DYJetsToLL_Pythia_HTsum", "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true,  "no_count": false},
-                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig",       "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": false, "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig_sum",       "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
                 {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "parts", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true,  "no_count": true}
             ],
             "variables" : ["phi"],

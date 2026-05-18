@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mplhep as hep
 import os
-import json
 import argparse
 
 from general.fslookup.skim_path import lookup_skim_path
@@ -38,19 +37,6 @@ JPT_BINS = [
     (2500, 5000),
 ]
 
-HT_BINS = [
-    ('DYJetsToLL_Pythia_HT70to100',    159.1),
-    ('DYJetsToLL_Pythia_HT100to200',   159.4),
-    ('DYJetsToLL_Pythia_HT200to400',   43.60),
-    ('DYJetsToLL_Pythia_HT400to600',   5.918),
-    ('DYJetsToLL_Pythia_HT600to800',   1.439),
-    ('DYJetsToLL_Pythia_HT800to1200',  0.6462),
-    ('DYJetsToLL_Pythia_HT1200to2500', 0.1514),
-    ('DYJetsToLL_Pythia_HT2500toInf',  0.003395),
-]
-
-# --- load workspaces ---
-valid      = np.load(os.path.join(args.pythia_workspace, 'valid_bins.npy'))
 gen_values = np.load(os.path.join(args.pythia_workspace, 'gen', 'values.npy'))
 
 x_pythia = np.load(os.path.join(args.pythia_workspace, 'minimization', 'result', 'x.npy'))
@@ -59,12 +45,14 @@ x_herwig = np.load(os.path.join(args.herwig_workspace, 'minimization', 'result',
 
 data_reco   = np.load(os.path.join(args.data_workspace,   'reco', 'values.npy'))
 herwig_reco = np.load(os.path.join(args.herwig_workspace, 'reco', 'values.npy'))
+pythia_reco = np.load(os.path.join(args.pythia_workspace, 'reco', 'values.npy'))
 
+pythia_ht_gen   = gen_values  # HT-stitched gen baseline from workspace
 pythia_unfolded = x_pythia * gen_values
 data_unfolded   = x_data   * gen_values
 herwig_unfolded = x_herwig * gen_values
+valid = np.load(os.path.join(args.pythia_workspace, 'valid_bins.npy'))
 
-# --- helpers ---
 def load_gen(config_suite, runtag, dataset, objsyst='NOM', wtsyst='nominal'):
     fs, skimpath = lookup_skim_path(
         'dylan-lxplus-eos', config_suite, runtag, dataset, objsyst, 'proj_Gen'
@@ -73,26 +61,9 @@ def load_gen(config_suite, runtag, dataset, objsyst='NOM', wtsyst='nominal'):
         values = np.load(f)
     return values[50:-50][valid]
 
-def load_n_events(config_suite, runtag, dataset, objsyst='NOM'):
-    fs, path = lookup_skim_path(
-        'dylan-lxplus-eos', config_suite, runtag, dataset, objsyst, 'count'
-    )
-    with fs.open(os.path.join(path, 'merged.json'), 'r') as f:
-        return json.load(f)['n_events']
-
-# --- Herwig gen ---
 herwig_gen = load_gen('EvtMCprojConfig', 'herwig_v3', 'DYJetsToLL_Herwig')
 
-# --- HT-stitched Pythia gen ---
-pythia_ht_gen = np.zeros(int(valid.sum()))
-for dataset, xsec in HT_BINS:
-    n_events = load_n_events('EvtMCprojConfig', 'v6', dataset)
-    pythia_ht_gen += (xsec / n_events) * load_gen('EvtMCprojConfig', 'v6', dataset)
-
-# --- jpt slicing ---
-# bin structure: Jpt slow index, R fast index (C-order)
-# first Jpt bin may be missing leading R bins (removed as NaN)
-n_first = int(valid.sum()) - 8 * 50
+n_first = int(len(gen_values)) - 8 * 50
 jpt_slices  = []
 jpt_r_edges = []
 idx = 0
@@ -114,30 +85,35 @@ def norm(vals, edges):
         return vals / dR
     return vals / (integral * dR)
 
+
 os.makedirs(args.output, exist_ok=True)
 hep.style.use('CMS')
 
-C_PYTHIA_GEN = '#3B2F2F'  # dark espresso
-C_HERWIG_GEN = '#8B5E3C'  # warm tan
-C_DATA_RECO  = '#2C2C2C'  # near black
-C_DATA_UNF   = '#1F77B4'  # blue
-C_HERWIG_UNF = '#E07B39'  # orange
-C_PYTHIA_UNF = '#6B8C6B'  # sage green
+C_PYTHIA_GEN  = '#3B2F2F'  # dark espresso
+C_HERWIG_GEN  = '#59A14F'  # green
+C_DATA_RECO   = '#2C2C2C'  # near black
+C_DATA_UNF    = '#4E79A7'  # steel blue
+C_HERWIG_UNF  = '#F28E2B'  # orange
+C_PYTHIA_UNF  = '#B07AA1'  # purple
+C_PYTHIA_RECO = '#E15759'  # red
+C_HERWIG_RECO = '#76B7B2'  # tiel 
 
 for i, (jlo, jhi) in enumerate(JPT_BINS):
     sl      = jpt_slices[i]
     r_edges = jpt_r_edges[i]
 
     curves = [
-        ('Pythia Gen (HT)',  norm(pythia_ht_gen[sl],    r_edges), C_PYTHIA_GEN, '-',  1.5),
-        ('Herwig Gen',       norm(herwig_gen[sl],        r_edges), C_HERWIG_GEN, '--', 1.2),
-        ('Data Reco',        norm(data_reco[sl],         r_edges), C_DATA_RECO,  ':',  1.2),
-        ('Data Unfolded',    norm(data_unfolded[sl],     r_edges), C_DATA_UNF,   '-',  1.5),
-        ('Herwig Unfolded',  norm(herwig_unfolded[sl],   r_edges), C_HERWIG_UNF, '-',  1.5),
-        ('Pythia Unfolded',  norm(pythia_unfolded[sl],   r_edges), C_PYTHIA_UNF, '--', 1.0),
+        ('Pythia Gen',      norm(pythia_ht_gen[sl],    r_edges), C_PYTHIA_GEN,  '-',  1.5),
+#        ('Herwig Gen',      norm(herwig_gen[sl],       r_edges), C_HERWIG_GEN,  '-', 1.2),
+#        ('Herwig Reco',     norm(herwig_reco[sl],      r_edges), C_HERWIG_RECO, '--', 1.0),
+        ('Data Reco',       norm(data_reco[sl],        r_edges), C_DATA_RECO,   '--',  1.0),
+        ('Data Unfolded',   norm(data_unfolded[sl],    r_edges), C_DATA_UNF,    ':',  1.0),
+#        ('Herwig Unfolded', norm(herwig_unfolded[sl],  r_edges), C_HERWIG_UNF,  ':',  1.0),
+        ('Pythia Reco',     norm(pythia_reco[sl],      r_edges), C_PYTHIA_RECO, '--', 1.0),
+        ('Pythia Unfolded', norm(pythia_unfolded[sl],  r_edges), C_PYTHIA_UNF,  ':',  1.0),
     ]
 
-    ref = curves[0][1]  # Pythia Gen (HT) as reference
+    ref = curves[1][1]
 
     fig, (ax, ax_ratio) = plt.subplots(
         2, 1, figsize=(10, 13),
@@ -153,18 +129,20 @@ for i, (jlo, jhi) in enumerate(JPT_BINS):
         ax.set_yscale('log')
     ax.set_ylabel('A.U.', fontsize=11)
     ax.legend(fontsize=9)
+    ax.set_title(f'Jet $p_T$ ∈ [{jlo}, {jhi}] GeV', fontsize=12)
     ax.tick_params(axis='both', labelsize=10)
     hep.cms.label(ax=ax, data=True, text='Private', com=13)
 
-    for label, vals, color, ls, lw in curves[1:]:
+    for label, vals, color, ls, lw in curves:
+        if vals is ref:
+            continue
         ratio = np.where(ref != 0, vals / ref, np.nan)
-        hep.histplot(ratio, r_edges, ax=ax_ratio, label=label,
-                     color=color, linestyle=ls, linewidth=lw)
+        hep.histplot(ratio, r_edges, ax=ax_ratio, label=label, color=color, linestyle=ls, linewidth=lw)
 
     ax_ratio.axhline(1.0, color=C_PYTHIA_GEN, linestyle='-', linewidth=0.8)
     ax_ratio.set_xscale('log')
     ax_ratio.set_xlabel(r'$\Delta R$', fontsize=11)
-    ax_ratio.set_ylabel('Ratio to Pythia Gen', fontsize=11)
+    ax_ratio.set_ylabel('Ratio to Data Reco', fontsize=11)
     ax_ratio.tick_params(axis='both', labelsize=10)
     ax_ratio.set_ylim(0.5, 1.5)
     ax_ratio.legend(fontsize=9)

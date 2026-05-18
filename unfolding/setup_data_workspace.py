@@ -40,7 +40,7 @@ def load_raw_reco(cfg, wtsyst):
     values = values[50:-50]
     return values, covmat, fs, skimpath
 
-valid = np.load(os.path.join(PYTHIA_WORKSPACE, 'valid_bins.npy'))
+valid_pythia = np.load(os.path.join(PYTHIA_WORKSPACE, 'valid_bins.npy'))
 
 print("Loading data reco histograms...")
 combined_values = None
@@ -58,13 +58,14 @@ for era in DATA_ERAS:
     else:
         combined_values += vals
         combined_cov    += cov
-
+valid_data  = ~np.isnan(np.diag(combined_cov))
+valid       = valid_pythia & valid_data
+print("Valid bins: Pythia", valid_pythia.sum(), "Data", valid_data.sum(), "Intersection", valid.sum())
 combined_values = combined_values[valid]
 combined_cov    = combined_cov[np.ix_(valid, valid)]
 
 print("Inverting covariance matrix...")
-invcov = smart_inverse(combined_cov, False)
-
+invcov = np.linalg.inv(combined_cov + 1e-10 * np.eye(len(combined_cov)))
 binning = ArbitraryBinning()
 with binning_fs.open(binning_path + '_bincfg.json', 'r') as f:
     binning.from_dict(json.load(f))

@@ -23,7 +23,7 @@ herwig = {
     'objsyst'      : OBJSYST,
 }
 
-valid = np.load(os.path.join(PYTHIA_WORKSPACE, 'valid_bins.npy'))
+valid_pythia = np.load(os.path.join(PYTHIA_WORKSPACE, 'valid_bins.npy'))
 
 print("Loading Herwig reco...")
 fs, skimpath = lookup_skim_path(
@@ -42,11 +42,15 @@ covmat = np.delete(covmat, range(0, 50), 0)
 covmat = np.delete(covmat, range(0, 50), 1)
 values = values[50:-50]
 
+valid_herwig = ~np.isnan(np.diag(covmat))
+valid        = valid_pythia & valid_herwig
+print("Valid bins: Pythia", valid_pythia.sum(), "Herwig", valid_herwig.sum(), "Intersection", valid.sum())
+
 values = values[valid]
 covmat = covmat[np.ix_(valid, valid)]
 
 print("Inverting covariance matrix...")
-invcov = smart_inverse(covmat, False)
+invcov = np.linalg.inv(covmat + 1e-10 * np.eye(len(covmat)))
 
 binning = ArbitraryBinning()
 with fs.open(skimpath + '_bincfg.json', 'r') as f:
