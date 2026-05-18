@@ -5,22 +5,44 @@ from typing import Protocol, TypedDict, List, overload
 import torch
 import numpy as np
 
+from simonpy.AbitraryBinning import ArbitraryGenRecoBinning
+
 class dsspec(TypedDict):
     location: str
     config_suite: str
     runtag: str
     dataset: str
     isMC: bool
+    target_lumi : float
+    isStack : bool
+    statN : int
+    statK : int | List[int]
+    what : str
+
+class whichsystspec(TypedDict):
+    wtsyst : str
+    objsyst : str
 
 class systspec(TypedDict):
     name : str
     isobjsyst : bool
     onesided : bool
     varytransfer : bool
+    label : str | None
 
 class detectormodelspec(TypedDict):
     systematics : List[systspec]
-    
+    dset : dsspec
+
+class histspec(TypedDict):
+    dset : dsspec
+    hist : whichsystspec
+    name : str
+
+class unfoldingworkspacespec(TypedDict):
+    data : histspec | List[histspec]
+    model : detectormodelspec
+
 class DetectorModelProtocol(Protocol):
     @property
     def nSyst(self) -> int:
@@ -36,6 +58,14 @@ class DetectorModelProtocol(Protocol):
 
     @property
     def device(self) -> str:
+        ...
+
+    @property
+    def binning(self) -> ArbitraryGenRecoBinning:
+        ...
+
+    @property
+    def nuisance_names(self) -> list[str]:
         ...
 
     @overload
@@ -63,3 +93,36 @@ class DetectorModelProtocol(Protocol):
 
     def detach(self) -> "DetectorModelProtocol":
         ...
+
+
+class TreatedNuisance(TypedDict):
+    index : int
+    value : float | None
+    fixed : bool
+
+class NuisanceTreatment:
+    profile : np.ndarray # indices of nuisnaces to profile
+    fix : np.ndarray     # indices of nuisnaces to fix
+    fixvals : np.ndarray # values to fix the nuisnaces to
+    num : int
+
+    def __init__(self, profile: np.ndarray, fix: np.ndarray, fixvals: np.ndarray, num : int):
+        self.profile = np.asarray(profile)
+        self.fix = np.asarray(fix)
+        self.fixvals = np.asarray(fixvals)
+        self.num = num
+
+        allindices = np.sort(np.concatenate([self.profile, self.fix]))
+        if not (allindices == np.arange(num)).all():
+            raise ValueError("Need to use every possible index exactly once")
+
+        self.treated_nuisances = []
+        for iprof in profile:
+            self.treated_nuisances.append(TreatedNuisance(index=iprof, value=None, fixed=False))
+        for ifix, vfix in zip(fix, fixvals):
+            self.treated_nuisances.append(TreatedNuisance(index=ifix, value=vfix, fixed=True))
+        # sort the treatednuisances descending in index so that we apply the operations in the right order
+        self.treated_nuisances.sort(key=lambda x: x["index"], reverse=True)
+
+    def treatments(self) -> List[TreatedNuisance]:
+        return self.treated_nuisances

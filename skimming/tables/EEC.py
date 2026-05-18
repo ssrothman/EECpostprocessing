@@ -217,8 +217,6 @@ class EECprojObsTable(EECgenericTable):
     @property
     def name(self) -> str:
         level = 'Gen' if self._gen else 'Reco'
-        if self._whichEECobj == 'total':
-            return 'proj_%s' % level
         return 'proj_%s%s' % (self._whichEECobj, level)
 
     def run_table(self,

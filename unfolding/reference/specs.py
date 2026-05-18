@@ -1,0 +1,65 @@
+
+
+from typing import Protocol, TypedDict, List, overload
+
+import torch
+import numpy as np
+
+class dsspec(TypedDict):
+    location: str
+    config_suite: str
+    runtag: str
+    dataset: str
+    isMC: bool
+
+class systspec(TypedDict):
+    name : str
+    isobjsyst : bool
+    onesided : bool
+    varytransfer : bool
+
+class detectormodelspec(TypedDict):
+    systematics : List[systspec]
+    
+class DetectorModelProtocol(Protocol):
+    @property
+    def nSyst(self) -> int:
+        ...
+
+    @property
+    def nGen(self) -> int:
+        ...
+
+    @property
+    def nReco(self) -> int:
+        ...
+
+    @property
+    def device(self) -> str:
+        ...
+
+    @overload
+    def forward(self, beta : torch.Tensor, theta : torch.Tensor) -> torch.Tensor:
+        ...
+    @overload
+    def forward(self, beta : np.ndarray, theta : np.ndarray) -> np.ndarray:
+        ...
+
+    @classmethod
+    def from_disk(cls, path : str) -> "DetectorModelProtocol":
+        ...
+
+    def dump_to_disk(self, where : str):
+        ...
+
+    def to_torch(self) -> "DetectorModelProtocol":
+        ...
+
+    def to_numpy(self, *args, **kwargs) -> "DetectorModelProtocol":
+        ...
+
+    def to(self, device : str, *args, **kwargs) -> "DetectorModelProtocol":
+        ...
+
+    def detach(self) -> "DetectorModelProtocol":
+        ...

@@ -4,12 +4,11 @@ import numpy as np
 import os
 import json
 
-from unfolding.specs import dsspec
 from unfolding.histogram import Histogram
-from unfolding.detectormodel import DetectorModel, load_hist_from_dataset
-from general.fslookup.skim_path import lookup_skim_path
+from unfolding.detectormodel import DetectorModel
+from general.fslookup.hist_lookup import get_hist_path, get_hist_bincfg_path
+from general.datasets.datasets import lookup_count
 from simonpy.AbitraryBinning import ArbitraryBinning
-from simonpy.stats_v2 import smart_inverse
 
 HT_BINS = [
     ('DYJetsToLL_Pythia_HT70to100',    159.1),
@@ -22,130 +21,110 @@ HT_BINS = [
     ('DYJetsToLL_Pythia_HT2500toInf',  0.003395),
 ]
 
-WORKSPACE = '/eos/user/d/dponman/proj_unfold_workspace'
-OBJSYST   = 'NOM'
-WTSYST    = 'nominal'
-LUMI      = (14.02 + 7.06 + 31.83) * 1e3  # pb^-1, 2018 A+B+D
+WORKSPACE    = '/eos/user/d/dponman/proj_unfold_workspace'
+RUNTAG       = 'v8'
+CONFIG_SUITE = 'EvtMCprojConfig'
+LOCATION     = 'dylan-lxplus-eos'
+OBJSYST      = 'NOM'
+WTSYST       = 'nominal'
+LUMI         = (14.02 + 7.06 + 31.83) * 1e3  # pb^-1, 2018 A+B+D
 
-def make_dset(dataset):
-    return {
-        'location'     : 'dylan-lxplus-eos',
-        'config_suite' : 'EvtMCprojConfig',
-        'runtag'       : 'v8',
-        'dataset'      : dataset,
-        'isMC'         : True,
-    }
+def load_binned(dataset, table, is_cov=False):
+    fs, path = get_hist_path(LOCATION, CONFIG_SUITE, RUNTAG, dataset,
+                             OBJSYST, WTSYST, table, is_cov, -1, -1)
+    with fs.open(path, 'rb') as f:
+        return np.load(f)
 
-def load_n_events(dataset):
-    dset = make_dset(dataset)
-    fs, path = lookup_skim_path(
-        dset['location'], dset['config_suite'],
-        dset['runtag'], dataset, OBJSYST, 'count'
-    )
-    with fs.open(os.path.join(path, 'merged.json'), 'r') as f:
-        return json.load(f)['n_events']
+def ht_weight(dataset, xsec):
+    return xsec / lookup_count(RUNTAG, dataset) * LUMI
 
-def load_ht_array(what, strip_flow=True):
-    """Sum a binned array over all HT bins, weighted by xsec/n_events * LUMI."""
+def load_ht_array(table, strip_flow=True):
     result = None
     for dataset, xsec in HT_BINS:
-        dset = make_dset(dataset)
-        arr = load_hist_from_dataset(dset, OBJSYST, '%s_BINNED_%s.npy' % (what, WTSYST))
+        arr = load_binned(dataset, table)
         if strip_flow:
             arr = arr[50:-50]
-        weight = xsec / load_n_events(dataset) * LUMI
-        result = weight * arr if result is None else result + weight * arr
+        w = ht_weight(dataset, xsec)
+        result = w * arr if result is None else result + w * arr
     return result
 
-def load_ht_covmat(what):
-    """Sum a binned covmat over all HT bins, weighted by (xsec/n_events * LUMI)^2."""
+def load_ht_covmat(table):
     result = None
     for dataset, xsec in HT_BINS:
-        dset = make_dset(dataset)
-        arr = load_hist_from_dataset(dset, OBJSYST, '%s_BINNED_covmat_%s.npy' % (what, WTSYST))
-        length = len(arr)
-        arr = np.delete(arr, range(length - 50, length), 0)
-        arr = np.delete(arr, range(length - 50, length), 1)
-        arr = np.delete(arr, range(0, 50), 0)
-        arr = np.delete(arr, range(0, 50), 1)
-        weight = xsec / load_n_events(dataset) * LUMI
-        result = weight**2 * arr if result is None else result + weight**2 * arr
+        arr = load_binned(dataset, table, is_cov=True)
+        n = len(arr)
+        arr = arr[50:n-50, 50:n-50]
+        w = ht_weight(dataset, xsec)
+        result = w**2 * arr if result is None else result + w**2 * arr
     return result
 
-# --- valid mask from combined HT reco covariance + transfer ---
+# --- valid mask ---
 print("Computing valid mask from HT-stitched reco...")
-raw_cov = load_ht_covmat('proj_Reco')
+raw_cov = load_ht_covmat('proj_totalReco')
 valid   = ~np.isnan(np.diag(raw_cov))
 print("Valid bins (reco cov):", valid.sum(), "of", len(valid))
 
-# extend valid mask: exclude bins where transfer has zero row sums
+# --- transfer (needed for valid mask extension) ---
 transfer_raw_full = None
 for dataset, xsec in HT_BINS:
-    dset = make_dset(dataset)
-    arr  = load_hist_from_dataset(dset, OBJSYST, 'proj_transfer_BINNED_%s.npy' % WTSYST)
-    w    = xsec / load_n_events(dataset) * LUMI
+    arr = load_binned(dataset, 'proj_transfer')
+    w   = ht_weight(dataset, xsec)
     transfer_raw_full = w * arr if transfer_raw_full is None else transfer_raw_full + w * arr
 
-n_with_flow_check = int(np.sqrt(len(transfer_raw_full)))
-t0_full = transfer_raw_full.reshape(n_with_flow_check, n_with_flow_check)
-t0_full = t0_full[50:-50, 50:-50]          # 450x450
+n = int(np.sqrt(len(transfer_raw_full)))
+t0_full = transfer_raw_full.reshape(n, n)[50:-50, 50:-50]
+
 valid_transfer = (t0_full.sum(axis=1) > 0) & (t0_full.sum(axis=0) > 0)
 valid = valid & valid_transfer
+print("Valid bins (after transfer mask):", valid.sum(), "of", len(valid))
 
+# --- reco ---
 print("Building HT-stitched Pythia reco...")
-reco_vals = load_ht_array('proj_Reco')[valid]
+reco_vals = load_ht_array('proj_totalReco')[valid]
 reco_cov  = raw_cov[np.ix_(valid, valid)]
-reco_invcov = np.linalg.inv(reco_cov + 1e-10 * np.eye(len(reco_cov)))
 
-fs0, skimpath0 = lookup_skim_path('dylan-lxplus-eos', 'EvtMCprojConfig', 'v8',
-                                   HT_BINS[0][0], OBJSYST, 'proj_Reco')
+fs0, bincfgpath0 = get_hist_bincfg_path(LOCATION, CONFIG_SUITE, RUNTAG,
+                                         HT_BINS[0][0], OBJSYST, 'proj_totalReco')
 binning_reco = ArbitraryBinning()
-with fs0.open(skimpath0 + '_bincfg.json', 'r') as f:
+with fs0.open(bincfgpath0, 'r') as f:
     binning_reco.from_dict(json.load(f))
 
-reco = Histogram(reco_vals, reco_cov, reco_invcov, binning_reco)
+reco = Histogram(reco_vals, reco_cov, binning_reco)
+reco.compute_invcov()
 reco.dump_to_disk(os.path.join(WORKSPACE, 'reco'))
-print("HT-stitched Pythia reco sum:", reco_vals.sum())
+print("Pythia reco sum:", reco_vals.sum())
 
-# --- HT-stitched gen baseline ---
+# --- gen baseline ---
 print("Building HT-stitched gen baseline...")
-ht_gen_vals = load_ht_array('proj_Gen')[valid]
+gen_vals = load_ht_array('proj_totalGen')[valid]
+gen_cov  = np.diag(np.where(gen_vals > 0, gen_vals, 1.0))
 
-gen_cov    = np.diag(np.where(ht_gen_vals > 0, ht_gen_vals, 1.0))
-gen_invcov = smart_inverse(gen_cov, False)
-
-fs1, skimpath1 = lookup_skim_path('dylan-lxplus-eos', 'EvtMCprojConfig', 'v8',
-                                   HT_BINS[0][0], OBJSYST, 'proj_Gen')
+fs1, bincfgpath1 = get_hist_bincfg_path(LOCATION, CONFIG_SUITE, RUNTAG,
+                                         HT_BINS[0][0], OBJSYST, 'proj_totalGen')
 binning_gen = ArbitraryBinning()
-with fs1.open(skimpath1 + '_bincfg.json', 'r') as f:
+with fs1.open(bincfgpath1, 'r') as f:
     binning_gen.from_dict(json.load(f))
 
-gen = Histogram(ht_gen_vals, gen_cov, gen_invcov, binning_gen)
-gen.dump_to_disk(os.path.join(WORKSPACE, 'gen'))
-print("HT-stitched gen sum:", ht_gen_vals.sum())
+mcgen = Histogram(gen_vals, gen_cov, binning_gen)
+mcgen.compute_invcov()
+mcgen.dump_to_disk(os.path.join(WORKSPACE, 'mcgen'))
+print("Pythia gen sum:", gen_vals.sum())
 
+# --- detector model ---
 print("Building HT-stitched detector model...")
-umG      = load_ht_array('proj_unmatchedGen')[valid]
-umR      = load_ht_array('proj_unmatchedReco')[valid]
-totG     = load_ht_array('proj_Gen')[valid]
-totR     = load_ht_array('proj_Reco')[valid]
+umG  = load_ht_array('proj_unmatchedGen')[valid]
+umR  = load_ht_array('proj_unmatchedReco')[valid]
+totG = load_ht_array('proj_totalGen')[valid]
+totR = load_ht_array('proj_totalReco')[valid]
+nGen = nReco = len(totG)
 
-nGen  = len(totG)
-nReco = len(totR)
-
-Gdenom = np.where(totG == 0, 1.0, totG)
-gamma0 = umG / Gdenom
-
+gamma0 = umG / np.where(totG == 0, 1.0, totG)
 bkgR   = umR
-Rdenom = totR - bkgR
-Rdenom = np.where(Rdenom == 0, 1.0, Rdenom)
-rho0   = bkgR / Rdenom
+rho0   = bkgR / np.where(totR - bkgR == 0, 1.0, totR - bkgR)
 
-# reuse already-loaded transfer; apply valid mask
 t0 = t0_full[np.ix_(valid, valid)]
 matchedG = totG - umG
-tdenom   = np.where(matchedG == 0, 1.0, matchedG)
-t0      /= tdenom[np.newaxis, :]
+t0 /= np.where(matchedG == 0, 1.0, matchedG)[np.newaxis, :]
 
 model = DetectorModel(
     transfer0          = t0,
@@ -157,7 +136,7 @@ model = DetectorModel(
     rhoVariations      = np.zeros((0, nReco)),
 )
 print(model)
-model.dump_to_disk(os.path.join(WORKSPACE, 'detectormodel'))
+model.dump_to_disk(os.path.join(WORKSPACE, 'model'))
 
 np.save(os.path.join(WORKSPACE, 'valid_bins.npy'), valid)
 print("Workspace written to:", WORKSPACE)

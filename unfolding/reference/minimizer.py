@@ -162,33 +162,7 @@ class Minimizer:
         if os.path.exists(x0path):
             pass
         else:
-            if isinstance(x0, torch.Tensor):
-                np.save(x0path, x0.detach().cpu().numpy())
-            else:
-                np.save(x0path, x0)
-
-        baselinepath = os.path.join(self.cfg['logpath'], 'baseline.npy')
-        if os.path.exists(baselinepath):
-            pass
-        else:
-            if isinstance(loss.genbaseline, torch.Tensor):
-                np.save(baselinepath, loss.genbaseline.detach().cpu().numpy())
-            else:
-                np.save(baselinepath, loss.genbaseline)
-
-        binningpath = os.path.join(self.cfg['logpath'], 'binning.json')
-        if os.path.exists(binningpath):
-            pass
-        else:
-            loss.model.binning.genbinning.dump_to_file(binningpath)
-
-        nuisance_names_path = os.path.join(self.cfg['logpath'], 'nuisance_names.txt')
-        if os.path.exists(nuisance_names_path):
-            pass
-        else:
-            with open(nuisance_names_path, 'w') as f:
-                for name in loss.model.nuisance_names:
-                    f.write(name + '\n')
+            np.save(x0path, x0)
 
         #ensure everything is `torch.Tensor`s
         loss = loss.to_torch()
