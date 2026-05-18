@@ -89,6 +89,8 @@ for dataset, xsec in HT_BINS:
 n_with_flow_check = int(np.sqrt(len(transfer_raw_full)))
 t0_full = transfer_raw_full.reshape(n_with_flow_check, n_with_flow_check)
 t0_full = t0_full[50:-50, 50:-50]          # 450x450
+valid_transfer = (t0_full.sum(axis=1) > 0) & (t0_full.sum(axis=0) > 0)
+valid = valid & valid_transfer
 
 print("Building HT-stitched Pythia reco...")
 reco_vals = load_ht_array('proj_Reco')[valid]

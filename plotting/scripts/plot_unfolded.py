@@ -62,18 +62,14 @@ def load_gen(config_suite, runtag, dataset, objsyst='NOM', wtsyst='nominal'):
     return values[50:-50][valid]
 
 herwig_gen = load_gen('EvtMCprojConfig', 'herwig_v3', 'DYJetsToLL_Herwig')
-
-n_first = int(len(gen_values)) - 8 * 50
+valid_2d    = valid.reshape(len(JPT_BINS), 50)
 jpt_slices  = []
 jpt_r_edges = []
 idx = 0
 for i in range(len(JPT_BINS)):
-    if i == 0:
-        n_r     = n_first
-        r_edges = R_EDGES[50 - n_r:]
-    else:
-        n_r     = 50
-        r_edges = R_EDGES
+    valid_r = np.where(valid_2d[i])[0]
+    n_r     = len(valid_r)
+    r_edges = np.append(R_EDGES[valid_r], R_EDGES[valid_r[-1] + 1])
     jpt_slices.append(slice(idx, idx + n_r))
     jpt_r_edges.append(r_edges)
     idx += n_r
@@ -129,7 +125,7 @@ for i, (jlo, jhi) in enumerate(JPT_BINS):
         ax.set_yscale('log')
     ax.set_ylabel('A.U.', fontsize=11)
     ax.legend(fontsize=9)
-    ax.set_title(f'Jet $p_T$ ∈ [{jlo}, {jhi}] GeV', fontsize=12)
+    ax.set_title(f'Jet $p_T \\in [{jlo}, {jhi}]$ GeV', fontsize=12)
     ax.tick_params(axis='both', labelsize=10)
     hep.cms.label(ax=ax, data=True, text='Private', com=13)
 
