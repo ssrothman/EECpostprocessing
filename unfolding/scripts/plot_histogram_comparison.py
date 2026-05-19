@@ -5,8 +5,18 @@ import fasteigenpy as eigen
 import argparse
 from pathlib import Path
 
-from unfolding.histogram import Histogram
+from unfolding.histogram import Histogram, UnfoldedHistogram
+import numpy as np
 import os.path
+
+def unfolded_to_histogram(uh: UnfoldedHistogram) -> Histogram:
+    nGen = len(uh.baseline)
+    x_gen = uh.x[:nGen]
+    values = x_gen * uh.baseline
+    invhess_gen = uh.invhess[:nGen, :nGen]
+    d = uh.baseline
+    covmat = d[:, None] * invhess_gen * d[None, :]
+    return Histogram(values, covmat, uh.binning)
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -16,7 +26,7 @@ def main() -> None:
         "histogram_paths",
         nargs="+",
         type=str,
-        help="Path to saved histogram directories containing values.npy/cov.npy/invcov.npy/bincfg.json",
+        help="Path to saved unfolded histogram directories",
     )
     parser.add_argument(
         '--output-folder',
@@ -42,11 +52,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # parse \n in extra-text into actual newline characters
     args.extra_text = args.extra_text.replace('\\n', '\n') if args.extra_text else None
 
     if args.labels is None:
-        # need to strip trailing '/' before taking basename
         args.labels = [os.path.basename(p.rstrip('/')) for p in args.histogram_paths]
 
     histogram_dirs = [Path(p).expanduser().resolve() for p in args.histogram_paths]
@@ -54,7 +62,8 @@ def main() -> None:
         if not histogram_dir.is_dir():
             raise NotADirectoryError(f"Histogram path is not a directory: {histogram_dir}")
 
-    histograms = [Histogram.from_disk(str(histogram_dir)) for histogram_dir in histogram_dirs]
+    unfolded = [UnfoldedHistogram.from_disk(str(d)) for d in histogram_dirs]
+    histograms = [unfolded_to_histogram(uh) for uh in unfolded]
 
     if args.chi2:
         for i1 in range(len(histograms)):
