@@ -1,27 +1,30 @@
-import hist
-from networkx import find_minimal_d_separator
-
-#from simonplot.binning.Binning import PrebinnedBinningWithLookup
-from simonplot.cut.PrebinnedCut import SliceOperation
-from simonplot.drivers import draw_radial_histogram
-from simonplot.plottables.PlotStuff import BoxSpec
-from simonplot.variable.PrebinnedVariable import DivideOutProfile, NormalizePerBlock, WithJacobian
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse, smart_sqrt
-import simonplot as splt
 from typing import Any, Literal, Sequence, TypedDict
 import numpy as np
 import os
 import json
-from simonplot import plot_histogram, draw_matrix
-from simonplot.binning import PrebinnedBinning
-from simonplot.cut import NoopOperation
-from simonplot.plottables.PrebinnedDatasets import TransferMatrixDataset, ValCovPairDataset, CovNoValDataset, ValNoCovDataset
-from simonplot.variable import BasicPrebinnedVariable, ConstantVariable, CorrelationFromCovariance
 from general.fslookup.skim_path import lookup_skim_path
 from general.datasets.datasets import lookup_count, lookup_dataset
 from unfolding.io import read_hist
 from unfolding.specs import NuisanceTreatment, dsspec, whichsystspec, histspec
+
+try:
+    import hist
+    from networkx import find_minimal_d_separator
+    import simonplot as splt
+    from simonplot import plot_histogram, draw_matrix
+    from simonplot.binning import PrebinnedBinning
+    from simonplot.cut import NoopOperation
+    from simonplot.cut.PrebinnedCut import SliceOperation
+    from simonplot.drivers import draw_radial_histogram
+    from simonplot.plottables.PlotStuff import BoxSpec
+    from simonplot.plottables.PrebinnedDatasets import TransferMatrixDataset, ValCovPairDataset, CovNoValDataset, ValNoCovDataset
+    from simonplot.variable import BasicPrebinnedVariable, ConstantVariable, CorrelationFromCovariance
+    from simonplot.variable.PrebinnedVariable import DivideOutProfile, NormalizePerBlock, WithJacobian
+    _SIMONPLOT_AVAILABLE = True
+except Exception:
+    _SIMONPLOT_AVAILABLE = False
 
 def get_genreco_name(axnames, target):
     if target+'_gen' in axnames:
