@@ -8,7 +8,7 @@ from unfolding.histogram import Histogram
 from unfolding.detectormodel import DetectorModel
 from general.fslookup.hist_lookup import get_hist_path, get_hist_bincfg_path
 from general.datasets.datasets import lookup_count
-from simonpy.AbitraryBinning import ArbitraryBinning
+from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 
 HT_BINS = [
     ('DYJetsToLL_Pythia_HT70to100',    159.1),
@@ -105,6 +105,10 @@ binning_gen = ArbitraryBinning()
 with fs1.open(bincfgpath1, 'r') as f:
     binning_gen.from_dict(json.load(f))
 
+genreco_binning = ArbitraryGenRecoBinning()
+genreco_binning.from_dict({'gen': binning_gen.to_dict(), 'reco':
+binning_reco.to_dict()})
+
 mcgen = Histogram(gen_vals, gen_cov, binning_gen)
 mcgen.compute_invcov()
 mcgen.dump_to_disk(os.path.join(WORKSPACE, 'mcgen'))
@@ -134,6 +138,8 @@ model = DetectorModel(
     transferVarIndices = np.array([], dtype=int),
     gammaVariations    = np.zeros((0, nGen)),
     rhoVariations      = np.zeros((0, nReco)),
+    binning        = genreco_binning,
+    nuisance_names = [],
 )
 print(model)
 model.dump_to_disk(os.path.join(WORKSPACE, 'model'))
