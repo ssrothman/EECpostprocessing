@@ -1,4 +1,8 @@
-from typing import overload, override
+from typing import overload
+try:
+    from typing import override
+except ImportError:
+    def override(f): return f
 
 from unfolding.specs import dsspec, whichsystspec
 import numpy as np
