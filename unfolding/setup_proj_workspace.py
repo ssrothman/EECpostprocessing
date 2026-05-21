@@ -29,6 +29,26 @@ OBJSYST      = 'NOM'
 WTSYST       = 'nominal'
 LUMI         = (14.02 + 7.06 + 31.83) * 1e3  # pb^-1, 2018 A+B+D
 
+N_JPT    = 9   # Jpt bins after stripping Jpt flow bins
+N_R      = 50  # R bins before stripping R flow bins
+N_R_CORE = 48  # R bins after stripping R underflow and overflow
+
+def strip_r_flow_1d(arr):
+    return arr.reshape(N_JPT, N_R)[:, 1:-1].reshape(N_JPT * N_R_CORE)
+
+def strip_r_flow_2d(arr):
+    return (arr.reshape(N_JPT, N_R, N_JPT, N_R)[:, 1:-1, :, 1:-1]
+               .reshape(N_JPT * N_R_CORE, N_JPT * N_R_CORE))
+
+def strip_r_flow_from_binning(binning):
+    for block in binning._blocks:
+        if 'R' in block.axis_names:
+            block.ax_details['R']['edges'][0]  = -np.inf
+            block.ax_details['R']['edges'][-1] =  np.inf
+            block.ax_details['R']['minedge']   = -np.inf
+            block.ax_details['R']['maxedge']   =  np.inf
+    return binning.remove_flow_bins(['R'])
+
 def load_binned(dataset, table, is_cov=False):
     fs, path = get_hist_path(LOCATION, CONFIG_SUITE, RUNTAG, dataset,
                              OBJSYST, WTSYST, table, is_cov, -1, -1)
@@ -43,7 +63,8 @@ def load_ht_array(table, strip_flow=True):
     for dataset, xsec in HT_BINS:
         arr = load_binned(dataset, table)
         if strip_flow:
-            arr = arr[50:-50]
+            arr = arr[50:-50]           # strip Jpt flow bins
+            arr = strip_r_flow_1d(arr)  # strip R flow bins
         w = ht_weight(dataset, xsec)
         result = w * arr if result is None else result + w * arr
     return result
@@ -53,7 +74,8 @@ def load_ht_covmat(table):
     for dataset, xsec in HT_BINS:
         arr = load_binned(dataset, table, is_cov=True)
         n = len(arr)
-        arr = arr[50:n-50, 50:n-50]
+        arr = arr[50:n-50, 50:n-50]    # strip Jpt flow bins
+        arr = strip_r_flow_2d(arr)     # strip R flow bins
         w = ht_weight(dataset, xsec)
         result = w**2 * arr if result is None else result + w**2 * arr
     return result
@@ -72,7 +94,8 @@ for dataset, xsec in HT_BINS:
     transfer_raw_full = w * arr if transfer_raw_full is None else transfer_raw_full + w * arr
 
 n = int(np.sqrt(len(transfer_raw_full)))
-t0_full = transfer_raw_full.reshape(n, n)[50:-50, 50:-50]
+t0_full = transfer_raw_full.reshape(n, n)[50:-50, 50:-50]  # strip Jpt flow
+t0_full = strip_r_flow_2d(t0_full)                         # strip R flow
 
 valid_transfer = (t0_full.sum(axis=1) > 0) & (t0_full.sum(axis=0) > 0)
 valid = valid & valid_transfer
@@ -89,6 +112,7 @@ binning_reco = ArbitraryBinning()
 with fs0.open(bincfgpath0, 'r') as f:
     binning_reco.from_dict(json.load(f))
 binning_reco = binning_reco.remove_flow_bins(['Jpt'])
+binning_reco = strip_r_flow_from_binning(binning_reco)
 
 reco = Histogram(reco_vals, reco_cov, binning_reco)
 reco.compute_invcov()
@@ -106,10 +130,10 @@ binning_gen = ArbitraryBinning()
 with fs1.open(bincfgpath1, 'r') as f:
     binning_gen.from_dict(json.load(f))
 binning_gen = binning_gen.remove_flow_bins(['Jpt'])
+binning_gen = strip_r_flow_from_binning(binning_gen)
 
 genreco_binning = ArbitraryGenRecoBinning()
-genreco_binning.from_dict({'gen': binning_gen.to_dict(), 'reco':
-binning_reco.to_dict()})
+genreco_binning.from_dict({'gen': binning_gen.to_dict(), 'reco': binning_reco.to_dict()})
 
 mcgen = Histogram(gen_vals, gen_cov, binning_gen)
 mcgen.compute_invcov()
