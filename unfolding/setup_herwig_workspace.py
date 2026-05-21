@@ -53,6 +53,7 @@ _, bincfgpath = get_hist_bincfg_path(herwig['location'], herwig['config_suite'],
 binning = ArbitraryBinning()
 with fs.open(bincfgpath, 'r') as f:
     binning.from_dict(json.load(f))
+binning = binning.remove_flow_bins(['Jpt'])
 
 print("Inverting covariance matrix...")
 reco = Histogram(values, covmat, binning)

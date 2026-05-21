@@ -363,11 +363,9 @@ class Histogram:
             if np.isinf(lo) or np.isinf(hi):
                 continue
             cut = SliceOperation({ptname: (lo, hi)}, [])
-            pt_label = "$%d < p_T < %d$ GeV" % (int(lo), int(hi))
-            itext = (pt_label + '\n' + extratext) if extratext else pt_label
             plot_histogram(
                 variable, cut, weight, dataset, binning,
-                extratext=itext,
+                extratext=extratext,
                 output_folder=output_folder,
                 override_filename='eec_pt%d' % int(lo),
                 no_lumi_normalization=True,

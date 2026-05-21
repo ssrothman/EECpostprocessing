@@ -68,6 +68,7 @@ _, bincfgpath = get_hist_bincfg_path(binning_cfg['location'], binning_cfg['confi
 binning = ArbitraryBinning()
 with fs.open(bincfgpath, 'r') as f:
     binning.from_dict(json.load(f))
+binning = binning.remove_flow_bins(['Jpt'])
 
 print("Inverting covariance matrix...")
 reco = Histogram(combined_values, combined_cov, binning)

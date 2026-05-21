@@ -88,6 +88,7 @@ fs0, bincfgpath0 = get_hist_bincfg_path(LOCATION, CONFIG_SUITE, RUNTAG,
 binning_reco = ArbitraryBinning()
 with fs0.open(bincfgpath0, 'r') as f:
     binning_reco.from_dict(json.load(f))
+binning_reco = binning_reco.remove_flow_bins(['Jpt'])
 
 reco = Histogram(reco_vals, reco_cov, binning_reco)
 reco.compute_invcov()
@@ -104,6 +105,7 @@ fs1, bincfgpath1 = get_hist_bincfg_path(LOCATION, CONFIG_SUITE, RUNTAG,
 binning_gen = ArbitraryBinning()
 with fs1.open(bincfgpath1, 'r') as f:
     binning_gen.from_dict(json.load(f))
+binning_gen = binning_gen.remove_flow_bins(['Jpt'])
 
 genreco_binning = ArbitraryGenRecoBinning()
 genreco_binning.from_dict({'gen': binning_gen.to_dict(), 'reco':
