@@ -149,8 +149,10 @@ totR = load_ht_array('proj_totalReco')[valid]
 nGen = nReco = len(totG)
 
 gamma0 = umG / np.where(totG == 0, 1.0, totG)
+gamma0[gamma0 == 1] = 0                                         # prevent gen bins from decoupling
 bkgR   = umR
-rho0   = bkgR / np.where(totR - bkgR == 0, 1.0, totR - bkgR)
+Rdenom = totR - bkgR
+rho0   = bkgR / np.where(Rdenom <= 0, 1.0, Rdenom)
 
 t0 = t0_full[np.ix_(valid, valid)]
 matchedG = totG - umG
