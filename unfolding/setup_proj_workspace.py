@@ -38,12 +38,10 @@ def load_binned(dataset, table, is_cov=False):
 def ht_weight(dataset, xsec):
     return xsec / lookup_count(RUNTAG, dataset) * LUMI
 
-def load_ht_array(table, strip_flow=True):
+def load_ht_array(table):
     result = None
     for dataset, xsec in HT_BINS:
         arr = load_binned(dataset, table)
-        if strip_flow:
-            arr = arr[50:-50]  # strip Jpt flow bins
         w = ht_weight(dataset, xsec)
         result = w * arr if result is None else result + w * arr
     return result
@@ -52,43 +50,28 @@ def load_ht_covmat(table):
     result = None
     for dataset, xsec in HT_BINS:
         arr = load_binned(dataset, table, is_cov=True)
-        n = len(arr)
-        arr = arr[50:n-50, 50:n-50]  # strip Jpt flow bins
         w = ht_weight(dataset, xsec)
         result = w**2 * arr if result is None else result + w**2 * arr
     return result
 
-# --- valid mask ---
-print("Computing valid mask from HT-stitched reco...")
-raw_cov = load_ht_covmat('proj_totalReco')
-valid   = ~np.isnan(np.diag(raw_cov))
-print("Valid bins (reco cov):", valid.sum(), "of", len(valid))
-
-# --- transfer (needed for valid mask extension) ---
-transfer_raw_full = None
-for dataset, xsec in HT_BINS:
-    arr = load_binned(dataset, 'proj_transfer')
-    w   = ht_weight(dataset, xsec)
-    transfer_raw_full = w * arr if transfer_raw_full is None else transfer_raw_full + w * arr
-
-n = int(np.sqrt(len(transfer_raw_full)))
-t0_full = transfer_raw_full.reshape(n, n)[50:-50, 50:-50]  # strip Jpt flow
-
-valid_transfer = (t0_full.sum(axis=1) > 0) & (t0_full.sum(axis=0) > 0)
-valid = valid & valid_transfer
-print("Valid bins (after transfer mask):", valid.sum(), "of", len(valid))
+def clean_covmat(cov):
+    """Replace NaN/zero diagonal entries with 1e30 (zero weight in chi-squared)."""
+    bad = np.isnan(np.diag(cov)) | (np.diag(cov) == 0)
+    cov = np.where(np.isnan(cov), 0.0, cov)
+    np.fill_diagonal(cov, np.where(bad, 1e30, np.diag(cov)))
+    return cov
 
 # --- reco ---
 print("Building HT-stitched Pythia reco...")
-reco_vals = load_ht_array('proj_totalReco')[valid]
-reco_cov  = raw_cov[np.ix_(valid, valid)]
+reco_vals = np.nan_to_num(load_ht_array('proj_totalReco'), nan=0.0)
+reco_cov  = clean_covmat(load_ht_covmat('proj_totalReco'))
+print("Valid reco bins:", np.sum(np.diag(reco_cov) < 1e29), "of", len(reco_vals))
 
 fs0, bincfgpath0 = get_hist_bincfg_path(LOCATION, CONFIG_SUITE, RUNTAG,
                                          HT_BINS[0][0], OBJSYST, 'proj_totalReco')
 binning_reco = ArbitraryBinning()
 with fs0.open(bincfgpath0, 'r') as f:
     binning_reco.from_dict(json.load(f))
-binning_reco = binning_reco.remove_flow_bins(['Jpt'])
 
 reco = Histogram(reco_vals, reco_cov, binning_reco)
 reco.compute_invcov()
@@ -97,7 +80,7 @@ print("Pythia reco sum:", reco_vals.sum())
 
 # --- gen baseline ---
 print("Building HT-stitched gen baseline...")
-gen_vals = load_ht_array('proj_totalGen')[valid]
+gen_vals = np.nan_to_num(load_ht_array('proj_totalGen'), nan=0.0)
 gen_cov  = np.diag(np.where(gen_vals > 0, gen_vals, 1.0))
 
 fs1, bincfgpath1 = get_hist_bincfg_path(LOCATION, CONFIG_SUITE, RUNTAG,
@@ -105,7 +88,6 @@ fs1, bincfgpath1 = get_hist_bincfg_path(LOCATION, CONFIG_SUITE, RUNTAG,
 binning_gen = ArbitraryBinning()
 with fs1.open(bincfgpath1, 'r') as f:
     binning_gen.from_dict(json.load(f))
-binning_gen = binning_gen.remove_flow_bins(['Jpt'])
 
 genreco_binning = ArbitraryGenRecoBinning()
 genreco_binning.from_dict({'gen': binning_gen.to_dict(), 'reco': binning_reco.to_dict()})
@@ -117,21 +99,22 @@ print("Pythia gen sum:", gen_vals.sum())
 
 # --- detector model ---
 print("Building HT-stitched detector model...")
-umG  = load_ht_array('proj_unmatchedGen')[valid]
-umR  = load_ht_array('proj_unmatchedReco')[valid]
-totG = load_ht_array('proj_totalGen')[valid]
-totR = load_ht_array('proj_totalReco')[valid]
+umG  = np.nan_to_num(load_ht_array('proj_unmatchedGen'),  nan=0.0)
+umR  = np.nan_to_num(load_ht_array('proj_unmatchedReco'), nan=0.0)
+totG = np.nan_to_num(load_ht_array('proj_totalGen'),      nan=0.0)
+totR = np.nan_to_num(load_ht_array('proj_totalReco'),     nan=0.0)
 nGen = nReco = len(totG)
 
 gamma0 = umG / np.where(totG == 0, 1.0, totG)
 gamma0[gamma0 == 1] = 0                        # prevent gen bins from decoupling
-bkgR   = umR
-Rdenom = totR - bkgR
-rho0   = bkgR / np.where(Rdenom <= 0, 1.0, Rdenom)
+Rdenom = totR - umR
+rho0   = umR / np.where(Rdenom <= 0, 1.0, Rdenom)
 
-t0 = t0_full[np.ix_(valid, valid)]
-matchedG = totG - umG
-t0 /= np.where(matchedG == 0, 1.0, matchedG)[np.newaxis, :]
+transfer_raw = np.nan_to_num(load_ht_array('proj_transfer'), nan=0.0)
+n = int(np.sqrt(len(transfer_raw)))
+t0 = transfer_raw.reshape(n, n)
+matchedG = np.where(totG - umG == 0, 1.0, totG - umG)
+t0 /= matchedG[np.newaxis, :]
 
 model = DetectorModel(
     transfer0          = t0,
@@ -146,6 +129,4 @@ model = DetectorModel(
 )
 print(model)
 model.dump_to_disk(os.path.join(WORKSPACE, 'model'))
-
-np.save(os.path.join(WORKSPACE, 'valid_bins.npy'), valid)
 print("Workspace written to:", WORKSPACE)

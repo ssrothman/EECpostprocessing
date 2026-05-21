@@ -22,6 +22,12 @@ DATA_ERAS = [
      'runtag': 'data_v1', 'dataset': 'DATA_2018D', 'objsyst': 'DATA'},
 ]
 
+def clean_covmat(cov):
+    bad = np.isnan(np.diag(cov)) | (np.diag(cov) == 0)
+    cov = np.where(np.isnan(cov), 0.0, cov)
+    np.fill_diagonal(cov, np.where(bad, 1e30, np.diag(cov)))
+    return cov
+
 def load_raw_reco(cfg):
     fs, valpath = get_hist_path(cfg['location'], cfg['config_suite'], cfg['runtag'],
                                 cfg['dataset'], cfg['objsyst'], WTSYST,
@@ -33,12 +39,7 @@ def load_raw_reco(cfg):
         values = np.load(f)
     with fs.open(covpath, 'rb') as f:
         covmat = np.load(f)
-    n = len(covmat)
-    covmat = covmat[50:n-50, 50:n-50]
-    values = values[50:-50]
     return values, covmat, fs, cfg
-
-valid_pythia = np.load(os.path.join(PYTHIA_WORKSPACE, 'valid_bins.npy'))
 
 print("Loading data reco histograms...")
 combined_values = None
@@ -55,12 +56,9 @@ for era in DATA_ERAS:
         combined_values += vals
         combined_cov    += cov
 
-valid_data = ~np.isnan(np.diag(combined_cov))
-valid      = valid_pythia & valid_data
-print("Valid bins: Pythia", valid_pythia.sum(), "Data", valid_data.sum(), "Intersection", valid.sum())
-
-combined_values = combined_values[valid]
-combined_cov    = combined_cov[np.ix_(valid, valid)]
+combined_values = np.nan_to_num(combined_values, nan=0.0)
+combined_cov    = clean_covmat(combined_cov)
+print("Valid bins:", np.sum(np.diag(combined_cov) < 1e29), "of", len(combined_values))
 
 _, bincfgpath = get_hist_bincfg_path(binning_cfg['location'], binning_cfg['config_suite'],
                                       binning_cfg['runtag'], binning_cfg['dataset'],
@@ -68,7 +66,6 @@ _, bincfgpath = get_hist_bincfg_path(binning_cfg['location'], binning_cfg['confi
 binning = ArbitraryBinning()
 with fs.open(bincfgpath, 'r') as f:
     binning.from_dict(json.load(f))
-binning = binning.remove_flow_bins(['Jpt'])
 
 print("Inverting covariance matrix...")
 reco = Histogram(combined_values, combined_cov, binning)
@@ -83,6 +80,5 @@ mcgen.dump_to_disk(os.path.join(WORKSPACE, 'mcgen'))
 shutil.copytree(os.path.join(PYTHIA_WORKSPACE, 'model'),
                 os.path.join(WORKSPACE, 'model'),
                 dirs_exist_ok=True)
-np.save(os.path.join(WORKSPACE, 'valid_bins.npy'), valid)
 
 print("Workspace written to:", WORKSPACE)

@@ -22,7 +22,11 @@ herwig = {
     'objsyst'      : OBJSYST,
 }
 
-valid_pythia = np.load(os.path.join(PYTHIA_WORKSPACE, 'valid_bins.npy'))
+def clean_covmat(cov):
+    bad = np.isnan(np.diag(cov)) | (np.diag(cov) == 0)
+    cov = np.where(np.isnan(cov), 0.0, cov)
+    np.fill_diagonal(cov, np.where(bad, 1e30, np.diag(cov)))
+    return cov
 
 print("Loading Herwig reco...")
 fs, valpath = get_hist_path(herwig['location'], herwig['config_suite'], herwig['runtag'],
@@ -36,16 +40,9 @@ with fs.open(valpath, 'rb') as f:
 with fs.open(covpath, 'rb') as f:
     covmat = np.load(f)
 
-n = len(covmat)
-covmat = covmat[50:n-50, 50:n-50]
-values = values[50:-50]
-
-valid_herwig = ~np.isnan(np.diag(covmat))
-valid        = valid_pythia & valid_herwig
-print("Valid bins: Pythia", valid_pythia.sum(), "Herwig", valid_herwig.sum(), "Intersection", valid.sum())
-
-values = values[valid]
-covmat = covmat[np.ix_(valid, valid)]
+values = np.nan_to_num(values, nan=0.0)
+covmat = clean_covmat(covmat)
+print("Valid bins:", np.sum(np.diag(covmat) < 1e29), "of", len(values))
 
 _, bincfgpath = get_hist_bincfg_path(herwig['location'], herwig['config_suite'],
                                       herwig['runtag'], herwig['dataset'],
@@ -53,7 +50,6 @@ _, bincfgpath = get_hist_bincfg_path(herwig['location'], herwig['config_suite'],
 binning = ArbitraryBinning()
 with fs.open(bincfgpath, 'r') as f:
     binning.from_dict(json.load(f))
-binning = binning.remove_flow_bins(['Jpt'])
 
 print("Inverting covariance matrix...")
 reco = Histogram(values, covmat, binning)
@@ -68,6 +64,5 @@ mcgen.dump_to_disk(os.path.join(WORKSPACE, 'mcgen'))
 shutil.copytree(os.path.join(PYTHIA_WORKSPACE, 'model'),
                 os.path.join(WORKSPACE, 'model'),
                 dirs_exist_ok=True)
-np.save(os.path.join(WORKSPACE, 'valid_bins.npy'), valid)
 
 print("Workspace written to:", WORKSPACE)
