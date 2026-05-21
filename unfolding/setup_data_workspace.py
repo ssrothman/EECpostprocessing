@@ -33,13 +33,9 @@ def load_raw_reco(cfg):
         values = np.load(f)
     with fs.open(covpath, 'rb') as f:
         covmat = np.load(f)
-    N_JPT = 9; N_R = 50; N_R_CORE = 48
     n = len(covmat)
     covmat = covmat[50:n-50, 50:n-50]
     values = values[50:-50]
-    covmat = (covmat.reshape(N_JPT, N_R, N_JPT, N_R)[:, 1:-1, :, 1:-1]
-                    .reshape(N_JPT * N_R_CORE, N_JPT * N_R_CORE))
-    values = values.reshape(N_JPT, N_R)[:, 1:-1].reshape(N_JPT * N_R_CORE)
     return values, covmat, fs, cfg
 
 valid_pythia = np.load(os.path.join(PYTHIA_WORKSPACE, 'valid_bins.npy'))
@@ -73,13 +69,6 @@ binning = ArbitraryBinning()
 with fs.open(bincfgpath, 'r') as f:
     binning.from_dict(json.load(f))
 binning = binning.remove_flow_bins(['Jpt'])
-for block in binning._blocks:
-    if 'R' in block.axis_names:
-        block.ax_details['R']['edges'][0]  = -np.inf
-        block.ax_details['R']['edges'][-1] =  np.inf
-        block.ax_details['R']['minedge']   = -np.inf
-        block.ax_details['R']['maxedge']   =  np.inf
-binning = binning.remove_flow_bins(['R'])
 
 print("Inverting covariance matrix...")
 reco = Histogram(combined_values, combined_cov, binning)
