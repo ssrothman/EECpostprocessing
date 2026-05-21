@@ -337,6 +337,45 @@ class Histogram:
             override_ylabel='Error [sqrt diag(cov)]'
         )
 
+    def _plot_proj(self, output_folder: str | None = None, extratext: str | None = None) -> None:
+        """Plot projected EEC (Jpt, ΔR) — one file per Jpt bin, ΔR on x-axis."""
+        axnames = self.binning.axis_names
+        ptname = get_genreco_name(axnames, 'Jpt')
+        ptedges = self.binning.axis_edges(ptname)
+
+        dataset = ValCovPairDataset(
+            key='histogram',
+            color=None,
+            label=None,
+            data=(self._as_numpy(self.values), self._as_numpy(self.covmat)),
+            binning=self.binning,
+            isMC=True,
+        )
+
+        variable = BasicPrebinnedVariable()
+        weight   = ConstantVariable(1.0)
+        binning  = PrebinnedBinning()
+
+        os.makedirs(output_folder or '.', exist_ok=True)
+
+        for ipt in range(len(ptedges) - 1):
+            lo, hi = ptedges[ipt], ptedges[ipt+1]
+            if np.isinf(lo) or np.isinf(hi):
+                continue
+            cut = SliceOperation({ptname: (lo, hi)}, [])
+            pt_label = "$%d < p_T < %d$ GeV" % (int(lo), int(hi))
+            itext = (pt_label + '\n' + extratext) if extratext else pt_label
+            plot_histogram(
+                variable, cut, weight, dataset, binning,
+                extratext=itext,
+                output_folder=output_folder,
+                override_filename='eec_pt%d' % int(lo),
+                no_lumi_normalization=True,
+                no_ratiopad=True,
+                logx=True,
+                logy=True,
+            )
+
     def plot(
         self,
         output_folder: str | None = None,
@@ -347,13 +386,18 @@ class Histogram:
         projected_c_1D : bool = False,
         transform : Literal['none', 'shapes', 'angular_modulation'] = 'none'
     ) -> None:
-        
-        if transform not in ['none', 'shapes', 'angular_modulation']:
-            raise ValueError("Invalid transform option: %s" % transform)
 
         axnames = self.binning.axis_names
 
-        ptname = get_genreco_name(axnames, 'Jpt')            
+        # Projected EEC: only (Jpt, ΔR) — no r/c decomposition
+        if len(axnames) == 2:
+            self._plot_proj(output_folder=output_folder, extratext=extratext)
+            return
+
+        if transform not in ['none', 'shapes', 'angular_modulation']:
+            raise ValueError("Invalid transform option: %s" % transform)
+
+        ptname = get_genreco_name(axnames, 'Jpt')
         Rname = get_genreco_name(axnames, 'R')
         rname = get_genreco_name(axnames, 'r')
         cname = get_genreco_name(axnames, 'c')
