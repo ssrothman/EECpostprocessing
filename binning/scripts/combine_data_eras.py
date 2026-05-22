@@ -43,7 +43,7 @@ for dataset in ERAS:
         args.table, args.cov, -1, -1
     )
     with fs.open(inpath, 'rb') as f:
-        arr = np.load(f)
+        arr = np.nan_to_num(np.load(f), nan=0.0)
 
     print(f"  {dataset}: sum={arr.sum():.4e}")
     combined = arr.copy() if combined is None else combined + arr
