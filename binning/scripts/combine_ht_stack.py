@@ -29,8 +29,12 @@ parser.add_argument('--objsyst',      default='NOM')
 parser.add_argument('--wtsyst',       default='nominal')
 parser.add_argument('--table',        required=True)
 parser.add_argument('--output-dataset', default='DYJetsToLL_Pythia_HTsum')
+parser.add_argument('--output-objsyst', default=None,
+                    help='objsyst for output path (defaults to --objsyst)')
 parser.add_argument('--cov',          action='store_true')
 args = parser.parse_args()
+if args.output_objsyst is None:
+    args.output_objsyst = args.objsyst
 
 from general.fslookup.hist_lookup import get_hist_path, get_hist_bincfg_path
 from general.datasets.datasets import lookup_count
@@ -69,7 +73,7 @@ for dataset, xsec in HT_BINS:
 
 fs, outpath = get_hist_path(
     args.location, args.config_suite, args.runtag,
-    args.output_dataset, args.objsyst, args.wtsyst,
+    args.output_dataset, args.output_objsyst, args.wtsyst,
     args.table, args.cov, -1, -1
 )
 
@@ -88,7 +92,7 @@ if not args.cov:
     )
     _, dst_bincfg = get_hist_bincfg_path(
         args.location, args.config_suite, args.runtag,
-        args.output_dataset, args.objsyst, args.table
+        args.output_dataset, args.output_objsyst, args.table
     )
     with first_fs.open(src_bincfg, 'r') as f:
         bincfg_data = f.read()

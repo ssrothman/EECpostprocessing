@@ -15,7 +15,7 @@
         },
         "hist": {
             "wtsyst":  "nominal",
-            "objsyst": "NOM"
+            "objsyst": "nominal"
         }
     },
     "model": {

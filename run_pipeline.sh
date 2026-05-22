@@ -6,10 +6,10 @@ CFG="unfolding/configs/pythia_proj.json"
 
 echo "=== Combining Pythia HT bins ==="
 for table in proj_totalReco proj_totalGen proj_unmatchedReco proj_unmatchedGen proj_transfer; do
-    python -m binning.scripts.combine_ht_stack --table $table
+    python -m binning.scripts.combine_ht_stack --table $table --output-objsyst nominal
 done
-python -m binning.scripts.combine_ht_stack --table proj_totalReco --cov
-python -m binning.scripts.combine_ht_stack --table proj_totalGen --cov
+python -m binning.scripts.combine_ht_stack --table proj_totalReco --cov --output-objsyst nominal
+python -m binning.scripts.combine_ht_stack --table proj_totalGen  --cov --output-objsyst nominal
 
 echo "=== Setting up Pythia workspace ==="
 mkdir -p $WORKSPACE_BASE/proj_unfold_workspace
