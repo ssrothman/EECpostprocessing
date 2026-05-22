@@ -1,0 +1,37 @@
+{
+    "data": {
+        "name": "reco",
+        "dset": {
+            "location":     "dylan-lxplus-eos",
+            "config_suite": "EvtMCprojConfig",
+            "runtag":       "v8",
+            "dataset":      "DYJetsToLL_Pythia_HTsum",
+            "isStack":      true,
+            "isMC":         true,
+            "target_lumi":  52.91,
+            "statN":        -1,
+            "statK":        -1,
+            "what":         "proj"
+        },
+        "hist": {
+            "wtsyst":  "nominal",
+            "objsyst": "NOM"
+        }
+    },
+    "model": {
+        "dset": {
+            "location":     "dylan-lxplus-eos",
+            "config_suite": "EvtMCprojConfig",
+            "runtag":       "v8",
+            "dataset":      "DYJetsToLL_Pythia_HTsum",
+            "isStack":      true,
+            "isMC":         true,
+            "target_lumi":  52.91,
+            "statN":        -1,
+            "statK":        -1,
+            "what":         "proj"
+        },
+        "systematics": [],
+        "what": "proj"
+    }
+}
