@@ -42,19 +42,21 @@ def get_transfer_binning(dset : dsspec, rebinning_reco : str | dict | None, rebi
         'transfer',
         False
     )
-    utG = read_hist(
-        dset, 
-        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'}, 
-        'untransferedGen',
-        False
-    )[0]
-    utR = read_hist(
-        dset, 
-        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'}, 
-        'untransferedReco',
-        False
-    )[0]    
-    tmp = np.reshape(tmp, (len(utR), len(utG)))
+    try:
+        utG = read_hist(dset, {'objsyst': 'nominal', 'wtsyst': 'nominal'}, 'untransferedGen', False)[0]
+    except Exception:
+        utG = None
+    try:
+        utR = read_hist(dset, {'objsyst': 'nominal', 'wtsyst': 'nominal'}, 'untransferedReco', False)[0]
+    except Exception:
+        utR = None
+
+    t = np.array(tmp)
+    if utG is not None and utR is not None:
+        tmp = np.reshape(t, (len(utR), len(utG)))
+    else:
+        n = int(np.sqrt(len(t)))
+        tmp = np.reshape(t, (n, n))
 
     if rebinning_reco is not None and rebinning_gen is not None:
         binning = binning.rebin_transfer2d(tmp, rebinning_reco, rebinning_gen)[1]
