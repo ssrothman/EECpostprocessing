@@ -39,6 +39,10 @@ parser.add_argument('--nocheck', action='store_true', help='Skip checks for exis
 
 parser.add_argument('--justcheck', action='store_true', help='Just check for existing output, do not run anything')
 parser.add_argument('--validate-existing', action='store_true', help='Validate existing output (does nothing if --nocheck is specified)')
+
+parser.add_argument('--reweight', type=str, default=None, help='Reweight with a correctionlib correction (format path:correction_name)')
+parser.add_argument('--reweighted-suffix', type=str, default=None, help='Suffix to add to table name for reweighted output')
+
 args = parser.parse_args()
 
 if args.table is not None and args.tables is not None:
@@ -46,7 +50,32 @@ if args.table is not None and args.tables is not None:
 if args.table is None and args.tables is None:
     parser.error("Must specify a table (positional) or --tables")
 
+if args.reweight is not None and args.reweighted_suffix is None:
+    parser.error("Must specify --reweighted-suffix when using --reweight")
+if args.reweight is None and args.reweighted_suffix is not None:
+    parser.error("Cannot specify --reweighted-suffix without --reweight")
+
 tables = args.tables if args.tables is not None else [args.table]
+
+if args.reweight is not None:
+    if ':' not in args.reweight or len(args.reweight.split(':')) != 2:
+        parser.error("Invalid format for --reweight, expected path:correction_name")
+    
+    correction_path, correction_name = args.reweight.split(':')
+    with open(correction_path, 'r') as f:
+        from correctionlib import CorrectionSet
+        cset = CorrectionSet.from_file(correction_path)
+        if correction_name not in cset.keys():
+            parser.error("Correction %s not found in file %s" % (correction_name, correction_path))
+        correction = cset[correction_name]
+
+    import pyarrow.compute as pc
+    correction_inputs = {
+        var.name : eval(var.description) for var in correction.inputs
+    }
+else:
+    correction = None
+    correction_inputs = None
 
 # imports
 from general.fslookup.hist_lookup import get_hist_path
@@ -98,4 +127,4 @@ if args.justcheck:
 
 for table in tables_to_run:
     print("Processing table", table)
-    run_table(args, table)
+    run_table(args, table, correction=correction, correction_inputs=correction_inputs, fname_suffix=args.reweighted_suffix)

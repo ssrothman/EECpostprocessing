@@ -7,7 +7,7 @@
                 "herwig_glu_50"
             ],
             "stacks" : [],
-            "color" : "blue",
+            "color" : "mediumblue",
             "label" : "Herwig Z+glu; default"
         },
         "herwig_glu_nohad" : {
@@ -17,7 +17,7 @@
                 "herwig_glu_nohad_50"
             ],
             "stacks" : [],
-            "color" : "blue",
+            "color" : "mediumorchid",
             "label" : "Herwig Z+glu; no hadronization"
         },
         "herwig_glu_nohardspin" : {
@@ -27,7 +27,7 @@
                 "herwig_glu_nohardspin_50"
             ],
             "stacks" : [],
-            "color" : "blue",
+            "color" : "palevioletred",
             "label" : "Herwig Z+glu; no hard spin corr."
         },
         "herwig_glu_nosoftspin" : {
@@ -37,7 +37,7 @@
                 "herwig_glu_nosoftspin_50"
             ],
             "stacks" : [],
-            "color" : "blue",
+            "color" : "darkturquoise",
             "label" : "Herwig Z+glu; no soft spin corr."
         },
         "herwig_glu_nospin" : {
@@ -47,7 +47,7 @@
                 "herwig_glu_nospin_50"
             ],
             "stacks" : [],
-            "color" : "blue",
+            "color" : "mediumseagreen",
             "label" : "Herwig Z+glu; no spin corr."
         },
 

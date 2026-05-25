@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Sequence
 
 import hist
 
@@ -7,23 +7,36 @@ import simonplot as splt
 import numpy as np
 from simonplot.typing.Protocols import CutProtocol, VariableProtocol
 from simonplot.util.evaluate import evaluate_on_dataset
+from simonplot.util.common import setup_canvas, make_oneax, add_cms_legend, savefig
+import pyarrow.dataset as ds
 
 import matplotlib.pyplot as plt
 
-
+def dump_smoothings(smoothing_l : Sequence[SmoothingProtocol], names : Sequence[str], varname : str, output_path : str, vardesc : str):
+    corrections = [smoothing.to_correctionlib(name, varname, vardesc) for smoothing, name in zip(smoothing_l, names)]
+    from correctionlib import schemav2
+    cset = schemav2.CorrectionSet(
+        schema_version = 2,
+        corrections = corrections
+    )
+    with open(output_path, 'w') as f:
+        f.write(cset.model_dump_json(indent=2))
 
 def compare_smothings(
-    dset_num : splt.plottables.ParquetDataset,
-    dset_denom : splt.plottables.ParquetDataset,
-    cut : CutProtocol,
-    variable : VariableProtocol,
-    wtvar_num : VariableProtocol,
-    wtvar_denom : VariableProtocol,
+    dset_num : splt.plottables.ParquetDataset | splt.plottables.DatasetStack,
+    dset_denom : splt.plottables.ParquetDataset | splt.plottables.DatasetStack,
+    cut : ds.Expression | None,
+    variable : ds.Expression,
+    wtvar_num : ds.Expression | None,
+    wtvar_denom : ds.Expression | None,
     bins : np.ndarray,
-    smoothings : List[SmoothingProtocol | None],
+    smoothings : Sequence[SmoothingProtocol],
     labels : List[str],
     logx : bool,
-    logy : bool
+    logy : bool,
+    isMC : bool,
+    lumi : float | None,
+    plot_path : str 
 ):
     ratio, ratioerr = compute_ratio(
         dset_num,
@@ -35,19 +48,16 @@ def compare_smothings(
         bins
     )
 
-    smoothed = []
     for smoothing in smoothings:
-        if smoothing is None:
-            smoothed.append(ratio)
-        else:
-            smoothed.append(smoothing(ratio, ratioerr, bins))
+        smoothing(ratio, ratioerr, bins)
 
-    fig = splt.util.common.setup_canvas()
-    ax = splt.util.common.make_oneax(fig)
-    splt.util.common.add_cms_legend(ax, False, None)
+    fig = setup_canvas()
+    ax = make_oneax(fig)
+    add_cms_legend(ax, not isMC, lumi)
 
-    for sm, label in zip(smoothed, labels):
-        ax.plot(0.5 * (bins[:-1] + bins[1:]), sm, label=label)
+    smoothx = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), 1000, base=10)
+    for sm, label in zip(smoothings, labels):
+        ax.plot(smoothx, sm.evaluate(smoothx), label=label)
 
     ax.errorbar(
         0.5 * (bins[:-1] + bins[1:]), ratio,
@@ -60,46 +70,37 @@ def compare_smothings(
         ax.set_yscale('log')
 
     ax.legend()
-    plt.savefig('test.png')
-    plt.show()
+    savefig(fig, plot_path)
+    plt.close(fig)
 
 def compute_ratio(
-    dset_num : splt.plottables.ParquetDataset,
-    dset_denom : splt.plottables.ParquetDataset,
-    cut : CutProtocol,
-    variable : VariableProtocol,
-    wtvar_num : VariableProtocol,
-    wtvar_denom : VariableProtocol,
+    dset_num : splt.plottables.ParquetDataset | splt.plottables.DatasetStack,
+    dset_denom : splt.plottables.ParquetDataset | splt.plottables.DatasetStack,
+    cut : ds.Expression | None,
+    variable : ds.Expression,
+    wtvar_num : ds.Expression | None,
+    wtvar_denom : ds.Expression | None,
     bins : np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:  
     
     print("evaluating numerator")
-    vals_num = evaluate_on_dataset(
-        dset_num, variable, cut # type: ignore
+    H_num = hist.Hist(
+        hist.axis.Variable(bins, overflow=False, underflow=False, name='x'),
+        storage=hist.storage.Weight()
     )
-    wt_num = evaluate_on_dataset(
-        dset_num, wtvar_num, cut # type: ignore
+    dset_num.streaming_fill_histogram(
+        H_num, 
+        {'x': variable}, wtvar_num, cut
     )
     print("evaluating denominator")
-    vals_denom = evaluate_on_dataset(
-        dset_denom, variable, cut # type: ignore
-    )
-    wt_denom = evaluate_on_dataset(
-        dset_denom, wtvar_denom, cut # type: ignore
-    )
-
-    print("binning")
-    H_num = hist.Hist(
-        hist.axis.Variable(bins, overflow=False, underflow=False),
-        storage=hist.storage.Weight(),
-    )
     H_denom = hist.Hist(
-        hist.axis.Variable(bins, overflow=False, underflow=False),
-        storage=hist.storage.Weight(),
+        hist.axis.Variable(bins, overflow=False, underflow=False, name='x'),
+        storage=hist.storage.Weight()
     )
-
-    H_num.fill(vals_num, weight=wt_num)
-    H_denom.fill(vals_denom, weight=wt_denom)
+    dset_denom.streaming_fill_histogram(
+        H_denom,
+        {'x': variable}, wtvar_denom, cut
+    )
 
     num = H_num.values(flow=True)
     denom = H_denom.values(flow=True)

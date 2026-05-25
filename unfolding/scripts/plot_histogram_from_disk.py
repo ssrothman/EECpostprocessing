@@ -29,6 +29,9 @@ def main() -> None:
     parser.add_argument(
         '--covmats', action='store_true', help="Also plot the covariance matrices (both raw and transformed to density space)"
     )
+    parser.add_argument(
+        '--detailed', action='store_true', help="Plot the basic histograms (values, relative error) per (pT, R) bin"
+    )
 
     args = parser.parse_args()
 
@@ -42,7 +45,8 @@ def main() -> None:
                    covmats=args.covmats,
                    transform=args.transform,
                    projected_r_c_1D=args.projected_r_c,
-                   projected_c_1D=args.projected_c)
+                   projected_c_1D=args.projected_c,
+                   detailed=args.detailed)
 
 if __name__ == "__main__":
     main()

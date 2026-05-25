@@ -8,7 +8,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; default [Zpt > 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "midnightblue"
         },
         "herwig_glu_250" : {
             "tag" : "herwig_glu_250_May_10_2026",
@@ -17,7 +17,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; default [250 < Zpt < 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "mediumblue"
         },
         "herwig_glu_50" : {
             "tag" : "herwig_glu_50_May_10_2026",
@@ -26,7 +26,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; default [50 < Zpt < 250 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "slateblue"
         },
 
         "herwig_glu_nohad_1200" : {
@@ -36,7 +36,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no hadronization [Zpt > 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "blueviolet"
         },
         "herwig_glu_nohad_250" : {
             "tag" : "herwig_glu_nohad_250_May_10_2026",
@@ -45,7 +45,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no hadronization [250 < Zpt < 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "mediumorchid"
         },
         "herwig_glu_nohad_50" : {
             "tag" : "herwig_glu_nohad_50_May_10_2026",
@@ -54,7 +54,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no hadronization [50 < Zpt < 250 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "violet"
         },
 
         "herwig_glu_nohardspin_1200" : {
@@ -64,7 +64,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no hard spin corr. [Zpt > 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "deeppink"
         },
         "herwig_glu_nohardspin_250" : {
             "tag" : "herwig_glu_nohardspin_250_May_10_2026",
@@ -73,7 +73,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no hard spin corr. [250 < Zpt < 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "palevioletred"
         },
         "herwig_glu_nohardspin_50" : {
             "tag" : "herwig_glu_nohardspin_50_May_10_2026",
@@ -82,7 +82,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no hard spin corr. [50 < Zpt < 250 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "pink"
         },
 
         "herwig_glu_nosoftspin_1200" : {
@@ -92,7 +92,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no soft spin corr. [Zpt > 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "teal"
         },
         "herwig_glu_nosoftspin_250" : {
             "tag" : "herwig_glu_nosoftspin_250_May_10_2026",
@@ -101,7 +101,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no soft spin corr. [250 < Zpt < 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "darkturquoise"
         },
         "herwig_glu_nosoftspin_50" : {
             "tag" : "herwig_glu_nosoftspin_50_May_10_2026",
@@ -110,7 +110,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no soft spin corr. [50 < Zpt < 250 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "skyblue"
         },
 
         "herwig_glu_nospin_1200" : {
@@ -120,7 +120,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no spin corr. [Zpt > 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "forestgreen"
         },
         "herwig_glu_nospin_250" : {
             "tag" : "herwig_glu_nospin_250_May_10_2026",
@@ -129,7 +129,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no spin corr. [250 < Zpt < 1200 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "mediumseagreen"
         },
         "herwig_glu_nospin_50" : {
             "tag" : "herwig_glu_nospin_50_May_10_2026",
@@ -138,7 +138,7 @@
             "flags" : {},
             "label" : "Herwig Z+glu; no spin corr. [50 < Zpt < 250 GeV]",
             "xsec" : 1.0,
-            "color" : "blue"
+            "color" : "spinggreen"
         },
 
 

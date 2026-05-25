@@ -10,8 +10,9 @@ import uuid
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 import pyarrow.dataset as ds
 import numpy as np
+from correctionlib.highlevel import Correction
 
-def run_table(args : Any, table: str):
+def run_table(args : Any, table: str, correction : Correction | None = None, correction_inputs : dict | None = None, fname_suffix : str | None = None):
     bincfg_name = args.bincfg
     if bincfg_name is None:
         bincfg_name = '_'.join(table.split('_')[:-1])
@@ -77,7 +78,8 @@ def run_table(args : Any, table: str):
         itemwt = itemwt,
         statN = args.statN,
         statK = args.statK,
-        reweight = None #for now
+        reweight = correction,
+        reweight_inputs = correction_inputs
     )
 
     if args.cov:
@@ -100,7 +102,8 @@ def run_table(args : Any, table: str):
         table,
         args.cov,
         args.statN,
-        args.statK
+        args.statK,
+        fname_suffix=fname_suffix
     )
 
     print("Writing result to", outpath)

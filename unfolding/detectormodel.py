@@ -289,6 +289,7 @@ class DetectorModel:
             output_folder=output_folder,
             override_filename=f'{base_prefix}_gamma_nominal',
             no_lumi_normalization=True,
+            override_ylabel = "$G_{\\varnothing}$"
         )
 
         plot_histogram(
@@ -301,6 +302,7 @@ class DetectorModel:
             output_folder=output_folder,
             override_filename=f'{base_prefix}_rho_nominal',
             no_lumi_normalization=True,
+            override_ylabel = "$R_{\\varnothing}$"
         )
 
         if nuisances:
@@ -390,6 +392,7 @@ class DetectorModel:
             override_filename=f'{base_prefix}_purity',
             no_lumi_normalization=True,
             no_ratiopad = True,
+            override_ylabel = "Purity"
         )
         plot_histogram(
             variable,
@@ -402,6 +405,7 @@ class DetectorModel:
             override_filename=f'{base_prefix}_stability',
             no_lumi_normalization=True,
             no_ratiopad = True,
+            override_ylabel = "Stability"
         )
         
         if detailed:
@@ -435,6 +439,7 @@ class DetectorModel:
                         override_filename=f'{base_prefix}_purity_ptgen_{ipt}_Rgen_{iR}',
                         no_lumi_normalization=True,
                         no_ratiopad = True,
+                        override_ylabel = "Purity"
                     )
             
             for ipt in range(len(ptreco_edges) - 1):
@@ -458,6 +463,7 @@ class DetectorModel:
                         override_filename=f'{base_prefix}_stability_ptreco_{ipt}_Rreco_{iR}',
                         no_lumi_normalization=True,
                         no_ratiopad = True,
+                        override_ylabel = "Stability"
                     )
 
         t0dset = TransferMatrixDataset(

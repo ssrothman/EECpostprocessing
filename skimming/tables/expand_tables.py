@@ -56,8 +56,8 @@ _ALL_RES4GEN_TABLES = [
 _ALL_GENSPLITTING_TABLES = [
     "GenericTable:DeltaPsiSoftSide",
     "GenericTable:DeltaPsiHardSide",
-    "GenericTable:GenSplittingsSoftSide",
-    "GenericTable:GenSplittingsHardSide"
+    "GenericTable:GenSimonJetsSoftSideDeltaPsiTable",
+    "GenericTable:GenSimonJetsHardSideDeltaPsiTable"
 ]
 _ALL_GENONLY_TABLES = _ALL_GENONLY_KINEMATICS_TABLES + _ALL_GENSPLITTING_TABLES + _ALL_RES4RECO_TABLES
 

@@ -149,13 +149,16 @@ def build_iterator(dset : ds.Dataset,
                     weightname: str, itemwt: str | None,
                     statN : int,
                     statK : int,
-                    reweight : Correction | None = None):
-    columns = list(names) + [weightname, 'event_id']
+                    reweight_inputs : dict[str, ds.Expression] | None = None):
+    columns = {
+        name : ds.field(name) for name in names
+    }
+    columns[weightname] = ds.field(weightname)
+    columns['event_id'] = ds.field('event_id')
     if itemwt is not None:
-        columns.append(itemwt)
-    if reweight is not None:
-        for input in reweight.inputs:
-            columns.append(input.name)
+        columns[itemwt] = ds.field(itemwt)
+    if reweight_inputs is not None:
+        columns.update(reweight_inputs)
             
     thefilter = statsplit_filter(statN, statK)
 
@@ -186,14 +189,20 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
              itemwt : str | None = None,
              statN : int = -1,
              statK : int = -1,
-             reweight : Correction | None = None) -> np.ndarray:
+             reweight : Correction | None = None,
+             reweight_inputs : dict[str, ds.Expression] | None = None) -> np.ndarray:
     import directcov
+
+    if reweight is not None and reweight_inputs is None:
+        raise ValueError("reweight_inputs must be provided if reweight is not None")
+    if reweight_inputs is not None and reweight is None:
+        raise ValueError("reweight must be provided if reweight_inputs is not None")
 
     iterator = build_iterator(
         dset, H.axes.name,
         weightname, itemwt,
         statN, statK,
-        reweight
+        reweight_inputs
     )
     total_rows = dset.count_rows()
     rows_so_far = 0
@@ -230,11 +239,11 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
         if itemwt is not None:
             weight = weight * get(batch, itemwt)
         
-        if reweight is not None:
-            rwin = {}
-            for i, input in enumerate(reweight.inputs):
-                rwin[input] = get(batch, input.name)
-            weight = weight * reweight.evaluate(**rwin)
+        if reweight is not None and reweight_inputs is not None:
+            rwin = []
+            for input in reweight_inputs.keys():
+                rwin.append(get(batch, input))
+            weight = weight * reweight.evaluate(*rwin)
 
         evtid = get(batch, 'event_id')
 
@@ -251,13 +260,14 @@ def fill_hist(H : hist.Hist,
               itemwt : str | None = None,
               statN : int = -1,
               statK : int = -1,
-              reweight : Correction | None = None) -> hist.Hist:
+              reweight : Correction | None = None,
+              reweight_inputs : dict[str, ds.Expression] | None = None) -> hist.Hist:
     
     iterator = build_iterator(
         dset, H.axes.name, 
         weightname, itemwt,
         statN, statK,
-        reweight
+        reweight_inputs
     )
     
     total_rows = dset.count_rows()
@@ -270,11 +280,11 @@ def fill_hist(H : hist.Hist,
         weight = get(batch, weightname)
         if itemwt is not None:
             weight = weight * get(batch, itemwt)
-        if reweight is not None:
-            rwin = {}
-            for i, input in enumerate(reweight.inputs):
-                rwin[input] = get(batch, input.name)
-            weight = weight * reweight.evaluate(**rwin)
+        if reweight is not None and reweight_inputs is not None:
+            rwin = []
+            for input in reweight_inputs.keys():
+                rwin.append(get(batch, input))
+            weight = weight * reweight.evaluate(*rwin)
 
         filldict = {
             name : get(batch, name) for name in H.axes.name

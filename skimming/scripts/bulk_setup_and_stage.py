@@ -3,7 +3,7 @@
 import argparse
 
 parser = argparse.ArgumentParser(description="Run EVERYTHING.")
-parser.add_argument('--signal-mc', type=str, nargs='+', help="List of signal MC datasets to process",
+parser.add_argument('--signal-mc', type=str, nargs='*', help="List of signal MC datasets to process",
                     default=[
                         'Pythia_inclusive', 
                         'Herwig_inclusive',

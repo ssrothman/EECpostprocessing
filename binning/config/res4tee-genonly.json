@@ -4,7 +4,7 @@
             "type" : "Variable",
             "name" : "Jpt",
             "edges" : [
-                300, 500, 800, 1200, 2000
+                100, 200, 300, 500, 800, 1200, 2000
             ],
             "underflow" : true,
             "overflow" : true
@@ -24,7 +24,7 @@
             "name" : "r",
             "start" : 0.0,
             "stop" : 1.0,
-            "bins" : 15,
+            "bins" : 20,
             "underflow" : true,
             "overflow" : true
         },

@@ -52,10 +52,10 @@
                     "LHE" : "LHE"
                 },
                 "optional_names" : {
-                    "GenSplittingsHardSide" : "GenHardSideDeltaPsiTable",
-                    "GenSplittingsSoftSide" : "GenSoftSideDeltaPsiTable",
-                    "DeltaPsiHardSide" : "GenSimonJetsHardSideDeltaPsiTable",
-                    "DeltaPsiSoftSide" : "GenSimonJetsSoftSideDeltaPsiTable"
+                    "DeltaPsiHardSide" : "GenHardSideDeltaPsiTable",
+                    "DeltaPsiSoftSide" : "GenSoftSideDeltaPsiTable",
+                    "GenSplittingsHardSide" : "GenSimonJetsHardSideDeltaPsiTable",
+                    "GenSplittingsSoftSide" : "GenSimonJetsSoftSideDeltaPsiTable"
                 }
             },
             "MConly" : false

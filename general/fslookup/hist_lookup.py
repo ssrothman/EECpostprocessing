@@ -12,7 +12,8 @@ def get_hist_path(
         table : str,
         cov : bool,
         statN : int,
-        statK : int | List[int]
+        statK : int | List[int],
+        fname_suffix : str | None = None
     ):
 
     fs, skimpath = lookup_skim_path(
@@ -39,6 +40,9 @@ def get_hist_path(
             statK = [statK]
         statK_str = '+'.join(str(k) for k in statK)
         thepath += '_%dstat%s' % (statN, statK_str)
+
+    if fname_suffix is not None:
+        thepath += '_%s' % fname_suffix
 
     return fs, thepath + '.npy'
 

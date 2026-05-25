@@ -5,7 +5,7 @@ from networkx import find_minimal_d_separator
 from simonplot.cut.PrebinnedCut import SliceOperation
 from simonplot.drivers import draw_radial_histogram
 from simonplot.plottables.PlotStuff import BoxSpec
-from simonplot.variable.PrebinnedVariable import DivideOutProfile, NormalizePerBlock, WithJacobian
+from simonplot.variable.PrebinnedVariable import DivideOutProfile, NormalizePerBlock, RelativeErrorVariable, WithJacobian
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
 from simonpy.stats_v2 import smart_inverse, smart_sqrt
 import simonplot as splt
@@ -181,6 +181,7 @@ class Histogram:
     def device(self) -> str:
         return self._device
 
+    # assumes self and other are not correlated :(
     def chi2(self, other : "Histogram") -> float:
         diff : np.ndarray = self._as_numpy(self.values) - self._as_numpy(other.values)
         cov : np.ndarray = self._as_numpy(self.covmat) + self._as_numpy(other.covmat)
@@ -342,6 +343,7 @@ class Histogram:
         prettymatrices : bool = False,
         projected_r_c_1D : bool = False,
         projected_c_1D : bool = False,
+        detailed : bool = False,
         transform : Literal['none', 'shapes', 'angular_modulation'] = 'none'
     ) -> None:
         
@@ -359,7 +361,7 @@ class Histogram:
         plotbinning.clip_flow_bins(ptname, negativeinf=30.0) # pT underflow actually starts at 30 GeV
 
         if self.invcov is None:
-            self.compute_invcov()
+            raise ValueError("Need to compute inverse covariance matrix before plotting")
         
         values = self._as_numpy(self.values)
         covmat = self._as_numpy(self.covmat)
@@ -376,14 +378,17 @@ class Histogram:
                 BasicPrebinnedVariable(),
                 [ptname, Rname, rname]
             )
-        else:
+        elif transform == 'none':
             basevariable = BasicPrebinnedVariable()
+        else:
+            raise ValueError("Invalid transform option: %s" % transform)
 
         if transform != 'angular_modulation':
             basevariable = WithJacobian(
                 basevariable,
                 [rname, cname],
-                radial_coords=[rname]
+                radial_coords=[rname],
+                clip_positiveinf = {rname : 3.0} # for triangle, clip overflow bin to r=3.0
             )
 
         cut = NoopOperation()
@@ -402,39 +407,101 @@ class Histogram:
             binning=plotbinning,
             isMC=True,
         )
-        cov_dataset = ValCovPairDataset(
-            key=f'{base_prefix}_cov',
-            color=None,
-            label=None,
-            data=(values, covmat),
-            binning=plotbinning,
-            isMC=True,
+
+        plot_histogram(
+            basevariable,
+            cut,
+            weight,
+            values_dataset,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_values_histogram',
+            no_lumi_normalization=True,
         )
-        invcov_dataset = ValCovPairDataset(
-            key=f'{base_prefix}_invcov',
-            color=None,
-            label=None,
-            data=(values, invcov),
-            binning=plotbinning,
-            isMC=True,
-        )
-        invcov_cov_dataset = ValCovPairDataset(
-            key=f'{base_prefix}_invcov_times_cov',
-            color=None,
-            label=None,
-            data=(values, invcov_cov),
-            binning=plotbinning,
-            isMC=True,
+        relative_err_variable = RelativeErrorVariable(basevariable)
+        plot_histogram(
+            relative_err_variable,
+            cut,
+            weight,
+            values_dataset,
+            binning,
+            extratext=extratext,
+            output_folder=output_folder,
+            override_filename=f'{base_prefix}_relative_uncertainty_histogram',
+            no_lumi_normalization=True,
+            override_ylabel='Relative Uncertainty [err / bin count]'
         )
 
+        if detailed:
+            detailedvariable = BasicPrebinnedVariable()
+            if transform == 'angular_modulation':
+                detailedvariable = DivideOutProfile(detailedvariable, [rname])
+            elif transform == 'shapes':
+                detailedvariable = NormalizePerBlock(detailedvariable, [])
+            elif transform == 'none':
+                pass
+            else:
+                raise ValueError("Invalid transform option: %s" % transform)
+            
+            if transform != 'angular_modulation':
+                detailedvariable = WithJacobian(
+                    detailedvariable, 
+                    [rname, cname],
+                    radial_coords=[rname],
+                    clip_positiveinf = {rname : 3.0} # for triangle, clip overflow bin to r=3.0
+                )
+
+            ptedges = plotbinning.axis_edges(ptname)
+            Redges = plotbinning.axis_edges(Rname)
+            for ipt in range(len(ptedges)-1):
+                for iR in range(len(Redges)-1):
+                    cuti = SliceOperation(
+                        {
+                            ptname: (ptedges[ipt], ptedges[ipt+1]),
+                            Rname: (Redges[iR], Redges[iR+1])
+                        },
+                        []
+                    )
+                    plot_histogram(
+                        detailedvariable,
+                        cuti,
+                        weight,
+                        values_dataset, # type: ignore
+                        binning,
+                        extratext=extratext,
+                        output_folder=output_folder,
+                        override_filename=f'{base_prefix}_values_histogram_pt{ipt}_R{iR}',
+                        no_lumi_normalization=True,
+                    )
+                    plot_histogram(
+                        RelativeErrorVariable(detailedvariable),
+                        cuti,
+                        weight,
+                        values_dataset,
+                        binning,
+                        extratext=extratext,
+                        output_folder=output_folder,
+                        override_filename=f'{base_prefix}_relative_uncertainty_histogram_pt{ipt}_R{iR}',
+                        no_lumi_normalization=True,
+                    )
+                    
         if projected_r_c_1D:
-            assert(isinstance(basevariable,splt.variable.WithJacobian))
+            projrc_variable = BasicPrebinnedVariable()
+            if transform == 'angular_modulation':
+                raise ValueError("projected_r_c not compatible with angular modulation transform")
+            elif transform == 'shapes':
+                projrc_variable = NormalizePerBlock(projrc_variable, [ptname, Rname])
+            elif transform == 'none':
+                pass
+            else:
+                raise ValueError("Invalid transform option: %s" % transform)
 
             projcut = splt.cut.ProjectionOperation(
                 [rname, cname]
             )
             plot_histogram(
-                basevariable._var,  # type: ignore
+                projrc_variable,  # type: ignore
                 projcut,
                 weight,
                 values_dataset,
@@ -448,7 +515,7 @@ class Histogram:
         if projected_c_1D:
             projc_variable = splt.variable.BasicPrebinnedVariable()
             if transform == 'angular_modulation':
-                raise ValueError("Angular modulation not supported when projecting out angular coordinate")
+                raise ValueError("projected_c not compatible with angular modulation transform")
             elif transform == 'shapes':
                 projc_variable = NormalizePerBlock(projc_variable, [])
             elif transform == 'none':
@@ -459,7 +526,8 @@ class Histogram:
             projc_variable = splt.variable.WithJacobian(
                 projc_variable,
                 [rname],
-                [rname]
+                [rname],
+                clip_positiveinf = {rname : 3.0}
             )
 
             Redges = plotbinning.axis_edges(Rname)
@@ -502,24 +570,21 @@ class Histogram:
                     logx=True,
                     logy=True
                 )
-            
-        plot_histogram(
-            basevariable,
-            cut,
-            weight,
-            values_dataset,
-            binning,
-            extratext=extratext,
-            output_folder=output_folder,
-            override_filename=f'{base_prefix}_values_histogram',
-            no_lumi_normalization=True,
-        )
-
+        
         if covmats:
+            invcov_dataset = CovNoValDataset(
+                key=f'{base_prefix}_invcov',
+                color=None,
+                label=None,
+                data=invcov,
+                binning=plotbinning,
+                isMC=True,
+            )
+
             draw_matrix(
                 basevariable,
                 cut,
-                cov_dataset, # type: ignore
+                values_dataset, # type: ignore
                 binning,
                 extratext=extratext,
                 sym=True,
@@ -540,25 +605,12 @@ class Histogram:
                 override_filename=f'{base_prefix}_inverse_covariance_matrix',
             )
 
-            draw_matrix(
-                basevariable,
-                cut,
-                invcov_cov_dataset, # type: ignore
-                binning,
-                extratext=extratext,
-                sym=True,
-                logc=False,
-                output_folder=output_folder,
-                override_filename=f'{base_prefix}_inverse_covariance_times_covariance_matrix',
-            )
+            corr_variable = CorrelationFromCovariance(basevariable)
 
-        corr_variable = CorrelationFromCovariance(basevariable)
-
-        if covmats:
             draw_matrix(
                 corr_variable,
                 cut,
-                cov_dataset, # type: ignore
+                values_dataset, # type: ignore
                 binning,
                 extratext=extratext,
                 sym=True,
@@ -592,11 +644,25 @@ class Histogram:
 
             plotbinning.clip_flow_bins(rname, positiveinf=3.0) #  clip r overflow bin for triangle
 
+            prettyvariable = BasicPrebinnedVariable()
 
-            if transform == 'angular_modulation':
-                # the slicing breaks the DivideOutProfile
-                assert(isinstance(basevariable, DivideOutProfile))
-                basevariable._axes = [rname]
+            if transform == 'shapes':
+                prettyvariable = NormalizePerBlock(prettyvariable, [])
+            elif transform == 'angular_modulation':
+                prettyvariable = DivideOutProfile(prettyvariable, [rname])
+            elif transform == 'none':
+                pass
+            else:
+                raise ValueError("Invalid transform option: %s" % transform)
+
+            if transform != 'angular_modulation':
+                prettyvariable = WithJacobian(
+                    prettyvariable, 
+                    [rname, cname],
+                    radial_coords=[rname],
+                    clip_positiveinf = {rname : 3.0} # for triangle, clip overflow bin to r=3.0
+                )
+
 
             for ipt in range(len(ptedges)-1):
                 for iR in range(len(Redges)-1):
@@ -610,7 +676,7 @@ class Histogram:
                     # if 'angular_modulation': want logc=False and sym=True
                     # else want logc=True and sym=False
                     draw_radial_histogram(
-                        basevariable,
+                        prettyvariable,
                         cuti,
                         values_dataset, # type: ignore
                         binning,

@@ -1,0 +1,65 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_10_2026",
+                    "name" : "herwig_glu_1200",
+                    "table" : "events",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq",
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_10_2026",
+                    "name" : "herwig_glu_250",
+                    "table" : "events",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq",
+                    "no_count" : true
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_10_2026",
+                    "name" : "herwig_glu_50",
+                    "table" : "events",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq",
+                    "no_count" : true
+                }
+            ],
+            "variables" : [
+                "var::BasicVariable('genVpt')",
+                "var::BasicVariable('genHT')",
+                "var::BasicVariable('numJets')",
+                "var::BasicVariable('Zpt')",
+                "var::BasicVariable('Zmass')",
+                "var::BasicVariable('Zy')"                
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::NoCut()"
+            ],
+            "binning" : "auto",
+            "plotspath" : "res4_pheno_plots/kinematics/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "genVpt",
+                "genHT",
+                "numJets",
+                "Zpt",
+                "Zmass",
+                "Zy"
+            ],
+            "logy" : true
+        }
+    ]
+}
