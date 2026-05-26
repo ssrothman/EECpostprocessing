@@ -98,7 +98,9 @@ def run_plots(cfg):
         if isinstance(c, dict) and c.get('type') == 'slice':
             return splt.cut.SliceOperation(
                 edges=c['edges'],
-                clipemptyflow=c.get('clipemptyflow', [])
+                clipemptyflow=c.get('clipemptyflow', []),
+                label_axes=c.get('label_axes', None),
+                label_overrides=c.get('label_overrides', None)
             )
         return parse_var(c)
 
