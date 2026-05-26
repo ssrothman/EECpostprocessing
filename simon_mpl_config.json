@@ -1,4 +1,5 @@
 {
+    "cms_label": "Simulation Private",
     "axis_labels": {
         "genHT" : "$H_{T}^{gen}$ [GeV]",
         "genVpt" : "$p_{T,Z}^{gen}$ [GeV]",

@@ -9,6 +9,11 @@
     },
     "data_v1" : {
         "base" : "crab/data_v1/2018/SingleMuon",
+        "DATA_2018ABD" : {
+            "label"    : "Data",
+            "color"    : "black",
+            "lumi"     : 52.917
+        },
         "DATA_2018A" : {
             "tag"      : "SingleMuon/2018A",
             "location" : "dylan-lxplus-eos",

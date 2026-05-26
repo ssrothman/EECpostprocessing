@@ -1,0 +1,74 @@
+{
+    "TO DO": [
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v8",        "name": "DYJetsToLL_Pythia_HTsum", "table": "jets", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true,  "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig_sum",   "table": "jets", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true,  "no_count": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "jets", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true,  "no_count": true}
+            ],
+            "variables": ["Jpt"],
+            "weights": ["wt_nominal", "wt_nominal", "wt_nominal"],
+            "cut": [],
+            "binning": "explicit:[40.0,50.9,64.8,82.5,105.1,133.7,170.3,216.8,275.9,351.3,447.2,569.3,724.8,922.7,1174.6,1495.3,1903.7,2423.4,3085.2,3927.6,5000.0]",
+            "plotspath": "plots/kinematics_comparison",
+            "plotsprefix": "",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": false,
+            "density": true,
+            "logx": true,
+            "override_filenames": ["jpt_comparison"]
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v8",        "name": "DYJetsToLL_Pythia_HTsum", "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig_sum",   "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "parts", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true, "no_count": true}
+            ],
+            "variables": ["pt"],
+            "weights": ["wt_nominal", "wt_nominal", "wt_nominal"],
+            "cut": [],
+            "binning": "explicit:[0.5,0.5395,0.5821,0.6281,0.6777,0.7312,0.7889,0.8512,0.9184,0.991,1.0692,1.1537,1.2448,1.3431,1.4492,1.5636,1.6871,1.8203,1.9641,2.1192,2.2865,2.4671,2.6619,2.8721,3.099,3.3437,3.6078,3.8927,4.2001,4.5318,4.8897,5.2758,5.6925,6.142,6.627,7.1504,7.7151,8.3244,8.9818,9.6911,10.4564,11.2822,12.1731,13.1345,14.1717,15.2909,16.4985,17.8014,19.2072,20.7241,22.3607,24.1266,26.0319,28.0877,30.3058,32.6992,35.2815,38.0677,41.074,44.3177,47.8176,51.5939,55.6684,60.0646,64.8081,69.9261,75.4484,81.4067,87.8356,94.7721,102.2565,110.332,119.0451,128.4464,138.5901,149.5349,161.344,174.0857,187.8337,202.6673,218.6724,235.9415,254.5743,274.6786,296.3707,319.7757,345.0292,372.2769,401.6765,433.3978,467.6242,504.5536,544.3994,587.3918,633.7795,683.8306,737.8342,796.1027,858.9728,926.8078,1000.0]",
+            "plotspath": "plots/kinematics_comparison",
+            "plotsprefix": "",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": false,
+            "density": true,
+            "logx": true,
+            "override_filenames": ["parts_pt"]
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v8",        "name": "DYJetsToLL_Pythia_HTsum", "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig_sum",   "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "parts", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true, "no_count": true}
+            ],
+            "variables": ["eta"],
+            "weights": ["wt_nominal", "wt_nominal", "wt_nominal"],
+            "cut": [],
+            "binning": "explicit:[-3.0,-2.94,-2.88,-2.82,-2.76,-2.7,-2.64,-2.58,-2.52,-2.46,-2.4,-2.34,-2.28,-2.22,-2.16,-2.1,-2.04,-1.98,-1.92,-1.86,-1.8,-1.74,-1.68,-1.62,-1.56,-1.5,-1.44,-1.38,-1.32,-1.26,-1.2,-1.14,-1.08,-1.02,-0.96,-0.9,-0.84,-0.78,-0.72,-0.66,-0.6,-0.54,-0.48,-0.42,-0.36,-0.3,-0.24,-0.18,-0.12,-0.06,0.0,0.06,0.12,0.18,0.24,0.3,0.36,0.42,0.48,0.54,0.6,0.66,0.72,0.78,0.84,0.9,0.96,1.02,1.08,1.14,1.2,1.26,1.32,1.38,1.44,1.5,1.56,1.62,1.68,1.74,1.8,1.86,1.92,1.98,2.04,2.1,2.16,2.22,2.28,2.34,2.4,2.46,2.52,2.58,2.64,2.7,2.76,2.82,2.88,2.94,3.0]",
+            "plotspath": "plots/kinematics_comparison",
+            "plotsprefix": "",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": false,
+            "density": true,
+            "override_filenames": ["parts_eta"]
+        },
+        {
+            "datasets": [
+                {"configsuite": "EvtMCprojConfig",   "runtag": "v8",        "name": "DYJetsToLL_Pythia_HTsum", "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
+                {"configsuite": "EvtMCprojConfig",   "runtag": "herwig_v3", "name": "DYJetsToLL_Herwig_sum",   "table": "parts", "objsyst": "NOM",  "location": "dylan-lxplus-eos", "isstack": true, "no_count": false},
+                {"configsuite": "EvtDataprojConfig", "runtag": "data_v1",   "name": "DATA_2018ABD",            "table": "parts", "objsyst": "DATA", "location": "dylan-lxplus-eos", "isstack": true, "no_count": true}
+            ],
+            "variables": ["phi"],
+            "weights": ["wt_nominal", "wt_nominal", "wt_nominal"],
+            "cut": [],
+            "binning": "explicit:[-3.1416,-3.0788,-3.0159,-2.9531,-2.8903,-2.8274,-2.7646,-2.7018,-2.6389,-2.5761,-2.5133,-2.4504,-2.3876,-2.3248,-2.2619,-2.1991,-2.1363,-2.0735,-2.0106,-1.9478,-1.885,-1.8221,-1.7593,-1.6965,-1.6336,-1.5708,-1.508,-1.4451,-1.3823,-1.3195,-1.2566,-1.1938,-1.131,-1.0681,-1.0053,-0.9425,-0.8796,-0.8168,-0.754,-0.6912,-0.6283,-0.5655,-0.5027,-0.4398,-0.377,-0.3142,-0.2513,-0.1885,-0.1257,-0.0628,0.0,0.0628,0.1257,0.1885,0.2513,0.3142,0.377,0.4398,0.5027,0.5655,0.6283,0.6912,0.754,0.8168,0.8796,0.9425,1.0053,1.0681,1.131,1.1938,1.2566,1.3195,1.3823,1.4451,1.508,1.5708,1.6336,1.6965,1.7593,1.8221,1.885,1.9478,2.0106,2.0735,2.1363,2.1991,2.2619,2.3248,2.3876,2.4504,2.5133,2.5761,2.6389,2.7018,2.7646,2.8274,2.8903,2.9531,3.0159,3.0788,3.1416]",
+            "plotspath": "plots/kinematics_comparison",
+            "plotsprefix": "",
+            "driver": "plot_histogram",
+            "no_lumi_normalization": false,
+            "density": true,
+            "override_filenames": ["parts_phi"]
+        }
+    ]
+}
