@@ -3,8 +3,8 @@
         {
             "datasets" : [
                 {
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Apr_23_2025",
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
                     "name" : "Pythia_HTsum",
                     "table" : "events",
                     "objsyst" : "nominal",
@@ -12,8 +12,8 @@
                     "dsetkind": "pq_stack"
                 },
                 {
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Apr_23_2025",
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
                     "name" : "Pythia_inclusive",
                     "table" : "events",
                     "objsyst" : "nominal",
@@ -35,13 +35,14 @@
             "driver" : "plot_histogram",
             "override_filenames" : [
                 "genHT_stitched_vs_inclusive"
-            ]
+            ],
+            "override_ratiopad_ylim" : [0.7, 1.3]
         },
         {
             "datasets" : [
                 {
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Apr_23_2025",
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
                     "name" : "Pythia_HTsum",
                     "table" : "jets",
                     "objsyst" : "nominal",
@@ -49,8 +50,8 @@
                     "dsetkind": "pq_stack"
                 },
                 {
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Apr_23_2025",
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
                     "name" : "Pythia_inclusive",
                     "table" : "jets",
                     "objsyst" : "nominal",
@@ -72,7 +73,8 @@
             "driver" : "plot_histogram",
             "override_filenames" : [
                 "Jpt_stitched_vs_inclusive"
-            ]
+            ],
+            "override_ratiopad_ylim" : [0.7, 1.3]
         }
     ]
 }

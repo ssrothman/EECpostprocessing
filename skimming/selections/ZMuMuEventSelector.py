@@ -19,6 +19,14 @@ class ZMuMuEventSelector:
                 "genHT",
                 allobjects.LHE.HT <= flags['genHT']
             )
+        if "genVpt" in flags:
+            if flags['genVpt'][1] < 0:
+                flags['genVpt'][1] = np.inf
+            
+            selection.add(
+                "genVpt",
+                (allobjects.LHE.Vpt >= flags['genVpt'][0]) & (allobjects.LHE.Vpt < flags['genVpt'][1])
+            )
 
         selection = self._addMuonSelections(selection, allobjects)
         selection = self._addZSelections(selection, allobjects)

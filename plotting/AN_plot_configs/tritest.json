@@ -46,6 +46,54 @@
                 "OLD",
                 "NEW"
             ]
+        }.
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "res4triangle_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : true
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "May_17_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "res4triangle_totalReco",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "prebinned",
+                    "no_count" : true,
+                    "nocov" : true
+                }
+            ],
+            "variables" : [
+                "var::BasicPrebinnedVariable()"
+            ],
+            "weights" : [
+                "var::ConstantVariable(1.0)"
+            ],
+            "cut" : [
+                "cut::ProjectAndSliceOperation(['Jpt'], {'R' : [0.4, 0.5], 'r': [0.0, 2.0], 'Jpt' : [50.0, np.inf]}, [])"
+            ],
+            "binning" : "prebinned",
+            "plotspath" : "test/test/",
+            "plotsprefix" : "",
+            "driver" : "draw_radial_histogram",
+            "override_filenames" : [
+                "OLD",
+                "NEW"
+            ],
+            "extratext" : [
+                "OLD",
+                "NEW"
+            ]
         }
     ]
 }

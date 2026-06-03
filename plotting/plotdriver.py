@@ -303,7 +303,8 @@ def run_plots(cfg):
                 logy=cfg.get('logy', None),
                 density=cfg.get('density', False),
                 override_filename=cfg.get('override_filenames', [None]*len(variables))[i],
-                extra_stuff=extra_stuff
+                extra_stuff=extra_stuff,
+                override_ratiopad_ylim=cfg.get('override_ratiopad_ylim', None)
             )
     elif cfg['driver'] == 'draw_radial_histogram':
         if len(variables) != 1:

@@ -15,6 +15,7 @@ parser.add_argument('--only', type=str, nargs='+', default=None, help='Only setu
 parser.add_argument('--rebinning-reco', type=str, default='rebinning_reco.json', help='Optional rebinning config for reco histograms')
 parser.add_argument('--rebinning-gen', type=str, default='rebinning_gen.json', help='Optional rebinning config for gen histograms')
 parser.add_argument('--rebin', action='store_true', help='Whether to apply rebinning to the histograms (if false, the rebinning configs are ignored)')
+parser.add_argument('--skip-invcov', action='store_true', help='Skip precomputing the inverse covariance matrices for the histograms')
 args = parser.parse_args()
 
 with open("config.json", 'r') as f:
@@ -41,7 +42,8 @@ if not args.skip_data:
             'totalReco',
             rebinning = args.rebinning_reco if args.rebin else None
         )
-        Hreco.compute_invcov() # precompute the inverse covariance matrix for the reco histogram
+        if not args.skip_invcov:
+            Hreco.compute_invcov() # precompute the inverse covariance matrix for the reco histogram
 
         Hreco.dump_to_disk('%s_reco'%datacfg['name'])
 
@@ -52,9 +54,10 @@ if not args.skip_data:
                 'totalGen',
                 rebinning = args.rebinning_gen if args.rebin else None
             )
-            Hgen.compute_invcov() # precompute the inverse covariance matrix for the gen histogram
-            Hgen.compute_sqrt() # precompute the sqrt of the covariance matrix for the gen
-                                # used for bootstrapping the forward covariance matrix
+            if not args.skip_invcov:
+                Hgen.compute_invcov() # precompute the inverse covariance matrix for the gen histogram
+                Hgen.compute_sqrt() # precompute the sqrt of the covariance matrix for the gen
+                                    # used for bootstrapping the forward covariance matrix
 
             Hgen.dump_to_disk('%s_gen'%datacfg['name'])
 

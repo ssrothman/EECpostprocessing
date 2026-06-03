@@ -18,7 +18,7 @@ def main() -> None:
         '--pretty', action='store_true', help="Draw the pretty 2D radial plots"
     )
     parser.add_argument(
-        '--transform', type=str, choices=['none', 'shapes', 'angular_modulation'], default='none', help="Apply a transformation to the histogram before plotting."
+        '--transform', type=str, choices=['none', 'shapes', 'angular_modulation', 'angular-modulation'], default='none', help="Apply a transformation to the histogram before plotting."
     )
     parser.add_argument(
         '--projected-r-c', action='store_true', help="Also plot the total flux integrated over (r, c)"
@@ -34,6 +34,7 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+    args.transform = args.transform.replace('-', '_')  # allow both --angular-modulation and --angular_modulation
 
     histogram_dir = Path(args.histogram_path).expanduser().resolve()
     if not histogram_dir.is_dir():

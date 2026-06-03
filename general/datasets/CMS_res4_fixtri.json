@@ -230,6 +230,24 @@
             "label" : "Data 2018D",
             "color" : "#000000",
             "lumi" : 31.692637576 
+        },
+        "DATA" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "2018 Data",
+            "color" : "#000000",
+            "lumi" : 59.535959317 
+        },
+        "Pythia_HTsum" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 6077.22 
         }
     }
 }

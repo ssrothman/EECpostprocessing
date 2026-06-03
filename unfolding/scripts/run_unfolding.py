@@ -7,6 +7,7 @@ from unfolding.detectormodel import DetectorModel
 from unfolding.loss import Loss
 from unfolding.minimizer import Minimizer
 from unfolding.histogram import Histogram
+import json
 
 import os.path
 import numpy as np
@@ -140,6 +141,10 @@ def main() -> None:
 
         x0 = np.concatenate([beta0, theta0])
         x0 = torch.from_numpy(x0).to(args.device)
+
+    os.makedirs(output_dir, exist_ok=True)
+    with open(os.path.join(output_dir, 'hist_properties.json'), 'w') as f:
+        json.dump(reco.properties, f, indent=4)
 
     result = minimizer(
         loss,

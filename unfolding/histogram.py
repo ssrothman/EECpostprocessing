@@ -4,12 +4,15 @@ from networkx import find_minimal_d_separator
 #from simonplot.binning.Binning import PrebinnedBinningWithLookup
 from simonplot.cut.PrebinnedCut import SliceOperation
 from simonplot.drivers import draw_radial_histogram
+from simonplot.plottables.Datasets import DatasetComparison
 from simonplot.plottables.PlotStuff import BoxSpec
+from simonplot.util.evaluate import evaluate_on_dataset
 from simonplot.variable.PrebinnedVariable import DivideOutProfile, NormalizePerBlock, RelativeErrorVariable, WithJacobian
 from simonpy.AbitraryBinning import ArbitraryBinning, ArbitraryGenRecoBinning
+from simonpy.stats import quotient_distribution
 from simonpy.stats_v2 import smart_inverse, smart_sqrt
 import simonplot as splt
-from typing import Any, Literal, Sequence, TypedDict
+from typing import Any, Literal, Sequence, Tuple, TypedDict
 import numpy as np
 import os
 import json
@@ -33,8 +36,14 @@ def get_genreco_name(axnames, target):
     else:
         raise ValueError("No axis found matching %s_gen, %s_reco, or %s" % (target, target, target))
 
+class HistogramProperties(TypedDict):
+    isMC : bool
+    xsec : float | None
+    lumi : float | None
+
 class Histogram:
     def __init__(self, values : np.ndarray, covmat : np.ndarray, binning : ArbitraryBinning,
+                 properties : HistogramProperties,
                  invcov : np.ndarray | None = None, 
                  L : np.ndarray | None = None, Linv : np.ndarray | None = None,
                  eigvals : np.ndarray | None = None, eigvecs : np.ndarray | None = None):
@@ -42,6 +51,8 @@ class Histogram:
         self._values = values
         self._covmat = covmat
         self._binning = binning
+
+        self._properties = properties
 
         self._device = 'numpy'
 
@@ -139,6 +150,10 @@ class Histogram:
         return self._covmat
     
     @property
+    def properties(self) -> HistogramProperties:
+        return self._properties
+
+    @property
     def invcov(self) -> Any:
         if self._invcov is None:
             self.compute_invcov()
@@ -182,14 +197,103 @@ class Histogram:
         return self._device
 
     # assumes self and other are not correlated :(
-    def chi2(self, other : "Histogram") -> float:
-        diff : np.ndarray = self._as_numpy(self.values) - self._as_numpy(other.values)
-        cov : np.ndarray = self._as_numpy(self.covmat) + self._as_numpy(other.covmat)
+    def chi2(self, other : "Histogram", 
+             transform : Literal['none', 'shapes', 'angular_modulation'],
+             cut : bool) -> Tuple[float, int]:
+
+        if transform == 'none':
+            selfvals = self._as_numpy(self.values)
+            selfcov = self._as_numpy(self.covmat)
+
+            othervals = self._as_numpy(other.values)
+            othercov = self._as_numpy(other.covmat)
+        elif transform == 'shapes':
+            ptname = get_genreco_name(self.binning.axis_names, 'Jpt') 
+            Rname = get_genreco_name(self.binning.axis_names, 'R')
+            selfflux, selfshapes, _ = self.binning.get_fluxes_shapes(
+                self._as_numpy(self.values),
+                [ptname, Rname]
+            )
+            _, selfcovshapes, _ = self.binning.get_fluxes_shapes_cov2d(
+                selfflux, selfshapes,
+                self._as_numpy(self.covmat),
+                [ptname, Rname]
+            )
+
+            ptname = get_genreco_name(other.binning.axis_names, 'Jpt') 
+            Rname = get_genreco_name(other.binning.axis_names, 'R')
+            otherflux, othershapes, _ = other.binning.get_fluxes_shapes(
+                self._as_numpy(other.values),
+                [ptname, Rname]
+            )
+
+            _, othercovshapes, _ = other.binning.get_fluxes_shapes_cov2d(
+                otherflux, othershapes,
+                other._as_numpy(other.covmat),
+                [ptname, Rname]
+            )
+
+            selfvals, selfcov = selfshapes, selfcovshapes
+            othervals, othercov = othershapes, othercovshapes
+        
+        elif transform == 'angular_modulation':
+            ptname = get_genreco_name(self.binning.axis_names, 'Jpt') 
+            Rname = get_genreco_name(self.binning.axis_names, 'R')
+            rname = get_genreco_name(self.binning.axis_names, 'r')
+            selfflux, selfshapes, _ = self.binning.get_fluxes_shapes(
+                self._as_numpy(self.values),
+                [ptname, Rname, rname]
+            )
+            _, selfcovshapes, _ = self.binning.get_fluxes_shapes_cov2d(
+                selfflux, selfshapes,
+                self._as_numpy(self.covmat),
+                [ptname, Rname, rname]
+            )
+
+            ptname = get_genreco_name(other.binning.axis_names, 'Jpt') 
+            Rname = get_genreco_name(other.binning.axis_names, 'R')
+            rname = get_genreco_name(other.binning.axis_names, 'r')
+            otherflux, othershapes, _ = other.binning.get_fluxes_shapes(
+                self._as_numpy(other.values),
+                [ptname, Rname, rname]
+            )
+
+            _, othercovshapes, _ = other.binning.get_fluxes_shapes_cov2d(
+                otherflux, othershapes,
+                other._as_numpy(other.covmat),
+                [ptname, Rname, rname]
+            )
+
+            selfvals, selfcov = selfshapes, selfcovshapes
+            othervals, othercov = othershapes, othercovshapes
+        else:
+            raise ValueError("Invalid transform option: %s" % transform)
+        
+        diff : np.ndarray = selfvals - othervals
+        cov : np.ndarray = selfcov + othercov
+
+        if cut:
+            ptname = get_genreco_name(self.binning.axis_names, 'Jpt')
+            Rname = get_genreco_name(self.binning.axis_names, 'R')
+            diff = self.binning.get_slice(
+                diff,
+                {
+                    ptname : (50, np.inf),
+                    Rname : (0.4, 0.5)
+                }
+            )
+            cov = self.binning.get_slice_cov2d(
+                cov,
+                {
+                    ptname : (50, np.inf),
+                    Rname : (0.4, 0.5)
+                }
+            )
+
         invcov : np.ndarray = smart_inverse(cov, False)
         result : float = np.linalg.multi_dot([diff, invcov, diff]).item()
-        print(result)
         assert type(result) == float, "Chi2 should be a single number"
-        return result
+        return result, len(diff)
 
     @classmethod
     def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'], rebinning : str | dict | None) -> "Histogram":
@@ -200,7 +304,14 @@ class Histogram:
             read_cov=True
         )
 
-        result = cls(values, covmat, binning)
+        dscfg = lookup_dataset(cfg['runtag'], cfg['dataset'])
+        properties = HistogramProperties(
+            isMC = 'xsec' in dscfg,
+            xsec = dscfg['xsec'] if 'xsec' in dscfg else None,
+            lumi = dscfg['lumi'] if 'lumi' in dscfg else None
+        )    
+
+        result = cls(values, covmat, binning, properties=properties)
         if rebinning is not None:
             result.rebin(rebinning)
         return result
@@ -214,6 +325,8 @@ class Histogram:
         with open(os.path.join(where, 'bincfg.json'), 'r') as f:
             binning = ArbitraryBinning()
             binning.from_dict(json.load(f))
+        with open(os.path.join(where, 'properties.json'), 'r') as f:
+            properties = HistogramProperties(**json.load(f))
 
         extras = {}
         if os.path.exists(os.path.join(where, 'invcov.npy')):
@@ -231,8 +344,8 @@ class Histogram:
         if os.path.exists(os.path.join(where, 'eigvecs.npy')):
             with open(os.path.join(where, 'eigvecs.npy'), 'rb') as f:
                 extras['eigvecs'] = np.load(f)
-        
-        return cls(values, covmat, binning, **extras)
+
+        return cls(values, covmat, binning, properties=properties, **extras)
 
     def dump_to_disk(self, where: str) -> None:
         os.makedirs(where, exist_ok=True)
@@ -242,6 +355,8 @@ class Histogram:
             np.save(f, self._covmat)
         with open(os.path.join(where, 'bincfg.json'), 'w') as f:
             json.dump(self._binning.to_dict(), f, indent=4)
+        with open(os.path.join(where, 'properties.json'), 'w') as f:
+            json.dump(self._properties, f, indent=4)
 
         if self._invcov is not None:
             with open(os.path.join(where, 'invcov.npy'), 'wb') as f:
@@ -281,11 +396,43 @@ class Histogram:
         cls,
         hist_l : Sequence['Histogram'],
         labels_l : Sequence[str],
+        transform : Literal['none', 'shapes', 'angular_modulation'] = 'none',
+        pretty : bool = False,
         output_folder : str | None = None,
         extratext : str | None = None
     ) -> None:
+
+        if len(hist_l) < 2:
+            raise ValueError("Need at least two histograms to compare!")
         
-        variable = BasicPrebinnedVariable()
+        if len(hist_l) != len(labels_l):
+            raise ValueError("Length of histograms and labels must match! Got %d histograms and %d labels" % (len(hist_l), len(labels_l)))
+        
+        if transform not in ['none', 'shapes', 'angular_modulation']:
+            raise ValueError("Invalid transform option: %s" % transform)
+
+        axnames = hist_l[0].binning.axis_names
+
+        ptname = get_genreco_name(axnames, 'Jpt')            
+        Rname = get_genreco_name(axnames, 'R')
+        rname = get_genreco_name(axnames, 'r')
+        cname = get_genreco_name(axnames, 'c')
+
+        if transform == 'shapes':
+            variable = NormalizePerBlock(
+                BasicPrebinnedVariable(),
+                [ptname, Rname]
+            )
+        elif transform == 'angular_modulation':
+            variable = DivideOutProfile(
+                BasicPrebinnedVariable(),
+                [ptname, Rname, rname]
+            )
+        elif transform == 'none':
+            variable = BasicPrebinnedVariable()
+        else:
+            raise ValueError("Invalid transform option: %s" % transform)
+
         cut = NoopOperation()
         weight = ConstantVariable(1.0)
         binning = PrebinnedBinning()
@@ -320,7 +467,8 @@ class Histogram:
             extratext=extratext,
             output_folder=output_folder,
             no_lumi_normalization=True,
-            override_filename='values_comparison',
+            override_filename='%s_values_comparison'%transform,
+            logy=True
         )
         plot_histogram(
             variable,
@@ -331,9 +479,77 @@ class Histogram:
             extratext=extratext,
             output_folder=output_folder,
             no_lumi_normalization=True,
-            override_filename='errs_comparison',
-            override_ylabel='Error [sqrt diag(cov)]'
+            override_filename='%s_errs_comparison'%transform,
+            override_ylabel='Error [sqrt diag(cov)]',
+            logy=True
         )
+
+        if pretty:
+            numval, numcov = evaluate_on_dataset(val_datasets_l[0], variable, cut)
+            for i in range(1, len(hist_l)):
+                denomval, denomcov = evaluate_on_dataset(val_datasets_l[i], variable, cut)
+
+                ratioval, ratiocov = quotient_distribution(
+                    numval, numcov,
+                    denomval, denomcov,
+                    None
+                )
+
+                comparison = ValCovPairDataset(
+                    key=f'comparison_{i}',
+                    data=(ratioval, ratiocov),
+                    color=None,
+                    label=f'{labels_l[0]} / {labels_l[i]}',
+                    binning = hist_l[0].binning,
+                )
+
+                ptedges = hist_l[0].binning.axis_edges(ptname)
+                Redges = hist_l[0].binning.axis_edges(Rname)
+
+                for ipt in range(len(ptedges)-1):
+                    for iR in range(len(Redges)-1):
+                        cutdict : dict = {
+                            ptname: (ptedges[ipt], ptedges[ipt+1]),
+                            Rname: (Redges[iR], Redges[iR+1])
+                        }
+
+                        cuti = SliceOperation(
+                            cutdict,
+                            []
+                        )
+
+                        # clip out flow bins if present
+                        ibinning = cuti.resulting_binning(hist_l[0].binning)
+                        upper_edges = ibinning.upper_edges()
+                        lower_edges = ibinning.lower_edges()
+
+                        for axname in ibinning.axis_names:
+                            if axname in cutdict:
+                                continue
+
+                            min_finite = np.min(lower_edges[axname][np.isfinite(lower_edges[axname])])
+                            max_finite = np.max(upper_edges[axname][np.isfinite(upper_edges[axname])])
+
+                            if np.min(lower_edges[axname]) == -np.inf or np.max(upper_edges[axname]) == np.inf:
+                                cutdict[axname] = (min_finite, max_finite)
+                        
+                        cuti = SliceOperation(
+                            cutdict,
+                            []
+                        )
+
+                        draw_radial_histogram(
+                            BasicPrebinnedVariable(),
+                            cuti,
+                            comparison, # type: ignore
+                            binning,
+                            extratext = extratext,
+                            logc = False,
+                            sym = True,
+                            output_folder = output_folder,
+                            override_cbarlabel = '%s/%s'%(labels_l[0], labels_l[i]),
+                            override_filename = 'comparison_%s_wrt%d_radial2D_pt%d_R%d' % (transform, i, ipt, iR)
+                        )
 
     def plot(
         self,
@@ -366,7 +582,6 @@ class Histogram:
         values = self._as_numpy(self.values)
         covmat = self._as_numpy(self.covmat)
         invcov = self._as_numpy(self.invcov)
-        invcov_cov = invcov @ covmat
 
         if transform == 'shapes':
             basevariable = NormalizePerBlock(
@@ -405,8 +620,12 @@ class Histogram:
             label=None,
             data=(values, covmat),
             binning=plotbinning,
-            isMC=True,
+            isMC=self.properties['isMC'],
         )
+        if values_dataset.isMC:
+            values_dataset.set_xsec(self.properties['xsec'])
+        else:
+            values_dataset.set_lumi(self.properties['lumi'])
 
         plot_histogram(
             basevariable,
@@ -484,6 +703,7 @@ class Histogram:
                         output_folder=output_folder,
                         override_filename=f'{base_prefix}_relative_uncertainty_histogram_pt{ipt}_R{iR}',
                         no_lumi_normalization=True,
+                        override_ylabel='Relative Uncertainty [err / bin count]'
                     )
                     
         if projected_r_c_1D:
@@ -572,15 +792,6 @@ class Histogram:
                 )
         
         if covmats:
-            invcov_dataset = CovNoValDataset(
-                key=f'{base_prefix}_invcov',
-                color=None,
-                label=None,
-                data=invcov,
-                binning=plotbinning,
-                isMC=True,
-            )
-
             draw_matrix(
                 basevariable,
                 cut,
@@ -591,18 +802,7 @@ class Histogram:
                 logc=True,
                 output_folder=output_folder,
                 override_filename=f'{base_prefix}_covariance_matrix',
-            )
-
-            draw_matrix(
-                basevariable,
-                cut,
-                invcov_dataset, # type: ignore
-                binning,
-                extratext=extratext,
-                sym=True,
-                logc=True,
-                output_folder=output_folder,
-                override_filename=f'{base_prefix}_inverse_covariance_matrix',
+                textloc='top-left'
             )
 
             corr_variable = CorrelationFromCovariance(basevariable)
@@ -617,18 +817,7 @@ class Histogram:
                 logc=False,
                 output_folder=output_folder,
                 override_filename=f'{base_prefix}_covariance_correlation_matrix',
-            )
-
-            draw_matrix(
-                corr_variable,
-                cut,
-                invcov_dataset, # type: ignore
-                binning,
-                extratext=extratext,
-                sym=True,
-                logc=False,
-                output_folder=output_folder,
-                override_filename=f'{base_prefix}_inverse_covariance_correlation_matrix',
+                textloc='top-left'
             )
 
         if prettymatrices:
@@ -642,14 +831,20 @@ class Histogram:
             ptedges = self.binning.axis_edges(ptname)
             Redges = self.binning.axis_edges(Rname)
 
-            plotbinning.clip_flow_bins(rname, positiveinf=3.0) #  clip r overflow bin for triangle
-
             prettyvariable = BasicPrebinnedVariable()
 
             if transform == 'shapes':
                 prettyvariable = NormalizePerBlock(prettyvariable, [])
             elif transform == 'angular_modulation':
-                prettyvariable = DivideOutProfile(prettyvariable, [rname])
+                prettyvariable = DivideOutProfile(
+                    WithJacobian(
+                        prettyvariable, 
+                        [rname, cname],
+                        radial_coords=[rname],
+                        clip_positiveinf = {} 
+                    ),
+                    [rname]
+                )
             elif transform == 'none':
                 pass
             else:
@@ -660,19 +855,43 @@ class Histogram:
                     prettyvariable, 
                     [rname, cname],
                     radial_coords=[rname],
-                    clip_positiveinf = {rname : 3.0} # for triangle, clip overflow bin to r=3.0
+                    clip_positiveinf = {} 
                 )
 
 
             for ipt in range(len(ptedges)-1):
                 for iR in range(len(Redges)-1):
+                    cutdict : dict = {
+                        ptname: (ptedges[ipt], ptedges[ipt+1]),
+                        Rname: (Redges[iR], Redges[iR+1])
+                    }
+
                     cuti = SliceOperation(
-                        {
-                            ptname: (ptedges[ipt], ptedges[ipt+1]),
-                            Rname: (Redges[iR], Redges[iR+1])
-                        },
+                        cutdict,
                         []
                     )
+
+                    # clip out flow bins if present
+                    ibinning = cuti.resulting_binning(plotbinning)
+                    upper_edges = ibinning.upper_edges()
+                    lower_edges = ibinning.lower_edges()
+
+                    for axname in ibinning.axis_names:
+                        if axname in cutdict:
+                            continue
+
+                        min_finite = np.min(lower_edges[axname][np.isfinite(lower_edges[axname])])
+                        max_finite = np.max(upper_edges[axname][np.isfinite(upper_edges[axname])])
+
+                        if np.min(lower_edges[axname]) == -np.inf or np.max(upper_edges[axname]) == np.inf:
+                            cutdict[axname] = (min_finite, max_finite)
+                    
+                    cuti = SliceOperation(
+                        cutdict,
+                        []
+                    )
+
+
                     # if 'angular_modulation': want logc=False and sym=True
                     # else want logc=True and sym=False
                     draw_radial_histogram(
@@ -762,6 +981,7 @@ class UnfoldedHistogram:
     def __init__(self, x : np.ndarray, baseline : np.ndarray, 
                  hessian : np.ndarray,
                  binning : ArbitraryBinning,
+                 properties : HistogramProperties,
                  nuisance_names : list[str],
                  invhess : np.ndarray | None = None,
                  eigvals : np.ndarray | None = None,
@@ -773,6 +993,7 @@ class UnfoldedHistogram:
         self._baseline = baseline
         self._hessian = hessian
         self._binning = binning
+        self._properties = properties
         self._eigvals = eigvals
         self._eigvecs = eigvecs
         self._L = L
@@ -800,6 +1021,10 @@ class UnfoldedHistogram:
     def binning(self):
         return self._binning
     
+    @property
+    def properties(self):
+        return self._properties
+
     @property
     def invhess(self):
         if self._invhess is None:
@@ -866,7 +1091,7 @@ class UnfoldedHistogram:
         x *= self._baseline
         invhess = invhess * np.outer(self._baseline, self._baseline)
 
-        return Histogram(x, invhess, self._binning)
+        return Histogram(x, invhess, self._binning, properties=self._properties)
         
     @classmethod 
     def from_minimization_result(cls, where:str) -> 'UnfoldedHistogram':
@@ -886,7 +1111,10 @@ class UnfoldedHistogram:
         with open(os.path.join(where, 'nuisance_names.txt'), 'r') as f:
             nuisance_names = [line.strip() for line in f]
 
-        return cls(x, baseline, hessian, binning=binning, nuisance_names=nuisance_names)
+        with open(os.path.join(where, 'hist_properties.json'), 'r') as f:
+            properties = HistogramProperties(**json.load(f))
+
+        return cls(x, baseline, hessian, binning=binning, nuisance_names=nuisance_names, properties=properties)
 
     @classmethod
     def from_disk(cls, where:str) -> 'UnfoldedHistogram':
@@ -900,6 +1128,9 @@ class UnfoldedHistogram:
         binning.load_from_file(os.path.join(where, 'binning.json'))
         with open(os.path.join(where, 'nuisance_names.txt'), 'r') as f:
             nuisance_names = [line.strip() for line in f]
+
+        with open(os.path.join(where, 'properties.json'), 'r') as f:
+            properties = HistogramProperties(**json.load(f))
 
         extras = {}
 
@@ -919,7 +1150,7 @@ class UnfoldedHistogram:
             with open(os.path.join(where, 'Linv.npy'), 'rb') as f:
                 extras['Linv'] = np.load(f)
 
-        return cls(x, baseline, hessian, binning=binning, nuisance_names=nuisance_names, **extras)
+        return cls(x, baseline, hessian, binning=binning, nuisance_names=nuisance_names, properties=properties, **extras)
     
     def dump_to_disk(self, where: str):
         os.makedirs(where, exist_ok=True)
@@ -933,6 +1164,9 @@ class UnfoldedHistogram:
         with open(os.path.join(where, 'nuisance_names.txt'), 'w') as f:
             for name in self._nuisance_names:
                 f.write(name + '\n')
+        
+        with open(os.path.join(where, 'properties.json'), 'w') as f:
+            json.dump(self._properties, f, indent=4)
 
         if self._invhess is not None:
             with open(os.path.join(where, 'invhess.npy'), 'wb') as f:
@@ -964,8 +1198,13 @@ class UnfoldedHistogram:
                 label=l,
                 data=d,
                 binning=thebinning,
-                isMC=True,
+                isMC=self.properties['isMC'],
             ))
+            if datasets[-1].isMC:
+                datasets[-1].set_xsec(self.properties['xsec'])
+            else:                
+                datasets[-1].set_lumi(self.properties['lumi'])
+
         plot_histogram(
             variable,
             cut,
@@ -998,8 +1237,12 @@ class UnfoldedHistogram:
             label='Unfolded [marginalized nuisances]',
             data=(xprof, cov_prof),
             binning=self._binning,
-            isMC=True,
+            isMC=self.properties['isMC'],
         )
+        if profdataset.isMC:
+            profdataset.set_xsec(self.properties['xsec'])
+        else:            
+            profdataset.set_lumi(self.properties['lumi'])
 
         variable = BasicPrebinnedVariable()
         cut = NoopOperation()
@@ -1016,6 +1259,7 @@ class UnfoldedHistogram:
             output_folder=output_folder,
             override_filename='unfolded_profiled',
             no_lumi_normalization=True,
+            textloc='top-left',
         )
 
         if covmats:
@@ -1029,6 +1273,7 @@ class UnfoldedHistogram:
                 logc=True,
                 output_folder=output_folder,
                 override_filename='unfolded_profiled_covariance_matrix',
+                textloc='top-left'
             )
 
         corr_variable = CorrelationFromCovariance(variable)
@@ -1044,6 +1289,7 @@ class UnfoldedHistogram:
                 logc=False,
                 output_folder=output_folder,
                 override_filename='unfolded_profiled_correlation_matrix',
+                textloc='top-left'
             )
 
         theta = self._x[self.baseline.shape[0]:]
@@ -1063,8 +1309,12 @@ class UnfoldedHistogram:
             label="Posterior",
             data=(theta, covtheta),
             binning=thetabinning,
-            isMC=True,
+            isMC=self.properties['isMC'],
         )
+        if covtheta_dataset.isMC:
+            covtheta_dataset.set_xsec(self.properties['xsec'])
+        else:
+            covtheta_dataset.set_lumi(self.properties['lumi'])
 
         gray_box = BoxSpec(-0.1, -1, len(self._nuisance_names)+0.2, 2, facecolor='gray', alpha=0.5, zorder=0, label='Prior')
 
@@ -1080,7 +1330,8 @@ class UnfoldedHistogram:
             no_lumi_normalization=True,
             extra_stuff=[gray_box],
             override_ylabel="Nuisance posteriors",
-            logy=False
+            logy=False,
+            textloc='top-left'
         )
         
         if covmats:
@@ -1094,6 +1345,7 @@ class UnfoldedHistogram:
                 logc=True,
                 output_folder=output_folder,
                 override_filename='unfolded_nuisance_covariance_matrix',
+                textloc='top-left'
             )
             draw_matrix(
                 corr_variable,
@@ -1105,6 +1357,7 @@ class UnfoldedHistogram:
                 logc=False,
                 output_folder=output_folder,
                 override_filename='unfolded_nuisance_correlation_matrix',
+                textloc='top-left'
             )
 
         covbetatheta = self.invhess[:self.baseline.shape[0], self.baseline.shape[0]:] * self._baseline[:, None]
@@ -1118,8 +1371,13 @@ class UnfoldedHistogram:
             label='Covariance between unfolded and nuisances',
             data=covbetatheta,
             binning=thetabetabinning,
-            isMC=True,
+            isMC=self.properties['isMC'],
         )
+        if covbetatheta_dataset.isMC:
+            covbetatheta_dataset.set_xsec(self.properties['xsec'])
+        else:
+            covbetatheta_dataset.set_lumi(self.properties['lumi'])
+
         thetaerrs = np.sqrt(np.diag(covtheta))
         betaerrs = np.sqrt(np.diag(cov_prof))
         covbetatheta_dataset.setup_custom_diagonals(thetaerrs, betaerrs)
@@ -1135,6 +1393,7 @@ class UnfoldedHistogram:
                 logc=True,
                 output_folder=output_folder,
                 override_filename='unfolded_betatheta_covariance_matrix',
+                textloc='top-left'
             )
             draw_matrix(
                 corr_variable,
@@ -1146,6 +1405,7 @@ class UnfoldedHistogram:
                 logc=True,
                 output_folder=output_folder,
                 override_filename='unfolded_betatheta_correlation_matrix',
+                textloc='top-left'
             )
         
         # time for nuisance contributions
@@ -1217,7 +1477,8 @@ class UnfoldedHistogram:
             thebinning = self.binning,
             override_filename='nuisance_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance',
-            logy=False
+            logy=False,
+            textloc='top-left'
         )
         self._plot_valonly_histogram(
             output_folder, extratext, variable, cut, weight, binning,
@@ -1226,7 +1487,8 @@ class UnfoldedHistogram:
             thebinning = fluxbinning,
             override_filename='nuisance_flux_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance [flux per (pT, R) bin]',
-            logy=False
+            logy=False,
+            textloc='top-left'
         )
         self._plot_valonly_histogram(
             output_folder, extratext, variable, cut, weight, binning,
@@ -1235,7 +1497,8 @@ class UnfoldedHistogram:
             thebinning = self.binning,
             override_filename='nuisance_shape_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance [normalized per (pT, R) bin]',
-            logy=False
+            logy=False,
+            textloc='top-left'
         )
 
         self._plot_valonly_histogram(
@@ -1245,7 +1508,8 @@ class UnfoldedHistogram:
             thebinning = self.binning,
             override_filename='nuisance_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance',
-            logy=True
+            logy=True,
+            textloc='top-left'
         )
         self._plot_valonly_histogram(
             output_folder, extratext, variable, cut, weight, binning,
@@ -1254,7 +1518,8 @@ class UnfoldedHistogram:
             thebinning = fluxbinning,
             override_filename='nuisance_flux_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance [flux per (pT, R) bin]',
-            logy=True
+            logy=True,
+            textloc='top-left'
         )
 
         # due to floating point rounding, it can happen that some of the contributions are very slightly negative
@@ -1262,7 +1527,6 @@ class UnfoldedHistogram:
         # -> take abs()
         diagcov = [np.diag(cov) for cov in (covshape_contributions + [covshape_statonly, covshape_total])]
         diagcov = [np.abs(diag) for diag in diagcov]
-        thedata = [np.sqrt(diag)/shape_statonly for diag in diagcov]
 
         self._plot_valonly_histogram(
             output_folder, extratext, variable, cut, weight, binning,
@@ -1271,5 +1535,6 @@ class UnfoldedHistogram:
             thebinning = self.binning,
             override_filename='nuisance_shape_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance [normalized per (pT, R) bin]',
-            logy=True
+            logy=True,
+            textloc='top-left'
         )

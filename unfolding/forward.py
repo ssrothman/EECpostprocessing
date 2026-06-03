@@ -108,4 +108,4 @@ def forward_hist(gen : Histogram, nuisances : np.ndarray | torch.Tensor, model :
     covmat = bootstrap_forward_cov(gen, nuisances, model, nboot, seed, device)
     values = forward_values(gen, nuisances, model, device)
 
-    return Histogram(values, covmat, gen.binning)
+    return Histogram(values, covmat, gen.binning, properties=gen.properties)

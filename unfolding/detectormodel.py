@@ -1,6 +1,7 @@
 import os
 from typing import overload
 from general.fslookup.skim_path import lookup_skim_path
+from simonpy.stats_v2 import smart_inverse
 from unfolding.specs import dsspec, detectormodelspec, whichsystspec, systspec
 import numpy as np
 import torch
@@ -409,21 +410,27 @@ class DetectorModel:
         )
         
         if detailed:
-            gen_edges = self.binning.genbinning.edges
-            reco_edges = self.binning.recobinning.edges
+            lower_edges_gen = self.binning.genbinning.lower_edges()
+            lower_edges_reco = self.binning.recobinning.lower_edges()
+            upper_edges_gen = self.binning.genbinning.upper_edges()
+            upper_edges_reco = self.binning.recobinning.upper_edges()
 
-            ptgen_edges = gen_edges['Jpt_gen']
-            ptreco_edges = reco_edges['Jpt_reco']
+            ptgen_lower_edges = np.sort(np.unique(lower_edges_gen['Jpt_gen']))
+            ptreco_lower_edges = np.sort(np.unique(lower_edges_reco['Jpt_reco']))
+            ptgen_upper_edges = np.sort(np.unique(upper_edges_gen['Jpt_gen']))
+            ptreco_upper_edges = np.sort(np.unique(upper_edges_reco['Jpt_reco']))
 
-            Rgen_edges = gen_edges['R_gen'] 
-            Rreco_edges = reco_edges['R_reco']
+            Rgen_lower_edges = np.sort(np.unique(lower_edges_gen['R_gen']))
+            Rreco_lower_edges = np.sort(np.unique(lower_edges_reco['R_reco']))
+            Rgen_upper_edges = np.sort(np.unique(upper_edges_gen['R_gen']))
+            Rreco_upper_edges = np.sort(np.unique(upper_edges_reco['R_reco']))
 
-            for ipt in range(len(ptgen_edges) - 1):
-                for iR in range(len(Rgen_edges) - 1):
+            for ipt in range(len(ptgen_lower_edges)):
+                for iR in range(len(Rgen_lower_edges)):
                     gencut_i = SliceOperation(
                         {
-                            'Jpt_gen' : (ptgen_edges[ipt], ptgen_edges[ipt+1]),
-                            'R_gen' : (Rgen_edges[iR], Rgen_edges[iR+1])
+                            'Jpt_gen' : (ptgen_lower_edges[ipt], ptgen_upper_edges[ipt]),
+                            'R_gen' : (Rgen_lower_edges[iR], Rgen_upper_edges[iR])
                         },
                         []
                     )
@@ -442,12 +449,12 @@ class DetectorModel:
                         override_ylabel = "Purity"
                     )
             
-            for ipt in range(len(ptreco_edges) - 1):
-                for iR in range(len(Rreco_edges) - 1):
+            for ipt in range(len(ptreco_lower_edges)):
+                for iR in range(len(Rreco_lower_edges)):
                     recocut_i = SliceOperation(
                         {
-                            'Jpt_reco' : (ptreco_edges[ipt], ptreco_edges[ipt+1]),
-                            'R_reco' : (Rreco_edges[iR], Rreco_edges[iR+1])
+                            'Jpt_reco' : (ptreco_lower_edges[ipt], ptreco_upper_edges[ipt]),
+                            'R_reco' : (Rreco_lower_edges[iR], Rreco_upper_edges[iR])
                         },
                         []
                     )
