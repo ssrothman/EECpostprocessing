@@ -551,6 +551,22 @@ class Histogram:
                             override_filename = 'comparison_%s_wrt%d_radial2D_pt%d_R%d' % (transform, i, ipt, iR)
                         )
 
+                        testvar = BasicPrebinnedVariable()
+                        testvar.override_centerline(1.0)
+                        plot_histogram(
+                            testvar,
+                            cuti,
+                            weight,
+                            comparison,
+                            binning,
+                            extratext=extratext,
+                            output_folder=output_folder,
+                            no_lumi_normalization=True,
+                            override_filename='%s_values_comparison_pt%d_R%d'%(transform, ipt, iR),
+                            logy=False,
+                            override_ylabel='%s / %s' % (labels_l[0], labels_l[i])
+                        )
+
     def plot(
         self,
         output_folder: str | None = None,

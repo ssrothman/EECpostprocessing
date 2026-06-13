@@ -1,5 +1,6 @@
 {
     "axis_labels": {
+        "DeltaR(eta_phi__Jeta_Jphi)" : "$\\Delta R(jet, track)$",
         "genHT" : "$H_{T}^{gen}$ [GeV]",
         "genVpt" : "$p_{T,Z}^{gen}$ [GeV]",
         "nTrueInt" : "Number of True Interactions",

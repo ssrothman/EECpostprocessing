@@ -17,7 +17,7 @@
       "name": "ZZ",
       "table": "jets",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind" : "pq"
     },
     {
@@ -28,7 +28,7 @@
       "name": "WW",
       "table": "jets",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind" : "pq"
     },
     {
@@ -39,7 +39,7 @@
       "name": "WZ",
       "table": "jets",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind" : "pq"
     },
     {
@@ -50,7 +50,7 @@
       "name": "TT",
       "table": "jets",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind" : "pq"
     },
     {
@@ -61,7 +61,7 @@
       "name": "ST",
       "table": "jets",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind" : "pq_stack"
     },
     {
@@ -72,7 +72,7 @@
       "name": "Pythia_HTsum",
       "table": "jets",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind" : "pq_stack"
     },
     {
@@ -83,19 +83,21 @@
       "name" : "DATA",
       "table" : "jets",
       "objsyst" : "DATA",
-      "location" : "scratch-submit",
+      "location" : "xrootd-submit",
       "dsetkind" : "pq_stack",
       "nocount" : true
     }
   ],
   "base_cuts": [
     "cut::EqualsCut('nMu', 2)",
-    "cut::EqualsCut('nEle', 0)"
+    "cut::EqualsCut('nEle', 0)",
+    "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
   ],
   "alternative_cut": [
     "cut::LessThanCut('numTightB', 2)",
     "cut::EqualsCut('nMu', 2)",
-    "cut::EqualsCut('nEle', 0)"
+    "cut::EqualsCut('nEle', 0)",
+    "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
   ],
   "bins": [
     [

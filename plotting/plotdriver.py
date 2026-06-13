@@ -301,6 +301,8 @@ def run_plots(cfg):
                 no_ratiopad=cfg.get('nopad', False),
                 no_lumi_normalization=cfg.get('no_lumi_normalization', False),
                 logy=cfg.get('logy', None),
+                logx=cfg.get('logx', None),
+                textloc=cfg.get('override_textloc', 'best'),
                 density=cfg.get('density', False),
                 override_filename=cfg.get('override_filenames', [None]*len(variables))[i],
                 extra_stuff=extra_stuff,

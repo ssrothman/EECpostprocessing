@@ -1,0 +1,148 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nohad",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nohardspin",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nosoftspin",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nospin",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicVariable('pt')",
+                "var::RatioVariable('pt', 'Jpt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::NoCut()"
+            ],
+            "binning" : "auto",
+            "plotspath" : "res4_pheno_plots/kinematics/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_glu_stacked_partPt",
+                "herwig_glu_stacked_partPt_over_Jpt"
+            ],
+            "logy" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nohad",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nohardspin",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nosoftspin",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nospin",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicVariable('pdgid')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::NoCut()"
+            ],
+            "binning" : "autoint:pdgid",
+            "plotspath" : "res4_pheno_plots/kinematics/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_glu_stacked_partPdgId"
+            ],
+            "logy" : true
+        }
+    ]
+}

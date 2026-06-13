@@ -16,7 +16,7 @@
       "name": "ZZ",
       "table": "events",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind": "pq"
     },
     {
@@ -27,7 +27,7 @@
       "name": "WW",
       "table": "events",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind": "pq"
     },
     {
@@ -38,7 +38,7 @@
       "name": "WZ",
       "table": "events",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind": "pq"
     },
     {
@@ -49,7 +49,7 @@
       "name": "TT",
       "table": "events",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind": "pq"
     },
     {
@@ -60,7 +60,7 @@
       "name": "ST",
       "table": "events",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind": "pq_stack"
     },
     {
@@ -71,7 +71,7 @@
       "name": "Pythia_HTsum",
       "table": "events",
       "objsyst": "nominal",
-      "location": "scratch-submit",
+      "location": "xrootd-submit",
       "dsetkind": "pq_stack"
     },
     {
@@ -82,12 +82,13 @@
       "name" : "DATA",
       "table" : "events",
       "objsyst" : "DATA",
-      "location" : "scratch-submit",
+      "location" : "xrootd-submit",
       "dsetkind": "pq_stack",
       "nocount" : true
     }
   ],
   "base_cuts": [
+      "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
   ],
   "alternative_cut": [
     "cut::EqualsCut('nMu', 2)",

@@ -100,6 +100,7 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
         table
     )
 
+    skimfs.makedirs(skimpath, exist_ok=True)
     listdir = skimfs.listdir(skimpath)
 
     skimresults = set()

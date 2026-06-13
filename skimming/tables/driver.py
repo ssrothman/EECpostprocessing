@@ -1,6 +1,6 @@
 from .AK4jetkinematics import AK4JetKinematicsTable
 from .eventkinematics import EventKinematicsTable   
-from .constituentkinematics import ConstituentKinematicsTable
+from .constituentkinematics import ConstituentKinematicsTable, GenConstituentKinematicsTable
 from .cutflow import CutflowTable
 from .jetkinematics import SimonJetKinematicsTable
 from .EEC import EECres4ObsTable, EECres4TransferTable
@@ -19,6 +19,7 @@ table_classes = {
     "AK4JetKinematicsTable": AK4JetKinematicsTable,
     "EventKinematicsTable": EventKinematicsTable,
     "ConstituentKinematicsTable": ConstituentKinematicsTable,
+    "GenConstituentKinematicsTable": GenConstituentKinematicsTable,
     "CutflowTable": CutflowTable,
     "SimonJetKinematicsTable": SimonJetKinematicsTable,
     "EECres4Obs": EECres4ObsTable,

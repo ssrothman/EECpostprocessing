@@ -448,6 +448,23 @@ class DetectorModel:
                         no_ratiopad = True,
                         override_ylabel = "Purity"
                     )
+
+                    testvar = BasicPrebinnedVariable()
+                    testvar.override_centerline([0.0, 1.0])
+
+                    plot_histogram(
+                        testvar,
+                        gencut_i,
+                        weight,
+                        gamma_dataset,
+                        plot_binning,
+                        extratext=extratext,
+                        output_folder=output_folder,
+                        override_filename=f'{base_prefix}_gamma_ptgen_{ipt}_Rgen_{iR}',
+                        no_lumi_normalization=True,
+                        no_ratiopad = True,
+                        override_ylabel = "Gen-level background template"
+                    )
             
             for ipt in range(len(ptreco_lower_edges)):
                 for iR in range(len(Rreco_lower_edges)):
@@ -471,6 +488,22 @@ class DetectorModel:
                         no_lumi_normalization=True,
                         no_ratiopad = True,
                         override_ylabel = "Stability"
+                    )
+
+                    testvar = BasicPrebinnedVariable()
+                    testvar.override_centerline([0.0, 1.0])
+                    plot_histogram(
+                        testvar,
+                        recocut_i,
+                        weight,
+                        rho_dataset,
+                        plot_binning,
+                        extratext=extratext,
+                        output_folder=output_folder,
+                        override_filename=f'{base_prefix}_rho_ptreco_{ipt}_Rreco_{iR}',
+                        no_lumi_normalization=True,
+                        no_ratiopad = True,
+                        override_ylabel = "Reco-level background template"
                     )
 
         t0dset = TransferMatrixDataset(

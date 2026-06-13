@@ -5,41 +5,56 @@
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "May_26_2026",
-                    "name" : "herwig_glu_1200",
-                    "table" : "events",
+                    "name" : "herwig_glu",
+                    "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind" : "pq",
+                    "dsetkind" : "pq_stack",
                     "no_count" : false
                 },
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "May_26_2026",
-                    "name" : "herwig_glu_250",
-                    "table" : "events",
+                    "name" : "herwig_glu_nohad",
+                    "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind" : "pq",
+                    "dsetkind" : "pq_stack",
                     "no_count" : false
                 },
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "May_26_2026",
-                    "name" : "herwig_glu_50",
-                    "table" : "events",
+                    "name" : "herwig_glu_nohardspin",
+                    "table" : "jets",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind" : "pq",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nosoftspin",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "May_26_2026",
+                    "name" : "herwig_glu_nospin",
+                    "table" : "jets",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
                     "no_count" : false
                 }
             ],
             "variables" : [
-                "var::BasicVariable('genVpt')",
-                "var::BasicVariable('genHT')",
-                "var::BasicVariable('numJets')",
-                "var::BasicVariable('Zpt')",
-                "var::BasicVariable('Zmass')",
-                "var::BasicVariable('Zy')"                
+                "var::BasicVariable('Jpt')"
             ],
             "weights" : [
                 "wt_nominal"
@@ -52,12 +67,7 @@
             "plotsprefix" : "",
             "driver" : "plot_histogram",
             "override_filenames" : [
-                "genVpt",
-                "genHT",
-                "numJets",
-                "Zpt",
-                "Zmass",
-                "Zy"
+                "herwig_glu_stacked_Jpt"
             ],
             "logy" : true
         }

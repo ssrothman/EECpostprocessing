@@ -81,6 +81,35 @@ _ALL_GENONLY_DATASETS = [
     "pythia_q_nospin_50",
 ]
 
+
+_ALL_GENONLY_Q_DATASETS = [
+    "herwig_q_1200",
+    "herwig_q_250",
+    "herwig_q_50",
+    "herwig_q_nohad_1200",
+    "herwig_q_nohad_250",
+    "herwig_q_nohad_50",
+    "herwig_q_nohardspin_1200",
+    "herwig_q_nohardspin_250",
+    "herwig_q_nohardspin_50",
+    "herwig_q_nosoftspin_1200",
+    "herwig_q_nosoftspin_250",
+    "herwig_q_nosoftspin_50",
+    "herwig_q_nospin_1200",
+    "herwig_q_nospin_250",
+    "herwig_q_nospin_50",
+    "pythia_q_1200",
+    "pythia_q_250",
+    "pythia_q_50",
+    "pythia_q_nohad_1200",
+    "pythia_q_nohad_250",
+    "pythia_q_nohad_50",
+    "pythia_q_nospin_1200",
+    "pythia_q_nospin_250",
+    "pythia_q_nospin_50",
+]
+
+
 def expand_one_dataset(dataset:str):
     if dataset == 'allSignal':
         return _ALL_SIGNAL_DATASETS
@@ -90,6 +119,8 @@ def expand_one_dataset(dataset:str):
         return _ALL_DATA_DATASETS
     elif dataset == 'allGenonly':
         return _ALL_GENONLY_DATASETS
+    elif dataset == 'allGenonlyQ':
+        return _ALL_GENONLY_Q_DATASETS
     else:
         return [dataset]
 

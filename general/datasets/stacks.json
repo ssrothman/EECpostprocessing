@@ -1,5 +1,172 @@
 {
-        "stacks" : {
+    "stacks" : {
+        "herwig_glu" : {
+            "dsets" : [
+                "herwig_glu_1200",
+                "herwig_glu_250",
+                "herwig_glu_50"
+            ],
+            "stacks" : [],
+            "color" : "mediumblue",
+            "label" : "Herwig Z+glu; default"
+        },
+        "herwig_glu_nohad" : {
+            "dsets" : [
+                "herwig_glu_nohad_1200",
+                "herwig_glu_nohad_250",
+                "herwig_glu_nohad_50"
+            ],
+            "stacks" : [],
+            "color" : "mediumorchid",
+            "label" : "Herwig Z+glu; no hadronization"
+        },
+        "herwig_glu_nohardspin" : {
+            "dsets" : [
+                "herwig_glu_nohardspin_1200",
+                "herwig_glu_nohardspin_250",
+                "herwig_glu_nohardspin_50"
+            ],
+            "stacks" : [],
+            "color" : "palevioletred",
+            "label" : "Herwig Z+glu; no hard spin corr."
+        },
+        "herwig_glu_nosoftspin" : {
+            "dsets" : [
+                "herwig_glu_nosoftspin_1200",
+                "herwig_glu_nosoftspin_250",
+                "herwig_glu_nosoftspin_50"
+            ],
+            "stacks" : [],
+            "color" : "darkturquoise",
+            "label" : "Herwig Z+glu; no soft spin corr."
+        },
+        "herwig_glu_nospin" : {
+            "dsets" : [
+                "herwig_glu_nospin_1200",
+                "herwig_glu_nospin_250",
+                "herwig_glu_nospin_50"
+            ],
+            "stacks" : [],
+            "color" : "mediumseagreen",
+            "label" : "Herwig Z+glu; no spin corr."
+        },
+
+
+        "herwig_q" : {
+            "dsets" : [
+                "herwig_q_1200",
+                "herwig_q_250",
+                "herwig_q_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Herwig Z+q; default"
+        },
+        "herwig_q_nohad" : {
+            "dsets" : [
+                "herwig_q_nohad_1200",
+                "herwig_q_nohad_250",
+                "herwig_q_nohad_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Herwig Z+q; no hadronization"
+        },
+        "herwig_q_nohardspin" : {
+            "dsets" : [
+                "herwig_q_nohardspin_1200",
+                "herwig_q_nohardspin_250",
+                "herwig_q_nohardspin_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Herwig Z+q; no hard spin corr."
+        },
+        "herwig_q_nosoftspin" : {
+            "dsets" : [
+                "herwig_q_nosoftspin_1200",
+                "herwig_q_nosoftspin_250",
+                "herwig_q_nosoftspin_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Herwig Z+q; no soft spin corr."
+        },
+        "herwig_q_nospin" : {
+            "dsets" : [
+                "herwig_q_nospin_1200",
+                "herwig_q_nospin_250",
+                "herwig_q_nospin_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Herwig Z+q; no spin corr."
+        },
+
+
+
+        "pythia_glu" : {
+            "dsets" : [
+                "pythia_glu_1200",
+                "pythia_glu_250",
+                "pythia_glu_50"
+            ],
+            "stacks" : [],
+            "color" : "blue",
+            "label" : "Pythia Z+glu; default"
+        },
+        "pythia_glu_nohad" : {
+            "dsets" : [
+                "pythia_glu_nohad_1200",
+                "pythia_glu_nohad_250",
+                "pythia_glu_nohad_50"
+            ],
+            "stacks" : [],
+            "color" : "blue",
+            "label" : "Pythia Z+glu; no hadronization"
+        },
+        "pythia_glu_nospin" : {
+            "dsets" : [
+                "pythia_glu_nospin_1200",
+                "pythia_glu_nospin_250",
+                "pythia_glu_nospin_50"
+            ],
+            "stacks" : [],
+            "color" : "blue",
+            "label" : "Pythia Z+glu; no hard spin corr."
+        },
+
+        "pythia_q" : {
+            "dsets" : [
+                "pythia_q_1200",
+                "pythia_q_250",
+                "pythia_q_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Pythia Z+q; default"
+        },
+        "pythia_q_nohad" : {
+            "dsets" : [
+                "pythia_q_nohad_1200",
+                "pythia_q_nohad_250",
+                "pythia_q_nohad_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Pythia Z+q; no hadronization"
+        },
+        "pythia_q_nospin" : {
+            "dsets" : [
+                "pythia_q_nospin_1200",
+                "pythia_q_nospin_250",
+                "pythia_q_nospin_50"
+            ],
+            "stacks" : [],
+            "color" : "red",
+            "label" : "Pythia Z+q; no hard spin corr."
+        },
+
         "herwig_glu_nospin_5Xand6X" : {
             "dsets" : [
                 "herwig_glu_nospin_5X",
@@ -49,7 +216,7 @@
                 "ST"
             ],
             "color" : "#2CA02C",
-            "label" : "MC signal+background (Herwig inclusive)"
+            "label" : "MC signal+background (Herwig)"
         },
         "ST" : {
             "dsets" : [
