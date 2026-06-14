@@ -60,6 +60,9 @@ class ConstituentKinematicsTable:
         thevals['Jeta'] = jets.eta[evtmask]
         thevals['Jphi'] = jets.phi[evtmask]
 
+        if hasattr(objs.RecoJets.simonjets, 'jetMatched'):
+            thevals['jetMatched'] = objs.RecoJets.simonjets.jetMatched[evtmask]
+
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(
             thevals,
