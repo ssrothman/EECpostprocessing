@@ -80,6 +80,15 @@
             "params-DATA" : {
                 "simonjetsname" : "ChargedSimonJets"
             },
+            "params-THRESH5" : {
+                "simonjetsname" : "ChargedSimonJetsTHRESH5"
+            },
+            "params-THRESH10" : {
+                "simonjetsname" : "ChargedSimonJetsTHRESH10"
+            },
+            "params-CORE_TRK" : {
+                "simonjetsname" : "ChargedSimonJetsCORETRK"
+            },
             "params-NO_JER" : {
                 "skipJER" : true
             },
@@ -163,6 +172,15 @@
             "params-TRK_EFF" : {
                 "name" : "RecoChargedEECsTRKEFFres4"
             },
+            "params-THRESH5" : {
+                "name" : "RecoChargedEECsTHRESH5res4"
+            },
+            "params-THRESH10" : {
+                "name" : "RecoChargedEECsTHRESH10res4"
+            },
+            "params-CORE_TRK" : {
+                "name" : "RecoChargedEECsCORETRKres4"
+            },
             "params-DATA" : {
                 "name" : "RecoChargedEECsres4"
             },
@@ -181,6 +199,15 @@
             },
             "params-TRK_EFF" : {
                 "name" : "UnmatchedRecoChargedEECsTRKEFFres4"
+            },
+            "params-THRESH5" : {
+                "name" : "UnmatchedRecoChargedEECsTHRESH5res4"
+            },
+            "params-THRESH10" : {
+                "name" : "UnmatchedRecoChargedEECsTHRESH10res4"
+            },
+            "params-CORE_TRK" : {
+                "name" : "UnmatchedRecoChargedEECsCORETRKres4"
             },
             "params-DATA" : {
                 "name" : "UnmatchedRecoChargedEECsres4"
@@ -201,6 +228,15 @@
             "params-TRK_EFF" : {
                 "name" : "UntransferedRecoChargedEECsTRKEFFres4"
             },
+            "params-THRESH5" : {
+                "name" : "UntransferedRecoChargedEECsTHRESH5res4"
+            },
+            "params-THRESH10" : {
+                "name" : "UntransferedRecoChargedEECsTHRESH10res4"
+            },
+            "params-CORE_TRK" : {
+                "name" : "UntransferedRecoChargedEECsCORETRKres4"
+            },
             "params-DATA" : {
                 "name" : "UntransferedRecoChargedEECsres4"
             },
@@ -220,6 +256,15 @@
             "params-TRK_EFF" : {
                 "name" : "GenChargedEECsTRKEFFres4"
             },
+            "params-THRESH5" : {
+                "name" : "GenChargedEECsTHRESH5res4"
+            },
+            "params-THRESH10" : {
+                "name" : "GenChargedEECsTHRESH10res4"
+            },
+            "params-CORE_TRK" : {
+                "name" : "GenChargedEECsCORETRKres4"
+            },
             "MConly" : true
         },
         "UnmatchedGenEEC" : {
@@ -235,6 +280,15 @@
             },
             "params-TRK_EFF" : {
                 "name" : "UnmatchedGenChargedEECsTRKEFFres4"
+            },
+            "params-THRESH5" : {
+                "name" : "UnmatchedGenChargedEECsTHRESH5res4"
+            },
+            "params-THRESH10" : {
+                "name" : "UnmatchedGenChargedEECsTHRESH10res4"
+            },
+            "params-CORE_TRK" : {
+                "name" : "UnmatchedGenChargedEECsCORETRKres4"
             },
             "MConly" : true
         },
@@ -252,6 +306,15 @@
             "params-TRK_EFF" : {
                 "name" : "UntransferedGenChargedEECsTRKEFFres4"
             },
+            "params-THRESH5" : {
+                "name" : "UntransferedGenChargedEECsTHRESH5res4"
+            },
+            "params-THRESH10" : {
+                "name" : "UntransferedGenChargedEECsTHRESH10res4"
+            },
+            "params-CORE_TRK" : {
+                "name" : "UntransferedGenChargedEECsCORETRKres4"
+            },
             "MConly" : true
         },
         "EECtransfer" : {
@@ -267,6 +330,15 @@
             },
             "params-TRK_EFF" : {
                 "name" : "GenChargedEECsTRKEFFres4Transfer"
+            },
+            "params-THRESH5" : {
+                "name" : "GenChargedEECsTHRESH5res4Transfer"
+            },
+            "params-THRESH10" : {
+                "name" : "GenChargedEECsTHRESH10res4Transfer"
+            },
+            "params-CORE_TRK" : {
+                "name" : "GenChargedEECsCORETRKres4Transfer"
             },
             "MConly" : true
         },
