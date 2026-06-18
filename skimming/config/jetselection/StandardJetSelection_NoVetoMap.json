@@ -1,0 +1,15 @@
+{
+    "jetsel" : {
+        "class" : "StandardJetSelector",
+        "params" : {
+            "minpt" : 30.0,
+            "maxeta" : 1.7,
+            "jetID" : "tightLepVeto",
+            "puJetID" : "none",
+            "muonOverlapDR" : 0.8,
+            "useVetoMap" : false,
+            "jetvetomap" : {
+            }
+        }
+    }
+}
