@@ -102,7 +102,7 @@
         },
         "GenJets" : {
             "class" : "SimonJets",
-            "params" : {
+            "params-common" : {
                 "jetsname" : "arbitratedGenJetsAK8",
                 "simonjetsname" : "GenChargedSimonJetsNOM",
                 "CHSjetsname" : "",
@@ -115,6 +115,17 @@
                 "CHS_minJetID" : -1,
                 "CHS_minPUID" : -1,
                 "CHS_PUID_ptthreshold" : -1
+            },
+            "params" : {
+            },
+            "params-THRESH5" : {
+                "simonjetsname" : "GenChargedSimonJetsTHRESH5"
+            },
+            "params-THRESH10" : {
+                "simonjetsname" : "GenChargedSimonJetsTHRESH10"
+            },
+            "params-CORE_TRK" : {
+                "simonjetsname" : "GenChargedSimonJetsCORETRK"
             },
             "MConly" : true
         },
