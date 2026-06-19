@@ -206,7 +206,7 @@ class ZMuMuEventSelector:
                 filtermask
             )
 
-        if gcfg['minNumGoodVtx'] >= 0:
+        if 'minNumGoodVtx' in gcfg and gcfg['minNumGoodVtx'] >= 0:
             selection.add(
                 "minNumGoodVtx",
                 objects.PV.npvsGood >= gcfg['minNumGoodVtx']
