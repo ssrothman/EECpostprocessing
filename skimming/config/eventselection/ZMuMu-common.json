@@ -20,6 +20,7 @@
                 "maxY" : -1
             },
             "global" : {
+                "minNumGoodVtx" : 1,
                 "trigger" : "IsoMu24",
                 "noiseFilters" : [
                     "goodVertices",

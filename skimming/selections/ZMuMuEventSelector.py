@@ -205,4 +205,11 @@ class ZMuMuEventSelector:
                 "noiseFilters",
                 filtermask
             )
+
+        if gcfg['minNumGoodVtx'] >= 0:
+            selection.add(
+                "minNumGoodVtx",
+                objects.PV.npvsGood >= gcfg['minNumGoodVtx']
+            )
+
         return selection

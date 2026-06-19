@@ -362,7 +362,8 @@
                     "event" : "event",
                     "run" : "run",
                     "lumi" : "luminosityBlock",
-                    "HLT" : "HLT"
+                    "HLT" : "HLT",
+                    "PV" : "PV"
                 },
                 "optional_names" : {
                 }
