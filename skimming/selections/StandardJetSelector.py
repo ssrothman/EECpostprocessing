@@ -101,8 +101,10 @@ class StandardJetSelector:
             vetomap = vetomap_cset[vetocfg['name']]
 
             njet = ak.num(jets.eta)
-            eta_flat = np.abs(ak.flatten(jets.eta))
+            eta_flat = ak.flatten(jets.eta)
             phi_flat = ak.flatten(jets.phi)
+
+            # clip phi to [-pi, pi] just to allow for numerical problems
             phi_flat : Any = ak.where(phi_flat < -3.14159, -3.14159, phi_flat)
             phi_flat = ak.where(phi_flat > +3.14159, +3.14159, phi_flat)
 
