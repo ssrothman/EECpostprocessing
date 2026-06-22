@@ -1,0 +1,883 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_inclusive",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::GreaterThanCut('matchPt', 0.5)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "inclusive_dpt"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 0.5, 1.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.0, 0.7)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-0.5-1.0_eta-0.0-0.7"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 1.0, 3.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.0, 0.7)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-1.0-3.0_eta-0.0-0.7"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 3.0, 10.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.0, 0.7)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-3.0-10.0_eta-0.0-0.7"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 10.0, 50.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.0, 0.7)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-10.0-50.0_eta-0.0-0.7"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::GreaterThanCut('matchPt', 50.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.0, 0.7)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-50.0-Inf_eta-0.0-0.7"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 0.5, 1.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.7, 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-0.5-1.0_eta-0.7-1.4"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 1.0, 3.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.7, 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-1.0-3.0_eta-0.7-1.4"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 3.0, 10.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.7, 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-3.0-10.0_eta-0.7-1.4"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 10.0, 50.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.7, 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-10.0-50.0_eta-0.7-1.4"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::GreaterThanCut('matchPt', 50.0)",
+                "cut::TwoSidedCut(var::AbsVariable('matchEta'), 0.7, 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-50.0-Inf_eta-0.7-1.4"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 0.5, 1.0)",
+                "cut::GreaterThanCut(var::AbsVariable('matchEta'), 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-0.5-1.0_eta-1.4-Inf"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 1.0, 3.0)",
+                "cut::GreaterThanCut(var::AbsVariable('matchEta'), 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-1.0-3.0_eta-1.4-Inf"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 3.0, 10.0)",
+                "cut::GreaterThanCut(var::AbsVariable('matchEta'), 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-3.0-10.0_eta-1.4-Inf"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::TwoSidedCut('matchPt', 10.0, 50.0)",
+                "cut::GreaterThanCut(var::AbsVariable('matchEta'), 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-10.0-50.0_eta-1.4-Inf"
+            ]
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Nominal",
+                    "color_override" : "black"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_UP",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale up",
+                    "color_override" : "red"
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "CH_DN",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "label_override" : "Track energy scale down",
+                    "color_override" : "blue"
+                }
+            ],
+            "variables" : [
+                "var::RelativeResolutionVariable('matchPt','pt')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMatches', 1)",
+                "cut::GreaterThanCut('matchPt', 50.0)",
+                "cut::GreaterThanCut(var::AbsVariable('matchEta'), 1.4)"
+            ],
+            "binning" : "regular:(-0.1, 0.1, 61)",
+            "plotspath" : "ANplots/trkscalebias/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "dpt_pt-50.0-Inf_eta-1.4-Inf"
+            ]
+        }
+    ]
+}

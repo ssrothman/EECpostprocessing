@@ -1,6 +1,6 @@
 
 
-from typing import Protocol, TypedDict, List, overload
+from typing import Protocol, TypedDict, List, overload, NotRequired
 
 import torch
 import numpy as np
@@ -29,6 +29,7 @@ class systspec(TypedDict):
     onesided : bool
     varytransfer : bool
     label : str | None
+    altruntag : NotRequired[str]
 
 class detectormodelspec(TypedDict):
     systematics : List[systspec]
@@ -38,6 +39,8 @@ class histspec(TypedDict):
     dset : dsspec
     hist : whichsystspec
     name : str
+    nocov : NotRequired[bool]
+    skipgen : NotRequired[bool]
 
 class unfoldingworkspacespec(TypedDict):
     data : histspec | List[histspec]

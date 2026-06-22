@@ -69,6 +69,9 @@ parser.add_argument('--location', type=str, help="Location to stage outputs to",
 stage = parser.add_mutually_exclusive_group(required=True)
 stage.add_argument('--condor', dest='stage', action='store_const', const='condor')
 stage.add_argument('--slurm',  dest='stage', action='store_const', const='slurm')
+stage.add_argument('--no-stage', dest='stage', action='store_const', const='none')
+
+parser.add_argument('--expand-tables', action='store_true')
 
 args = parser.parse_args()
 
@@ -76,6 +79,10 @@ from general.datasets.expand_datasets import expand_datasets
 args.signal_mc = expand_datasets(args.signal_mc)
 args.background_mc = expand_datasets(args.background_mc)
 args.data = expand_datasets(args.data)
+
+if args.expand_tables:
+    from skimming.tables.expand_tables import expand_tables
+    args.tables = expand_tables(args.tables)
 
 import os
 import subprocess
@@ -106,22 +113,23 @@ def setup_and_stage(dset, objsyst, table):
                     # so we can skip staging too.
                     
 
-    cmd = 'stage_to_%s.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --mem %s --exec' % (
-        args.stage,
-        dset,
-        objsyst,
-        table,
-        dset,
-        objsyst,
-        table,
-        args.files_per_job,
-        args.mem
-    )
-    output = subprocess.run(cmd, shell=True, capture_output=True)
-    print(output.stdout.decode())
-    if output.returncode != 0:
-        print(output.stderr.decode())
-        raise RuntimeError("Staging to %s failed" % args.stage)
+    if args.stage != 'none':
+        cmd = 'stage_to_%s.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --mem %s --exec' % (
+            args.stage,
+            dset,
+            objsyst,
+            table,
+            dset,
+            objsyst,
+            table,
+            args.files_per_job,
+            args.mem
+        )
+        output = subprocess.run(cmd, shell=True, capture_output=True)
+        print(output.stdout.decode())
+        if output.returncode != 0:
+            print(output.stderr.decode())
+            raise RuntimeError("Staging to %s failed" % args.stage)
 
 for smc in args.signal_mc:
     for table in args.tables:

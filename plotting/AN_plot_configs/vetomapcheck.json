@@ -1,0 +1,66 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig1_NoVetoMap",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig1_FixedVetoMap",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq"
+                }
+
+            ],
+            "variables" : [
+                "Jphi",
+                "Jeta"
+            ],
+            "override_filenames" : [
+                "vetomapcheck_MC",
+                "vetomapcheck_MC_NoVetoMap",
+                "vetomapcheck_MC_FixedVetoMap"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                
+            ],
+            "override_cuttext" : "",
+            "binning" : [
+                "regular:(-np.pi, +np.pi, 51)",
+                "regular:(-1.7, 1.7, 51)"
+            ],
+            "plotsprefix" : "",
+            "plotspath" : "ANplots/vetomapcheck/",
+            "driver" : "draw_hist2D"
+        }
+        
+    ]
+}

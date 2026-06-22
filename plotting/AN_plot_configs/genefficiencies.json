@@ -10,8 +10,386 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
+                    "color_override" : "black",
+                    "label_override" : "",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'genPt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_inclusive.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('genPt', 0.01)",
+                "cut::GreaterThanCut('genJetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/genefficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03, 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.2, 0.4)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'genPt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_50to100.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('genJpt', 50.0, 100.0)",
+                "cut::GreaterThanCut('genPt', 0.01)",
+                "cut::GreaterThanCut('genJetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/genefficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03, 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.2, 0.4)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'genPt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_100to200.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('genJpt', 100.0, 200.0)",
+                "cut::GreaterThanCut('genPt', 0.01)",
+                "cut::GreaterThanCut('genJetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/genefficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03, 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.2, 0.4)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'genPt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_200to400.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('genJpt', 200.0, 400.0)",
+                "cut::GreaterThanCut('genPt', 0.01)",
+                "cut::GreaterThanCut('genJetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/genefficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.03, 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.2, 0.4)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'genPt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_400toInf.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('genJpt', 400.0)",
+                "cut::GreaterThanCut('genPt', 0.01)",
+                "cut::GreaterThanCut('genJetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/genefficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
-                    "label_override" : "$p_T^{track} < 1$ GeV",
+                    "label_override" : "$p_T^{gen-track} < 1$ GeV",
                     "extra_cuts" : [
                         "cut::LessThanCut('genPt', 1.0)"
                     ]
@@ -25,7 +403,7 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "red",
-                    "label_override" : "$1 < p_T^{track} < 10$ GeV",
+                    "label_override" : "$1 < p_T^{gen-track} < 10$ GeV",
                     "extra_cuts" : [
                         "cut::TwoSidedCut('genPt', 1.0, 10.0)"
                     ]
@@ -39,14 +417,14 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "green",
-                    "label_override" : "$p_T^{track} > 10$ GeV",
+                    "label_override" : "$p_T^{gen-track} > 10$ GeV",
                     "extra_cuts" : [
                         "cut::GreaterThanCut('genPt', 10.0)"
                     ]
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_50to100.png"
@@ -56,8 +434,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('genJpt', 50.0, 100.0)",
-                "cut::GreaterThanCut('genJetMatched', 0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('genJetMatched', 1)",
+                "cut::GreaterThanCut('genPt', 0.01)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/genefficiencies/",
@@ -78,7 +456,7 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "blue",
-                    "label_override" : "$p_T^{track} < 1$ GeV",
+                    "label_override" : "$p_T^{gen-track} < 1$ GeV",
                     "extra_cuts" : [
                         "cut::LessThanCut('genPt', 1.0)"
                     ]
@@ -92,7 +470,7 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "red",
-                    "label_override" : "$1 < p_T^{track} < 10$ GeV",
+                    "label_override" : "$1 < p_T^{gen-track} < 10$ GeV",
                     "extra_cuts" : [
                         "cut::TwoSidedCut('genPt', 1.0, 10.0)"
                     ]
@@ -106,14 +484,14 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "green",
-                    "label_override" : "$p_T^{track} > 10$ GeV",
+                    "label_override" : "$p_T^{gen-track} > 10$ GeV",
                     "extra_cuts" : [
                         "cut::GreaterThanCut('genPt', 10.0)"
                     ]
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_100to200.png"
@@ -123,8 +501,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('genJpt', 100.0, 200.0)",
-                "cut::GreaterThanCut('genJetMatched', 0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('genJetMatched', 1)",
+                "cut::GreaterThanCut('genPt', 0.01)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/genefficiencies/",
@@ -145,7 +523,7 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "blue",
-                    "label_override" : "$p_T^{track} < 1$ GeV",
+                    "label_override" : "$p_T^{gen-track} < 1$ GeV",
                     "extra_cuts" : [
                         "cut::LessThanCut('genPt', 1.0)"
                     ]
@@ -159,7 +537,7 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "red",
-                    "label_override" : "$1 < p_T^{track} < 10$ GeV",
+                    "label_override" : "$1 < p_T^{gen-track} < 10$ GeV",
                     "extra_cuts" : [
                         "cut::TwoSidedCut('genPt', 1.0, 10.0)"
                     ]
@@ -173,14 +551,14 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "green",
-                    "label_override" : "$p_T^{track} > 10$ GeV",
+                    "label_override" : "$p_T^{gen-track} > 10$ GeV",
                     "extra_cuts" : [
                         "cut::GreaterThanCut('genPt', 10.0)"
                     ]
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_200to400.png"
@@ -190,8 +568,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('genJpt', 200.0, 400.0)",
-                "cut::GreaterThanCut('genJetMatched', 0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('genJetMatched', 1)",
+                "cut::GreaterThanCut('genPt', 0.01)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/genefficiencies/",
@@ -212,7 +590,7 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "blue",
-                    "label_override" : "$p_T^{track} < 1$ GeV",
+                    "label_override" : "$p_T^{gen-track} < 1$ GeV",
                     "extra_cuts" : [
                         "cut::LessThanCut('genPt', 1.0)"
                     ]
@@ -226,7 +604,7 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "red",
-                    "label_override" : "$1 < p_T^{track} < 10$ GeV",
+                    "label_override" : "$1 < p_T^{gen-track} < 10$ GeV",
                     "extra_cuts" : [
                         "cut::TwoSidedCut('genPt', 1.0, 10.0)"
                     ]
@@ -240,14 +618,14 @@
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
                     "color_override" : "green",
-                    "label_override" : "$p_T^{track} > 10$ GeV",
+                    "label_override" : "$p_T^{gen-track} > 10$ GeV",
                     "extra_cuts" : [
                         "cut::GreaterThanCut('genPt', 10.0)"
                     ]
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_400toInf.png"
@@ -257,8 +635,8 @@
             ],
             "cut" : [
                 "cut::GreaterThanCut('genJpt', 400.0)",
-                "cut::GreaterThanCut('genJetMatched', 0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('genEta', 'genPhi', 'genJeta', 'genJphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('genJetMatched', 1)",
+                "cut::GreaterThanCut('genPt', 0.01)"
             ],
             "override_textloc" : "bottom-right",
             "binning" : "auto",

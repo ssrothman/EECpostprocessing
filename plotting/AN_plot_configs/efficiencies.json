@@ -5,11 +5,333 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "black",
+                    "label_override" : "",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                }
+
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_inclusive.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/efficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "never_resolve" : true,
+                    "color_override" : "green",
+                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                    ]
+                }
+
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_50to100.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 50.0, 100.0)",
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/efficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "never_resolve" : true,
+                    "color_override" : "green",
+                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_100to200.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 100.0, 200.0)",
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/efficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "never_resolve" : true,
+                    "color_override" : "green",
+                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                    ]
+                }
+
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_200to400.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 200.0, 400.0)",
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/efficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "never_resolve" : true,
+                    "color_override" : "green",
+                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                    ]
+                }
+
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_400toInf.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('Jpt', 400.0)",
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/efficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$p_T^{track} < 1$ GeV",
                     "extra_cuts" : [
@@ -19,11 +341,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$1 < p_T^{track} < 10$ GeV",
                     "extra_cuts" : [
@@ -33,11 +355,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "green",
                     "label_override" : "$p_T^{track} > 10$ GeV",
                     "extra_cuts" : [
@@ -46,7 +368,7 @@
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_50to100.png"
@@ -56,7 +378,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('Jpt', 50.0, 100.0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/efficiencies/",
@@ -71,11 +394,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$p_T^{track} < 1$ GeV",
                     "extra_cuts" : [
@@ -85,11 +408,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$1 < p_T^{track} < 10$ GeV",
                     "extra_cuts" : [
@@ -99,11 +422,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "green",
                     "label_override" : "$p_T^{track} > 10$ GeV",
                     "extra_cuts" : [
@@ -112,7 +435,7 @@
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_100to200.png"
@@ -122,7 +445,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('Jpt', 100.0, 200.0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/efficiencies/",
@@ -137,11 +461,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$p_T^{track} < 1$ GeV",
                     "extra_cuts" : [
@@ -151,11 +475,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$1 < p_T^{track} < 10$ GeV",
                     "extra_cuts" : [
@@ -165,11 +489,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "green",
                     "label_override" : "$p_T^{track} > 10$ GeV",
                     "extra_cuts" : [
@@ -178,7 +502,7 @@
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_200to400.png"
@@ -188,7 +512,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('Jpt', 200.0, 400.0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/efficiencies/",
@@ -203,11 +528,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "blue",
                     "label_override" : "$p_T^{track} < 1$ GeV",
                     "extra_cuts" : [
@@ -217,11 +542,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "red",
                     "label_override" : "$1 < p_T^{track} < 10$ GeV",
                     "extra_cuts" : [
@@ -231,11 +556,11 @@
                 {
                     "configsuite" : "VetoConfig1",
                     "runtag" : "Mar_01_2026",
-                    "name" : "Pythia_inclusive",
+                    "name" : "Pythia_HTsum",
                     "table" : "parts",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
-                    "dsetkind": "pq",
+                    "dsetkind": "pq_stack",
                     "color_override" : "green",
                     "label_override" : "$p_T^{track} > 10$ GeV",
                     "extra_cuts" : [
@@ -244,7 +569,7 @@
                 }
             ],
             "variables" : [
-                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 0)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'))"
             ],
             "override_filenames" : [
                 "part_matching_efficiency_wrt_dR_Jet_pt_400toInf.png"
@@ -254,7 +579,8 @@
             ],
             "cut" : [
                 "cut::GreaterThanCut('Jpt', 400.0)",
-                "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.001, 0.8)"
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
             ],
             "override_textloc" : "bottom-right",
             "binning" : "auto",

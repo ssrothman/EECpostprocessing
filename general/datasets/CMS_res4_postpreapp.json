@@ -42,7 +42,10 @@
             "eventcount" : 17004433.0
         },
         "Pythia_HT-100to200" : {
-            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "tag" : [
+                "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+                "DYJetsToLL/DYJetsToLL_M-50_HT-100to200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/"
+            ],
             "location" : "simon-LPC",
             "era" : "MC",
             "flags" : {},
@@ -82,7 +85,10 @@
             "eventcount" : 7033476.0
         },
         "Pythia_HT-800to1200" : {
-            "tag" : "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",
+            "tag" : [
+                "DYJetsToLL_Pythia/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/",  
+                "DYJetsToLL/DYJetsToLL_M-50_HT-800to1200_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/"  
+            ],
             "location" : "simon-LPC",
             "era" : "MC",
             "flags" : {},

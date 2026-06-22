@@ -1,0 +1,136 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "Nominal",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Jun_15_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "THRESH5",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "Threshold 500 MeV",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Jun_15_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "THRESH10",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "green",
+                    "label_override" : "Threshold 1 GeV",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
+            ],
+            "override_filenames" : [
+                "RECO_part_matching_efficiency_wrt_pT_Jet_pt_inclusive.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('pt', 0.01)",
+                "cut::GreaterThanCut('jetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/threshold_efficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "blue",
+                    "label_override" : "Nominal",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Jun_15_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "THRESH5",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "red",
+                    "label_override" : "Threshold 500 MeV",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Jun_15_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "THRESH10",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "green",
+                    "label_override" : "Threshold 1 GeV",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'genPt')"
+            ],
+            "override_filenames" : [
+                "GEN_part_matching_efficiency_wrt_pT_Jet_pt_inclusive.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('genPt', 0.01)",
+                "cut::GreaterThanCut('genJetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/threhsold_efficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        }
+    ]
+}

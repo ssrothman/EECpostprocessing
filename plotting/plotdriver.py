@@ -7,10 +7,52 @@ from simonplot.cut.CutBase import PrebinnedOperationBase
 import json
 import os
 import numpy as np
+from typing import Any
 
 from simonplot.plottables.PrebinnedDatasets import ValCovPairDataset
 from simonplot.typing.Protocols import PrebinnedVariableProtocol, VariableProtocol
 from simonplot.util.evaluate import evaluate_on_dataset
+
+def build_binning_from_config(binning : Any, force_range : tuple | None):
+    if isinstance(binning, str):
+        if binning == 'auto':
+            binning = splt.binning.AutoBinning()
+        elif binning.startswith('autoint:'):
+            labelkey = binning.split(':')[1]
+            with open(os.path.join(os.path.dirname(__file__), 'autoint_lookups.json'), 'r') as f:
+                label_lookup = json.load(f)
+        
+            binning = splt.binning.AutoIntCategoryBinning(
+                label_lookup=label_lookup.get(labelkey, {})
+            )
+        elif binning.startswith('regular'):
+            #expect something of the form "regular:(start, stop, nbins)"
+            _, params = binning.split(':')
+            # count the commas to determine the number of parameters
+            nparams = params.count(',') + 1
+            if nparams == 3:
+                start, stop, nbins = eval(params)
+                transform = None
+            elif nparams == 4:
+                start, stop, nbins, transform = eval(params)
+            else:
+                raise ValueError("Invalid number of parameters for regular binning")
+
+            binning = splt.binning.BasicBinning(nbins=nbins, low=start, high=stop, transform=transform)
+
+            if force_range is not None:
+                binning.force_range(*force_range)
+
+        elif binning == 'prebinned':
+            binning = splt.binning.PrebinnedBinning()
+        else:
+            raise NotImplementedError("Binning type {} not implemented in this driver script!".format('binning'))
+        
+        return binning
+    elif isinstance(binning, (list, tuple)):
+        return [build_binning_from_config(b, force_range=force_range) for b in binning]
+    else:
+        raise ValueError(f"Unsupported binning: {binning}")
 
 def build_prebinned_comparison_dataset(dscfg1 : dict, dscfg2 : dict, func : str, thevariable : PrebinnedVariableProtocol, key : str | None= None, color : str | None= None, label : str | None = None):
     dset1= build_dataset_from_dscfg(
@@ -252,32 +294,8 @@ def run_plots(cfg):
                 onecut.override_label(cfg['override_cuttext']) # pyright: ignore[reportAttributeAccessIssue]
         else:
             cut.override_label(cfg['override_cuttext']) # pyright: ignore[reportAttributeAccessIssue]
-
-    if cfg['binning'] == 'auto':
-        binning = splt.binning.AutoBinning()
-    elif cfg['binning'].startswith('autoint:'):
-        labelkey = cfg['binning'].split(':')[1]
-        with open(os.path.join(os.path.dirname(__file__), 'autoint_lookups.json'), 'r') as f:
-            label_lookup = json.load(f)
-    
-        binning = splt.binning.AutoIntCategoryBinning(
-            label_lookup=label_lookup.get(labelkey, {})
-        )
-    elif cfg['binning'].startswith('regular'):
-        #expect something of the form "regular:(start, stop, nbins)"
-        _, params = cfg['binning'].split(':')
-        start, stop, nbins = eval(params)
-        binning = splt.binning.BasicBinning(nbins=nbins, low=start, high=stop)
-    elif cfg['binning'] == 'prebinned':
-        binning = splt.binning.PrebinnedBinning()
-    else:
-        raise NotImplementedError("Binning type {} not implemented in this driver script!".format(cfg['binning']))
-    
-    if 'force_range' in cfg:
-        if hasattr(binning, 'force_range'):
-            binning.force_range(*cfg['force_range']) # pyright: ignore[reportAttributeAccessIssue]
-        else:
-            raise ValueError(f"binning {binning} does not support force_range")
+        
+    binning = build_binning_from_config(cfg['binning'], force_range=cfg.get('force_range', None))
 
     if cfg['plotsprefix'] == '':
         cfg['plotsprefix'] = None
@@ -348,6 +366,47 @@ def run_plots(cfg):
                 output_folder=cfg['plotspath'],
                 output_prefix=cfg['plotsprefix'],
                 override_filename=radial_override,
+            )
+    elif cfg['driver'] == 'draw_hist2D':
+        if len(variables) != 2:
+            raise RuntimeError("draw_hist2D only supports exactly two variables")
+
+        if 'override_filenames' in cfg:
+            override_filenames = cfg['override_filenames']
+        else:
+            override_filenames = [None] * len(datasets)
+
+        if not isinstance(binning, (list, tuple)):
+            raise RuntimeError("draw_hist2D only supports list or tuple of binning")
+    
+        if len(binning) != 2:
+            raise RuntimeError("draw_hist2D only supports exactly two binning objects")
+        
+        binningX, binningY = binning
+
+        if len(weights) != 1:
+            raise RuntimeError("draw_hist2D only supports exactly one weight")
+
+        for i, dset in enumerate(datasets):
+            print(f"Plotting matrix for dataset {dset.key}")
+            splt.draw_hist2D(
+                variableX = variables[0], 
+                variableY = variables[1],
+                cut = cut,
+                weight = weights[0],
+                dataset = dset,
+                binningX = binningX,
+                binningY = binningY,
+                extratext=cfg.get('extratext', None),
+                textloc=cfg.get('override_textloc', 'best'),
+                logx=cfg.get('logx', None),
+                logy=cfg.get('logy', None),
+                logc=cfg.get('logc', None),
+                no_lumi_normalization=cfg.get('no_lumi_normalization', False),
+                output_folder=cfg['plotspath'],
+                output_prefix=cfg['plotsprefix'],
+                override_filename=override_filenames[i],
+                override_cbarlabel = cfg.get('override_cbarlabel', None)
             )
     else:
         raise NotImplementedError(f"Plotting driver {cfg['driver']} not implemented yet in this driver script!")

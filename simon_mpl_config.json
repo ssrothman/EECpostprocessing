@@ -1,5 +1,8 @@
 {
     "axis_labels": {
+        "ABS-matchEta" : "$|\\eta^{gen}|$",
+        "genJpt": "$p_{T}^{gen-jet}$ [GeV]",
+        "DeltaR(genEta_genPhi__genJeta_genJphi)" : "$\\Delta R(jet, track)_{gen}$",
         "DeltaR(eta_phi__Jeta_Jphi)" : "$\\Delta R(jet, track)$",
         "genHT" : "$H_{T}^{gen}$ [GeV]",
         "genVpt" : "$p_{T,Z}^{gen}$ [GeV]",

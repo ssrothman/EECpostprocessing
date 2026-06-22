@@ -42,7 +42,7 @@ class HistogramProperties(TypedDict):
     lumi : float | None
 
 class Histogram:
-    def __init__(self, values : np.ndarray, covmat : np.ndarray, binning : ArbitraryBinning,
+    def __init__(self, values : np.ndarray, covmat : np.ndarray |  None, binning : ArbitraryBinning,
                  properties : HistogramProperties,
                  invcov : np.ndarray | None = None, 
                  L : np.ndarray | None = None, Linv : np.ndarray | None = None,
@@ -63,26 +63,32 @@ class Histogram:
         self._eigvecs = eigvecs
 
         assert self._values.ndim == 1
-        assert self._covmat.ndim == 2
-        assert self._covmat.shape[0] == self._covmat.shape[1]
-        assert self._values.shape[0] == self._covmat.shape[0]
+        if self._covmat is not None:
+            assert self._covmat.ndim == 2
+            assert self._covmat.shape[0] == self._covmat.shape[1]
+            assert self._values.shape[0] == self._covmat.shape[0]
         if self._invcov is not None:
             assert self._invcov.ndim == 2
             assert self._invcov.shape[0] == self._invcov.shape[1]
+            assert self._covmat is not None
             assert self._invcov.shape == self._covmat.shape
         if self._L is not None:
             assert self._L.ndim == 2
             assert self._L.shape[0] == self._L.shape[1]
+            assert self._covmat is not None
             assert self._L.shape == self._covmat.shape
         if self._Linv is not None:
             assert self._Linv.ndim == 2
             assert self._Linv.shape[0] == self._Linv.shape[1]
+            assert self._covmat is not None
             assert self._Linv.shape == self._covmat.shape
         if self._eigvals is not None:
             assert self._eigvals.ndim == 1
+            assert self._covmat is not None
             assert self._eigvals.shape[0] == self._covmat.shape[0]
         if self._eigvecs is not None:
             assert self._eigvecs.ndim == 2
+            assert self._covmat is not None
             assert self._eigvecs.shape[0] == self._covmat.shape[0]
             assert self._eigvecs.shape[1] == self._covmat.shape[1]
 
@@ -94,7 +100,8 @@ class Histogram:
 
     def imult(self, w : float) -> "Histogram":
         self._values *= w
-        self._covmat *= w * w
+        if self._covmat is not None:
+            self._covmat *= w * w
 
         if self._invcov is not None:
             self._invcov /= w * w
@@ -114,10 +121,13 @@ class Histogram:
     def iadd(self, other : "Histogram", w : float = 1.0) -> "Histogram":
         assert self._binning == other._binning
         assert isinstance(self._values, np.ndarray) and isinstance(other._values, np.ndarray)
-        assert isinstance(self._covmat, np.ndarray) and isinstance(other._covmat, np.ndarray)
+
+        if self._covmat is not None and other._covmat is not None:
+            assert isinstance(self._covmat, np.ndarray) and isinstance(other._covmat, np.ndarray)
 
         self._values += w * other._values
-        self._covmat += w * w * other._covmat
+        if self._covmat is not None and other._covmat is not None:
+            self._covmat += w * w * other._covmat
 
         # invalidate the inverse covariance and eigendecomposition since they are no longer correct
         self._invcov = None
@@ -147,7 +157,10 @@ class Histogram:
     
     @property
     def covmat(self) -> Any:
-        return self._covmat
+        if self._covmat is None:
+            return np.zeros((self.values.shape[0], self.values.shape[0]), dtype=self.values.dtype)
+        else:
+            return self._covmat
     
     @property
     def properties(self) -> HistogramProperties:
@@ -296,13 +309,22 @@ class Histogram:
         return result, len(diff)
 
     @classmethod
-    def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'], rebinning : str | dict | None) -> "Histogram":
-        values, covmat, binning = read_hist(
-            cfg,
-            histcfg,
-            whichhist,
-            read_cov=True
-        )
+    def from_dataset(cls, cfg: dsspec, histcfg: whichsystspec, whichhist : Literal['totalReco', 'totalGen', 'unmatchedReco', 'unmatchedGen', 'untransferedReco', 'untransferedGen'], rebinning : str | dict | None, nocov : bool) -> "Histogram":
+        if nocov:
+            values, binning = read_hist(
+                cfg,
+                histcfg,
+                whichhist,
+                read_cov=False
+            )
+            covmat = None
+        else:
+            values, covmat, binning = read_hist(
+                cfg,
+                histcfg,
+                whichhist,
+                read_cov=True
+            )
 
         dscfg = lookup_dataset(cfg['runtag'], cfg['dataset'])
         properties = HistogramProperties(
@@ -320,8 +342,13 @@ class Histogram:
     def from_disk(cls, where: str) -> "Histogram":
         with open(os.path.join(where, 'values.npy'), 'rb') as f:
             values = np.load(f)
-        with open(os.path.join(where, 'cov.npy'), 'rb') as f:
-            covmat = np.load(f)
+
+        if os.path.exists(os.path.join(where, 'cov.npy')):
+            with open(os.path.join(where, 'cov.npy'), 'rb') as f:
+                covmat = np.load(f)
+        else:
+            covmat = None
+
         with open(os.path.join(where, 'bincfg.json'), 'r') as f:
             binning = ArbitraryBinning()
             binning.from_dict(json.load(f))
@@ -351,8 +378,11 @@ class Histogram:
         os.makedirs(where, exist_ok=True)
         with open(os.path.join(where, 'values.npy'), 'wb') as f:
             np.save(f, self._values)
-        with open(os.path.join(where, 'cov.npy'), 'wb') as f:
-            np.save(f, self._covmat)
+        
+        if self._covmat is not None:
+            with open(os.path.join(where, 'cov.npy'), 'wb') as f:
+                np.save(f, self._covmat)
+
         with open(os.path.join(where, 'bincfg.json'), 'w') as f:
             json.dump(self._binning.to_dict(), f, indent=4)
         with open(os.path.join(where, 'properties.json'), 'w') as f:
@@ -378,10 +408,13 @@ class Histogram:
     def rebin(self, rebinning_spec : dict | str):
         self.to('numpy')
         assert(isinstance(self._values, np.ndarray))
-        assert(isinstance(self._covmat, np.ndarray))
 
-        self._values, _ = self._binning.rebin(self._values, rebinning_spec)
-        self._covmat, self._binning = self._binning.rebin_cov2d(self._covmat, rebinning_spec)
+        if self._covmat is not None:
+            assert(isinstance(self._covmat, np.ndarray))
+            self._values, _ = self._binning.rebin(self._values, rebinning_spec)
+            self._covmat, self._binning = self._binning.rebin_cov2d(self._covmat, rebinning_spec)
+        else:
+            self._values, self._binning = self._binning.rebin(self._values, rebinning_spec)
 
         # I'm not sure if its possible to propagate the inverse covariance, eigendecomposition, or sqrt
         # so for now to be conservative we just invalidate them
@@ -470,19 +503,20 @@ class Histogram:
             override_filename='%s_values_comparison'%transform,
             logy=True
         )
-        plot_histogram(
-            variable,
-            cut,
-            weight,
-            err_datasets_l,
-            binning,
-            extratext=extratext,
-            output_folder=output_folder,
-            no_lumi_normalization=True,
-            override_filename='%s_errs_comparison'%transform,
-            override_ylabel='Error [sqrt diag(cov)]',
-            logy=True
-        )
+        if np.all([np.max(np.abs(err_datasets_l[i].data[0])) > 0 for i in range(len(err_datasets_l))]):
+            plot_histogram(
+                variable,
+                cut,
+                weight,
+                err_datasets_l,
+                binning,
+                extratext=extratext,
+                output_folder=output_folder,
+                no_lumi_normalization=True,
+                override_filename='%s_errs_comparison'%transform,
+                override_ylabel='Error [sqrt diag(cov)]',
+                logy=True
+            )
 
         if pretty:
             numval, numcov = evaluate_on_dataset(val_datasets_l[0], variable, cut)
@@ -931,12 +965,14 @@ class Histogram:
         self._device = 'cpu'
 
         assert isinstance(self._values, np.ndarray)
-        assert isinstance(self._covmat, np.ndarray)
         assert isinstance(self._invcov, np.ndarray)
 
         self._values =  torch.from_numpy(self._values)
-        self._covmat = torch.from_numpy(self._covmat)
         self._invcov = torch.from_numpy(self._invcov)
+
+        if self._covmat is not None:
+            assert isinstance(self._covmat, np.ndarray)
+            self._covmat = torch.from_numpy(self._covmat)
 
         return self
 
@@ -948,12 +984,14 @@ class Histogram:
             import torch
 
             assert isinstance(self._values, torch.Tensor)
-            assert isinstance(self._covmat, torch.Tensor)
             assert isinstance(self._invcov, torch.Tensor)
 
             self._values = self._values.numpy(*args, **kwargs)
-            self._covmat = self._covmat.numpy(*args, **kwargs)
             self._invcov = self._invcov.numpy(*args, **kwargs)
+            
+            if self._covmat is not None:
+                assert isinstance(self._covmat, torch.Tensor)
+                self._covmat = self._covmat.numpy(*args, **kwargs)
 
             return self
 
@@ -968,12 +1006,14 @@ class Histogram:
             import torch
 
             assert isinstance(self._values, torch.Tensor)
-            assert isinstance(self._covmat, torch.Tensor)
             assert isinstance(self._invcov, torch.Tensor)
 
             self._values = self._values.to(device, *args, **kwargs)
-            self._covmat = self._covmat.to(device, *args, **kwargs)
             self._invcov = self._invcov.to(device, *args, **kwargs)
+
+            if self._covmat is not None:
+                assert isinstance(self._covmat, torch.Tensor)
+                self._covmat = self._covmat.to(device, *args, **kwargs)
 
             return self
         
@@ -984,12 +1024,14 @@ class Histogram:
         import torch
 
         assert isinstance(self._values, torch.Tensor)
-        assert isinstance(self._covmat, torch.Tensor)
         assert isinstance(self._invcov, torch.Tensor)
 
         self._values = self._values.detach()
-        self._covmat = self._covmat.detach()
         self._invcov = self._invcov.detach()
+
+        if self._covmat is not None:
+            assert isinstance(self._covmat, torch.Tensor)
+            self._covmat = self._covmat.detach()
 
         return self
 

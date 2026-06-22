@@ -65,7 +65,7 @@ def get_transfer_binning(dset : dsspec, rebinning_reco : str | dict | None, rebi
     return binning
 
 
-def get_model_matrices(dset : dsspec, hist : whichsystspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None):
+def get_model_matrices(dset : dsspec, hist : whichsystspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None):        
         umG, gbinning = read_hist(
             dset, hist, 
             'unmatchedGen',
@@ -643,9 +643,13 @@ class DetectorModel:
             else:
                 nuisance_names.append(syst['name'])
 
+            thedset = cfg['dset'].copy()
+            if 'altruntag' in syst:
+                thedset['runtag'] = syst['altruntag']
+
             if syst['onesided']:
                 t_up, gamma_up, rho_up = get_model_matrices(
-                    cfg['dset'],
+                    thedset,
                     hist_from_syst(syst, None),
                     rebinning_reco = rebinning_reco,
                     rebinning_gen = rebinning_gen
@@ -655,13 +659,13 @@ class DetectorModel:
                 dRho = rho_up - rho0
             else:
                 t_up, gamma_up, rho_up = get_model_matrices(
-                    cfg['dset'] ,
+                    thedset,
                     hist_from_syst(syst, "Up"),
                     rebinning_reco = rebinning_reco,
                     rebinning_gen = rebinning_gen
                 )
                 t_dn, gamma_dn, rho_dn = get_model_matrices(
-                    cfg['dset'],
+                    thedset,
                     hist_from_syst(syst, "Down"),
                     rebinning_reco = rebinning_reco,
                     rebinning_gen = rebinning_gen
