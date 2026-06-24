@@ -89,6 +89,12 @@
             "params-CORE_TRK" : {
                 "simonjetsname" : "ChargedSimonJetsCORETRK"
             },
+            "params-SOFT_TRK10" : {
+                "simonjetsname" : "ChargedSimonJetsSOFTTRK10"
+            },
+            "params-SOFT_TRK20" : {
+                "simonjetsname" : "ChargedSimonJetsSOFTTRK20"
+            },
             "params-NO_JER" : {
                 "skipJER" : true
             },
@@ -126,6 +132,12 @@
             },
             "params-CORE_TRK" : {
                 "simonjetsname" : "GenChargedSimonJetsCORETRK"
+            },
+            "params-SOFT_TRK10" : {
+                "simonjetsname" : "GenChargedSimonJetsSOFTTRK10"
+            },
+            "params-SOFT_TRK20" : {
+                "simonjetsname" : "GenChargedSimonJetsSOFTTRK20"
             },
             "MConly" : true
         },
@@ -192,6 +204,12 @@
             "params-CORE_TRK" : {
                 "name" : "RecoChargedEECsCORETRKres4"
             },
+            "params-SOFT_TRK10" : {
+                "name" : "RecoChargedEECsSOFTTRK10res4"
+            },
+            "params-SOFT_TRK20" : {
+                "name" : "RecoChargedEECsSOFTTRK20res4"
+            },
             "params-DATA" : {
                 "name" : "RecoChargedEECsres4"
             },
@@ -219,6 +237,12 @@
             },
             "params-CORE_TRK" : {
                 "name" : "UnmatchedRecoChargedEECsCORETRKres4"
+            },
+            "params-SOFT_TRK10" : {
+                "name" : "UnmatchedRecoChargedEECsSOFTTRK10res4"
+            },
+            "params-SOFT_TRK20" : {
+                "name" : "UnmatchedRecoChargedEECsSOFTTRK20res4"
             },
             "params-DATA" : {
                 "name" : "UnmatchedRecoChargedEECsres4"
@@ -248,6 +272,12 @@
             "params-CORE_TRK" : {
                 "name" : "UntransferedRecoChargedEECsCORETRKres4"
             },
+            "params-SOFT_TRK10" : {
+                "name" : "UntransferedRecoChargedEECsSOFTTRK10res4"
+            },
+            "params-SOFT_TRK20" : {
+                "name" : "UntransferedRecoChargedEECsSOFTTRK20res4"
+            },
             "params-DATA" : {
                 "name" : "UntransferedRecoChargedEECsres4"
             },
@@ -276,6 +306,12 @@
             "params-CORE_TRK" : {
                 "name" : "GenChargedEECsCORETRKres4"
             },
+            "params-SOFT_TRK10" : {
+                "name" : "GenChargedEECsSOFTTRK10res4"
+            },
+            "params-SOFT_TRK20" : {
+                "name" : "GenChargedEECsSOFTTRK20res4"
+            },
             "MConly" : true
         },
         "UnmatchedGenEEC" : {
@@ -300,6 +336,12 @@
             },
             "params-CORE_TRK" : {
                 "name" : "UnmatchedGenChargedEECsCORETRKres4"
+            },
+            "params-SOFT_TRK10" : {
+                "name" : "UnmatchedGenChargedEECsSOFTTRK10res4"
+            },
+            "params-SOFT_TRK20" : {
+                "name" : "UnmatchedGenChargedEECsSOFTTRK20res4"
             },
             "MConly" : true
         },
@@ -326,6 +368,12 @@
             "params-CORE_TRK" : {
                 "name" : "UntransferedGenChargedEECsCORETRKres4"
             },
+            "params-SOFT_TRK10" : {
+                "name" : "UntransferedGenChargedEECsSOFTTRK10res4"
+            },
+            "params-SOFT_TRK20" : {
+                "name" : "UntransferedGenChargedEECsSOFTTRK20res4"
+            },
             "MConly" : true
         },
         "EECtransfer" : {
@@ -350,6 +398,12 @@
             },
             "params-CORE_TRK" : {
                 "name" : "GenChargedEECsCORETRKres4Transfer"
+            },
+            "params-SOFT_TRK10" : {
+                "name" : "GenChargedEECsSOFTTRK10res4Transfer"
+            },
+            "params-SOFT_TRK20" : {
+                "name" : "GenChargedEECsSOFTTRK20res4Transfer"
             },
             "MConly" : true
         },

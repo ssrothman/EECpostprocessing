@@ -14,7 +14,7 @@
                 "oppsign" : true
             },
             "Zs" : {
-                "massWindow" : 20.0,
+                "massWindow" : 15.0,
                 "polemass" : 91.1876,
                 "minpt" : -1,
                 "maxY" : -1

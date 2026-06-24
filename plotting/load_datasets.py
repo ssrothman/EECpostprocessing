@@ -1,8 +1,11 @@
-from general.datasets import datasets
+print("top of load_datasets")
 from general.datasets.datasets import lookup_count, lookup_dataset, cfg
+print("imported from datasets.datasets")
 from general.fslookup.skim_path import lookup_skim_path
+print("imported from fslookup.skim_path")
 from simonplot.plottables import ParquetDataset
 from simonplot.plottables.Datasets import DatasetStack
+print("imported plottables")
 import os
 import json
 import numpy as np
@@ -234,8 +237,9 @@ def build_pq_dataset(configsuite : str,
                      color_override : str | None = None,
                      extra_key : str | None = None) -> ParquetDataset:
     
+    print("Top of build_pq_dataset()")
     dsetcfg = lookup_dataset(runtag, dataset)
-    
+    print("looked up dsetcfg")
     fs, tablepath = lookup_skim_path(
         location,
         configsuite,
@@ -244,6 +248,7 @@ def build_pq_dataset(configsuite : str,
         objsyst,
         table
     )
+    print("looked up skim path")
 
     thekey = dataset
     if extra_key is not None:
@@ -256,6 +261,7 @@ def build_pq_dataset(configsuite : str,
         path = tablepath,
         filesystem=fs,
     )
+    print("Created ParquetDataset")
 
     if not no_count and objsyst != 'DATA':
         pqds.override_num_events(
@@ -264,6 +270,7 @@ def build_pq_dataset(configsuite : str,
                 dataset, 
             )
         )
+        print("Overrode number of events")
         
     if 'lumi' in dsetcfg:
         pqds.set_lumi(dsetcfg['lumi'])
@@ -272,4 +279,5 @@ def build_pq_dataset(configsuite : str,
     else:
         raise RuntimeError(f"Dataset {dataset} in runtag {runtag} has neither lumi nor xsec defined!")
     
+    print("set lumi or xsec")
     return pqds

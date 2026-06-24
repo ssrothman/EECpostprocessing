@@ -16,6 +16,9 @@ def add_common_vars(thevals : dict[str, Any],
     thevals['Zpt'] = objs.Muons.Zs.pt[evtmask]
     thevals['Zmass'] = objs.Muons.Zs.mass[evtmask]
     thevals['Zy'] = objs.Muons.Zs.rapidity[evtmask]
+    thevals['NgoodPV'] = objs.PV.npvsGood[evtmask]
+    thevals['NPV'] = objs.PV.npvs[evtmask]
+    
     if hasattr(objs, 'MET'):
         thevals['MET'] = objs.MET.pt[evtmask]
     if hasattr(objs, 'AK4Jets'):

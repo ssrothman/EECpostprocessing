@@ -5,6 +5,7 @@ _ALL_KINEMATICS_TABLES = [
     "AK4JetKinematicsTable",
     "EventKinematicsTable",
     "ConstituentKinematicsTable",
+    "GenConstituentKinematicsTable",
     "CutflowTable",
     "SimonJetKinematicsTable",
 ]

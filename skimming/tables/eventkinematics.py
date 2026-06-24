@@ -37,6 +37,10 @@ class EventKinematicsTable:
         if objs.isMC and hasattr(objs, 'PileupInfo'):
             thevals['nTrueInt'] = objs.PileupInfo.nTrueInt[evtmask]
 
+        #nPV
+        thevals['NgoodPV'] = objs.PV.npvsGood[evtmask]
+        thevals['NPV'] = objs.PV.npvs[evtmask] 
+
         #global event properties (genonly events won't have rho, MET)
         if hasattr(objs, 'rho'):
             thevals['rho'] = objs.rho[evtmask]

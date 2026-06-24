@@ -16,7 +16,6 @@
                     "extra_cuts" : [
                     ]
                 }
-
             ],
             "variables" : [
                 "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
@@ -49,11 +48,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "blue",
-                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03)"
                     ]
                 },
                 {
@@ -64,11 +63,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "red",
-                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03, 0.1)"
                     ]
                 },
                 {
@@ -79,14 +78,28 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
                     "never_resolve" : true,
-                    "color_override" : "green",
-                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
                     "extra_cuts" : [
-                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.2, 0.4)"
                     ]
                 }
-
             ],
             "variables" : [
                 "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
@@ -120,11 +133,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "blue",
-                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03)"
                     ]
                 },
                 {
@@ -135,11 +148,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "red",
-                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03, 0.1)"
                     ]
                 },
                 {
@@ -150,11 +163,26 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
                     "never_resolve" : true,
-                    "color_override" : "green",
-                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
                     "extra_cuts" : [
-                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.2, 0.4)"
                     ]
                 }
             ],
@@ -190,11 +218,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "blue",
-                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03)"
                     ]
                 },
                 {
@@ -205,11 +233,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "red",
-                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03, 0.1)"
                     ]
                 },
                 {
@@ -220,14 +248,28 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
                     "never_resolve" : true,
-                    "color_override" : "green",
-                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
                     "extra_cuts" : [
-                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.2, 0.4)"
                     ]
                 }
-
             ],
             "variables" : [
                 "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
@@ -261,11 +303,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "blue",
-                    "label_override" : "$\\Delta R (J, trk) < 0.1$",
+                    "color_override" : "midnightblue",
+                    "label_override" : "$\\Delta R (J, trk) < 0.01$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1)"
+                        "cut::LessThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03)"
                     ]
                 },
                 {
@@ -276,11 +318,11 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
-                    "color_override" : "red",
-                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.8$",
+                    "color_override" : "deepskyblue",
+                    "label_override" : "$0.03 < \\Delta R (J, trk) < 0.1$",
                     "never_resolve" : true,
                     "extra_cuts" : [
-                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.03, 0.1)"
                     ]
                 },
                 {
@@ -291,14 +333,28 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
+                    "color_override" : "darkturquoise",
+                    "label_override" : "$0.1 < \\Delta R (J, trk) < 0.2$",
                     "never_resolve" : true,
-                    "color_override" : "green",
-                    "label_override" : "$\\Delta R (J, trk) > 0.8$",
                     "extra_cuts" : [
-                        "cut::GreaterThanCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.8)"
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.1, 0.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "parts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "springgreen",
+                    "label_override" : "$0.2 < \\Delta R (J, trk) < 0.4$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::DeltaRVariable('eta', 'phi', 'Jeta', 'Jphi'), 0.2, 0.4)"
                     ]
                 }
-
             ],
             "variables" : [
                 "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'pt')"
@@ -378,8 +434,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('Jpt', 50.0, 100.0)",
-                "cut::GreaterThanCut('pt', 0.01)",
-                "cut::GreaterThanCut('jetMatched', 1)"
+                "cut::GreaterThanCut('jetMatched', 1)",
+                "cut::GreaterThanCut('pt', 0.01)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/efficiencies/",
@@ -445,8 +501,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('Jpt', 100.0, 200.0)",
-                "cut::GreaterThanCut('pt', 0.01)",
-                "cut::GreaterThanCut('jetMatched', 1)"
+                "cut::GreaterThanCut('jetMatched', 1)",
+                "cut::GreaterThanCut('pt', 0.01)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/efficiencies/",
@@ -512,8 +568,8 @@
             ],
             "cut" : [
                 "cut::TwoSidedCut('Jpt', 200.0, 400.0)",
-                "cut::GreaterThanCut('pt', 0.01)",
-                "cut::GreaterThanCut('jetMatched', 1)"
+                "cut::GreaterThanCut('jetMatched', 1)",
+                "cut::GreaterThanCut('pt', 0.01)"
             ],
             "binning" : "auto",
             "plotspath" : "ANplots/efficiencies/",
@@ -579,8 +635,8 @@
             ],
             "cut" : [
                 "cut::GreaterThanCut('Jpt', 400.0)",
-                "cut::GreaterThanCut('pt', 0.01)",
-                "cut::GreaterThanCut('jetMatched', 1)"
+                "cut::GreaterThanCut('jetMatched', 1)",
+                "cut::GreaterThanCut('pt', 0.01)"
             ],
             "override_textloc" : "bottom-right",
             "binning" : "auto",

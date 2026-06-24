@@ -1,0 +1,473 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                {
+                    "dsetkind" : "unbinned_comparison",
+                    "dataset2" : {
+                        "key": "MC",
+                        "label": "Pythia",
+                        "configsuite": "VetoConfig1",
+                        "runtag": "Mar_01_2026",
+                        "name": "Pythia_inclusive",
+                        "table": "parts",
+                        "objsyst": "nominal",
+                        "location": "xrootd-submit",
+                        "dsetkind": "pq"
+                    },
+                    "dataset1" : {
+                        "key" : "DATA",
+                        "label" : "Data",
+                        "configsuite" : "BasicConfig",
+                        "runtag" : "Mar_01_2026",
+                        "name" : "DATA_2018C",
+                        "table" : "parts",
+                        "objsyst" : "DATA",
+                        "location" : "xrootd-submit",
+                        "dsetkind": "pq"
+                    },
+                    "label_override" : "$0 < |\\eta| < 0.7$",
+                    "color_override" : "blue",
+                    "key" : "DATAMC",
+                    "ylabel" : "Data/MC",
+                    "comparison" : "ratio",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0, 0.7)"
+                    ]
+                },
+                {
+                    "dsetkind" : "unbinned_comparison",
+                    "dataset2" : {
+                        "key": "MC",
+                        "label": "Pythia",
+                        "configsuite": "VetoConfig1",
+                        "runtag": "Mar_01_2026",
+                        "name": "Pythia_inclusive",
+                        "table": "parts",
+                        "objsyst": "nominal",
+                        "location": "xrootd-submit",
+                        "dsetkind": "pq"
+                    },
+                    "dataset1" : {
+                        "key" : "DATA",
+                        "label" : "Data",
+                        "configsuite" : "BasicConfig",
+                        "runtag" : "Mar_01_2026",
+                        "name" : "DATA_2018C",
+                        "table" : "parts",
+                        "objsyst" : "DATA",
+                        "location" : "xrootd-submit",
+                        "dsetkind": "pq"
+                    },
+                    "label_override" : "$0.7 < |\\eta| < 1.4$",
+                    "color_override" : "red",
+                    "key" : "DATAMC",
+                    "ylabel" : "Data/MC",
+                    "comparison" : "ratio",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0.7, 1.4)"
+                    ]
+                },
+                {
+                    "dsetkind" : "unbinned_comparison",
+                    "dataset2" : {
+                        "key": "MC",
+                        "label": "Pythia",
+                        "configsuite": "VetoConfig1",
+                        "runtag": "Mar_01_2026",
+                        "name": "Pythia_inclusive",
+                        "table": "parts",
+                        "objsyst": "nominal",
+                        "location": "xrootd-submit",
+                        "dsetkind": "pq"
+                    },
+                    "dataset1" : {
+                        "key" : "DATA",
+                        "label" : "Data",
+                        "configsuite" : "BasicConfig",
+                        "runtag" : "Mar_01_2026",
+                        "name" : "DATA_2018C",
+                        "table" : "parts",
+                        "objsyst" : "DATA",
+                        "location" : "xrootd-submit",
+                        "dsetkind": "pq"
+                    },
+                    "label_override" : "$1.4 < |\\eta|$",
+                    "color_override" : "green",
+                    "key" : "DATAMC",
+                    "ylabel" : "Data/MC",
+                    "comparison" : "ratio",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('eta'), 1.4)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "pt"
+            ],
+            "override_filenames" : [
+                "pt_dataMC"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+
+            ],
+            "binning" : "regular:(0.01, 10, 100, 'log')",
+            "override_ylim" : [0.0, 3.0],
+            "nopad" : true,
+            "plotspath" : "ANplots/tracking_turnon/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "logy" : false,
+            "logx" : true,
+            "density" : false,
+            "no_lumi_normalization" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0 < |\\eta| < 0.7$",
+                    "color_override" : "blue",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0, 0.7)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0.7 < |\\eta| < 1.4$",
+                    "color_override" : "green",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0.7, 1.4)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$|\\eta| > 1.4$",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('eta'), 1.4)"
+                    ]
+                  }
+            ],
+            "variables" : [
+                "pt"
+            ],
+            "override_filenames" : [
+                "tracking_turnon_inclusive.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/tracking_turnon/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0 < |\\eta| < 0.7$",
+                    "color_override" : "blue",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0, 0.7)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0.7 < |\\eta| < 1.4$",
+                    "color_override" : "green",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0.7, 1.4)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$|\\eta| > 1.4$",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('eta'), 1.4)"
+                    ]
+                  }
+            ],
+            "variables" : [
+                "pt"
+            ],
+            "override_filenames" : [
+                "tracking_turnon_Jpt_50to100.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 50, 100)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/tracking_turnon/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0 < |\\eta| < 0.7$",
+                    "color_override" : "blue",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0, 0.7)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0.7 < |\\eta| < 1.4$",
+                    "color_override" : "green",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0.7, 1.4)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$|\\eta| > 1.4$",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('eta'), 1.4)"
+                    ]
+                  }
+            ],
+            "variables" : [
+                "pt"
+            ],
+            "override_filenames" : [
+                "tracking_turnon_Jpt_100to200.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 100, 200)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/tracking_turnon/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0 < |\\eta| < 0.7$",
+                    "color_override" : "blue",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0, 0.7)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0.7 < |\\eta| < 1.4$",
+                    "color_override" : "green",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0.7, 1.4)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$|\\eta| > 1.4$",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('eta'), 1.4)"
+                    ]
+                  }
+            ],
+            "variables" : [
+                "pt"
+            ],
+            "override_filenames" : [
+                "tracking_turnon_Jpt_200to400.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 200, 400)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/tracking_turnon/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0 < |\\eta| < 0.7$",
+                    "color_override" : "blue",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0, 0.7)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$0.7 < |\\eta| < 1.4$",
+                    "color_override" : "green",
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('eta'), 0.7, 1.4)"
+                    ]
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "VetoConfig1",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq",
+                    "label_override" : "$|\\eta| > 1.4$",
+                    "color_override" : "red",
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('eta'), 1.4)"
+                    ]
+                  }
+            ],
+            "variables" : [
+                "pt"
+            ],
+            "override_filenames" : [
+                "tracking_turnon_Jpt_400toInf.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('Jpt', 400)"
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/tracking_turnon/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        }
+    ]
+}

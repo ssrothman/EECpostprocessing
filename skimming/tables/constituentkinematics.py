@@ -35,33 +35,33 @@ class ConstituentKinematicsTable:
         
         #constituent kinematics
         parts = objs.RecoJets.parts
-        thevals['pt'] = parts.pt[evtmask]
-        thevals['eta'] = parts.eta[evtmask]
-        thevals['phi'] = parts.phi[evtmask]
-        thevals['pdgid'] = parts.pdgid[evtmask]
-        thevals['charge'] = parts.charge[evtmask]
-        thevals['dxy'] = parts.dxy[evtmask]
-        thevals['dz'] = parts.dz[evtmask]
-        thevals['puppiWeight'] = parts.puppiWeight[evtmask]
-        thevals['fromPV'] = parts.fromPV[evtmask]
+        thevals['pt'] = parts.pt[jetmask][evtmask]
+        thevals['eta'] = parts.eta[jetmask][evtmask]
+        thevals['phi'] = parts.phi[jetmask][evtmask]
+        thevals['pdgid'] = parts.pdgid[jetmask][evtmask]
+        thevals['charge'] = parts.charge[jetmask][evtmask]
+        thevals['dxy'] = parts.dxy[jetmask][evtmask]
+        thevals['dz'] = parts.dz[jetmask][evtmask]
+        thevals['puppiWeight'] = parts.puppiWeight[jetmask][evtmask]
+        thevals['fromPV'] = parts.fromPV[jetmask][evtmask]
 
         #truth matching
         if hasattr(parts, 'matchPt'):
-            thevals['matchPt'] = parts.matchPt[evtmask]
-            thevals['matchEta'] = parts.matchEta[evtmask]
-            thevals['matchPhi'] = parts.matchPhi[evtmask]
-            thevals['matchCharge'] = parts.matchCharge[evtmask]
-            thevals['matchTypes'] = parts.matchTypes[evtmask]
-            thevals['nMatches'] = parts.nMatches[evtmask]
+            thevals['matchPt'] = parts.matchPt[jetmask][evtmask]
+            thevals['matchEta'] = parts.matchEta[jetmask][evtmask]
+            thevals['matchPhi'] = parts.matchPhi[jetmask][evtmask]
+            thevals['matchCharge'] = parts.matchCharge[jetmask][evtmask]
+            thevals['matchTypes'] = parts.matchTypes[jetmask][evtmask]
+            thevals['nMatches'] = parts.nMatches[jetmask][evtmask]
         
         #jet info
         jets = objs.RecoJets.jets
-        thevals['Jpt'] = jets.pt[evtmask]
-        thevals['Jeta'] = jets.eta[evtmask]
-        thevals['Jphi'] = jets.phi[evtmask]
+        thevals['Jpt'] = jets.pt[jetmask][evtmask]
+        thevals['Jeta'] = jets.eta[jetmask][evtmask]
+        thevals['Jphi'] = jets.phi[jetmask][evtmask]
 
         if hasattr(objs.RecoJets.simonjets, 'jetMatched'):
-            thevals['jetMatched'] = objs.RecoJets.simonjets.jetMatched[evtmask]
+            thevals['jetMatched'] = objs.RecoJets.simonjets.jetMatched[jetmask][evtmask]
 
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(

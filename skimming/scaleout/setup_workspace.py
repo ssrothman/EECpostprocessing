@@ -15,7 +15,6 @@ def setup_skim_workspace(working_dir,
     import json
     import os
 
-
     if len(tables) == 1 and tables[0] == 'count':
         exclude_dropped = False
     else:

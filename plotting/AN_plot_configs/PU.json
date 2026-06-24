@@ -5,6 +5,83 @@
                 {
                     "key": "MC",
                     "label": "MC",
+                    "configsuite": "VetoConfig2",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind" : "pq",
+                    "label_override" : "nominal",
+                    "color_override" : "green"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig2",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind" : "pq",
+                    "label_override" : "Up",
+                    "color_override" : "red"
+                },
+                {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig2",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "events",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind" : "pq",
+                    "label_override" : "Down",
+                    "color_override" : "blue"
+                },
+                {
+                    "key": "data",
+                    "label": "data",
+                    "configsuite": "VetoConfig2",
+                    "runtag": "Mar_01_2026",
+                    "name": "DATA_2018C",
+                    "table": "events",
+                    "objsyst": "DATA",
+                    "location": "xrootd-submit",
+                    "dsetkind" : "pq",
+                    "label_override" : "DATA",
+                    "color_override" : "black"
+                }
+            ],
+            "variables" : [
+                "NPV",
+                "NgoodPV"
+            ],
+            "override_filenames" : [
+                "NPV",
+                "NgoodPV"
+            ],
+            "weights" : [
+                "wt_nominal",
+                "wt_PUUp",
+                "wt_PUDown",
+                "wt_nominal"
+            ],
+            "cut" : [
+            ],
+            "override_cuttext" : "",
+            "binning" : "auto",
+            "plotspath" : "ANplots/PU/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
+        {
+            "datasets" : [
+                {
+                    "key": "MC",
+                    "label": "MC",
                     "configsuite": "BasicConfig",
                     "runtag": "Mar_01_2026",
                     "name": "allMC",
