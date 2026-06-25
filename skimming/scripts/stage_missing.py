@@ -27,6 +27,7 @@ def main() -> None:
         action="store_true",
         help="Use workspace target_files.txt instead of dataset file lookup in check_missing_files.py",
     )
+    parser.add_argument('--split-by-rows', type=int, default=-1, help="Split the job by the number of rows in the input file")
     
     # Mutually exclusive scheduler options
     scheduler_group = parser.add_mutually_exclusive_group(required=True)
@@ -64,6 +65,7 @@ def main() -> None:
         mem=args.mem,
         exec=args.exec,
         check_j=args.check_j,
+        split_by_rows=args.split_by_rows
     )
 
 if __name__ == "__main__":

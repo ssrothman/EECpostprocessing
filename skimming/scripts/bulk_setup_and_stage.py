@@ -2,6 +2,9 @@
 
 import argparse
 
+from skimming.config.load_config import load_config
+from skimming.scaleout.setup_workspace import setup_skim_workspace
+
 parser = argparse.ArgumentParser(description="Run EVERYTHING.")
 parser.add_argument('--signal-mc', type=str, nargs='*', help="List of signal MC datasets to process",
                     default=[
@@ -59,6 +62,7 @@ parser.add_argument('--files_per_job', type=int, help="Number of input files per
                      default=100)
 parser.add_argument('--mem', type=str, help="Requested memory per job",
                     default='4gb')
+parser.add_argument('--split-by-rows', type=int, default=-1, help="Split the job by the number of rows in the input file")
 parser.add_argument('--runtag', type=str, help="Datasets runtag",
                     default='Mar_01_2026')
 
@@ -86,35 +90,31 @@ if args.expand_tables:
 
 import os
 import subprocess
+from skimming.tables.expand_tables import expand_tables
 
 def setup_and_stage(dset, objsyst, table):
-    cmd = 'setup_skimming_workspace.py skim_%s_%s_%s %s %s %s --tables %s --output-location %s --config-suite %s' % (
-        dset,
-        objsyst,
-        table,
-        args.runtag,
-        dset,
-        objsyst,
-        table,
-        args.location,
-        args.config_suite
+    tables = expand_tables([table])
+    thecfg = load_config(args.config_suite)
+    print("setting up workspace for %s, %s, %s" % (dset, objsyst, table))
+    setup_skim_workspace(
+        working_dir = 'skim_%s_%s_%s' % (dset, objsyst, table),
+        runtag = args.runtag,
+        dataset = dset,
+        objsyst = objsyst,
+        config = thecfg,
+        tables = tables,
+        output_location = args.location,
+        nocheck = args.nocheck
     )
-    if args.nocheck:
-        cmd += ' --nocheck'
-    output = subprocess.run(cmd, shell=True, capture_output=True)
-    print(output.stdout.decode())
-    if output.returncode != 0:
-        print(output.stderr.decode())
-        raise RuntimeError("Workspace setup failed")
 
     if not os.path.exists('skim_%s_%s_%s'%(dset, objsyst, table)):
         return # if workspace setup didn't do anything,
                     # it's because all the desired outputs already exist! 
                     # so we can skip staging too.
                     
-
     if args.stage != 'none':
-        cmd = 'stage_to_%s.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --mem %s --exec' % (
+        print("\t staging to %s" % args.stage)
+        cmd = 'stage_to_%s.py skim_%s_%s_%s/ %s_%s_%s --files-per-job %d --mem %s --exec --split-by-rows %d' % (
             args.stage,
             dset,
             objsyst,
@@ -123,7 +123,8 @@ def setup_and_stage(dset, objsyst, table):
             objsyst,
             table,
             args.files_per_job,
-            args.mem
+            args.mem,
+            args.split_by_rows
         )
         output = subprocess.run(cmd, shell=True, capture_output=True)
         print(output.stdout.decode())

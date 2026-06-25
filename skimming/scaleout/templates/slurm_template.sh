@@ -25,5 +25,5 @@ for i in $(seq 0 $((FILES_PER_JOB - 1))); do
         echo "Index $index exceeds total files NFILES, skipping."
         continue
     fi
-    python skimscript.py $index
+    python skimscript.py $index --split-by-rows SPLIT_BY_ROWS
 done

@@ -3,10 +3,11 @@ import os.path
 import os
 import json
 import fcntl
+from re import split
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
-from typing import Sequence
+from typing import List, Sequence, Tuple
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 NanoAODSchema.warn_missing_crossrefs = False
 
@@ -87,10 +88,45 @@ def get_expected_name(target_file, hostid, uniqueid_cache):
     # Return the computed uniqueid for cache update
     return target_file, uniqueid, uniqueid
 
+def get_all_expected_names(target_files : Sequence[str], hostid : str, uniqueid_cache : dict, j : int):
+    max_workers = max(1, j)
+    expected_names : dict [str, Tuple[int, int]] = {}
+    fname_lookup : dict[str, str] = {}
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_target_file = {executor.submit(get_expected_name, target_file, hostid, uniqueid_cache): target_file for target_file in target_files}
+        for future in tqdm(as_completed(future_to_target_file), total=len(target_files)):
+            target_file, expected_name, computed_uniqueid = future.result()
+            
+            # Update cache if we computed a new uniqueid
+            if computed_uniqueid is not None:
+                uniqueid_cache[target_file] = {'uniqueid': computed_uniqueid}
+        
+            # each expected_name is a string with the format '<ANYTHING>_%d-%d'
+            # the first piece is the basename [should be the key in the expected_names dict]
+            # and then the two integers are the entry_start and entry_stop values
+            # which should be the values in the expected_names dict
+            # use a regex to pull out the basename and the two integers
+            import re
+            match = re.match(r'^(.*?)_(\d+)-(\d+)$', expected_name)
+            if match:
+                basename = match.group(1)
+                entry_start = int(match.group(2))
+                entry_stop = int(match.group(3))
+                expected_names[basename] = (entry_start, entry_stop)
+                fname_lookup[basename] = target_file
+            else:
+                raise ValueError("Expected name format is '<ANYTHING>_%%d-%%d' - got %s" % (expected_name))
+
+    return expected_names, fname_lookup
+
 def check_one_table(target_files, skimfs, hostid, skimbase, 
-                    configsuite, runtag, dataset, objsyst, table, 
-                    dont_short_circuit, j,
+                    configsuite, runtag, dataset, objsyst, table, j,
+                    dont_short_circuit : bool,
                     uniqueid_cache) -> tuple[set[str], set[str]]:
+        
+    completed_names : dict[str, List[int]] = {}
+
     skimpath = os.path.join(
         skimbase, 
         configsuite,
@@ -103,7 +139,6 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
     skimfs.makedirs(skimpath, exist_ok=True)
     listdir = skimfs.listdir(skimpath)
 
-    skimresults = set()
     for item in listdir:
         if not (item['name'].endswith('.parquet') or item['name'].endswith('.json')):
             continue
@@ -112,39 +147,75 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
         if item['size'] == 0:
             print("[WARNING] Found empty skim result file %s, skipping." % item['name'])
             continue
+
         name = os.path.basename(item['name'])
         # strip .parquet or .json extension to get the expected target file name
         name = name.replace('.parquet', '').replace('.json', '')
-        skimresults.add(name)
 
-    print("[INFO] Found %d skim results for table %s." % (len(skimresults), table))
+        # the name is of the format '<ANYTHING>_%d-%d'
+        # we need to extract the basename and the two integers
+        import re
+        match = re.match(r'^(.*?)_(\d+)-(\d+)$', name)
+        if match:
+            basename = match.group(1)
+            entry_start = int(match.group(2))
+            entry_stop = int(match.group(3))
+            if basename in completed_names:
+                completed_names[basename].extend([entry_start, entry_stop])
+            else:
+                completed_names[basename] = [entry_start, entry_stop]
+        else:
+            raise ValueError("Expected name format is '<ANYTHING>_%%d-%%d' - got %s" % (name))
+
+    print("[INFO] Found %d skim results for table %s." % (len(completed_names), table))
     print("[INFO] Found %d target files." % len(target_files))
 
-    if not dont_short_circuit and len(target_files) == len(skimresults):
+    if not dont_short_circuit and len(target_files) == len(completed_names):
         print("[INFO] Number of skim results matches number of target files, assuming no missing files for table %s." % table)
         return set(), set()
 
+    expected_names, fname_lookup = get_all_expected_names(target_files, hostid, uniqueid_cache, j)
+
+    erroneous_files = set()
     missing_files = set()
 
-    max_workers = max(1, j)
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_target_file = {executor.submit(get_expected_name, target_file, hostid, uniqueid_cache): target_file for target_file in target_files}
-        for future in tqdm(as_completed(future_to_target_file), total=len(target_files)):
-            target_file, expected_name, computed_uniqueid = future.result()
-            
-            # Update cache if we computed a new uniqueid
-            if computed_uniqueid is not None:
-                uniqueid_cache[target_file] = {'uniqueid': computed_uniqueid}
-            
-            if expected_name in skimresults:
-                # success!
-                skimresults.remove(expected_name) # remove from the set of skim results so that 
-                                                # at the end, any remaining skim results in the set 
-                                                # are unexpected/skimming errors
-            else:
-                missing_files.add(target_file)
+    for completed_name, completed_indices in completed_names.items():
+        if completed_name not in expected_names:
+            erroneous_files.add(fname_lookup[completed_name])
+            continue
 
-    return missing_files, skimresults
+        expected_indices = expected_names[completed_name]
+
+        # completed_name is the basename
+        # completed_incies is the list of [start, stop] indices
+        # if we sort the completed_indices, and then remove all indices which appear twice
+        # it should reduce to [global_start, global_stop] if the completed indices are contiguous
+        completed_indices.sort()
+        cleaned = [completed_indices[0]]
+        for i in range(1, len(completed_indices)-1):
+            if completed_indices[i] != completed_indices[i+1] and completed_indices[i] != completed_indices[i-1]:
+                cleaned.append(completed_indices[i])
+        cleaned.append(completed_indices[-1])
+        
+        if len(cleaned) == 2 and cleaned[0] == expected_indices[0] and cleaned[1] == expected_indices[1]:
+            # We've skimmed the entire expected range
+            print("File %s is complete." % fname_lookup[completed_name])
+            continue
+        else:
+            # We haven't skimmed the entire expected range
+            print("File %s is incomplete." % fname_lookup[completed_name])
+            print("\t expected range ", expected_indices)
+            print("\t completed range ", cleaned)
+            missing_files.add(fname_lookup[completed_name])
+
+    for expected_name in expected_names.keys():
+        if expected_name not in completed_names:
+            missing_files.add(fname_lookup[expected_name])
+
+    print("[INFO] Found %d missing files." % len(missing_files))
+    print("[INFO] Found %d erroneous files." % len(erroneous_files))
+
+    return missing_files, erroneous_files
 
 def check_workspace(workspace_path : str, dont_short_circuit : bool, j : int):    
     with open(os.path.join(workspace_path, 'target_files.txt'), 'r') as f:
@@ -160,31 +231,31 @@ def check_workspace(workspace_path : str, dont_short_circuit : bool, j : int):
     print("[INFO] Uniqueid cache loaded: %d entries from %s" % (len(uniqueid_cache), CACHE_FILE))
 
     missing_files : set[str] = set()
-    skimresults : set[str] = set()
+    erroneous_files : set[str] = set()
 
     for table in tables:
         print("[INFO] Checking table %s..." % table)
-        missing, skimres = check_one_table(
+        missing, erroneous = check_one_table(
             target_files, skimfs, hostid, skimbase,
             metadata['config_suite'], metadata['runtag'], 
             metadata['dataset'], metadata['objsyst'], table,
-            dont_short_circuit, j,
+            j, dont_short_circuit,
             uniqueid_cache
         )
 
         missing_files.update(missing)
-        skimresults.update(skimres)
+        erroneous_files.update(erroneous)
 
     # Save updated cache with lock
     save_cache(uniqueid_cache)
     print("[INFO] Uniqueid cache saved with %d entries" % len(uniqueid_cache))
 
-    if len(skimresults) > 0:
-        print("[WARNING] Found %d skim result files that do not correspond to any target file:" % len(skimresults))
-        for s in sorted(skimresults):
+    if len(erroneous_files) > 0:
+        print("[WARNING] Found %d erroneous files:" % len(erroneous_files))
+        for s in sorted(erroneous_files):
             print("  ", s)
 
-    return missing_files, skimresults
+    return missing_files, erroneous_files
 
 def choose_next_suffix(workspace: str, scheduler: str) -> int:
     """Choose next suffix for missing files, checking for existing artifacts from the given scheduler."""
@@ -239,6 +310,7 @@ def make_missing_slurm_submit(
     nfiles: int,
     skimscript_name: str,
     mem: str,
+    split_by_rows: int
 ) -> str:
     """Create SLURM submit script for missing files."""
     template = os.path.join(os.path.dirname(__file__), "..", "scaleout", "templates", "slurm_template.sh")
@@ -257,6 +329,7 @@ def make_missing_slurm_submit(
     content = content.replace("FILES_PER_JOB", str(files_per_job))
     content = content.replace("NFILES", str(nfiles))
     content = content.replace("python skimscript.py $index", f"python {skimscript_name} $index")
+    content = content.replace('SPLIT_BY_ROWS', str(split_by_rows))
 
     submit_name = f"submit_slurm_missing_{suffix}.sh"
     submit_path = os.path.join(workspace, submit_name)
@@ -278,6 +351,7 @@ def make_missing_condor_submit(
     nfiles: int,
     skimscript_name: str,
     mem: str,
+    split_by_rows: int
 ) -> tuple[str, str]:
     """Create Condor submit files for missing files.
     
@@ -319,10 +393,10 @@ def make_missing_condor_submit(
 
     exec_content = exec_content.replace("FILES_PER_JOB", str(files_per_job))
     exec_content = exec_content.replace("NFILES", str(nfiles))
+    exec_content = exec_content.replace("python skimscript.py $index", f"python {skimscript_name} $index")
+    exec_content = exec_content.replace("SPLIT_BY_ROWS", str(split_by_rows))
 
     exec_path = os.path.join(workspace, exec_name)
-
-    exec_content = exec_content.replace("python skimscript.py $index", f"python {skimscript_name} $index")
 
     with open(exec_path, "w", encoding="utf-8") as f:
         f.write(exec_content)
@@ -339,6 +413,7 @@ def make_missing_local_submit(
     suffix: int,
     nfiles: int,
     skimscript_name: str,
+    split_by_rows: int
 ) -> str:
     """Create a local bash script that runs all missing jobs sequentially."""
     submit_name = f"submit_local_missing_{suffix}.sh"
@@ -349,7 +424,7 @@ def make_missing_local_submit(
         "set -euo pipefail",
         "",
         f"for i in $(seq 0 {nfiles - 1}); do",
-        f"    python {skimscript_name} \"$i\" 2>&1 | tee local/skim_missing_{suffix}_$i.log",
+        f"    python {skimscript_name} \"$i\" --split-by-rows {split_by_rows} 2>&1 | tee local/skim_missing_{suffix}_$i.log",
         "done",
         "",
     ]
@@ -362,7 +437,7 @@ def make_missing_local_submit(
 
     return submit_name
 
-def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : str, exec : bool, check_j : int) -> int:
+def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : str, exec : bool, check_j : int, split_by_rows : int) -> int:
     workspace = os.path.abspath(workspace)
     # strip trailing slash if present for nicer output
     if workspace.endswith("/"):
@@ -413,6 +488,7 @@ def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : s
             nfiles=len(missing_files),
             skimscript_name=skimscript_name,
             mem=mem,
+            split_by_rows=split_by_rows
         )
         if exec:
             cmd = ["sbatch", submit_name]
@@ -436,6 +512,7 @@ def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : s
             nfiles=len(missing_files),
             skimscript_name=skimscript_name,
             mem=mem,
+            split_by_rows=split_by_rows
         )
 
         if exec:
@@ -457,6 +534,7 @@ def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : s
             suffix=suffix,
             nfiles=len(missing_files),
             skimscript_name=skimscript_name,
+            split_by_rows=split_by_rows
         )
 
         if exec:
@@ -474,7 +552,9 @@ def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : s
 def stage_all_missing(workspace_dir : str, 
                       scheduler: str, files_per_job : int, 
                       mem : str, exec : bool, check_j : int,
-                      filter : list[str], anti_filter : list[str], only_new : bool) -> tuple[list[str], list[tuple[str, int]]]:
+                      split_by_rows : int,
+                      filter : list[str], anti_filter : list[str], 
+                      only_new : bool) -> tuple[list[str], list[tuple[str, int]]]:
     
     subdirs = os.listdir(workspace_dir)
     workspaces = []
@@ -513,6 +593,7 @@ def stage_all_missing(workspace_dir : str,
                 mem=mem,
                 exec=exec,
                 check_j=check_j,
+                split_by_rows=split_by_rows
             )
             if missing > 0:
                 nmissing.append((ws, missing))

@@ -1,4 +1,4 @@
-def stage_via_condor(working_dir, name, files_per_job=1, mem='4gb'):
+def stage_via_condor(working_dir, name, files_per_job=1, mem='4gb', split_by_rows=-1):
     import os
     import subprocess
     import shutil
@@ -26,12 +26,12 @@ def stage_via_condor(working_dir, name, files_per_job=1, mem='4gb'):
 
     subprocess.run([
         'sed', '-i',
-        f's|NAME|{name}|g; s|NJOBS|{njobs}|g; s|MEM|{mem}|g; s|WORKINGDIR|{working_dir}|g; s|FILES_PER_JOB|{files_per_job}|g; s|NFILES|{nfiles}|g',
+        f's|NAME|{name}|g; s|NJOBS|{njobs}|g; s|MEM|{mem}|g; s|WORKINGDIR|{working_dir}|g; s|FILES_PER_JOB|{files_per_job}|g; s|NFILES|{nfiles}|g; s|SPLIT_BY_ROWS|{split_by_rows}|g',
         condor_sub_path
     ], check=True)
     subprocess.run([
         'sed', '-i',
-        f's|NAME|{name}|g; s|NJOBS|{njobs}|g; s|WORKINGDIR|{working_dir}|g; s|FILES_PER_JOB|{files_per_job}|g; s|NFILES|{nfiles}|g',
+        f's|NAME|{name}|g; s|NJOBS|{njobs}|g; s|WORKINGDIR|{working_dir}|g; s|FILES_PER_JOB|{files_per_job}|g; s|NFILES|{nfiles}|g; s|SPLIT_BY_ROWS|{split_by_rows}|g',
         condor_exec_path
     ], check=True)
 

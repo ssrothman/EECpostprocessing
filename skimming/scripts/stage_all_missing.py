@@ -27,6 +27,12 @@ parser.add_argument(
     help="Memory requested for each resubmission job (default: 4gb)",
 )
 parser.add_argument(
+    '--split-by-rows',
+    type=int,
+    default=-1,
+    help="Split input files by rows (default: -1, no splitting)",
+)
+parser.add_argument(
     "--check-j",
     type=int,
     default=1,
@@ -90,6 +96,7 @@ failures, nmissing = stage_all_missing(
     filter=args.filter,
     anti_filter=args.anti_filter,
     exec=args.exec,
+    split_by_rows=args.split_by_rows
 )
 if failures:
     print("Failed to stage missing files for the following %d workspaces:" % len(failures))

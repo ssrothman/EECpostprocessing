@@ -24,6 +24,12 @@ parser.add_argument(
     help="Memory requested for each job (default: 4gb)",
 )
 parser.add_argument(
+    '--split-by-rows',
+    type=int,
+    default=-1,
+    help="Split input files by rows (default: -1, no splitting)",
+)
+parser.add_argument(
     "--filter",
     nargs="+",
     default=None,

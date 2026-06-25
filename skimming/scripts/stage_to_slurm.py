@@ -9,6 +9,7 @@ parser.add_argument('--files-per-job', type=int, default=1,
 parser.add_argument('--mem', type=str, default='4gb',
                     help='Requested memory per job (default: 4gb)')
 parser.add_argument('--exec', action='store_true', help='Whether to execute the staging command immediately (default: False)')
+parser.add_argument('--split-by-rows', type=int, default=-1, help="Split the job by the number of rows in the input file")
 args = parser.parse_args()
 
 from skimming.scaleout.slurm import stage_via_slurm
@@ -16,7 +17,7 @@ import os
 if args.mem.strip() == '':
     raise RuntimeError("--mem must not be empty")
 
-stage_via_slurm(args.where, args.name, args.files_per_job, mem=args.mem)
+stage_via_slurm(args.where, args.name, args.files_per_job, mem=args.mem, split_by_rows=args.split_by_rows)
 
 if not args.exec:
     print("Submit with: ")

@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description="Skim script for scaleout processin
 
 parser.add_argument('i', type=int, help="Input file index")
 parser.add_argument('--override-location', type=str, default=None, help='Override the output location')
-
+parser.add_argument('--split-by-rows', type=int, default=-1, help='Split the input file by the specified number of rows')
 args = parser.parse_args()
 
 import json
@@ -45,15 +45,30 @@ if config['input_location'] != 'local':
     input_file = 'root://' + hostid + '//' + input_file
     
 events = NanoEventsFactory.from_root(input_file+":Events", schemaclass=NanoAODSchema).events()
+Nevt = len(events)
 
-if len(events) == 0:
+if Nevt == 0:
     print(f"No events found in file {input_file}, skipping skim.")
     exit(0)
 
-skim(
-    events,  # pyright: ignore[reportArgumentType]
-    config,
-    os.path.join(rootpath, config['output_path']),
-    targetfs,
-    config['tables']
-)
+if args.split_by_rows < 0:
+    args.split_by_rows = Nevt*2
+
+for start in range(0, Nevt, args.split_by_rows):
+    stop = min(start + args.split_by_rows, Nevt)
+
+    print("doing block from {} to {}".format(start, stop))
+    subevts = NanoEventsFactory.from_root(
+        input_file+":Events", 
+        schemaclass=NanoAODSchema,
+        entry_start=start,
+        entry_stop=stop
+    ).events()
+
+    skim(
+        subevts,  # pyright: ignore[reportArgumentType]
+        config,
+        os.path.join(rootpath, config['output_path']),
+        targetfs,
+        config['tables']
+    )
