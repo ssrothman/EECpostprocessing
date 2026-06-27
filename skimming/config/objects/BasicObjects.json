@@ -95,6 +95,12 @@
             "params-SOFT_TRK20" : {
                 "simonjetsname" : "ChargedSimonJetsSOFTTRK20"
             },
+            "params-SOFT_TRK10at1" : {
+                "simonjetsname" : "ChargedSimonJetsSOFTTRK10at1"
+            },
+            "params-SOFT_TRK8at1" : {
+                "simonjetsname" : "ChargedSimonJetsSOFTTRK8at1"
+            },
             "params-NO_JER" : {
                 "skipJER" : true
             },
@@ -138,6 +144,12 @@
             },
             "params-SOFT_TRK20" : {
                 "simonjetsname" : "GenChargedSimonJetsSOFTTRK20"
+            },
+            "params-SOFT_TRK10at1" : {
+                "simonjetsname" : "GenChargedSimonJetsSOFTTRK10at1"
+            },
+            "params-SOFT_TRK8at1" : {
+                "simonjetsname" : "GenChargedSimonJetsSOFTTRK8at1"
             },
             "MConly" : true
         },
@@ -210,6 +222,12 @@
             "params-SOFT_TRK20" : {
                 "name" : "RecoChargedEECsSOFTTRK20res4"
             },
+            "params-SOFT_TRK10at1" : {
+                "name" : "RecoChargedEECsSOFTTRK10at1res4"
+            },
+            "params-SOFT_TRK8at1" : {
+                "name" : "RecoChargedEECsSOFTTRK8at1res4"
+            },
             "params-DATA" : {
                 "name" : "RecoChargedEECsres4"
             },
@@ -243,6 +261,12 @@
             },
             "params-SOFT_TRK20" : {
                 "name" : "UnmatchedRecoChargedEECsSOFTTRK20res4"
+            },
+            "params-SOFT_TRK10at1" : {
+                "name" : "UnmatchedRecoChargedEECsSOFTTRK10at1res4"
+            },
+            "params-SOFT_TRK8at1" : {
+                "name" : "UnmatchedRecoChargedEECsSOFTTRK8at1res4"
             },
             "params-DATA" : {
                 "name" : "UnmatchedRecoChargedEECsres4"
@@ -278,6 +302,12 @@
             "params-SOFT_TRK20" : {
                 "name" : "UntransferedRecoChargedEECsSOFTTRK20res4"
             },
+            "params-SOFT_TRK10at1" : {
+                "name" : "UntransferedRecoChargedEECsSOFTTRK10at1res4"
+            },
+            "params-SOFT_TRK8at1" : {
+                "name" : "UntransferedRecoChargedEECsSOFTTRK8at1res4"
+            },
             "params-DATA" : {
                 "name" : "UntransferedRecoChargedEECsres4"
             },
@@ -312,6 +342,12 @@
             "params-SOFT_TRK20" : {
                 "name" : "GenChargedEECsSOFTTRK20res4"
             },
+            "params-SOFT_TRK10at1" : {
+                "name" : "GenChargedEECsSOFTTRK10at1res4"
+            },
+            "params-SOFT_TRK8at1" : {
+                "name" : "GenChargedEECsSOFTTRK8at1res4"
+            },
             "MConly" : true
         },
         "UnmatchedGenEEC" : {
@@ -342,6 +378,12 @@
             },
             "params-SOFT_TRK20" : {
                 "name" : "UnmatchedGenChargedEECsSOFTTRK20res4"
+            },
+            "params-SOFT_TRK10at1" : {
+                "name" : "UnmatchedGenChargedEECsSOFTTRK10at1res4"
+            },
+            "params-SOFT_TRK8at1" : {
+                "name" : "UnmatchedGenChargedEECsSOFTTRK8at1res4"
             },
             "MConly" : true
         },
@@ -374,6 +416,12 @@
             "params-SOFT_TRK20" : {
                 "name" : "UntransferedGenChargedEECsSOFTTRK20res4"
             },
+            "params-SOFT_TRK10at1" : {
+                "name" : "UntransferedGenChargedEECsSOFTTRK10at1res4"
+            },
+            "params-SOFT_TRK8at1" : {
+                "name" : "UntransferedGenChargedEECsSOFTTRK8at1res4"
+            },
             "MConly" : true
         },
         "EECtransfer" : {
@@ -404,6 +452,12 @@
             },
             "params-SOFT_TRK20" : {
                 "name" : "GenChargedEECsSOFTTRK20res4Transfer"
+            },
+            "params-SOFT_TRK10at1" : {
+                "name" : "GenChargedEECsSOFTTRK10at1res4Transfer"
+            },
+            "params-SOFT_TRK8at1" : {
+                "name" : "GenChargedEECsSOFTTRK8at1res4Transfer"
             },
             "MConly" : true
         },
