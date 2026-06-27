@@ -181,6 +181,7 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
 
     for completed_name, completed_indices in completed_names.items():
         if completed_name not in expected_names:
+            print("[WARNING] Found completed file %s which is not in the expected target files." % completed_name)
             erroneous_files.add(fname_lookup[completed_name])
             continue
 
@@ -190,22 +191,78 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
         # completed_incies is the list of [start, stop] indices
         # if we sort the completed_indices, and then remove all indices which appear twice
         # it should reduce to [global_start, global_stop] if the completed indices are contiguous
+        import numpy as np
+        unique_indices, counts = np.unique(completed_indices, return_counts=True)
+        erroneous = False
+        for idx, ct in zip(unique_indices, counts):
+            if ct > 2:
+                # something bad has happened
+                print("[WARNING] Found index %d in completed_name %s with count %d > 2, which is unexpected." % (idx, completed_name, ct))
+                # delete all files with this basename 
+                erroneous = True
+                break
+            elif ct == 2:
+                # remove all instances of this index from completed_indices
+                completed_indices = [i for i in completed_indices if i != idx]
+            elif ct == 1:
+                # keep this index
+                pass
+            else:
+                raise RuntimeError("Unexpected count %d for index %d in completed_name %s" % (ct, idx, completed_name))
+
         completed_indices.sort()
-        cleaned = [completed_indices[0]]
-        for i in range(1, len(completed_indices)-1):
-            if completed_indices[i] != completed_indices[i+1] and completed_indices[i] != completed_indices[i-1]:
-                cleaned.append(completed_indices[i])
-        cleaned.append(completed_indices[-1])
         
-        if len(cleaned) == 2 and cleaned[0] == expected_indices[0] and cleaned[1] == expected_indices[1]:
+        if len(completed_indices) == 2 and completed_indices[0] == expected_indices[0] and completed_indices[1] == expected_indices[1]:
             # We've skimmed the entire expected range
-            print("File %s is complete." % fname_lookup[completed_name])
             continue
+        elif len(completed_indices) != 2:
+            print("[WARNING] Found completed file %s with unexpected number of unique indices %d (expected 2)." % (completed_name, len(completed_indices)))
+            erroneous = True
         else:
             # We haven't skimmed the entire expected range
             print("File %s is incomplete." % fname_lookup[completed_name])
             print("\t expected range ", expected_indices)
-            print("\t completed range ", cleaned)
+            print("\t completed range ", completed_indices)
+            print("\tuniqueid", completed_name)
+            missing_files.add(fname_lookup[completed_name])
+
+        if erroneous:
+            print("[WARNING] Deleting anomalous files for %s." % completed_name)
+            batch_sizes = []
+            for item in listdir:
+                if os.path.basename(item['name']).startswith(completed_name):
+                    #parse with re
+                    import re
+                    match = re.match(r'^(.*?)_(\d+)-(\d+)\.(parquet|json)$', item['name'])
+                    if match:
+                        entry_start = int(match.group(2))
+                        entry_stop = int(match.group(3))
+                        batch_sizes.append(entry_stop - entry_start)
+                    else:
+                        raise ValueError("Expected name format is '<ANYTHING>_%%d-%%d.(parquet|json)' - got %s" % (item['name']))
+            
+            if len(batch_sizes) == 0:
+                raise RuntimeError("No files found for completed_name %s, but it was in completed_names." % completed_name)
+            
+            largest_batch_size = max(batch_sizes) if batch_sizes else 0
+            print("[INFO] \t Largest batch size for %s is %d." % (completed_name, largest_batch_size))
+            # now delete only things that are not the largest batch size, to avoid deleting the largest batch which may be correct
+            for item in listdir:
+                if os.path.basename(item['name']).startswith(completed_name):
+                    #parse with re
+                    import re
+                    match = re.match(r'^(.*?)_(\d+)-(\d+)\.(parquet|json)$', item['name'])
+                    if match:
+                        entry_start = int(match.group(2))
+                        entry_stop = int(match.group(3))
+                        batch_size = entry_stop - entry_start
+                        if batch_size != largest_batch_size and entry_stop != expected_indices[1]:
+                            print("\t\tdeleting %s" % item['name'])
+                            skimfs.rm(os.path.join(skimpath, item['name']))
+                    else:
+                        raise ValueError("Expected name format is '<ANYTHING>_%%d-%%d.(parquet|json)' - got %s" % (item['name']))
+
+            erroneous_files.add(fname_lookup[completed_name])
             missing_files.add(fname_lookup[completed_name])
 
     for expected_name in expected_names.keys():
@@ -276,9 +333,8 @@ def choose_next_suffix(workspace: str, scheduler: str) -> int:
         idx += 1
 
 def make_missing_skimscript(workspace: str, suffix: int) -> str:
-    src = os.path.join(workspace, "skimscript.py")
-    if not os.path.exists(src):
-        raise RuntimeError(f"Workspace is missing required file: {src}")
+    src = os.path.join(os.path.dirname(__file__), "..", "scaleout", "skimscript.py")
+    src = os.path.abspath(src)
 
     dst_name = f"skimscript_missing_{suffix}.py"
     dst = os.path.join(workspace, dst_name)
@@ -456,7 +512,7 @@ def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : s
 
     missing_files, _ = check_workspace(
             workspace,
-            False,
+            True,
             check_j,
         )
     

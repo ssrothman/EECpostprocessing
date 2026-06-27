@@ -1248,11 +1248,14 @@ class UnfoldedHistogram:
                                 data : list[np.ndarray], label : list[str], thebinning : Any,
                                 override_filename : str, override_ylabel : str | None = None,
                                 **kwargs):
+        
+        import matplotlib.pyplot as plt
+        cmap = plt.get_cmap('tab10')
         datasets = []
         for d, l in zip(data, label):
             datasets.append(ValNoCovDataset(
                 key=l,
-                color=None,
+                color=cmap(len(datasets)/9),
                 label=l,
                 data=d,
                 binning=thebinning,
@@ -1279,7 +1282,7 @@ class UnfoldedHistogram:
         )
 
 
-    def plot(self, output_folder: str | None = None, extratext: str | None = None, covmats : bool = False) -> None:
+    def plot(self, output_folder: str | None, extratext: str | None, covmats : bool, signalcut : bool) -> None:
         if self.invhess is None:
             self.compute_invhess()
         
@@ -1303,9 +1306,23 @@ class UnfoldedHistogram:
             profdataset.set_lumi(self.properties['lumi'])
 
         variable = BasicPrebinnedVariable()
-        cut = NoopOperation()
+        if signalcut:
+            ptname = get_genreco_name(self.binning.axis_names, 'Jpt')
+            Rname = get_genreco_name(self.binning.axis_names, 'R')
+            cut = SliceOperation(
+                {
+                    ptname : (50.0, np.inf),
+                    Rname : (0.4, 0.5)
+                },
+                []
+            )
+        else:
+            cut = NoopOperation()
+
         weight = ConstantVariable(1.0)
         binning = PrebinnedBinning()
+
+        prefix = 'signalcut_' if signalcut else ''
 
         plot_histogram(
             variable,
@@ -1315,7 +1332,7 @@ class UnfoldedHistogram:
             binning,
             extratext=extratext,
             output_folder=output_folder,
-            override_filename='unfolded_profiled',
+            override_filename=prefix+'unfolded_profiled',
             no_lumi_normalization=True,
             textloc='top-left',
         )
@@ -1330,7 +1347,7 @@ class UnfoldedHistogram:
                 sym=True,
                 logc=True,
                 output_folder=output_folder,
-                override_filename='unfolded_profiled_covariance_matrix',
+                override_filename=prefix+'unfolded_profiled_covariance_matrix',
                 textloc='top-left'
             )
 
@@ -1346,7 +1363,7 @@ class UnfoldedHistogram:
                 sym=True,
                 logc=False,
                 output_folder=output_folder,
-                override_filename='unfolded_profiled_correlation_matrix',
+                override_filename=prefix+'unfolded_profiled_correlation_matrix',
                 textloc='top-left'
             )
 
@@ -1378,13 +1395,13 @@ class UnfoldedHistogram:
 
         plot_histogram(
             variable,
-            cut,
+            splt.cut.NoopOperation(),
             weight,
             covtheta_dataset,
             binning,
             extratext=extratext,
             output_folder=output_folder,
-            override_filename='nuisance_pulls',
+            override_filename=prefix+'nuisance_pulls',
             no_lumi_normalization=True,
             extra_stuff=[gray_box],
             override_ylabel="Nuisance posteriors",
@@ -1395,26 +1412,26 @@ class UnfoldedHistogram:
         if covmats:
             draw_matrix(
                 variable,
-                cut,
+                splt.cut.NoopOperation(),
                 covtheta_dataset,  # type: ignore
                 binning,
                 extratext=extratext,
                 sym=True,
                 logc=True,
                 output_folder=output_folder,
-                override_filename='unfolded_nuisance_covariance_matrix',
+                override_filename=prefix+'unfolded_nuisance_covariance_matrix',
                 textloc='top-left'
             )
             draw_matrix(
                 corr_variable,
-                cut,
+                splt.cut.NoopOperation(),
                 covtheta_dataset,  # type: ignore
                 binning,
                 extratext=extratext,
                 sym=True,
                 logc=False,
                 output_folder=output_folder,
-                override_filename='unfolded_nuisance_correlation_matrix',
+                override_filename=prefix+'unfolded_nuisance_correlation_matrix',
                 textloc='top-left'
             )
 
@@ -1443,26 +1460,26 @@ class UnfoldedHistogram:
         if covmats:
             draw_matrix(
                 variable,
-                cut,
+                splt.cut.NoopOperation(),
                 covbetatheta_dataset,  # type: ignore
                 binning,
                 extratext=extratext,
                 sym=True,
                 logc=True,
                 output_folder=output_folder,
-                override_filename='unfolded_betatheta_covariance_matrix',
+                override_filename=prefix+'unfolded_betatheta_covariance_matrix',
                 textloc='top-left'
             )
             draw_matrix(
                 corr_variable,
-                cut,
+                splt.cut.NoopOperation(),
                 covbetatheta_dataset,  # type: ignore
                 binning,
                 extratext=extratext,
                 sym=True,
                 logc=True,
                 output_folder=output_folder,
-                override_filename='unfolded_betatheta_correlation_matrix',
+                override_filename=prefix+'unfolded_betatheta_correlation_matrix',
                 textloc='top-left'
             )
         
@@ -1533,17 +1550,17 @@ class UnfoldedHistogram:
             data=[x / x_statonly for x in val_contributions],
             label=self.nuisance_names,
             thebinning = self.binning,
-            override_filename='nuisance_contributions',
+            override_filename=prefix+'nuisance_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance',
             logy=False,
             textloc='top-left'
         )
         self._plot_valonly_histogram(
-            output_folder, extratext, variable, cut, weight, binning,
+            output_folder, extratext, variable, splt.cut.NoopOperation(), weight, binning,
             data=[flux / flux_statonly for flux in flux_contributions],
             label=self.nuisance_names,
             thebinning = fluxbinning,
-            override_filename='nuisance_flux_contributions',
+            override_filename=prefix+'nuisance_flux_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance [flux per (pT, R) bin]',
             logy=False,
             textloc='top-left'
@@ -1553,7 +1570,7 @@ class UnfoldedHistogram:
             data=[shape / shape_statonly for shape in shape_contributions],
             label=self.nuisance_names,
             thebinning = self.binning,
-            override_filename='nuisance_shape_contributions',
+            override_filename=prefix+'nuisance_shape_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance [normalized per (pT, R) bin]',
             logy=False,
             textloc='top-left'
@@ -1564,17 +1581,17 @@ class UnfoldedHistogram:
             data=[np.sqrt(np.diag(cov))/x_statonly for cov in (cov_contributions + [cov_statonly, cov_prof])],
             label=self.nuisance_names + ['Stat', 'Total'],
             thebinning = self.binning,
-            override_filename='nuisance_err_contributions',
+            override_filename=prefix+'nuisance_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance',
             logy=True,
             textloc='top-left'
         )
         self._plot_valonly_histogram(
-            output_folder, extratext, variable, cut, weight, binning,
+            output_folder, extratext, variable, splt.cut.NoopOperation(), weight, binning,
             data=[np.sqrt(np.diag(cov))/flux_statonly for cov in (covflux_contributions + [covflux_statonly, covflux_total])],
             label=self.nuisance_names + ['Stat', 'Total'],
             thebinning = fluxbinning,
-            override_filename='nuisance_flux_err_contributions',
+            override_filename=prefix+'nuisance_flux_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance [flux per (pT, R) bin]',
             logy=True,
             textloc='top-left'
@@ -1591,7 +1608,7 @@ class UnfoldedHistogram:
             data=[np.sqrt(cov)/shape_statonly for cov in diagcov],
             label=self.nuisance_names + ['Stat', 'Total'],
             thebinning = self.binning,
-            override_filename='nuisance_shape_err_contributions',
+            override_filename=prefix+'nuisance_shape_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance [normalized per (pT, R) bin]',
             logy=True,
             textloc='top-left'

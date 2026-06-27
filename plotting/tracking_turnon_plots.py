@@ -10,7 +10,7 @@ import simonplot.util.common as splt_common
 import simonplot.util.histplot as splt_histplot
 from simonplot.util.comparison import ComparisonHistStruct
 
-def run_plots(MC_, DATA_, binlabels_, bincuts_, bincolors_):
+def run_plots(MC_, DATA_, binlabels_, bincuts_, bincolors_, basecut_):
 
     fig = splt_common.setup_canvas()
     ax = splt_common.make_oneax(fig)
@@ -18,16 +18,17 @@ def run_plots(MC_, DATA_, binlabels_, bincuts_, bincolors_):
 
 
     for i, (cut, label, color) in enumerate(zip(bincuts_, binlabels_, bincolors_)):
+        thecut = splt.cut.AndCuts([basecut_, cut])
         print(f"running for {label}")
         HMC = MC_.fill_hist(
             var,
-            cut,
+            thecut,
             wt,
             axis
         )
         HDATA = DATA_.fill_hist(
             var, 
-            cut,
+            thecut,
             wt,
             axis
         )
@@ -91,6 +92,7 @@ MC.compute_weight(DATA.lumi)
 
 var = splt.variable.BasicVariable('pt')
 wt = splt.variable.BasicVariable('wt_nominal')
+basecut = splt.cut.GreaterThanCut('Jpt', 50)
 
 axis = hist.axis.Regular(
     100, 1e-1, 1e2,
@@ -120,7 +122,7 @@ bincolors = [
     cmap(i/(len(binlabels)-1)) for i in range(len(binlabels))
 ]
 
-#run_plots(MC, DATA, binlabels, bincuts, bincolors)
+run_plots(MC, DATA, binlabels, bincuts, bincolors, basecut)
 
 
 bincuts = [
@@ -138,4 +140,4 @@ binlabels = [
 bincolors = [
     cmap(i/(len(binlabels)-1)) for i in range(len(binlabels))
 ]
-run_plots(MC, DATA, binlabels, bincuts, bincolors)
+run_plots(MC, DATA, binlabels, bincuts, bincolors, basecut)

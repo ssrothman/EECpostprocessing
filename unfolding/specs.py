@@ -30,6 +30,7 @@ class systspec(TypedDict):
     varytransfer : bool
     label : str | None
     altruntag : NotRequired[str]
+    altconfig : NotRequired[str]
 
 class detectormodelspec(TypedDict):
     systematics : List[systspec]

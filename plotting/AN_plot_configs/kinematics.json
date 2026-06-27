@@ -49,9 +49,10 @@
                 "cut::EqualsCut('nMu', 2)",
                 "cut::EqualsCut('nEle', 0)",
                 "cut::LessThanCut('numMediumB', 2)",
-                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)",
+                "cut::GreaterThanCut('Jpt', 50)"
             ],
-            "override_cuttext" : "",
+            "override_cuttext" : "Jet pT > 50 GeV",
             "binning" : "auto",
             "plotspath" : "ANplots/kinematics/",
             "plotsprefix" : "",

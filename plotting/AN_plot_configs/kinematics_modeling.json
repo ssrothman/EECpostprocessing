@@ -1,5 +1,74 @@
 {
     "TO DO" : [
+                {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "Pythia",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq_stack"
+                  },
+                  {
+                    "key": "MC",
+                    "label": "Herwig",
+                    "configsuite": "BasicConfig",
+                    "runtag": "Mar_01_2026",
+                    "name": "allMC_herwig_inclusive",
+                    "table": "parts",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq_stack"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "BasicConfig",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA",
+                    "table" : "parts",
+                    "objsyst" : "DATA",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "dxy",
+                "dz",
+                "puppiWeight",
+                "var::RatioVariable('pt', 'Jpt')",
+                "pt",
+                "eta"
+            ],
+            "override_filenames" : [
+                "dxy",
+                "dz",
+                "puppiWeight",
+                "pt_over_Jpt",
+                "pt",
+                "eta"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::EqualsCut('nMu', 2)",
+                "cut::EqualsCut('nEle', 0)",
+                "cut::LessThanCut('numMediumB', 2)",
+                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)",
+                "cut::GreaterThanCut('Jpt', 50)"
+            ],
+            "override_cuttext" : "Jet pT > 50 GeV",
+            "binning" : "auto",
+            "plotspath" : "ANplots/kinematics_modeling/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram"
+        },
         {
             "datasets" : [
                 {
@@ -156,74 +225,6 @@
                 "flav",
                 "nConstituents",
                 "nPassingConstituents"
-            ],
-            "weights" : [
-                "wt_nominal"
-            ],
-            "cut" : [
-                "cut::EqualsCut('nMu', 2)",
-                "cut::EqualsCut('nEle', 0)",
-                "cut::LessThanCut('numMediumB', 2)",
-                "cut::TwoSidedCut('Zmass', 91.1876-15, 91.1876+15)"
-            ],
-            "override_cuttext" : "",
-            "binning" : "auto",
-            "plotspath" : "ANplots/kinematics_modeling/",
-            "plotsprefix" : "",
-            "driver" : "plot_histogram"
-        },
-        {
-            "datasets" : [
-                  {
-                    "key": "MC",
-                    "label": "Pythia",
-                    "configsuite": "BasicConfig",
-                    "runtag": "Mar_01_2026",
-                    "name": "allMC",
-                    "table": "parts",
-                    "objsyst": "nominal",
-                    "location": "xrootd-submit",
-                    "dsetkind": "pq_stack"
-                  },
-                  {
-                    "key": "MC",
-                    "label": "Herwig",
-                    "configsuite": "BasicConfig",
-                    "runtag": "Mar_01_2026",
-                    "name": "allMC_herwig_inclusive",
-                    "table": "parts",
-                    "objsyst": "nominal",
-                    "location": "xrootd-submit",
-                    "dsetkind": "pq_stack"
-                  },
-                  {
-                    "key" : "DATA",
-                    "label" : "Data",
-                    "configsuite" : "BasicConfig",
-                    "runtag" : "Mar_01_2026",
-                    "name" : "DATA",
-                    "table" : "parts",
-                    "objsyst" : "DATA",
-                    "location" : "xrootd-submit",
-                    "dsetkind": "pq_stack",
-                    "nocount" : true
-                  }
-            ],
-            "variables" : [
-                "dxy",
-                "dz",
-                "puppiWeight",
-                "var::RatioVariable('pt', 'Jpt')",
-                "pt",
-                "eta"
-            ],
-            "override_filenames" : [
-                "dxy",
-                "dz",
-                "puppiWeight",
-                "pt_over_Jpt",
-                "pt",
-                "eta"
             ],
             "weights" : [
                 "wt_nominal"

@@ -419,7 +419,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+glu; default [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 3229438
         },
@@ -431,7 +431,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+glu; default [50 < Zpt < 250 GeV]",
-            "xsec" : 250000,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 3156699
         },
@@ -458,7 +458,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+glu; no hadronization [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 3180717
         },
@@ -470,7 +470,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+glu; no hadronization [50 < Zpt < 250 GeV]",
-            "xsec" : 250000,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 2102166
         },
@@ -497,7 +497,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+glu; no hard spin corr. [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 2794699
         },
@@ -509,7 +509,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+glu; no hard spin corr. [50 < Zpt < 250 GeV]",
-            "xsec" : 250000,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 2837474
         },
@@ -540,7 +540,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+q; default [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 0
         },
@@ -552,7 +552,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+q; default [50 < Zpt < 250 GeV]",
-            "xsec" : 250000,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 4256000
         },
@@ -579,7 +579,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+q; no hadronization [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 0
         },
@@ -591,7 +591,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+q; no hadronization [50 < Zpt < 250 GeV]",
-            "xsec" : 250000,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 3617049
         },
@@ -618,7 +618,7 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+q; no hard spin corr. [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
             "eventcount" : 0
         },

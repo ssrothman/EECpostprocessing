@@ -24,6 +24,10 @@ def main() -> None:
         '--extra-text', type=str, default=None,
         help="Extra text to add to the plot legends (e.g. to indicate which minimization result this is from)"
     )
+    parser.add_argument(
+        '--signalcut', action='store_true',
+        help="Whether to also plot the signal cut (if applicable) on the unfolded histogram"
+    )
     args = parser.parse_args()
 
     histogram_dir = Path(args.histogram_path).expanduser().resolve()
@@ -31,7 +35,7 @@ def main() -> None:
         raise NotADirectoryError(f"Histogram path is not a directory: {histogram_dir}")
 
     histogram = UnfoldedHistogram.from_disk(str(histogram_dir))
-    histogram.plot(output_folder=os.path.join(str(histogram_dir), 'plots'), covmats=args.covmats, extratext=args.extra_text)
+    histogram.plot(output_folder=os.path.join(str(histogram_dir), 'plots'), covmats=args.covmats, extratext=args.extra_text, signalcut=args.signalcut)
 
 if __name__ == "__main__":
     main()

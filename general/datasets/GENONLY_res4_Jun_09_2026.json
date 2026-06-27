@@ -12,7 +12,7 @@
             "label" : "Herwig Z+q; default [Zpt > 1200 GeV]",
             "xsec" : 1.0,
             "color" : "blue",
-            "eventcount" : 3827661
+            "eventcount" : 3827962
         },
         "herwig_q_250" : {
             "tag" : [
@@ -25,7 +25,7 @@
             "label" : "Herwig Z+q; default [250 < Zpt < 1200 GeV]",
             "xsec" : 2200,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3148108
         },
         "herwig_q_50" : {
             "tag" : [
@@ -37,7 +37,7 @@
             "label" : "Herwig Z+q; default [50 < Zpt < 250 GeV]",
             "xsec" : 250000,
             "color" : "blue",
-            "eventcount" : 3973812
+            "eventcount" : 2162287
         },
         "herwig_q_nohad_1200" : {
             "tag" : [
@@ -50,7 +50,7 @@
             "label" : "Herwig Z+q; no hadronization [Zpt > 1200 GeV]",
             "xsec" : 1.0,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3827962
         },
         "herwig_q_nohad_250" : {
             "tag" : [
@@ -63,7 +63,7 @@
             "label" : "Herwig Z+q; no hadronization [250 < Zpt < 1200 GeV]",
             "xsec" : 2200,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3148108
         },
         "herwig_q_nohad_50" : {
             "tag" : [
@@ -75,7 +75,7 @@
             "label" : "Herwig Z+q; no hadronization [50 < Zpt < 250 GeV]",
             "xsec" : 250000,
             "color" : "blue",
-            "eventcount" : 3508768
+            "eventcount" : 2164437
         },
         "herwig_q_nohardspin_1200" : {
             "tag" : [
@@ -88,7 +88,7 @@
             "label" : "Herwig Z+q; no hard spin corr. [Zpt > 1200 GeV]",
             "xsec" : 1.0,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3827993
         },
         "herwig_q_nohardspin_250" : {
             "tag" : [
@@ -101,7 +101,7 @@
             "label" : "Herwig Z+q; no hard spin corr. [250 < Zpt < 1200 GeV]",
             "xsec" : 2200,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3147670
         },
         "herwig_q_nohardspin_50" : {
             "tag" : [
@@ -113,7 +113,7 @@
             "label" : "Herwig Z+q; no hard spin corr. [50 < Zpt < 250 GeV]",
             "xsec" : 250000,
             "color" : "blue",
-            "eventcount" : 3721521
+            "eventcount" : 2160589
         },
         "herwig_q_nosoftspin_1200" : {
             "tag" : [
@@ -126,7 +126,7 @@
             "label" : "Herwig Z+q; no soft spin corr. [Zpt > 1200 GeV]",
             "xsec" : 1.0,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3827450
         },
         "herwig_q_nosoftspin_250" : {
             "tag" : [
@@ -139,7 +139,7 @@
             "label" : "Herwig Z+q; no soft spin corr. [250 < Zpt < 1200 GeV]",
             "xsec" : 2200,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3146128
         },
         "herwig_q_nosoftspin_50" : {
             "tag" : [
@@ -151,7 +151,7 @@
             "label" : "Herwig Z+q; no soft spin corr. [50 < Zpt < 250 GeV]",
             "xsec" : 250000,
             "color" : "blue",
-            "eventcount" : 3587704
+            "eventcount" : 2161375
         },
         "herwig_q_nospin_1200" : {
             "tag" : [
@@ -177,7 +177,7 @@
             "label" : "Herwig Z+q; no spin corr. [250 < Zpt < 1200 GeV]",
             "xsec" : 2200,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3146016
         },
         "herwig_q_nospin_50" : {
             "tag" : [
@@ -189,7 +189,7 @@
             "label" : "Herwig Z+q; no spin corr. [50 < Zpt < 250 GeV]",
             "xsec" : 250000,
             "color" : "blue",
-            "eventcount" : 3786048
+            "eventcount" : 2161920
         },
         "pythia_q_1200" : {
             "tag" : [
@@ -202,7 +202,7 @@
             "label" : "Pythia Z+q; default [Zpt > 1200 GeV]",
             "xsec" : 1.0,
             "color" : "blue",
-            "eventcount" : 3614557
+            "eventcount" : 7571177
         },
         "pythia_q_250" : {
             "tag" : [
@@ -213,9 +213,9 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+q; default [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3105864
         },
         "pythia_q_50" : {
             "tag" : [
@@ -225,9 +225,9 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+q; default [50 < Zpt < 250 GeV]",
-            "xsec" : 250000,
+            "xsec" : 1,
             "color" : "blue",
-            "eventcount" : 4256000
+            "eventcount" : 2091522
         },
         "pythia_q_nohad_1200" : {
             "tag" : [
@@ -240,7 +240,7 @@
             "label" : "Pythia Z+q; no hadronization [Zpt > 1200 GeV]",
             "xsec" : 1.0,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3800809
         },
         "pythia_q_nohad_250" : {
             "tag" : [
@@ -251,9 +251,9 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+q; no hadronization [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3108794
         },
         "pythia_q_nohad_50" : {
             "tag" : [
@@ -263,9 +263,9 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+q; no hadronization [50 < Zpt < 250 GeV]",
-            "xsec" : 250000,
+            "xsec" : 1,
             "color" : "blue",
-            "eventcount" : 3617049
+            "eventcount" : 2088510
         },
         "pythia_q_nospin_1200" : {
             "tag" : [
@@ -278,7 +278,7 @@
             "label" : "Pythia Z+q; no hard spin corr. [Zpt > 1200 GeV]",
             "xsec" : 1.0,
             "color" : "blue",
-            "eventcount" : 3614715
+            "eventcount" : 4026745
         },
         "pythia_q_nospin_250" : {
             "tag" : [
@@ -289,9 +289,9 @@
             "era" : "skip",
             "flags" : {"genVpt" : [250, 1200]},
             "label" : "Pythia Z+q; no hard spin corr. [250 < Zpt < 1200 GeV]",
-            "xsec" : 2200,
+            "xsec" : 1,
             "color" : "blue",
-            "eventcount" : 0
+            "eventcount" : 3105396
         },
         "pythia_q_nospin_50" : {
             "tag" : [
@@ -301,9 +301,9 @@
             "era" : "skip",
             "flags" : {"genVpt" : [50, 250]},
             "label" : "Pythia Z+q; no hard spin corr. [50 < Zpt < 250 GeV]",
-            "xsec" : 1.0,
+            "xsec" : 1,
             "color" : "blue",
-            "eventcount" : 4000206
+            "eventcount" : 2089398
         }
     }
 }

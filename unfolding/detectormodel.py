@@ -646,6 +646,8 @@ class DetectorModel:
             thedset = cfg['dset'].copy()
             if 'altruntag' in syst:
                 thedset['runtag'] = syst['altruntag']
+            if 'altconfig' in syst:
+                thedset['config_suite'] = syst['altconfig']
 
             if syst['onesided']:
                 t_up, gamma_up, rho_up = get_model_matrices(

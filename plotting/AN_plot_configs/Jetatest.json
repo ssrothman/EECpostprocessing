@@ -1,0 +1,136 @@
+{
+    "TO DO" : [
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig2",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "VetoConfig2",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA_2018C",
+                    "table" : "jets",
+                    "objsyst" : "DATA",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq",
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Jeta"
+            ],
+            "override_filenames" : [
+                "Jeta_Jpt30to50"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 30, 50)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/Jetatest/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "density" : true
+        },
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig2",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "VetoConfig2",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA_2018C",
+                    "table" : "jets",
+                    "objsyst" : "DATA",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq",
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Jeta"
+            ],
+            "override_filenames" : [
+                "Jeta_Jpt50to90"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 50, 90)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/Jetatest/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "density" : true
+        },
+        {
+            "datasets" : [
+                  {
+                    "key": "MC",
+                    "label": "MC",
+                    "configsuite": "VetoConfig2",
+                    "runtag": "Mar_01_2026",
+                    "name": "Pythia_inclusive",
+                    "table": "jets",
+                    "objsyst": "nominal",
+                    "location": "xrootd-submit",
+                    "dsetkind": "pq"
+                  },
+                  {
+                    "key" : "DATA",
+                    "label" : "Data",
+                    "configsuite" : "VetoConfig2",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "DATA_2018C",
+                    "table" : "jets",
+                    "objsyst" : "DATA",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq",
+                    "nocount" : true
+                  }
+            ],
+            "variables" : [
+                "Jeta"
+            ],
+            "override_filenames" : [
+                "Jeta_Jpt90to150"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::TwoSidedCut('Jpt', 90, 150)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/Jetatest/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "density" : true
+        }
+    ]
+}
