@@ -26,7 +26,15 @@ parser.add_argument("--cov", action="store_true", help="Build covariance output"
 
 parser.add_argument("--nocheck", action="store_true", help="Skip existing-output checks")
 
+parser.add_argument('--reweight', type=str, default=None, help='Reweight with a correctionlib correction (format path:correction_name)')
+parser.add_argument('--reweighted-suffix', type=str, default=None, help='Suffix to add to table name for reweighted output')
+
 args = parser.parse_args()
+
+if args.reweight is not None and args.reweighted_suffix is None:
+    parser.error("Must specify --reweighted-suffix when using --reweight")
+if args.reweight is None and args.reweighted_suffix is not None:
+    parser.error("Cannot specify --reweighted-suffix without --reweight")
 
 from general.datasets.expand_datasets import expand_datasets
 
@@ -112,6 +120,8 @@ ncommands = setup_binning_workspace(
     cov=args.cov,
     nocheck=args.nocheck,
     dataset_objsyst_wtsyst_triples=dataset_objsyst_wtsyst_triples,
+    reweight=args.reweight,
+    reweighted_suffix=args.reweighted_suffix
 )
 
 print(f"Workspace written to {args.where}")

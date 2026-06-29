@@ -73,6 +73,7 @@ if args.reweight is not None:
     correction_inputs = {
         var.name : eval(var.description) for var in correction.inputs
     }
+    print("Using correction %s from file %s with inputs: %s" % (correction_name, correction_path, correction_inputs))
 else:
     correction = None
     correction_inputs = None
@@ -95,7 +96,8 @@ if not args.nocheck:
             table,
             args.cov,
             args.statN,
-            args.statK
+            args.statK,
+            args.reweighted_suffix
         )
         print("looking for", path)
         if fs.exists(path):

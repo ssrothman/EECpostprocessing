@@ -32,6 +32,7 @@ def read_hist(
     cov: bool,
     statN: int = -1,
     statK: int = -1,
+    suffix : str | None = None
 ) -> tuple[np.ndarray, ArbitraryBinning | ArbitraryGenRecoBinning]:
     
     if is_stack:
@@ -55,7 +56,8 @@ def read_hist(
                 is_stack=False,
                 cov=cov,
                 statN=statN,
-                statK=statK
+                statK=statK,
+                suffix=suffix
             )
 
             if accu is None:
@@ -81,7 +83,8 @@ def read_hist(
                 is_stack=True,
                 cov=cov,
                 statN=statN,
-                statK=statK
+                statK=statK,
+                suffix = suffix
             )
 
             if accu is None:
@@ -109,7 +112,8 @@ def read_hist(
             table,
             cov,
             statN,
-            statK
+            statK,
+            fname_suffix = suffix
         )
 
         _, binningpath = get_hist_bincfg_path(
@@ -159,7 +163,8 @@ def handle_one_table(
             table,
             args.cov,
             args.statN,
-            args.statK
+            args.statK,
+            args.suffix
         )
 
         if fs.exists(outpath):
@@ -177,7 +182,8 @@ def handle_one_table(
         is_stack=True,
         cov=args.cov,
         statN=args.statN,
-        statK=args.statK
+        statK=args.statK,
+        suffix = args.suffix
     )
 
     fs, outpath = get_hist_path(
@@ -190,7 +196,8 @@ def handle_one_table(
         table,
         args.cov,
         args.statN,
-        args.statK
+        args.statK,
+        fname_suffix = args.suffix
     )
 
     fs.makedirs(os.path.dirname(outpath), exist_ok=True)
@@ -238,6 +245,9 @@ if __name__ == '__main__':
                         help='Covariance matrix')
     parser.add_argument('--nocheck', action='store_true',
                         help='Do not check if output file already exists')
+    
+    parser.add_argument('--suffix', type=str, default=None,
+                        help='Suffix for output files')
     
     args = parser.parse_args()
     

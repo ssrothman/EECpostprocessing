@@ -75,6 +75,12 @@ def run_one_check(cmd:str, validate:bool):
     else:
         cov = False
 
+    if '--reweighted-suffix' in tokens:
+        idx = tokens.index('--reweighted-suffix')
+        reweighted_suffix = tokens[idx+1]
+    else:
+        reweighted_suffix = None
+
     # now we can just lookup the path to the binned .npy file
     missing_tables = []
     
@@ -89,7 +95,8 @@ def run_one_check(cmd:str, validate:bool):
             table,
             cov,
             statN,
-            statK
+            statK,
+            reweighted_suffix
         )
         if fs.exists(path):
             if validate:
