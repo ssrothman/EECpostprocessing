@@ -20,20 +20,23 @@
             "narrow_to" : [2, 3]
         },
         {
-            "type" : "Regular-Prebinned",
+            "type" : "Variable-Prebinned",
             "name" : "r",
-            "start" : 0.0,
-            "stop" : 1.0,
-            "bins" : 20,
+            "edges" : [
+                0.0, 0.2, 0.4,
+                0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
+                1.1, 1.2, 1.4, 1.8, 2.0, 
+                2.5, 3.0
+            ],
             "underflow" : true,
             "overflow" : true
         },
         {
             "type" : "Regular-Prebinned",
             "name" : "c",
-            "start" : 0.0,
-            "stop" : 1.5707963269,
-            "bins" : 15,
+            "start" : -3.14159265,
+            "stop" :   3.14159265,
+            "bins" : 48,
             "underflow" : true,
             "overflow" : true
         }
