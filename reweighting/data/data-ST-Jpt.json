@@ -1,0 +1,121 @@
+{
+  "schema_version": 2,
+  "description": null,
+  "corrections": [
+    {
+      "name": "Spline",
+      "description": "Spline-smoothed reweighting factor",
+      "version": 1,
+      "inputs": [
+        {
+          "name": "Jpt",
+          "type": "real",
+          "description": "pc.field('Jpt')"
+        }
+      ],
+      "output": {
+        "name": "weight",
+        "type": "real",
+        "description": null
+      },
+      "generic_formulas": [
+        {
+          "nodetype": "formula",
+          "expression": "[1] + [2] * (x - [0]) + [3] * (x - [0])^2 + [4] * (x - [0])^3",
+          "parser": "TFormula",
+          "variables": [
+            "Jpt"
+          ],
+          "parameters": null
+        }
+      ],
+      "data": {
+        "nodetype": "binning",
+        "input": "Jpt",
+        "edges": [
+          30.112777765,
+          31.112777765,
+          63.640028805,
+          78.880170695,
+          91.017763105,
+          121.18330428,
+          247.87593809,
+          657.59446039,
+          658.59446039
+        ],
+        "content": [
+          3526.0403435637854,
+          {
+            "nodetype": "formularef",
+            "index": 0,
+            "parameters": [
+              31.112777765,
+              3526.0403435637854,
+              -135.83919456371729,
+              2.5136527866774823,
+              -0.01748988974813696
+            ]
+          },
+          {
+            "nodetype": "formularef",
+            "index": 0,
+            "parameters": [
+              63.640028805,
+              1165.1581904386635,
+              -27.82883167739983,
+              0.806958683178762,
+              -0.013542342608465754
+            ]
+          },
+          {
+            "nodetype": "formularef",
+            "index": 0,
+            "parameters": [
+              78.880170695,
+              880.5327304084428,
+              -12.668613698116427,
+              0.18779701455072995,
+              0.001717983654013433
+            ]
+          },
+          {
+            "nodetype": "formularef",
+            "index": 0,
+            "parameters": [
+              91.017763105,
+              757.5047009163426,
+              -7.350520481000638,
+              0.2503535706291023,
+              -0.0027103873559493064
+            ]
+          },
+          {
+            "nodetype": "formularef",
+            "index": 0,
+            "parameters": [
+              121.18330428,
+              689.1853827908282,
+              0.3545501914129142,
+              0.0050726664708377195,
+              -0.000031671416928429114
+            ]
+          },
+          {
+            "nodetype": "formularef",
+            "index": 0,
+            "parameters": [
+              247.87593809,
+              751.1204718235806,
+              0.11481317412122782,
+              -0.006964939210634216,
+              0.000012026026766071623
+            ]
+          },
+          456.1021897994468
+        ],
+        "flow": "clamp"
+      }
+    }
+  ],
+  "compound_corrections": null
+}
