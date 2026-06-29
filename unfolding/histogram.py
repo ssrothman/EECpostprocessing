@@ -501,7 +501,8 @@ class Histogram:
             output_folder=output_folder,
             no_lumi_normalization=True,
             override_filename='%s_values_comparison'%transform,
-            logy=True
+            logy=True,
+            textloc='bottom-left'
         )
         if np.all([np.max(np.abs(err_datasets_l[i].data[0])) > 0 for i in range(len(err_datasets_l))]):
             plot_histogram(
@@ -515,7 +516,8 @@ class Histogram:
                 no_lumi_normalization=True,
                 override_filename='%s_errs_comparison'%transform,
                 override_ylabel='Error [sqrt diag(cov)]',
-                logy=True
+                logy=True,
+                textloc='bottom-left'
             )
 
         if pretty:
@@ -598,7 +600,8 @@ class Histogram:
                             no_lumi_normalization=True,
                             override_filename='%s_values_comparison_pt%d_R%d'%(transform, ipt, iR),
                             logy=False,
-                            override_ylabel='%s / %s' % (labels_l[0], labels_l[i])
+                            override_ylabel='%s / %s' % (labels_l[0], labels_l[i]),
+                            textloc='bottom-left'
                         )
 
     def plot(
@@ -1553,7 +1556,7 @@ class UnfoldedHistogram:
             override_filename=prefix+'nuisance_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance',
             logy=False,
-            textloc='top-left'
+            textloc='bottom-left'
         )
         self._plot_valonly_histogram(
             output_folder, extratext, variable, splt.cut.NoopOperation(), weight, binning,
@@ -1563,7 +1566,7 @@ class UnfoldedHistogram:
             override_filename=prefix+'nuisance_flux_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance [flux per (pT, R) bin]',
             logy=False,
-            textloc='top-left'
+            textloc='bottom-left'
         )
         self._plot_valonly_histogram(
             output_folder, extratext, variable, cut, weight, binning,
@@ -1573,7 +1576,7 @@ class UnfoldedHistogram:
             override_filename=prefix+'nuisance_shape_contributions',
             override_ylabel='Proportional shift in unfolded result from nuisance [normalized per (pT, R) bin]',
             logy=False,
-            textloc='top-left'
+            textloc='bottom-left'
         )
 
         self._plot_valonly_histogram(
@@ -1584,7 +1587,7 @@ class UnfoldedHistogram:
             override_filename=prefix+'nuisance_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance',
             logy=True,
-            textloc='top-left'
+            textloc='bottom-left'
         )
         self._plot_valonly_histogram(
             output_folder, extratext, variable, splt.cut.NoopOperation(), weight, binning,
@@ -1594,7 +1597,7 @@ class UnfoldedHistogram:
             override_filename=prefix+'nuisance_flux_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance [flux per (pT, R) bin]',
             logy=True,
-            textloc='top-left'
+            textloc='bottom-left'
         )
 
         # due to floating point rounding, it can happen that some of the contributions are very slightly negative
@@ -1611,5 +1614,5 @@ class UnfoldedHistogram:
             override_filename=prefix+'nuisance_shape_err_contributions',
             override_ylabel='$\\sigma/\\mu$ contribution from nuisance [normalized per (pT, R) bin]',
             logy=True,
-            textloc='top-left'
+            textloc='bottom-left'
         )

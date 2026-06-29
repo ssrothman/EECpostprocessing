@@ -10,10 +10,7 @@ def get_rootfiles(fs, path, exclude_dropped=True):
     return get_files_recursive(fs, path, allowed, '')
 
 def get_files_recursive(fs, rootpath, allowed = lambda f : True, prepend = ''):
-    print("get files recursive: %s" % rootpath)
-    print("\t", fs)
     pathlist = fs.ls(rootpath, detail=True)
-    print("len(pathlist) = %d" % len(pathlist))
     result = []
     for path in pathlist:
         if path['type'] == 'directory':

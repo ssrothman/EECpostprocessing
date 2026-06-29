@@ -22,6 +22,7 @@ class dsspec(TypedDict):
 class whichsystspec(TypedDict):
     wtsyst : str
     objsyst : str
+    suffix : NotRequired[str]
 
 class systspec(TypedDict):
     name : str
@@ -35,6 +36,7 @@ class systspec(TypedDict):
 class detectormodelspec(TypedDict):
     systematics : List[systspec]
     dset : dsspec
+    nominalhist : whichsystspec
 
 class histspec(TypedDict):
     dset : dsspec

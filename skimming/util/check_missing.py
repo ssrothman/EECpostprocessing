@@ -181,8 +181,14 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
 
     for completed_name, completed_indices in completed_names.items():
         if completed_name not in expected_names:
-            print("[WARNING] Found completed file %s which is not in the expected target files." % completed_name)
-            erroneous_files.add(fname_lookup[completed_name])
+            if len(erroneous_files) < 10:
+                #print("[WARNING] Found completed file %s which is not in the expected target files." % completed_name)
+                pass
+            elif len(erroneous_files) == 10:
+                #print("[WARNING] Found more than 10 completed files which are not in the expected target files, suppressing further warnings.")
+                pass
+
+            erroneous_files.add(completed_name)
             continue
 
         expected_indices = expected_names[completed_name]
@@ -224,11 +230,18 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
             print("\t expected range ", expected_indices)
             print("\t completed range ", completed_indices)
             print("\tuniqueid", completed_name)
-            missing_files.add(fname_lookup[completed_name])
+            if completed_indices[0] != expected_indices[0]:
+                erroneous = True
+            else:
+                missing_files.add(fname_lookup[completed_name])
+
 
         if erroneous:
             print("[WARNING] Deleting anomalous files for %s." % completed_name)
             batch_sizes = []
+
+            largest_final = 0
+
             for item in listdir:
                 if os.path.basename(item['name']).startswith(completed_name):
                     #parse with re
@@ -238,6 +251,8 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
                         entry_start = int(match.group(2))
                         entry_stop = int(match.group(3))
                         batch_sizes.append(entry_stop - entry_start)
+                        if entry_stop == expected_indices[1]:
+                            largest_final = max(largest_final, entry_stop - entry_start)
                     else:
                         raise ValueError("Expected name format is '<ANYTHING>_%%d-%%d.(parquet|json)' - got %s" % (item['name']))
             
@@ -259,11 +274,14 @@ def check_one_table(target_files, skimfs, hostid, skimbase,
                         if batch_size != largest_batch_size and entry_stop != expected_indices[1]:
                             print("\t\tdeleting %s" % item['name'])
                             skimfs.rm(os.path.join(skimpath, item['name']))
+                        elif entry_stop == expected_indices[1] and batch_size != largest_final:
+                            print("\t\tdeleting %s" % item['name'])
+                            skimfs.rm(os.path.join(skimpath, item['name']))
                     else:
                         raise ValueError("Expected name format is '<ANYTHING>_%%d-%%d.(parquet|json)' - got %s" % (item['name']))
 
             erroneous_files.add(fname_lookup[completed_name])
-            missing_files.add(fname_lookup[completed_name])
+            #missing_files.add(fname_lookup[completed_name])
 
     for expected_name in expected_names.keys():
         if expected_name not in completed_names:
@@ -527,7 +545,7 @@ def stage_missing(workspace : str, scheduler : str, files_per_job : int, mem : s
         os.makedirs(os.path.join(workspace, "slurm"), exist_ok=True)
     elif scheduler == "condor":
         os.makedirs(os.path.join(workspace, "condor"), exist_ok=True)
-    else:  # local
+    elif scheduler == "local":
         os.makedirs(os.path.join(workspace, "local"), exist_ok=True)
 
     target_name = make_missing_target_file(workspace, suffix, list(missing_files))

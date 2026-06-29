@@ -46,7 +46,8 @@ def read_hist(dset : dsspec,
         table,
         False,
         dset['statN'],
-        dset['statK']
+        dset['statK'],
+        hist.get('suffix', None)
     )
 
     _, bincfgpath = get_hist_bincfg_path(
@@ -58,6 +59,7 @@ def read_hist(dset : dsspec,
         table
     )
 
+    print("reading histogram from", valpath)
     with fs.open(valpath, 'rb') as f:
         values = np.load(f)
 
@@ -103,7 +105,8 @@ def read_hist(dset : dsspec,
                 table,
                 True,
                 dset['statN'],
-                dset['statK']
+                dset['statK'],
+                hist.get('suffix', None)
             )
             with fs.open(covpath, 'rb') as f:
                 covmat = np.load(f)

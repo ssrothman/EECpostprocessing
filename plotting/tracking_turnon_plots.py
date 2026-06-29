@@ -117,7 +117,7 @@ binlabels = [
     '$1.5 < |\\eta| < 1.8$',
     '$|\\eta| > 1.8$'
 ]
-cmap = plt.cm.viridis
+cmap = plt.get_cmap('viridis')
 bincolors = [
     cmap(i/(len(binlabels)-1)) for i in range(len(binlabels))
 ]

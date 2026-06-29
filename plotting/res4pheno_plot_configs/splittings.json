@@ -4,6 +4,176 @@
             "datasets" : [
                 {
                     "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nohad",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nohardspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nosoftspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nospin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable(var::BasicVariable('pdgId1'))",
+                "var::AbsVariable(var::BasicVariable('pdgId2'))",
+                "var::AbsVariable(var::BasicVariable('pdgId3'))",
+                "var::AbsVariable(var::BasicVariable('pdgId4'))",
+                "var::AbsVariable(var::BasicVariable('pdgId5'))",
+                "var::AbsVariable(var::BasicVariable('pdgId6'))"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::NoCut()"
+            ],
+            "binning" : "autoint:abs(pdgid)",
+            "plotspath" : "res4_pheno_plots/splittings/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_q_stacked_pdgId1",
+                "herwig_q_stacked_pdgId2",
+                "herwig_q_stacked_pdgId3",
+                "herwig_q_stacked_pdgId4",
+                "herwig_q_stacked_pdgId5",
+                "herwig_q_stacked_pdgId6"
+            ],
+            "logy" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nohad",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nohardspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nosoftspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "herwig_q_nospin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicVariable('deltaPsi_type3')",
+                "var::BasicVariable('deltaR23')",
+                "var::BasicVariable('deltaR56')",
+                "var::BasicVariable('kt23')",
+                "var::BasicVariable('kt56')",
+                "var::BasicVariable('z23')",
+                "var::BasicVariable('z56')",
+                "var::BasicVariable('pt1')",
+                "var::BasicVariable('pt4')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::NoCut()"
+            ],
+            "binning" : "auto",
+            "plotspath" : "res4_pheno_plots/splittings/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "herwig_q_stacked_deltaPsi_type3",
+                "herwig_q_stacked_deltaR23",
+                "herwig_q_stacked_deltaR56",
+                "herwig_q_stacked_kt23",
+                "herwig_q_stacked_kt56",
+                "herwig_q_stacked_z23",
+                "herwig_q_stacked_z56",
+                "herwig_q_stacked_pt1",
+                "herwig_q_stacked_pt4"
+            ],
+            "logy" : true
+        },
+
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
                     "runtag" : "May_26_2026",
                     "name" : "herwig_glu",
                     "table" : "DeltaPsiSoftSide",
@@ -168,7 +338,191 @@
             ],
             "logy" : true
         },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {
+            "datasets" : [
                 {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nohad",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nohardspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nosoftspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nospin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                }
+            ],
+            "variables" : [
+                "var::AbsVariable(var::BasicVariable('pdgId1'))",
+                "var::AbsVariable(var::BasicVariable('pdgId2'))",
+                "var::AbsVariable(var::BasicVariable('pdgId3'))",
+                "var::AbsVariable(var::BasicVariable('pdgId4'))",
+                "var::AbsVariable(var::BasicVariable('pdgId5'))",
+                "var::AbsVariable(var::BasicVariable('pdgId6'))"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::NoCut()"
+            ],
+            "binning" : "autoint:abs(pdgid)",
+            "plotspath" : "res4_pheno_plots/splittings/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_q_stacked_pdgId1",
+                "pythia_q_stacked_pdgId2",
+                "pythia_q_stacked_pdgId3",
+                "pythia_q_stacked_pdgId4",
+                "pythia_q_stacked_pdgId5",
+                "pythia_q_stacked_pdgId6"
+            ],
+            "logy" : true
+        },
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nohad",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nohardspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nosoftspin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                },
+                {
+                    "configsuite" : "GenonlyConfig",
+                    "runtag" : "Jun_09_2026",
+                    "name" : "pythia_q_nospin",
+                    "table" : "DeltaPsiSoftSide",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind" : "pq_stack",
+                    "no_count" : false
+                }
+            ],
+            "variables" : [
+                "var::BasicVariable('deltaPsi_type3')",
+                "var::BasicVariable('deltaR23')",
+                "var::BasicVariable('deltaR56')",
+                "var::BasicVariable('kt23')",
+                "var::BasicVariable('kt56')",
+                "var::BasicVariable('z23')",
+                "var::BasicVariable('z56')",
+                "var::BasicVariable('pt1')",
+                "var::BasicVariable('pt4')"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::NoCut()"
+            ],
+            "binning" : "auto",
+            "plotspath" : "res4_pheno_plots/splittings/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_filenames" : [
+                "pythia_q_stacked_deltaPsi_type3",
+                "pythia_q_stacked_deltaR23",
+                "pythia_q_stacked_deltaR56",
+                "pythia_q_stacked_kt23",
+                "pythia_q_stacked_kt56",
+                "pythia_q_stacked_z23",
+                "pythia_q_stacked_z56",
+                "pythia_q_stacked_pt1",
+                "pythia_q_stacked_pt4"
+            ],
+            "logy" : true
+        },
+
+
+        {
             "datasets" : [
                 {
                     "configsuite" : "GenonlyConfig",
@@ -193,7 +547,7 @@
                 {
                     "configsuite" : "GenonlyConfig",
                     "runtag" : "May_26_2026",
-                    "name" : "herwig_glu_nospin",
+                    "name" : "pythia_glu_nospin",
                     "table" : "DeltaPsiSoftSide",
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",

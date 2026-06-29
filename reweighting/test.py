@@ -4,47 +4,30 @@ import reweighting.smoothing
 import simonplot as splt
 import numpy as np
 
-TT = build_pq_dataset(
+DATA = build_pq_dataset_stack(
     'VetoConfig1',
     'Mar_01_2026',
-    'TT',
-    'nominal',
+    'DATA',
+    'DATA',
     'jets',
-    location = 'xrootd-submit',
+    location = 'xrootd-submit'
 )
-ST = build_pq_dataset_stack(
-    'VetoConfig1',
-    'Mar_01_2026',
-    'ST',
-    'nominal',
-    'jets',
-    location = 'xrootd-submit',
-)
-diboson = build_pq_dataset_stack(
-    'VetoConfig1',
-    'Mar_01_2026',
-    'diboson',
-    'nominal',
-    'jets',
-    location = 'xrootd-submit',
-)
-pythia = build_pq_dataset_stack(
+
+MC = build_pq_dataset_stack(
     'VetoConfig1',
     'Mar_01_2026',
     'Pythia_HTsum',
     'nominal',
     'jets',
-    location = 'xrootd-submit',
+    location = 'xrootd-submit'
 )
-pythia.compute_weight(1.0)
-TT.compute_weight(1.0)
-ST.compute_weight(1.0)
-diboson.compute_weight(1.0)
+
+MC.compute_weight(DATA.lumi)
 
 import pyarrow.compute as pc
 cut = None
 variable = pc.field('Jpt')
-bins = np.logspace(np.log10(30), np.log10(1000), 30, base=10)
+bins = np.logspace(np.log10(30), np.log10(1000), 50, base=10)
 
 evtwt_nominal = pc.field('wt_nominal')
 
@@ -57,47 +40,73 @@ labels = [
     "Spline smoothing (smoothing_factor=100)"
 ]
 
-for denom, name in [(ST, "ST"), (diboson, "diboson"), (TT, "TT")]:
-    smoothings = [
-        reweighting.smoothing.SplineSmoothing(
-            degree=3, smoothing_factor=0.3
-        ),
-        reweighting.smoothing.SplineSmoothing(
-            degree=3, smoothing_factor=1.0
-        ),
-        reweighting.smoothing.SplineSmoothing(
-            degree=3, smoothing_factor=3
-        ),
-        reweighting.smoothing.SplineSmoothing(
-            degree=3, smoothing_factor=10
-        ),
-        reweighting.smoothing.SplineSmoothing(
-            degree=3, smoothing_factor=30
-        ),
-        reweighting.smoothing.SplineSmoothing(
-            degree=3, smoothing_factor=100
-        ),
-    ]
-    reweighting.reweighting_backend.compare_smothings(
-        pythia,
-        denom,
-        cut,
-        variable,
-        wtvar_num = evtwt_nominal,
-        wtvar_denom = evtwt_nominal,
-        bins = bins,
-        smoothings = smoothings,
-        labels = labels,
-        logx=True,
-        logy=False,
-        isMC = True,
-        lumi = None,
-        plot_path = f'reweighting/data/{name}'
+smoothings = [
+    reweighting.smoothing.SplineSmoothing(
+        degree=3, smoothing_factor=0.3
+    ),
+    reweighting.smoothing.SplineSmoothing(
+        degree=3, smoothing_factor=1.0
+    ),
+    reweighting.smoothing.SplineSmoothing(
+        degree=3, smoothing_factor=3
+    ),
+    reweighting.smoothing.SplineSmoothing(
+        degree=3, smoothing_factor=10
+    ),
+    reweighting.smoothing.SplineSmoothing(
+        degree=3, smoothing_factor=30
+    ),
+    reweighting.smoothing.SplineSmoothing(
+        degree=3, smoothing_factor=100
+    ),
+]
+reweighting.reweighting_backend.compare_smothings(
+    MC,
+    DATA,
+    cut,
+    variable,
+    wtvar_num = evtwt_nominal,
+    wtvar_denom = evtwt_nominal,
+    bins = bins,
+    smoothings = smoothings,
+    labels = labels,
+    logx=True,
+    logy=False,
+    isMC = True,
+    lumi = None,
+    plot_path = f'reweighting/data/TEST-data-MC-Jpt',
+    ylabel = 'MC/Data',
+    xlabel = 'Jet pT'
+)
+
+labels = ['Spline']
+smoothings = [
+    reweighting.smoothing.SplineSmoothing(
+        degree=3, smoothing_factor=30
     )
-    reweighting.reweighting_backend.dump_smoothings(
-        smoothings,
-        labels,
-        varname = 'Jpt',
-        vardesc = 'pc.field("Jpt")',
-        output_path = 'reweighting/data/reweightings_%s.json' % name
-    )
+]
+reweighting.reweighting_backend.compare_smothings(
+    MC,
+    DATA,
+    cut,
+    variable,
+    wtvar_num = evtwt_nominal,
+    wtvar_denom = evtwt_nominal,
+    bins = bins,
+    smoothings = smoothings,
+    labels = labels,
+    logx=True,
+    logy=False,
+    isMC = True,
+    lumi = None,
+    ylabel = 'MC/Data',
+    xlabel = 'Jet pT',
+    plot_path = f'reweighting/data/data-MC-Jpt'
+)
+reweighting.reweighting_backend.dump_smoothings(
+    smoothings,
+    labels,
+    varname = 'Jpt',
+    vardesc = 'pc.field("Jpt")',
+    output_path = 'reweighting/data/data-MC-Jpt.json'
+)

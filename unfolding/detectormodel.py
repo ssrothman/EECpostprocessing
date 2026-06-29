@@ -36,22 +36,22 @@ def hist_from_syst(spec : systspec, updn : str | None) -> whichsystspec:
             'wtsyst' : thename
         }
 
-def get_transfer_binning(dset : dsspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None) -> ArbitraryGenRecoBinning:
+def get_transfer_binning(dset : dsspec, nominalhist : whichsystspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None) -> ArbitraryGenRecoBinning:
     tmp, binning = read_hist(
         dset, 
-        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'},
+        nominalhist,
         'transfer',
         False
     )
     utG = read_hist(
         dset, 
-        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'}, 
+        nominalhist, 
         'untransferedGen',
         False
     )[0]
     utR = read_hist(
         dset, 
-        {'objsyst' : 'nominal', 'wtsyst' : 'nominal'}, 
+        nominalhist, 
         'untransferedReco',
         False
     )[0]    
@@ -623,10 +623,7 @@ class DetectorModel:
     def from_dataset(cls, cfg : detectormodelspec, rebinning_reco : str | dict | None, rebinning_gen : str | dict | None) -> "DetectorModel":
         t0, gamma0, rho0 = get_model_matrices(
             cfg['dset'],
-            {
-                'objsyst' : 'nominal',
-                'wtsyst' : 'nominal'
-            },
+            cfg['nominalhist'],
             rebinning_reco = rebinning_reco,
             rebinning_gen = rebinning_gen
         )
@@ -699,6 +696,7 @@ class DetectorModel:
 
         binning = get_transfer_binning(
             cfg['dset'],
+            cfg['nominalhist'],
             rebinning_reco = rebinning_reco,
             rebinning_gen = rebinning_gen
         )

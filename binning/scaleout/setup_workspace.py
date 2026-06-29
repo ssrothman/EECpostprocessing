@@ -18,6 +18,8 @@ def _build_command(
     statK: int,
     bincfg: Optional[str],
     cov: bool,
+    reweight: Optional[str],
+    reweighted_suffix: Optional[str],
 ) -> str:
     parts = [
         "bin.py",
@@ -36,6 +38,10 @@ def _build_command(
         str(statK),
         "--nocheck",
     ]
+    if reweight is not None:
+        parts.extend(["--reweight", shlex.quote(reweight)])
+    if reweighted_suffix is not None:
+        parts.extend(["--reweighted-suffix", shlex.quote(reweighted_suffix)])
 
     if bincfg is not None:
         parts.extend(["--bincfg", shlex.quote(bincfg)])
@@ -58,6 +64,8 @@ def setup_binning_workspace(
     bincfg: Optional[str] = None,
     cov: bool = False,
     nocheck: bool = False,
+    reweight: Optional[str] = None,
+    reweighted_suffix: Optional[str] = None,
 ) -> int:
     this_dir = os.path.dirname(__file__)
 
@@ -79,7 +87,9 @@ def setup_binning_workspace(
                         cov,
                         statN,
                         statK,
+                        reweighted_suffix
                     )
+                    
                     if fs.exists(outpath):
                         skipped_existing += 1
                         continue
@@ -96,6 +106,8 @@ def setup_binning_workspace(
                     statK=statK,
                     bincfg=bincfg,
                     cov=cov,
+                    reweight=reweight,
+                    reweighted_suffix=reweighted_suffix,
                 )
                 commands.append(cmd)
 

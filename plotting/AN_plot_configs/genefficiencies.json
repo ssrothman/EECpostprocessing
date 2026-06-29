@@ -10,6 +10,137 @@
                     "objsyst" : "nominal",
                     "location" : "xrootd-submit",
                     "dsetkind": "pq_stack",
+                    "color_override" : "#440154",
+                    "label_override" : "$0.0 < |\\eta| < 0.3$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::LessThanCut(var::AbsVariable('genEta'), 0.3)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "#443983",
+                    "label_override" : "$0.3 < |\\eta| < 0.6$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('genEta'), 0.3, 0.6)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "#31688E",
+                    "label_override" : "$0.6 < |\\eta| < 0.9$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('genEta'), 0.6, 0.9)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "#31688E",
+                    "label_override" : "$0.9 < |\\eta| < 1.2$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('genEta'), 0.9, 1.2)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "#35B779",
+                    "label_override" : "$1.2 < |\\eta| < 1.5$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('genEta'), 1.2, 1.5)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "#90D743",
+                    "label_override" : "$1.5 < |\\eta| < 1.8$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::TwoSidedCut(var::AbsVariable('genEta'), 1.5, 1.8)"
+                    ]
+                },
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
+                    "color_override" : "#FDE725",
+                    "label_override" : "$|\\eta| > 1.8$",
+                    "never_resolve" : true,
+                    "extra_cuts" : [
+                        "cut::GreaterThanCut(var::AbsVariable('genEta'), 1.8)"
+                    ]
+                }
+            ],
+            "variables" : [
+                "var::RateVariable(var::VariableFromCut(cut::GreaterThanCut('nMatches', 1)), 'genPt')"
+            ],
+            "override_filenames" : [
+                "part_matching_efficiency_wrt_pT_Jet_pt_inclusive_eta_binned.png"
+            ],
+            "weights" : [
+                "wt_nominal"
+            ],
+            "cut" : [
+                "cut::GreaterThanCut('genPt', 0.01)",
+                "cut::GreaterThanCut('genJetMatched', 1)"
+            ],
+            "binning" : "auto",
+            "plotspath" : "ANplots/genefficiencies/",
+            "plotsprefix" : "",
+            "driver" : "plot_histogram",
+            "override_textloc" : "bottom-right",
+            "logx" : true,
+            "nopad" : true
+        },
+
+
+        {
+            "datasets" : [
+                {
+                    "configsuite" : "VetoConfig1",
+                    "runtag" : "Mar_01_2026",
+                    "name" : "Pythia_HTsum",
+                    "table" : "genparts",
+                    "objsyst" : "nominal",
+                    "location" : "xrootd-submit",
+                    "dsetkind": "pq_stack",
                     "color_override" : "black",
                     "label_override" : "",
                     "never_resolve" : true,

@@ -1,10 +1,81 @@
 {
     "Jun_09_2026" : {
         "base" : "condor_production/Jun_09_2026",
+        "herwig_q" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
+        "herwig_q_nohad" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
+        "herwig_q_nohardspin" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
+        "herwig_q_nosoftspin" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
+        "herwig_q_nospin" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
+        "pythia_q" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
+        "pythia_q_nohad" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
+        "pythia_q_nospin" : {
+            "tag" : "THIS IS A STACK - IT IS NOT ON DISK ANYWHERE",
+            "location" : "simon-LPC",
+            "era" : "THIS SHOULD NEVER APPEAR IN SKIMMING",
+            "flags" : {},
+            "label" : "",
+            "color" : "",
+            "xsec" : 252201
+        },
         "herwig_q_1200" : {
             "tag" : [
-                "herwig_q_1200",
-                "herwig_q_250"
+                "herwig_q_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -16,8 +87,7 @@
         },
         "herwig_q_250" : {
             "tag" : [
-                "herwig_q_250",
-                "herwig_q_50"
+                "herwig_q_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -41,8 +111,7 @@
         },
         "herwig_q_nohad_1200" : {
             "tag" : [
-                "herwig_q_nohad_1200",
-                "herwig_q_nohad_250"
+                "herwig_q_nohad_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -54,8 +123,7 @@
         },
         "herwig_q_nohad_250" : {
             "tag" : [
-                "herwig_q_nohad_250",
-                "herwig_q_nohad_50"
+                "herwig_q_nohad_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -79,8 +147,7 @@
         },
         "herwig_q_nohardspin_1200" : {
             "tag" : [
-                "herwig_q_nohardspin_1200",
-                "herwig_q_nohardspin_250"
+                "herwig_q_nohardspin_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -92,8 +159,7 @@
         },
         "herwig_q_nohardspin_250" : {
             "tag" : [
-                "herwig_q_nohardspin_250",
-                "herwig_q_nohardspin_50"
+                "herwig_q_nohardspin_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -117,8 +183,7 @@
         },
         "herwig_q_nosoftspin_1200" : {
             "tag" : [
-                "herwig_q_nosoftspin_1200",
-                "herwig_q_nosoftspin_250"
+                "herwig_q_nosoftspin_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -130,8 +195,7 @@
         },
         "herwig_q_nosoftspin_250" : {
             "tag" : [
-                "herwig_q_nosoftspin_250",
-                "herwig_q_nosoftspin_50"
+                "herwig_q_nosoftspin_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -155,8 +219,7 @@
         },
         "herwig_q_nospin_1200" : {
             "tag" : [
-                "herwig_q_nospin_1200",
-                "herwig_q_nospin_250"
+                "herwig_q_nospin_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -168,8 +231,7 @@
         },
         "herwig_q_nospin_250" : {
             "tag" : [
-                "herwig_q_nospin_250",
-                "herwig_q_nospin_50"
+                "herwig_q_nospin_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -193,8 +255,7 @@
         },
         "pythia_q_1200" : {
             "tag" : [
-                "pythia_q_1200",
-                "pythia_q_250"
+                "pythia_q_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -206,8 +267,7 @@
         },
         "pythia_q_250" : {
             "tag" : [
-                "pythia_q_250",
-                "pythia_q_50"
+                "pythia_q_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -231,8 +291,7 @@
         },
         "pythia_q_nohad_1200" : {
             "tag" : [
-                "pythia_q_nohad_1200",
-                "pythia_q_nohad_250"
+                "pythia_q_nohad_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -244,8 +303,7 @@
         },
         "pythia_q_nohad_250" : {
             "tag" : [
-                "pythia_q_nohad_250",
-                "pythia_q_nohad_50"
+                "pythia_q_nohad_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -269,8 +327,7 @@
         },
         "pythia_q_nospin_1200" : {
             "tag" : [
-                "pythia_q_nospin_1200",
-                "pythia_q_nospin_250"
+                "pythia_q_nospin_1200"
             ],
             "location" : "simon-LPC",
             "era" : "skip",
@@ -282,8 +339,7 @@
         },
         "pythia_q_nospin_250" : {
             "tag" : [
-                "pythia_q_nospin_250",
-                "pythia_q_nospin_50"
+                "pythia_q_nospin_250"
             ],
             "location" : "simon-LPC",
             "era" : "skip",

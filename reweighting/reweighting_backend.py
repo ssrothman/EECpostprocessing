@@ -22,7 +22,7 @@ def dump_smoothings(smoothing_l : Sequence[SmoothingProtocol], names : Sequence[
     with open(output_path, 'w') as f:
         f.write(cset.model_dump_json(indent=2))
 
-def compare_smothings(
+def compare_smoothings(
     dset_num : splt.plottables.ParquetDataset | splt.plottables.DatasetStack,
     dset_denom : splt.plottables.ParquetDataset | splt.plottables.DatasetStack,
     cut : ds.Expression | None,
@@ -36,8 +36,10 @@ def compare_smothings(
     logy : bool,
     isMC : bool,
     lumi : float | None,
-    plot_path : str 
-):
+    plot_path : str ,
+    ylabel : str,
+    xlabel : str
+):  
     ratio, ratioerr = compute_ratio(
         dset_num,
         dset_denom,
@@ -62,14 +64,21 @@ def compare_smothings(
     ax.errorbar(
         0.5 * (bins[:-1] + bins[1:]), ratio,
         yerr=ratioerr, xerr =0.5 * (bins[1:] - bins[:-1]),
-        fmt='o', label='Ratio (no smoothing)', color='black'
+        fmt='o', label='Ratio', color='black'
     )
     if logx:
         ax.set_xscale('log')
     if logy:
         ax.set_yscale('log')
 
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+
     ax.legend()
+
+    #tight layout
+    fig.tight_layout()
+
     savefig(fig, plot_path)
     plt.close(fig)
 

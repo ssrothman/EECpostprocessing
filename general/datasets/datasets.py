@@ -25,7 +25,6 @@ def get_flags(runtag : str, dataset : str) -> dict:
     return dsetcfg['flags']
 
 def get_target_files(runtag : str, dataset : str, exclude_dropped=True):
-    print("getting target files for dataset %s with runtag %s" % (dataset, runtag))
     base = cfg[runtag]['base']
 
     dsetcfg = cfg[runtag][dataset]

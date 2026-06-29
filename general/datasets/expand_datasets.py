@@ -30,7 +30,7 @@ _ALL_DATA_DATASETS = [
     "DATA_2018C",
     "DATA_2018D"
 ]
-_ALL_GENONLY_DATASETS = [
+_ALL_HERWIG_GLU_DATASETS = [
     "herwig_glu_1200",
     "herwig_glu_250",
     "herwig_glu_50",
@@ -45,7 +45,9 @@ _ALL_GENONLY_DATASETS = [
     "herwig_glu_nosoftspin_50",
     "herwig_glu_nospin_1200",
     "herwig_glu_nospin_250",
-    "herwig_glu_nospin_50",
+    "herwig_glu_nospin_50"
+]
+_ALL_HERWIG_Q_DATASETS = [
     "herwig_q_1200",
     "herwig_q_250",
     "herwig_q_50",
@@ -60,7 +62,9 @@ _ALL_GENONLY_DATASETS = [
     "herwig_q_nosoftspin_50",
     "herwig_q_nospin_1200",
     "herwig_q_nospin_250",
-    "herwig_q_nospin_50",
+    "herwig_q_nospin_50"
+]
+_ALL_PYTHIA_GLU_DATASETS = [
     "pythia_glu_1200",
     "pythia_glu_250",
     "pythia_glu_50",
@@ -70,6 +74,8 @@ _ALL_GENONLY_DATASETS = [
     "pythia_glu_nospin_1200",
     "pythia_glu_nospin_250",
     "pythia_glu_nospin_50",
+]
+_ALL_PYTHIA_Q_DATASETS = [
     "pythia_q_1200",
     "pythia_q_250",
     "pythia_q_50",
@@ -78,37 +84,9 @@ _ALL_GENONLY_DATASETS = [
     "pythia_q_nohad_50",
     "pythia_q_nospin_1200",
     "pythia_q_nospin_250",
-    "pythia_q_nospin_50",
+    "pythia_q_nospin_50"
 ]
-
-
-_ALL_GENONLY_Q_DATASETS = [
-    "herwig_q_1200",
-    "herwig_q_250",
-    "herwig_q_50",
-    "herwig_q_nohad_1200",
-    "herwig_q_nohad_250",
-    "herwig_q_nohad_50",
-    "herwig_q_nohardspin_1200",
-    "herwig_q_nohardspin_250",
-    "herwig_q_nohardspin_50",
-    "herwig_q_nosoftspin_1200",
-    "herwig_q_nosoftspin_250",
-    "herwig_q_nosoftspin_50",
-    "herwig_q_nospin_1200",
-    "herwig_q_nospin_250",
-    "herwig_q_nospin_50",
-    "pythia_q_1200",
-    "pythia_q_250",
-    "pythia_q_50",
-    "pythia_q_nohad_1200",
-    "pythia_q_nohad_250",
-    "pythia_q_nohad_50",
-    "pythia_q_nospin_1200",
-    "pythia_q_nospin_250",
-    "pythia_q_nospin_50",
-]
-
+_ALL_GENONLY_DATASETS = _ALL_HERWIG_GLU_DATASETS + _ALL_HERWIG_Q_DATASETS + _ALL_PYTHIA_GLU_DATASETS + _ALL_PYTHIA_Q_DATASETS
 
 def expand_one_dataset(dataset:str):
     if dataset == 'allSignal':
@@ -119,8 +97,14 @@ def expand_one_dataset(dataset:str):
         return _ALL_DATA_DATASETS
     elif dataset == 'allGenonly':
         return _ALL_GENONLY_DATASETS
-    elif dataset == 'allGenonlyQ':
-        return _ALL_GENONLY_Q_DATASETS
+    elif dataset == 'allHerwigQ':
+        return _ALL_HERWIG_Q_DATASETS
+    elif dataset == 'allPythiaQ':
+        return _ALL_PYTHIA_Q_DATASETS
+    elif dataset == 'allHerwigGlu':
+        return _ALL_HERWIG_GLU_DATASETS
+    elif dataset == 'allPythiaGlu':
+        return _ALL_PYTHIA_GLU_DATASETS
     else:
         return [dataset]
 
