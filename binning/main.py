@@ -27,7 +27,7 @@ def narrow_axis(axis, narrow_to: List[int]):
             overflow=overflow
         )
     elif isinstance(axis, hist.axis.Variable):
-        edges = axis.edges[narrow_to[0]:narrow_to[1]]
+        edges = axis.edges[narrow_to[0]:(narrow_to[1]+1)]
         theaxis = hist.axis.Variable(
             edges,
             name=axis.name,
