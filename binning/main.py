@@ -210,6 +210,11 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
     shape = [ax.extent for ax in H.axes]
     cov = directcov.DirectCov(shape, 1)
 
+    epsilon = {}
+    for name in prebinned:
+        finit = prebinned[name][np.isfinite(prebinned[name])]
+        epsilon[name] = np.min(np.diff(finit)) / 2
+
     for batch in iterator:
         rows_so_far += batch.num_rows
         if batch.num_rows == 0:
@@ -219,7 +224,7 @@ def fill_cov(H, prebinned : dict[str, np.ndarray],
 
 
         values = [
-            prebinned[name][get(batch, name)] if name in prebinned else get(batch, name) for name in H.axes.name
+            prebinned[name][get(batch, name)] + epsilon[name] if name in prebinned else get(batch, name) for name in H.axes.name
         ]
         indices = [
             H.axes[i].index(values[i]) for i in range(len(H.axes))
@@ -273,6 +278,12 @@ def fill_hist(H : hist.Hist,
     total_rows = dset.count_rows()
     rows_so_far = 0
 
+    sumdiff = 0
+    epsilon = {}
+    for name in prebinned:
+        finit = prebinned[name][np.isfinite(prebinned[name])]
+        epsilon[name] = np.min(np.diff(finit)) / 2
+
     for batch in iterator:
         rows_so_far += batch.num_rows
         iterator.set_description("Rows: %g%%" % (rows_so_far / total_rows * 100))
@@ -289,8 +300,9 @@ def fill_hist(H : hist.Hist,
         filldict = {
             name : get(batch, name) for name in H.axes.name
         }
-        for name in prebinned:
-            filldict[name] = prebinned[name][filldict[name]]
+        for name in prebinned:              
+            filldict[name] = prebinned[name][filldict[name]] + epsilon[name]
+              
             if H.axes[name].clamp:
                 filldict[name] = np.clip(filldict[name], H.axes[name].edges[0], H.axes[name].edges[-1])
 
@@ -299,4 +311,6 @@ def fill_hist(H : hist.Hist,
             weight=weight
         )
 
+    
+    print("SUMDIFF", sumdiff)
     return H
