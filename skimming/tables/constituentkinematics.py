@@ -101,27 +101,33 @@ class GenConstituentKinematicsTable:
         #and playing with selections
         add_common_vars(thevals, objs, evtmask)
         
+        noReco = objs.GenJets.simonjets.iReco < 0
+        clippedReco = ak.where(noReco, 0, objs.GenJets.simonjets.iReco)
+        genjetmask = jetmask[clippedReco]
+        genjetmask = ak.where(noReco, False, genjetmask)
+
         #constituent kinematics
         parts = objs.GenJets.parts
-        thevals['genPt'] = parts.pt[evtmask]
-        thevals['genEta'] = parts.eta[evtmask]
-        thevals['genPhi'] = parts.phi[evtmask]
-        thevals['genPdgid'] = parts.pdgid[evtmask]
-        thevals['genCharge'] = parts.charge[evtmask]
+        thevals['genPt'] = parts.pt[genjetmask][evtmask]
+        thevals['genEta'] = parts.eta[genjetmask][evtmask]
+        thevals['genPhi'] = parts.phi[genjetmask][evtmask]
+        thevals['genPdgid'] = parts.pdgid[genjetmask][evtmask]
+        thevals['genCharge'] = parts.charge[genjetmask][evtmask]
 
         #truth matching
         if hasattr(parts, 'nMatches'):
-            thevals['nMatches'] = parts.nMatches[evtmask]
-            thevals['matchTypes'] = parts.matchTypes[evtmask]
-        
+            thevals['nMatches'] = parts.nMatches[genjetmask][evtmask]
+            thevals['matchTypes'] = parts.matchTypes[genjetmask][evtmask]
+
         #jet info
         jets = objs.GenJets.jets
-        thevals['genJpt'] = jets.pt[evtmask]
-        thevals['genJeta'] = jets.eta[evtmask]
-        thevals['genJphi'] = jets.phi[evtmask]
+        thevals['genJpt'] = jets.pt[genjetmask][evtmask]
+        thevals['genJeta'] = jets.eta[genjetmask][evtmask]
+        thevals['genJphi'] = jets.phi[genjetmask][evtmask]
 
         if hasattr(objs.GenJets.simonjets, 'genJetMatched'):
-            thevals['genJetMatched'] = objs.GenJets.simonjets.genJetMatched[evtmask]
+            thevals['genJetMatched'] = objs.GenJets.simonjets.genJetMatched[genjetmask][evtmask]
+            thevals['iReco'] = objs.GenJets.simonjets.iReco[genjetmask][evtmask]
 
         add_weight_variations(thevals, weights, evtmask)
         add_event_id(
